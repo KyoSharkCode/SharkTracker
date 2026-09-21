@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SharkTracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
+    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
+    --danger:#ff5f3d; --danger-glow:rgba(255,95,61,.45);
+    --gold:#facc15; --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
+    background:
+      radial-gradient(1000px 460px at 15% -6%, rgba(0,229,199,.14), transparent 60%),
+      radial-gradient(1000px 460px at 85% 6%, rgba(0,229,199,.10), transparent 60%),
+      var(--bg);
+  }
+  a{color:inherit;}
+  .wrap{max-width:1080px; margin:0 auto; padding:44px 20px 80px;}
+
+  header{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:34px; padding-bottom:24px; border-bottom:1px solid var(--border);}
+  .logo-slot{width:40px; height:40px; border-radius:10px; border:1px dashed var(--border); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--text-faint); font-weight:700;}
+  h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(28px,4vw,40px); letter-spacing:.03em; text-transform:uppercase;
+     background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .auth-slot{grid-column:3; justify-self:end;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none;}
+  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+
+  .section-title{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
+  .section-title h2{margin:0; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:.08em;}
+  section{margin-bottom:44px;}
+
+  /* PODIO */
+  .podium-grid{display:flex; align-items:flex-end; gap:18px; margin-bottom:24px;}
+  .podium-card{flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:22px 14px 20px;}
+  .podium-card.rank1{flex:1.4; padding:36px 14px 32px; border-color:var(--accent); background:linear-gradient(180deg, rgba(0,229,199,.16), var(--panel) 65%); box-shadow:0 0 40px var(--accent-glow), 0 0 90px rgba(0,229,199,.18);}
+  .podium-rank-chip{font-size:10px; font-weight:800; padding:4px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:.1em; background:var(--panel-2); color:var(--text-faint); border:1px solid var(--border); margin-bottom:10px;}
+  .podium-card.rank1 .podium-rank-chip{background:var(--accent); color:#032018; border:none;}
+  .podium-avatar{width:56px; height:56px; border-radius:50%; background:#0a1622; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; color:var(--text-dim); margin-bottom:12px; overflow:hidden;}
+  .podium-card.rank1 .podium-avatar{width:88px; height:88px; border:3px solid var(--accent); box-shadow:0 0 24px var(--accent-glow); font-size:22px; color:var(--accent);}
+  .podium-avatar img{width:100%; height:100%; object-fit:cover;}
+  .podium-name{font-size:14px; font-weight:800;}
+  .podium-card.rank1 .podium-name{font-size:19px;}
+  .podium-meta{font-size:11px; font-weight:600; color:var(--text-faint); text-transform:uppercase; margin:3px 0 12px;}
+  .podium-lp{font-size:17px; font-weight:900; color:var(--accent);}
+  .podium-card.rank1 .podium-lp{font-size:30px; background:linear-gradient(90deg,var(--gold),#fff3c4); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .podium-tier{font-size:11px; color:var(--text-faint); font-weight:600; margin-top:4px;}
+
+  /* TWITCH — oculto por defecto, se abre con animación cuando hay vivo */
+  .twitch-wrap{display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows .5s ease, opacity .4s ease, margin .5s ease; margin-bottom:0;}
+  .twitch-wrap.visible{grid-template-rows:1fr; opacity:1; margin-bottom:28px;}
+  .twitch-inner{min-height:0; overflow:hidden;}
+  .twitch-card{width:71%; margin:0 auto; display:flex; height:210px; background:var(--panel); border:1px solid var(--danger-glow); box-shadow:0 0 24px rgba(255,95,61,.12); border-radius:var(--radius); overflow:hidden;}
+  .twitch-preview{flex:0 0 57%; position:relative; background:repeating-linear-gradient(45deg,#0a1622,#0a1622 10px,#0d1c28 10px,#0d1c28 20px); border-right:1px solid var(--border);}
+  .twitch-preview iframe{width:100%; height:100%; border:0;}
+  .twitch-live-chip{position:absolute; top:12px; left:12px; display:flex; align-items:center; gap:6px; background:rgba(3,8,18,.75); padding:4px 10px; border-radius:6px;}
+  .pulse-dot{width:6px; height:6px; border-radius:50%; background:var(--danger); box-shadow:0 0 6px var(--danger-glow); animation:pulse 2s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,95,61,.6);} 70%{box-shadow:0 0 0 8px rgba(255,95,61,0);} 100%{box-shadow:0 0 0 0 rgba(255,95,61,0);}}
+  .twitch-info{flex-grow:1; padding:22px 24px; display:flex; flex-direction:column; justify-content:center; gap:8px; min-width:0;}
+  .twitch-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint);}
+  .twitch-title{font-size:19px; font-weight:800; line-height:1.25;}
+  .twitch-game{font-size:13px; color:var(--accent); font-weight:700;}
+  .twitch-viewers{font-size:13px; color:var(--danger); font-weight:700;}
+
+  /* Tarjetas destacadas (Primera Victoria, Rey de la Temporada) */
+  .spotlight-card{position:relative; overflow:hidden; display:flex; align-items:center; gap:16px; background:var(--panel); border:1px solid rgba(250,204,21,.4); box-shadow:0 0 24px rgba(250,204,21,.1); border-radius:var(--radius); padding:18px 22px; margin-bottom:28px;}
+  .spotlight-badge{position:absolute; top:0; left:0; background:var(--gold); color:#000; font-size:10px; font-weight:800; padding:4px 12px; border-bottom-right-radius:8px; text-transform:uppercase; letter-spacing:.08em;}
+  .spotlight-icon{width:52px; height:52px; border-radius:12px; background:rgba(250,204,21,.16); border:2px solid var(--gold); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; overflow:hidden;}
+  .spotlight-icon img{width:100%; height:100%; object-fit:cover;}
+
+  /* Grids de tarjetas (badges recientes / destacados semana) */
+  .cards-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  .info-card{display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px;}
+  .info-card .ico{width:44px; height:44px; border-radius:12px; background:var(--panel-2); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;}
+  .info-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint);}
+  .info-player{font-size:14px; font-weight:800; margin:2px 0;}
+  .info-detail{font-size:12px; color:var(--accent); font-weight:700;}
+  @media (max-width:700px){ .cards-grid{grid-template-columns:1fr 1fr;} }
+
+  /* Ranking */
+  .filter-bar{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+  .filter-bar select{background:var(--panel-2); color:var(--text); border:1px solid var(--border); padding:7px 12px; border-radius:8px; font-family:inherit; font-size:12px; cursor:pointer;}
+  .rank-head, .rank-row{display:flex; align-items:center; gap:14px;}
+  .rank-head{padding:0 16px 8px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint);}
+  .rank-list{display:flex; flex-direction:column; gap:6px;}
+  .rank-row{padding:12px 16px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); position:relative; overflow:hidden;}
+  .rank-row.streak-fire{background:linear-gradient(90deg, rgba(255,95,61,.10), var(--panel) 60%); border-color:rgba(255,95,61,.5); box-shadow:inset 0 0 16px rgba(255,95,61,.18);}
+  .rank-row.streak-ice{background:linear-gradient(90deg, rgba(125,211,252,.09), var(--panel) 60%); border-color:rgba(125,211,252,.45); box-shadow:inset 0 0 16px rgba(125,211,252,.2);}
+  .col-pos{width:24px; font-size:14px; font-weight:700; color:var(--text-faint); text-align:center;}
+  .col-pos.pos-1{font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:800; color:var(--gold); text-shadow:0 0 10px rgba(250,204,21,.6);}
+  .col-avatar{position:relative; width:44px; height:44px; border-radius:10px; overflow:hidden; background:#0a1622; border:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px;}
+  .col-avatar img{width:100%; height:100%; object-fit:cover; position:absolute; inset:0;}
+  .col-name{flex-grow:1; min-width:0; font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .col-name .duo{font-size:10px; font-weight:700; color:var(--accent);}
+  .twitch-dot{width:16px; height:16px; border-radius:4px; flex-shrink:0;}
+  .col-estado{width:96px; display:flex; align-items:center; gap:6px;}
+  .champ-mini{width:20px; height:20px; border-radius:5px; overflow:hidden; flex-shrink:0; background:#0a1622; border:1px solid var(--border);}
+  .champ-mini img{width:100%; height:100%; object-fit:cover;}
+  .status-chip{font-size:10px; font-weight:800; padding:4px 8px; border-radius:6px; text-transform:uppercase; white-space:nowrap;}
+  .status-chip.in-game{background:rgba(255,95,61,.15); color:var(--danger); border:1px solid rgba(255,95,61,.4);}
+  .status-chip.offline{background:rgba(161,161,170,.1); color:#a1a1aa; border:1px solid rgba(161,161,170,.2);}
+  .col-role{width:70px; font-size:12px; color:var(--text-dim); font-weight:600;}
+  .col-rank{width:110px; display:flex; align-items:center; gap:6px;}
+  .rank-emblem{width:18px; height:18px; flex-shrink:0;}
+  .col-rank .tier-lp .tier{font-size:13px; color:#fff; font-weight:700; line-height:1.2;}
+  .col-rank .tier-lp .lp{font-size:11px; color:var(--accent); font-weight:700; line-height:1.2;}
+  .col-wr{width:90px;}
+  .wr-pct{font-size:11px; color:var(--text-faint); margin-bottom:3px;}
+  .wr-bar{height:4px; background:#0a1622; border-radius:99px; overflow:hidden;}
+  .wr-fill{height:100%; background:var(--accent); box-shadow:0 0 8px var(--accent-glow);}
+  @media (max-width:760px){
+    .rank-head{display:none;}
+    .col-role, .col-wr{display:none;}
+  }
+
+  /* Historial de logros */
+  .logros-panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+  .logro-item{display:flex; align-items:center; gap:14px; padding:14px 18px; border-bottom:1px solid var(--border);}
+  .logro-item:last-child{border-bottom:none;}
+  .logro-icon{width:38px; height:38px; border-radius:50%; background:var(--panel-2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0;}
+  .logro-icon img{width:20px; height:20px;}
+  .logro-text{font-size:13px; font-weight:600; color:var(--text-dim);}
+  .logro-text b{color:#fff; font-weight:800;}
+  .logro-detail{font-size:12px; color:var(--accent); font-weight:600; margin-top:2px;}
+  .logro-time{font-size:11px; color:var(--text-faint); flex-shrink:0;}
+  .empty{padding:24px; text-align:center; color:var(--text-faint); font-size:13px;}
+
+  footer{margin-top:60px; padding-top:32px; border-top:1px solid var(--border); text-align:center; color:var(--text-dim); font-size:13px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo-slot">LOGO</div>
+    <h1>SharkTracker</h1>
+    <div class="auth-slot" id="auth-slot"></div>
+  </header>
+
+  <section>
+    <div class="podium-grid" id="podium"></div>
+  </section>
+
+  <div class="twitch-wrap" id="twitch-wrap">
+    <div class="twitch-inner">
+      <div class="twitch-card" id="twitch-card"></div>
+    </div>
+  </div>
+
+  <section id="primera-victoria-section" style="display:none;">
+    <div id="primera-victoria"></div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="bar"></span><h2>Últimas 10 Partidas</h2></div>
+    <div class="cards-grid" id="badges-recientes"></div>
+  </section>
+
+  <section>
+    <div class="filter-bar">
+      <div class="section-title" style="margin:0;"><span class="bar"></span><h2>Ranking Global (SoloQ)</h2></div>
+      <select id="elo-filter">
+        <option value="ALL">Todos los Elos</option>
+      </select>
+    </div>
+    <div class="rank-head">
+      <div class="col-pos">#</div><div style="width:44px;"></div>
+      <div style="flex-grow:1;">Jugador</div>
+      <div class="col-estado">Estado</div>
+      <div class="col-role">Rol (10p)</div>
+      <div class="col-rank">Rango</div>
+      <div class="col-wr">Winrate</div>
+    </div>
+    <div class="rank-list" id="ranking-list"></div>
+  </section>
+
+  <section id="rey-temporada-section" style="display:none;">
+    <div id="rey-temporada"></div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="bar"></span><h2>Destacados de la Semana</h2></div>
+    <div class="cards-grid" id="destacados-semana"></div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="bar"></span><h2>Historial de Logros</h2></div>
+    <div class="logros-panel" id="logros"></div>
+  </section>
+
+  <footer>SharkTracker &middot; hecho por KyoSumiVT</footer>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const TIER_ORDER = ['IRON','BRONZE','SILVER','GOLD','PLATINUM','EMERALD','DIAMOND','MASTER','GRANDMASTER','CHALLENGER'];
+const TIER_LABEL = {IRON:'Hierro',BRONZE:'Bronce',SILVER:'Plata',GOLD:'Oro',PLATINUM:'Platino',EMERALD:'Esmeralda',DIAMOND:'Diamante',MASTER:'Maestro',GRANDMASTER:'Gran Maestro',CHALLENGER:'Aspirante'};
+const MINI_CREST_BASE = 'https://raw.communitydragon.org/14.10/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/';
+const BADGE_META = {
+  top_asesino:{icono:'⚔️',label:'Top Asesino'}, top_observador:{icono:'👁️',label:'Top Observador'}, sin_rendirse:{icono:'🎮',label:'Sin Rendirse'},
+  otp_del_torneo:{icono:'🎯',label:'OTP del Torneo'}, escalador:{icono:'📈',label:'El Escalador'}, horas_en_la_grieta:{icono:'⏱️',label:'Horas en la Grieta'},
+  agresivo:{icono:'🩸',label:'Agresivo'}, kda_player:{icono:'📊',label:'KDA Player'}, pentakills:{icono:'💀',label:'Pentakills'},
+  duo_dinamico:{icono:'🎮',label:'Dúo Dinámico'}, farmeador:{icono:'🌾',label:'El Farmeador'}, defensor:{icono:'🛡️',label:'El Defensor'},
+  ladron:{icono:'🥷',label:'El Ladrón'}, destructor:{icono:'💥',label:'El Destructor'}, stop:{icono:'🛑',label:'Stop'}, champion_pool:{icono:'🎭',label:'Maestro del Champion Pool'},
+};
+const EVENT_META = {
+  badge_semanal:'🏅', badge_reciente:'🏅', record_lp:'📈', adelantamiento:'🔥', rey_temporada:'👑',
+  primera_victoria_dia:'🌅', posible_egida:'assets/Aegis_of_Valor_icon.svg', logro_partida:'⚔️',
+};
+
+let ddragonVersion = '15.19.1';
+try {
+  const versions = await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json());
+  ddragonVersion = versions[0];
+} catch (e) { console.warn('DDragon version fetch falló, usando fallback', e); }
+
+const champIconUrl = (champion) => `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${champion}.png`;
+const emblemUrl = (tier) => `${MINI_CREST_BASE}${(tier || 'unranked').toLowerCase()}.png`;
+const initials = (name) => (name || '?').replace(/[^\p{L}\p{N}]/gu, '').slice(0, 2).toUpperCase();
+const eloScore = (tier, lpVal) => tier ? TIER_ORDER.indexOf((tier || '').toUpperCase()) * 400 + (lpVal || 0) : -1;
+const timeAgo = (iso) => {
+  const diffMin = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (diffMin < 60) return `hace ${diffMin}min`;
+  const diffH = Math.round(diffMin / 60);
+  if (diffH < 24) return `hace ${diffH}h`;
+  return `hace ${Math.round(diffH / 24)}d`;
+};
+
+// ── Filtro de elo: se arma una sola vez ──────────────────────────
+const filterSelect = document.getElementById('elo-filter');
+TIER_ORDER.slice().reverse().forEach(t => {
+  const opt = document.createElement('option');
+  opt.value = t; opt.textContent = TIER_LABEL[t];
+  filterSelect.appendChild(opt);
+});
+
+let roster = [];
+
+function renderRanking() {
+  const filtro = filterSelect.value;
+  const listEl = document.getElementById('ranking-list');
+  listEl.innerHTML = '';
+  roster.forEach((p, idx) => {
+    if (filtro !== 'ALL' && (p.rank?.tier ?? '').toUpperCase() !== filtro) return;
+    const row = document.createElement('div');
+    row.className = 'rank-row';
+    const enPartida = p.live?.in_game;
+    const wr = p.rank && (p.rank.wins + p.rank.losses) > 0 ? Math.round(p.rank.wins / (p.rank.wins + p.rank.losses) * 100) : null;
+    row.innerHTML = `
+      <div class="col-pos ${idx === 0 ? 'pos-1' : ''}">${idx + 1}</div>
+      <div class="col-avatar">${initials(p.riot_game_name)}</div>
+      <div class="col-name">${p.riot_game_name}
+        ${p.profile.twitch_username ? `<div class="twitch-dot" style="background:${p.stream?.is_live ? '#ff5f3d' : '#4a6178'};" title="Twitch"></div>` : ''}
+      </div>
+      <div class="col-estado">
+        ${enPartida ? `<div class="champ-mini"><img src="${champIconUrl(p.live.champion)}" alt=""></div>` : ''}
+        <span class="status-chip ${enPartida ? 'in-game' : 'offline'}">${enPartida ? 'En partida' : 'Offline'}</span>
+      </div>
+      <div class="col-role">${p.primary_role ?? '—'}</div>
+      <div class="col-rank">
+        <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="">
+        <div class="tier-lp"><div class="tier">${p.rank ? (TIER_LABEL[p.rank.tier] ?? p.rank.tier) + ' ' + (p.rank.division ?? '') : 'Unranked'}</div><div class="lp">${p.rank?.lp ?? 0} LP</div></div>
+      </div>
+      <div class="col-wr">
+        ${wr !== null ? `<div class="wr-pct">${wr}%</div><div class="wr-bar"><div class="wr-fill" style="width:${wr}%"></div></div>` : ''}
+      </div>`;
+    listEl.appendChild(row);
+  });
+}
+filterSelect.addEventListener('change', renderRanking);
+
+function renderBadgeCard(container, categoria, badgeByCategory, nameById) {
+  const b = badgeByCategory.get(categoria);
+  const meta = BADGE_META[categoria];
+  if (!b || !meta) return;
+  const div = document.createElement('div');
+  div.className = 'info-card';
+  div.innerHTML = `<div class="ico">${meta.icono}</div>
+    <div style="min-width:0;">
+      <div class="info-label">${meta.label}</div>
+      <div class="info-player">${nameById.get(b.player_id) ?? '?'}</div>
+      <div class="info-detail">${b.detail ?? ''}</div>
+    </div>`;
+  container.appendChild(div);
+}
+
+// ── Carga + dibuja TODO — se vuelve a llamar cada vez que Realtime
+// avisa que algo cambió en las tablas suscritas (ver más abajo).
+async function render() {
+  const [{ data: players }, { data: profiles }, { data: rankSnaps }, { data: liveStatus },
+         { data: streamStatus }, { data: weeklyBadges }, { data: events }, { data: firstWin }] = await Promise.all([
+    supabase.from('players').select('*'),
+    supabase.from('player_profiles').select('*'),
+    supabase.from('rank_snapshots').select('*').eq('queue_type', 'RANKED_SOLO_5x5').order('recorded_at', { ascending: false }),
+    supabase.from('live_status').select('*'),
+    supabase.from('stream_status').select('*'),
+    supabase.from('weekly_badges').select('*'),
+    supabase.from('events').select('*').order('occurred_at', { ascending: false }).limit(20),
+    supabase.from('daily_first_win_state').select('*').maybeSingle(),
+  ]);
+
+  const profileByPlayer = new Map((profiles ?? []).map(p => [p.player_id, p]));
+  const liveByPlayer = new Map((liveStatus ?? []).map(l => [l.player_id, l]));
+  const streamByPlayer = new Map((streamStatus ?? []).map(s => [s.player_id, s]));
+  const badgeByCategory = new Map((weeklyBadges ?? []).map(b => [b.category, b]));
+  const nameById = new Map((players ?? []).map(p => [p.id, p.riot_game_name]));
+
+  const latestRankByPlayer = new Map();
+  for (const row of rankSnaps ?? []) {
+    if (!latestRankByPlayer.has(row.player_id)) latestRankByPlayer.set(row.player_id, row);
+  }
+
+  roster = (players ?? []).map(p => ({
+    ...p,
+    profile: profileByPlayer.get(p.id) ?? {},
+    live: liveByPlayer.get(p.id) ?? { in_game: false },
+    stream: streamByPlayer.get(p.id) ?? { is_live: false },
+    rank: latestRankByPlayer.get(p.id) ?? null,
+  })).sort((a, b) => eloScore(b.rank?.tier, b.rank?.lp) - eloScore(a.rank?.tier, a.rank?.lp));
+
+  // Header: sesión actual
+  const { data: { session } } = await supabase.auth.getSession();
+  const authSlot = document.getElementById('auth-slot');
+  if (session) {
+    const mine = roster.find(p => p.user_id === session.user.id);
+    authSlot.innerHTML = `<a class="avatar" href="perfil.html">${mine ? initials(mine.riot_game_name) : '?'}</a>`;
+  } else {
+    authSlot.innerHTML = `<a class="login-btn" href="login.html">Login</a>`;
+  }
+
+  // Podio (top 3)
+  const podiumEl = document.getElementById('podium');
+  podiumEl.innerHTML = '';
+  [1, 0, 2].forEach((idx) => { // #2, #1, #3 visualmente
+    const p = roster[idx];
+    if (!p) return;
+    const rankNum = idx + 1;
+    const div = document.createElement('div');
+    div.className = `podium-card ${rankNum === 1 ? 'rank1' : ''}`;
+    div.innerHTML = `
+      <div class="podium-rank-chip">${rankNum === 1 ? '👑 #1' : '#' + rankNum}</div>
+      <div class="podium-avatar">${initials(p.riot_game_name)}</div>
+      <div class="podium-name">${p.riot_game_name}</div>
+      <div class="podium-meta">${p.primary_role ?? 'Sin datos'}${p.top_recent_champions?.[0] ? ' — ' + p.top_recent_champions[0].campeon : ''}</div>
+      <div class="podium-lp">${p.rank?.lp ?? 0} LP</div>
+      <div class="podium-tier">${p.rank ? (TIER_LABEL[p.rank.tier] ?? p.rank.tier) + ' ' + (p.rank.division ?? '') : 'Unranked'}</div>`;
+    podiumEl.appendChild(div);
+  });
+
+  // Twitch — se abre o se colapsa según quién esté en vivo ahora
+  const twitchWrap = document.getElementById('twitch-wrap');
+  const liveStreamer = roster.find(p => p.stream?.is_live);
+  if (liveStreamer) {
+    const card = document.getElementById('twitch-card');
+    const parentDomain = window.location.hostname || 'localhost';
+    card.innerHTML = `
+      <div class="twitch-preview">
+        <div class="twitch-live-chip"><span class="pulse-dot"></span><span style="font-size:10px;font-weight:800;color:#fff;text-transform:uppercase;">En vivo</span></div>
+        <iframe src="https://player.twitch.tv/?channel=${encodeURIComponent(liveStreamer.profile.twitch_username)}&parent=${parentDomain}&muted=true" allowfullscreen></iframe>
+      </div>
+      <div class="twitch-info">
+        <div class="twitch-label">${liveStreamer.profile.twitch_username}</div>
+        <div class="twitch-title">${liveStreamer.stream.title ?? ''}</div>
+        <div class="twitch-game">${liveStreamer.stream.game_name ?? ''}</div>
+        <div class="twitch-viewers">${liveStreamer.stream.viewer_count ?? 0} viewers</div>
+      </div>`;
+    requestAnimationFrame(() => twitchWrap.classList.add('visible'));
+  } else {
+    twitchWrap.classList.remove('visible');
+  }
+
+  // Primera Victoria del Día
+  const pvSection = document.getElementById('primera-victoria-section');
+  const p = firstWin?.player_id ? roster.find(r => r.id === firstWin.player_id) : null;
+  if (p) {
+    pvSection.style.display = '';
+    document.getElementById('primera-victoria').innerHTML = `
+      <div class="spotlight-card">
+        <div class="spotlight-badge">Primera Victoria del Día</div>
+        <div class="spotlight-icon" style="margin-top:8px;">${initials(p.riot_game_name)}</div>
+        <div style="margin-top:8px;min-width:0;"><div style="font-size:17px;font-weight:800;">${p.riot_game_name}</div></div>
+        <div style="margin-top:8px;margin-left:auto;font-size:12px;color:var(--gold);font-weight:800;">
+          ${new Date(firstWin.won_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+        </div>
+      </div>`;
+  } else {
+    pvSection.style.display = 'none';
+  }
+
+  // Badges últimas 10 + destacados semana
+  const badgesRecientesEl = document.getElementById('badges-recientes');
+  const destacadosEl = document.getElementById('destacados-semana');
+  badgesRecientesEl.innerHTML = '';
+  destacadosEl.innerHTML = '';
+  ['top_asesino', 'top_observador', 'sin_rendirse'].forEach(c => renderBadgeCard(badgesRecientesEl, c, badgeByCategory, nameById));
+  ['otp_del_torneo', 'escalador', 'horas_en_la_grieta', 'agresivo', 'kda_player', 'pentakills',
+   'duo_dinamico', 'farmeador', 'defensor', 'ladron', 'destructor', 'stop', 'champion_pool']
+    .forEach(c => renderBadgeCard(destacadosEl, c, badgeByCategory, nameById));
+
+  // Rey de la Temporada
+  const reySection = document.getElementById('rey-temporada-section');
+  const rey = badgeByCategory.get('rey_temporada');
+  if (rey) {
+    reySection.style.display = '';
+    document.getElementById('rey-temporada').innerHTML = `
+      <div class="spotlight-card">
+        <div style="font-size:26px;flex-shrink:0;">👑</div>
+        <div style="min-width:0;flex-grow:1;">
+          <div class="info-label">Rey de la Temporada</div>
+          <div style="font-size:14px;font-weight:800;margin-top:2px;">${nameById.get(rey.player_id) ?? '?'}</div>
+        </div>
+        <div style="font-size:12px;color:var(--gold);font-weight:700;">${rey.detail ?? ''}</div>
+      </div>`;
+  } else {
+    reySection.style.display = 'none';
+  }
+
+  renderRanking();
+
+  // Historial de Logros
+  const logrosEl = document.getElementById('logros');
+  logrosEl.innerHTML = '';
+  if (!events || events.length === 0) {
+    logrosEl.innerHTML = `<div class="empty">Todavía no hay logros registrados.</div>`;
+  } else {
+    events.forEach(ev => {
+      const icono = EVENT_META[ev.type] ?? '🔔';
+      const nombreNuevo = nameById.get(ev.player_id) ?? '?';
+      const nombreAnterior = ev.previous_player_id ? nameById.get(ev.previous_player_id) : null;
+      let texto = '';
+      if (ev.type === 'badge_semanal' || ev.type === 'badge_reciente') texto = `<b>${nombreNuevo}</b> reclamó ${BADGE_META[ev.category]?.label ?? ev.category}` + (nombreAnterior ? ` (se lo quitó a <b>${nombreAnterior}</b>)` : '');
+      else if (ev.type === 'record_lp') texto = `<b>${nombreNuevo}</b> alcanzó un nuevo récord de temporada`;
+      else if (ev.type === 'adelantamiento') texto = `<b>${nombreNuevo}</b> superó a <b>${nombreAnterior}</b>`;
+      else if (ev.type === 'rey_temporada') texto = `<b>${nombreNuevo}</b> es el nuevo Rey de la Temporada` + (nombreAnterior ? ` (se lo quitó a <b>${nombreAnterior}</b>)` : '');
+      else if (ev.type === 'primera_victoria_dia') texto = `<b>${nombreNuevo}</b> consiguió la primera victoria del día`;
+      else if (ev.type === 'posible_egida') texto = `<b>${nombreNuevo}</b> posible Égida de Valor`;
+      else if (ev.category?.startsWith('perfecta:')) texto = `<b>${nombreNuevo}</b> logró Partida Perfecta`;
+      else if (ev.category?.startsWith('ace:')) texto = `<b>${nombreNuevo}</b> logró Ace Perfecto`;
+      else if (ev.category?.startsWith('terminador:')) texto = `<b>${nombreNuevo}</b> le dio el golpe final al Nexus`;
+      else texto = `<b>${nombreNuevo}</b> — ${ev.category ?? ev.type}`;
+
+      const item = document.createElement('div');
+      item.className = 'logro-item';
+      const iconoHtml = icono.endsWith('.svg') ? `<img src="${icono}" alt="">` : icono;
+      item.innerHTML = `
+        <div class="logro-icon">${iconoHtml}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="logro-text">${texto}</div>
+          ${ev.detail ? `<div class="logro-detail">${ev.detail}</div>` : ''}
+        </div>
+        <div class="logro-time">${timeAgo(ev.occurred_at)}</div>`;
+      logrosEl.appendChild(item);
+    });
+  }
+}
+
+await render();
+
+// ── Realtime — Supabase avisa al instante cuando cambia algo en
+// estas tablas; se agrupan avisos que lleguen muy seguidos (p.ej.
+// los 6 rangos actualizándose en la misma corrida) en un solo
+// redibujado, en vez de redibujar 6 veces en el mismo segundo.
+let rerenderTimer = null;
+function scheduleRerender() {
+  clearTimeout(rerenderTimer);
+  rerenderTimer = setTimeout(render, 600);
+}
+
+supabase.channel('sharktracker-live')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, scheduleRerender)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'rank_snapshots' }, scheduleRerender)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'live_status' }, scheduleRerender)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'stream_status' }, scheduleRerender)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'weekly_badges' }, scheduleRerender)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, scheduleRerender)
+  .subscribe();
+</script>
+</body>
+</html>
