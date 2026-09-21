@@ -26,7 +26,9 @@
   .wrap{max-width:1080px; margin:0 auto; padding:44px 20px 80px;}
 
   header{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:34px; padding-bottom:24px; border-bottom:1px solid var(--border);}
-  .logo-slot{width:40px; height:40px; border-radius:10px; border:1px dashed var(--border); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--text-faint); font-weight:700;}
+  .logo-slot img{height:40px; width:auto; display:block;}
+  footer{display:flex; flex-direction:column; align-items:center; gap:12px;}
+  .footer-logo{height:34px; width:auto;}
   h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(28px,4vw,40px); letter-spacing:.03em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
@@ -140,7 +142,7 @@
 <div class="wrap">
 
   <header>
-    <div class="logo-slot">LOGO</div>
+    <div class="logo-slot"><img src="logo/FlaviIconLogo.png" alt="SharkTracker"></div>
     <h1>SharkTracker</h1>
     <div class="auth-slot" id="auth-slot"></div>
   </header>
@@ -196,7 +198,10 @@
     <div class="logros-panel" id="logros"></div>
   </section>
 
-  <footer>SharkTracker &middot; hecho por KyoSumiVT</footer>
+  <footer>
+    <img class="footer-logo" src="logo/HorizontalLogo.png" alt="SharkTracker">
+    <div>hecho por KyoSumiVT</div>
+  </footer>
 </div>
 
 <script type="module">
@@ -230,7 +235,10 @@ try {
 const champIconUrl = (champion) => `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${champion}.png`;
 const emblemUrl = (tier) => `${MINI_CREST_BASE}${(tier || 'unranked').toLowerCase()}.png`;
 const initials = (name) => (name || '?').replace(/[^\p{L}\p{N}]/gu, '').slice(0, 2).toUpperCase();
-const eloScore = (tier, lpVal) => tier ? TIER_ORDER.indexOf((tier || '').toUpperCase()) * 400 + (lpVal || 0) : -1;
+// El orden real ya lo calcula el backend (rank_snapshots.elo_score), que sí
+// tiene en cuenta la división — no se recalcula acá para no repetir mal la
+// lógica (esto es justo lo que se rompió: comparar solo tier+LP ignoraba
+// la división y ponía Oro III por encima de Oro II con más LP).
 const timeAgo = (iso) => {
   const diffMin = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
   if (diffMin < 60) return `hace ${diffMin}min`;
@@ -329,7 +337,7 @@ async function render() {
     live: liveByPlayer.get(p.id) ?? { in_game: false },
     stream: streamByPlayer.get(p.id) ?? { is_live: false },
     rank: latestRankByPlayer.get(p.id) ?? null,
-  })).sort((a, b) => eloScore(b.rank?.tier, b.rank?.lp) - eloScore(a.rank?.tier, a.rank?.lp));
+  })).sort((a, b) => (b.rank?.elo_score ?? -1) - (a.rank?.elo_score ?? -1));
 
   // Header: sesión actual
   const { data: { session } } = await supabase.auth.getSession();
