@@ -42,8 +42,12 @@
 
   /* PODIO */
   .podium-grid{display:flex; align-items:flex-end; gap:18px; margin-bottom:24px;}
-  .podium-card{flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:22px 14px 20px;}
+  .podium-card{flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:22px 14px 20px; position:relative; overflow:hidden;}
+  .podium-card > *{position:relative; z-index:1;}
   .podium-card.rank1{flex:1.4; padding:36px 14px 32px; border-color:var(--accent); background:linear-gradient(180deg, rgba(0,229,199,.16), var(--panel) 65%); box-shadow:0 0 40px var(--accent-glow), 0 0 90px rgba(0,229,199,.18);}
+  /* Fondo de la tarjeta = skin elegida (o campeón en vivo si está jugando) */
+  .podium-splash{position:absolute; inset:0; z-index:0; background-size:cover; background-position:center 12%;}
+  .podium-scrim{position:absolute; inset:0; z-index:0; background:linear-gradient(180deg, rgba(3,8,18,.2) 0%, rgba(3,8,18,.5) 45%, rgba(3,8,18,.94) 100%);}
   .podium-rank-chip{font-size:10px; font-weight:800; padding:4px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:.1em; background:var(--panel-2); color:var(--text-faint); border:1px solid var(--border); margin-bottom:10px;}
   .podium-card.rank1 .podium-rank-chip{background:var(--accent); color:#032018; border:none;}
   .podium-avatar{width:56px; height:56px; border-radius:50%; background:#0a1622; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; color:var(--text-dim); margin-bottom:12px; overflow:hidden;}
@@ -97,10 +101,12 @@
   .rank-row.streak-fire{border-color:rgba(255,95,61,.5); box-shadow:inset 0 0 16px rgba(255,95,61,.18);}
   .rank-row.streak-ice{border-color:rgba(125,211,252,.45); box-shadow:inset 0 0 16px rgba(125,211,252,.2);}
   /* Campeón de fondo — en vivo si está jugando, si no su "representación"
-     elegida (players.favorite_champion). Tamaño FIJO siempre (min-height
-     de la fila de arriba), no depende de si la imagen carga o no. */
-  .row-splash{position:absolute; inset:0; background-size:cover; background-position:center 15%; filter:blur(1.5px) saturate(1.1); opacity:.55;}
-  .row-scrim{position:absolute; inset:0; background:linear-gradient(90deg, rgba(3,8,18,.35) 0%, rgba(3,8,18,.8) 58%, rgba(3,8,18,.94) 100%);}
+     elegida (players.favorite_champion). Solo ocupa la franja izquierda
+     (alto completo, ancho angosto) y se desvanece a transparente ANTES
+     de llegar a la columna de estado — no cubre toda la fila. */
+  .row-splash{position:absolute; top:0; left:0; bottom:0; width:360px; background-size:cover; background-position:center 15%; filter:blur(1px) saturate(1.1); opacity:.6;
+    -webkit-mask-image:linear-gradient(90deg, #000 0%, #000 40%, transparent 88%); mask-image:linear-gradient(90deg, #000 0%, #000 40%, transparent 88%);}
+  .row-scrim{position:absolute; top:0; left:0; bottom:0; width:360px; background:linear-gradient(90deg, rgba(3,8,18,.1) 0%, rgba(3,8,18,.65) 55%, rgba(3,8,18,.98) 85%);}
   .row-content{position:relative; z-index:1; display:flex; align-items:center; gap:14px; width:100%;}
   .col-pos{width:24px; font-size:14px; font-weight:700; color:var(--text-faint); text-align:center;}
   .col-pos.pos-1{font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:800; color:var(--gold); text-shadow:0 0 10px rgba(250,204,21,.6);}
@@ -385,9 +391,18 @@ async function render() {
     const rankNum = idx + 1;
     const div = document.createElement('div');
     div.className = `podium-card ${rankNum === 1 ? 'rank1' : ''}`;
-    const champAvatar = p.live?.in_game ? p.live.champion : p.favorite_champion;
-    const avatarHtml = champAvatar ? `<img src="${champIconUrl(champAvatar)}" alt="">` : initials(p.riot_game_name);
+    // Fondo de la tarjeta = skin elegida (favorite_champion/skin), o el
+    // campeón que está jugando ahora mismo si está en partida.
+    const champBg = p.live?.in_game ? p.live.champion : p.favorite_champion;
+    const skinBg = p.live?.in_game ? 0 : (p.favorite_skin ?? 0);
+    const splashHtml = champBg
+      ? `<div class="podium-splash" style="background-image:url('${splashUrl(champBg, skinBg)}')"></div><div class="podium-scrim"></div>`
+      : '';
+    // Avatar = ícono de invocador REAL (players.icon_id), no el campeón.
+    const iconUrl = profileIconUrl(p.icon_id);
+    const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="">` : initials(p.riot_game_name);
     div.innerHTML = `
+      ${splashHtml}
       <div class="podium-rank-chip">${rankNum === 1 ? '👑 #1' : '#' + rankNum}</div>
       <div class="podium-avatar">${avatarHtml}</div>
       <div class="podium-name">${p.riot_game_name}</div>
