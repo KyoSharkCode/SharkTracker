@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Torneo LoL · Ranking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstract.com" crossorigin>
+<link rel="shortcut icon" href="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/764bbd9c-6d80-481d-8136-96848f01e843/ddx6q22-c6936a5b-73d6-409d-b248-0b370494f90f.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi83NjRiYmQ5Yy02ZDgwLTQ4MWQtODEzNi05Njg0OGYwMWU4NDMvZGR4NnEyMi1jNjkzNmE1Yi03M2Q2LTQwOWQtYjI0OC0wYjM3MDQ5NGY5MGYucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.5gC4gH1VsNiJXARJGlpuWTYklhg8sRjJiXKO7IpdYeQ" type="image/x-icon" alt="logo">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#050508; --panel:rgba(22,20,32,.6); --panel-2:rgba(28,26,40,.65);
+    --border:#332f47; --text:#ffffff; --text-dim:#a8a8c0;
+    --text-faint:#8888a3; --accent:#a855f7; --accent-soft:#22d3ee;
+    --accent-glow:rgba(168,85,247,.45); --gold:#facc15;
+    --win:#34d399; --win-bg:rgba(52,211,153,.12);
+    --loss:#fb7185; --loss-bg:rgba(251,113,133,.12);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+
+  /* Scrollbar personalizado — reemplaza el feo scrollbar blanco nativo del
+     sistema (Windows/etc) por uno delgado y oscuro que combina con el resto
+     del sitio. Se aplica a TODO (*) así que cubre tanto el scroll de la
+     página como cualquier cajita interna con overflow:auto. */
+  *{ scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+  *::-webkit-scrollbar{ width:10px; height:10px; }
+  *::-webkit-scrollbar-track{ background:transparent; }
+  *::-webkit-scrollbar-thumb{ background-color:var(--border); border-radius:8px; border:2px solid var(--bg); background-clip:padding-box; }
+  *::-webkit-scrollbar-thumb:hover{ background-color:var(--accent); }
+  *::-webkit-scrollbar-corner{ background:transparent; }
+  body{
+    margin:0; background:
+      radial-gradient(1000px 460px at 15% -10%, rgba(168,85,247,.18), transparent 60%),
+      radial-gradient(1000px 460px at 85% 10%, rgba(34,211,238,.12), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',system-ui,sans-serif; min-height:100vh;
+  }
+  button { font-family: inherit; color: var(--text); }
+  .wrap{ max-width:1040px; margin:0 auto; padding:48px 20px 80px; }
+
+  /* FIX: header pasó de flex (título a la izquierda, indicador en vivo a
+     la derecha) a grid de 3 columnas simétricas para poder centrar el
+     título de verdad en el ancho completo — con flex+space-between el
+     título nunca queda centrado en la página, solo "pegado" a la
+     izquierda del espacio que le sobra al indicador. La columna
+     izquierda queda vacía a propósito, como contrapeso de la derecha. */
+  header{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:30px; padding-bottom:24px; border-bottom:1px solid var(--border); }
+  header > div:first-child{ grid-column:2; text-align:center; }
+  header > .live-indicator{ grid-column:3; justify-self:end; }
+  h1{ font-size:clamp(30px,4.5vw,44px); font-weight:700; margin:0; font-family:'Rajdhani',sans-serif; letter-spacing:.03em; text-transform:uppercase;
+      background:linear-gradient(90deg, #ffffff 0%, var(--accent-soft) 55%, var(--accent) 100%);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+      filter:drop-shadow(0 0 18px rgba(168,85,247,.35)); }
+
+  /* ── PODIO — Top 3 como podio de premiación: #2 y #3 flanquean a #1,
+     que va elevado, más grande y con un glow animado. En mobile se
+     reordena a 1-2-3 de arriba a abajo. */
+  .podium-grid{ display:flex; align-items:flex-end; justify-content:center; gap:18px; margin-bottom:20px; }
+  .podium-card{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; text-align:center;
+    background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    padding:22px 16px 20px; position:relative; overflow:hidden; backdrop-filter:blur(14px);
+    transition:transform .2s ease, box-shadow .2s ease; }
+  .podium-card:hover{ transform:translateY(-5px); }
+  .podium-card > *{ position:relative; z-index:1; }
+
+  /* Relleno decorativo detrás del avatar/info: número gigante en watermark
+     + halo de luz radial + un barrido de brillo que cruza la tarjeta. Todo
+     puramente visual (CSS), no depende de ningún dato nuevo. */
+  .podium-card::before{
+    content:attr(data-rank); position:absolute; top:-.28em; right:-.08em; z-index:0;
+    font-family:'Rajdhani',sans-serif; font-weight:800; font-size:100px; line-height:1;
+    color:transparent; -webkit-text-stroke:1.5px rgba(255,255,255,.09); pointer-events:none; user-select:none;
+  }
+  .podium-card::after{
+    content:''; position:absolute; z-index:0; top:-35%; left:50%; transform:translateX(-50%);
+    width:150%; aspect-ratio:1; border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle, rgba(34,211,238,.16), transparent 62%);
+  }
+  .podium-card.rank2::after{ background:radial-gradient(circle, rgba(148,163,184,.16), transparent 62%); }
+  .podium-card.rank3::after{ background:radial-gradient(circle, rgba(217,119,6,.16), transparent 62%); }
+  .podium-card.rank1::before{ font-size:130px; -webkit-text-stroke:1.5px rgba(168,85,247,.22); }
+  .podium-card.rank1::after{ background:radial-gradient(circle, rgba(250,204,21,.2), transparent 62%); }
+
+  .podium-shine{
+    position:absolute; z-index:0; top:0; left:-60%; width:35%; height:100%; pointer-events:none;
+    background:linear-gradient(115deg, transparent, rgba(255,255,255,.08), transparent);
+    animation:podiumShine 5.5s ease-in-out infinite;
+  }
+  .podium-card.rank1 .podium-shine{ background:linear-gradient(115deg, transparent, rgba(255,255,255,.15), transparent); animation-duration:4.2s; }
+  @keyframes podiumShine{ 0%{ left:-60%; } 55%{ left:130%; } 100%{ left:130%; } }
+
+  /* Splash art elegida por cada jugador (fondo de su tarjeta del podio).
+     Usa el arte de "loading screen" (retrato, personaje centrado) recortado
+     por arriba con object/background-position para no tener que alargar la
+     tarjeta — se ve la mitad superior, que es donde está el personaje.
+     Un scrim oscuro encima mantiene el texto legible sobre cualquier imagen.
+     Estas dos capas van con mayor especificidad que ".podium-card > *" a
+     propósito, para pisar su position:relative/z-index:1 y quedar de fondo. */
+  .podium-card .podium-splash,
+  .podium-card .podium-scrim{ position:absolute; inset:0; z-index:0; pointer-events:none; }
+  .podium-card .podium-splash{ background-size:cover; background-position:center 12%; }
+  .podium-card .podium-scrim{ background:linear-gradient(180deg, rgba(6,6,10,.32) 0%, rgba(6,6,10,.5) 45%, rgba(6,6,10,.93) 100%); }
+  .podium-card.has-splash::before, .podium-card.has-splash::after{ opacity:.4; }
+
+  .podium-badge{ font-weight:800; font-size:10px; padding:4px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px; }
+
+  .podium-card.rank2{ order:1; padding-bottom:26px; }
+  .podium-card.rank1{ order:2; flex:1.4; padding-top:36px; padding-bottom:32px; z-index:2;
+    border:1px solid var(--accent);
+    background:linear-gradient(180deg, rgba(168,85,247,.16), var(--panel) 65%);
+    box-shadow:0 0 40px var(--accent-glow), 0 0 90px rgba(34,211,238,.18);
+    animation:podiumPulse 3.2s ease-in-out infinite; }
+  .podium-card.rank3{ order:3; padding-bottom:22px; }
+  @keyframes podiumPulse{
+    0%,100%{ box-shadow:0 0 40px var(--accent-glow), 0 0 90px rgba(34,211,238,.18); }
+    50%{ box-shadow:0 0 58px var(--accent-glow), 0 0 120px rgba(34,211,238,.3); }
+  }
+
+  .podium-card.rank1 .podium-badge{ background:linear-gradient(90deg, var(--accent), var(--accent-soft)); color:#0a0410; }
+  .podium-card.rank2 .podium-badge, .podium-card.rank3 .podium-badge{ background:var(--panel-2); color:var(--text-faint); border:1px solid var(--border); }
+
+  .podium-medal{ font-size:26px; line-height:1; margin-bottom:8px; }
+  .podium-card.rank1 .podium-medal{ font-size:38px; filter:drop-shadow(0 0 10px rgba(250,204,21,.5)); }
+
+  .podium-avatar{ width:56px; height:56px; border-radius:50%; border:2px solid var(--border); object-fit:cover; margin-bottom:12px; }
+  .podium-card.rank1 .podium-avatar{ width:88px; height:88px; border:3px solid var(--accent-soft); box-shadow:0 0 24px var(--accent-glow); }
+
+  .podium-card h3{ margin:0 0 3px 0; font-size:14px; font-weight:800; color:#ffffff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .podium-card.rank1 h3{ font-size:19px; }
+  .podium-card p.podium-role{ margin:0 0 12px 0; color:var(--text-faint); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.03em; }
+
+  .podium-card .podium-lp{ font-size:17px; font-weight:900; color:var(--accent-soft); margin:0; }
+  .podium-card.rank1 .podium-lp{ font-size:30px;
+    background:linear-gradient(90deg, var(--gold), #fff3c4);
+    -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .podium-card .podium-tier{ font-size:11px; color:var(--text-faint); font-weight:600; text-transform:uppercase; margin:4px 0 0; display:flex; align-items:center; justify-content:center; gap:5px; }
+  .podium-emblem{ width:15px; height:15px; object-fit:contain; flex-shrink:0; }
+  .podium-card.rank1 .podium-emblem{ width:19px; height:19px; }
+
+  @media (max-width:640px){
+    .podium-grid{ flex-direction:column; align-items:stretch; }
+    .podium-card.rank1{ order:1; }
+    .podium-card.rank2{ order:2; }
+    .podium-card.rank3{ order:3; }
+    .podium-card.rank1 .podium-avatar{ width:72px; height:72px; }
+  }
+
+  /* HIGHLIGHTS — grid normal para los 3 tops */
+  /* Columnas FIJAS en 3 (no auto-fit) — con auto-fit, la fila de arriba
+     (primera victoria a ancho completo + 3 badges de últimas 10 partidas)
+     hacía que el grid calculara 4 columnas para caber en el ancho del
+     contenedor, dejando una 4ª columna vacía y los 3 badges corridos a la
+     izquierda. Con 3 fijas, esa fila queda pareja y la de "Destacados de
+     la Semana" (15 items) también cierra en una cuadrícula completa de
+     3×5 en vez de dejar 3 sueltos en una fila de 4. */
+  .highlights-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:50px; }
+  .highlight-card { display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px; }
+  /* Rey de la Temporada — es un logro de TODA la temporada (como Top 1
+     Actual), no un badge semanal más, así que ocupa el ancho completo de
+     la fila en vez de competir por una casilla del grid con los demás. */
+  .highlight-card.rey-card{ grid-column:1 / -1; border-color:rgba(251,191,36,.4); box-shadow:0 0 24px rgba(251,191,36,.1); padding:20px 22px; }
+  .highlight-card.rey-card .highlight-avatar,
+  .highlight-card.rey-card .highlight-icon{ width:52px; height:52px; }
+  .highlight-card.rey-card .highlight-player{ font-size:16px; }
+  .highlight-icon { font-size:26px; line-height:1; flex-shrink:0; width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:var(--panel-2); border-radius:12px; }
+  .highlight-avatar { width:44px; height:44px; border-radius:12px; border:1px solid var(--border); object-fit:cover; flex-shrink:0; }
+  .highlight-avatars-multi { display:flex; flex-shrink:0; }
+  .highlight-avatars-multi .highlight-avatar { border:1px solid var(--panel); box-shadow:0 0 0 1px var(--border); }
+  .highlight-body { min-width:0; }
+  .highlight-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); margin:0 0 4px; }
+  .highlight-player { font-size:14px; font-weight:800; color:#fff; margin:0 0 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .highlight-value { font-size:12px; color:var(--accent-soft); font-weight:700; margin:0; }
+  .highlight-empty { font-size:13px; color:var(--text-faint); }
+
+  /* HISTORIAL DE LOGROS — feed de eventos ("X le quitó tal badge a Y") */
+  .historial-logros{ display:flex; flex-direction:column; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+  .historial-item{ display:flex; align-items:center; gap:14px; padding:14px 18px; border-bottom:1px solid var(--border); }
+  .historial-item:last-child{ border-bottom:none; }
+  .historial-icon{ font-size:19px; width:38px; height:38px; border-radius:50%; background:var(--panel-2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .historial-body{ flex:1; min-width:0; }
+  .historial-text{ font-size:13px; font-weight:600; color:var(--text-dim); margin:0; line-height:1.4; }
+  .historial-text b{ color:#fff; font-weight:800; }
+  .historial-detalle{ font-size:12px; color:var(--accent-soft); font-weight:600; margin:3px 0 0; }
+  .historial-time{ font-size:11px; color:var(--text-faint); white-space:nowrap; flex-shrink:0; }
+  .historial-empty{ padding:26px 18px; text-align:center; color:var(--text-faint); font-size:13px; }
+
+  /* POPUP DE LOGROS — toast abajo a la izquierda cuando cambia algo en vivo */
+  .toast-container{
+    position:fixed; left:24px; bottom:24px; z-index:1000;
+    display:flex; flex-direction:column-reverse; gap:10px;
+    max-width:340px; pointer-events:none;
+  }
+  .toast{
+    display:flex; align-items:center; gap:12px;
+    background:var(--panel); border:1px solid var(--accent);
+    border-radius:14px; padding:12px 16px;
+    box-shadow:0 8px 32px rgba(0,0,0,.55), 0 0 24px rgba(168,85,247,.25);
+    animation: toast-in .3s ease; pointer-events:auto; backdrop-filter:blur(12px);
+  }
+  .toast.toast-out{ animation: toast-out .3s ease forwards; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateX(-24px); } to{ opacity:1; transform:translateX(0); } }
+  @keyframes toast-out{ from{ opacity:1; transform:translateX(0); } to{ opacity:0; transform:translateX(-24px); } }
+  .toast-icon{ font-size:24px; flex-shrink:0; }
+  .toast-body{ flex:1; min-width:0; }
+  .toast-title{ font-size:13px; font-weight:700; color:var(--text-dim); margin:0; line-height:1.4; }
+  .toast-title b{ color:#fff; font-weight:800; }
+  .toast-sub{ font-size:11px; color:var(--accent-soft); font-weight:600; margin:3px 0 0; }
+
+  /* PRIMERA VICTORIA DEL DÍA — ocupa todo el ancho, pirámide encima de los 3 tops */
+  .first-win-card {
+    grid-column: 1 / -1;
+    display:flex; align-items:center; gap:20px;
+    background:var(--panel);
+    border:1px solid rgba(251,191,36,.4);
+    box-shadow:0 0 24px rgba(251,191,36,.12);
+    border-radius:var(--radius); padding:20px 24px;
+    flex-wrap:wrap; position:relative; overflow:hidden;
+  }
+  .first-win-card::before {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(135deg, rgba(251,191,36,.07), transparent 60%);
+    pointer-events:none;
+  }
+  .first-win-badge {
+    position:absolute; top:0; left:0;
+    background:var(--gold); color:#000;
+    font-size:10px; font-weight:800; padding:4px 12px;
+    border-bottom-right-radius:8px; text-transform:uppercase; letter-spacing:.08em;
+  }
+  .first-win-avatar { width:52px; height:52px; border-radius:12px; border:2px solid var(--gold); object-fit:cover; flex-shrink:0; }
+  .first-win-champ  { width:52px; height:52px; border-radius:10px; object-fit:cover; flex-shrink:0; border:2px solid var(--border); }
+  .first-win-info   { display:flex; flex-direction:column; gap:3px; min-width:0; }
+  .first-win-name   { font-size:17px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .first-win-kda    { font-size:12px; color:var(--text-faint); font-weight:600; }
+  .first-win-meta   { display:flex; align-items:center; gap:10px; margin-left:auto; flex-wrap:wrap; }
+  .first-win-spells { display:flex; gap:5px; }
+  .first-win-spells img { width:28px; height:28px; border-radius:6px; border:1px solid var(--border); }
+  .first-win-side   { font-size:11px; font-weight:800; padding:5px 12px; border-radius:7px; text-transform:uppercase; }
+  .first-win-side.blue { color:#60a5fa; background:rgba(96,165,250,.12); border:1px solid rgba(96,165,250,.3); }
+  .first-win-side.red  { color:#f87171; background:rgba(248,113,113,.12); border:1px solid rgba(248,113,113,.3); }
+  .first-win-dur    { font-size:12px; color:var(--text-faint); font-weight:700; }
+  .first-win-time   { font-size:12px; color:var(--gold); font-weight:800; }
+
+  .otp-champ-info { display:flex; align-items:center; gap:6px; margin-top:2px; }
+  .champ-icon-small { width:20px; height:20px; border-radius:4px; object-fit:cover; }
+
+  .filter-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+  .filter-bar select { background:var(--panel-2); color:var(--text); border:1px solid var(--border); padding:8px 12px; border-radius:8px; font-family:inherit; font-size:13px; cursor:pointer; outline:none; }
+
+  .section-title h2{ font-size:15px; font-weight:700; text-transform:uppercase; margin:0; color:#ffffff; font-family:'Rajdhani',sans-serif; letter-spacing:.08em; display:flex; align-items:center; gap:10px; }
+  .section-title h2::before{ content:''; width:4px; height:16px; border-radius:2px; flex-shrink:0;
+    background:linear-gradient(180deg, var(--accent-soft), var(--accent)); box-shadow:0 0 10px var(--accent-glow); }
+  .section-title span{ font-size:12px; color:var(--text-faint); }
+  section{margin-bottom:52px;}
+
+  .ranking-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .ranking{ display:flex; flex-direction:column; gap:6px; min-width:580px; }
+  .rank-head, .rank-row{ display:grid; grid-template-columns:40px 1fr 110px 90px 150px 80px 110px; gap:14px; align-items:center; }
+  .rank-head{ padding:0 16px 10px; font-size:11px; font-weight:600; text-transform:uppercase; color:var(--text-faint); }
+
+  .rank-row{ padding:12px 16px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); cursor:pointer; transition:all .15s ease; color:var(--text); text-align:left; backdrop-filter:blur(10px); position:relative; overflow:hidden; }
+  .rank-row > *{ position:relative; z-index:1; }
+  .rank-row:hover{ border-color:var(--accent-soft); transform:translateY(-1px); box-shadow:0 0 20px rgba(34,211,238,.2); }
+  .rank-row.active{ border-color:var(--accent); background:linear-gradient(180deg, rgba(168,85,247,.16), rgba(34,211,238,.05)); }
+
+  /* Racha de victorias (🔥) / derrotas (❄️) — además del emoji junto al
+     nombre, la fila entera se tiñe y respira con un efecto de fuego o
+     escarcha animado, puramente decorativo (CSS, sin datos nuevos). */
+  .rank-row.streak-fire{ border-color:rgba(251,146,60,.5); background:linear-gradient(90deg, rgba(251,146,60,.10), var(--panel) 60%); animation:streakFirePulse 2.4s ease-in-out infinite; }
+  .rank-row.streak-fire:hover{ border-color:rgba(251,146,60,.85); }
+  .rank-row.streak-fire::before{ content:''; position:absolute; z-index:0; inset:0; pointer-events:none;
+    background:
+      radial-gradient(circle at 12% 100%, rgba(251,146,60,.22), transparent 55%),
+      radial-gradient(circle at 22% 100%, rgba(250,204,21,.16), transparent 45%),
+      radial-gradient(circle at 5% 100%, rgba(239,68,68,.15), transparent 45%);
+    animation:emberGlow 2.6s ease-in-out infinite; }
+  @keyframes streakFirePulse{ 0%,100%{ box-shadow:inset 0 0 14px rgba(251,146,60,.22); } 50%{ box-shadow:inset 0 0 22px rgba(251,146,60,.4); } }
+  @keyframes emberGlow{ 0%,100%{ opacity:.6; } 50%{ opacity:1; } }
+
+  .rank-row.streak-ice{ border-color:rgba(125,211,252,.45); background:linear-gradient(90deg, rgba(125,211,252,.09), var(--panel) 60%); box-shadow:inset 0 0 16px rgba(125,211,252,.22); }
+  .rank-row.streak-ice:hover{ border-color:rgba(125,211,252,.8); }
+  .rank-row.streak-ice::before{ content:''; position:absolute; z-index:0; inset:0; pointer-events:none; opacity:.4;
+    background-image:radial-gradient(rgba(224,242,254,.6) 1px, transparent 1.6px);
+    background-size:14px 14px; animation:frostDrift 7s linear infinite; }
+  @keyframes frostDrift{ 0%{ background-position:0 0; } 100%{ background-position:0 28px; } }
+
+  .rank-pos{ font-size:13px; font-weight:700; color:var(--text-faint); text-align:center; }
+  .rank-pos.pos-1{ font-size:18px; color:var(--gold); text-shadow:0 0 12px rgba(251,191,36,.7); }
+  .rank-pos.pos-2{ color:#d6d9e0; text-shadow:0 0 10px rgba(214,217,224,.55); font-weight:900; }
+  .rank-pos.pos-3{ color:#d99a5b; text-shadow:0 0 10px rgba(217,154,91,.55); font-weight:900; }
+  .player-cell{ display:flex; align-items:center; gap:12px; }
+  .avatar{ width:34px; height:34px; border-radius:9px; border:1px solid var(--border); object-fit:cover; }
+
+  .status-cell{ display:flex; justify-content:center; }
+  .role-cell{ display:flex; align-items:center; gap:6px; }
+  .trend-arrow{ font-size:11px; font-weight:900; line-height:1; }
+  .trend-arrow.up{ color:var(--win); }
+  .trend-arrow.down{ color:var(--loss); }
+
+  .profile-link { font-size:14px; font-weight:700; color:#ffffff; text-decoration:none; transition:color 0.2s; position:relative; z-index:10; padding:4px 8px; border-radius:6px;}
+  .profile-link:hover { color:var(--accent-soft); background:rgba(139,92,246,.15); text-decoration:underline; }
+
+  .tier-badge{ display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:#ffffff; white-space:nowrap; }
+  .tier-emblem{ width:28px; height:28px; object-fit:contain; flex-shrink:0; image-rendering:auto; }
+  .role-badge{ font-size:12px; color:#ffffff; font-weight:700; background:rgba(139,92,246,0.3); padding:4px 0; border-radius:6px; text-align:center; width:72px; display:inline-block; }
+
+  .lp-cell{ font-size:13px; font-weight:600; color:#ffffff; }
+
+  .wr-cell{ display:flex; flex-direction:column; gap:5px; }
+  .wr-top{ display:flex; justify-content:space-between; font-size:12px; color:var(--text-faint); }
+  .wr-bar{ display:block; width:100%; height:4px; background:var(--panel-2); border-radius:99px; overflow:hidden; }
+  .wr-fill{ display:block; height:100%; background:linear-gradient(90deg,var(--accent-soft),var(--accent)); border-radius:99px; }
+
+  .history-panel{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
+  .matches{ display:flex; flex-direction:column; gap:8px; }
+  .match{ display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:14px; padding:10px 12px; border-radius:10px; background:var(--panel-2); border:1px solid var(--border); }
+  a.match{ text-decoration:none; color:inherit; cursor:pointer; transition:border-color .15s ease; }
+  a.match:hover{ border-color:var(--accent-soft); }
+  .match-icons{ display:flex; align-items:center; gap:5px; }
+  .champ-icon{ width:36px; height:36px; border-radius:8px; object-fit:cover; background:#1d1d24; }
+  .match-spells{ display:flex; flex-direction:column; gap:3px; }
+  .match-spells img{ width:16px; height:16px; border-radius:4px; border:1px solid var(--border); background:#1d1d24; }
+  .match-runes{ display:flex; flex-direction:column; gap:3px; }
+  .match-runes img{ width:16px; height:16px; border-radius:50%; border:1px solid var(--border); background:#0a0a0c; object-fit:contain; padding:1px; }
+  .match-champ{ font-size:13px; font-weight:700; color:#ffffff;}
+  .match-kda{ font-size:12px; color:var(--text-faint); }
+  .match-duo{ font-size:11px; font-weight:700; color:var(--accent-soft); margin-top:2px; }
+  .result-chip{ font-size:11px; font-weight:700; padding:4px 10px; border-radius:99px; text-transform:uppercase; text-align:center; }
+  .result-chip.victoria{ color:var(--win); background:var(--win-bg); }
+  .result-chip.derrota{ color:var(--loss); background:var(--loss-bg); }
+  .result-chip.remake{ color:#a1a1aa; background:rgba(161,161,170,.1); }
+  .match-result-block{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+  .lp-change{ font-size:11px; font-weight:800; }
+  .lp-change.win{ color:var(--win); }
+  .lp-change.loss{ color:var(--loss); }
+  .egida-tag{ font-size:10px; font-weight:700; color:var(--text-dim); background:rgba(255,255,255,.08); border:1px dashed rgba(255,255,255,.35); border-radius:99px; padding:2px 8px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px; }
+  .egida-tag img{ width:12px; height:12px; object-fit:contain; }
+  .empty-state{ color:var(--text-faint); font-size:13px; text-align:center; padding:30px 0; }
+
+  .countdown-container { text-align:center; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:40px 20px; }
+  .countdown-container h2 { margin:0 0 20px 0; font-size:20px; font-weight:800; letter-spacing:0.05em; color:var(--accent-soft); text-transform:uppercase;}
+  .timer-boxes { display:flex; justify-content:center; gap:15px; }
+  .timer-box { background:var(--panel-2); border:1px solid var(--border); padding:15px 20px; border-radius:12px; min-width:90px; }
+  .timer-val { font-size:32px; font-weight:900; line-height:1; margin-bottom:5px; color:#ffffff; }
+  .timer-label { font-size:11px; font-weight:700; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.1em; }
+
+  .live-indicator{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim); background:var(--panel); border:1px solid var(--border); padding:8px 14px; border-radius:999px; }
+  .pulse-dot{ width:7px; height:7px; border-radius:50%; background:var(--accent); flex-shrink:0; animation:pulse 2.2s infinite; }
+  @keyframes pulse{ 0%{box-shadow:0 0 0 0 var(--accent-glow);} 70%{box-shadow:0 0 0 8px rgba(139,92,246,0);} 100%{box-shadow:0 0 0 0 rgba(139,92,246,0);} }
+
+  .status-chip { font-size:10px; font-weight:800; padding:4px 8px; border-radius:6px; text-transform:uppercase; margin-left:8px; letter-spacing:0.05em; }
+  .status-chip.in-game { background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.4); box-shadow:0 0 10px rgba(239,68,68,0.2); }
+  .status-chip.offline { background:rgba(161,161,170,0.1); color:#a1a1aa; border:1px solid rgba(161,161,170,0.2); }
+  .status-cell{ display:flex; flex-direction:column; align-items:flex-start; gap:3px; }
+  .duo-tag{ font-size:10px; font-weight:700; color:var(--accent-soft); margin-left:8px; }
+
+  .site-footer { margin-top:60px; padding-top:40px; border-top:1px solid var(--border); text-align:center; display:flex; flex-direction:column; align-items:center; }
+  .footer-logo { width:70px; height:auto; margin-bottom:12px; }
+  .site-footer p { margin:0; font-size:14px; color:var(--text-dim); font-weight:500; }
+
+  /* Menú flotante desplegable — un botón, se abre en burbujas hacia arriba */
+  .fab-menu{ position:fixed; right:28px; bottom:28px; z-index:999; display:flex; flex-direction:column; align-items:flex-end; gap:14px; }
+  .fab-main{
+    width:56px; height:56px; border-radius:50%; border:none; cursor:pointer;
+    background:linear-gradient(135deg, var(--accent), var(--accent-soft)); color:#fff; font-size:26px; font-weight:400; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 24px rgba(168,85,247,.55), 0 0 30px rgba(34,211,238,.25);
+    transition:transform .25s ease, box-shadow .2s ease;
+  }
+  .fab-main:hover{ box-shadow:0 6px 32px rgba(168,85,247,.75), 0 0 40px rgba(34,211,238,.4); }
+  .fab-menu.open .fab-main{ transform:rotate(45deg); }
+  .fab-options{ display:flex; flex-direction:column; align-items:flex-end; gap:12px; }
+  .fab-option{
+    display:flex; align-items:center; gap:10px; text-decoration:none;
+    opacity:0; transform:translateY(10px) scale(.85); pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease;
+  }
+  .fab-menu.open .fab-option{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+  .fab-menu.open .fab-option:nth-child(1){ transition-delay:.06s; }
+  .fab-menu.open .fab-option:nth-child(2){ transition-delay:.03s; }
+  .fab-menu.open .fab-option:nth-child(3){ transition-delay:0s; }
+  .fab-option-icon{
+    width:46px; height:46px; border-radius:50%; background:var(--panel-2);
+    border:1px solid var(--border); display:flex; align-items:center; justify-content:center;
+    font-size:20px; box-shadow:0 4px 16px rgba(0,0,0,.45); flex-shrink:0;
+  }
+  .fab-option-label{
+    font-size:12px; font-weight:700; color:var(--text); background:var(--panel-2);
+    padding:5px 10px; border-radius:8px; border:1px solid var(--border);
+    white-space:nowrap; box-shadow:0 4px 16px rgba(0,0,0,.4);
+  }
+
+  @media (max-width:700px){
+    .wrap{ padding:28px 12px 60px; }
+    .rank-head{ display:none; }
+    .rank-row{ grid-template-columns:32px 1fr auto; grid-template-rows:auto auto; gap:6px 10px; padding:12px 14px; }
+    .rank-row > *:nth-child(1){ grid-column:1; grid-row:1; }
+    .rank-row > *:nth-child(2){ grid-column:2; grid-row:1; }
+    .rank-row > *:nth-child(3){ grid-column:3; grid-row:1; }
+    .rank-row > *:nth-child(4){ grid-column:2; grid-row:2; display:flex; flex-wrap:wrap; gap:6px; }
+    .rank-row > *:nth-child(5){ display:none; }
+    .rank-row > *:nth-child(6){ display:none; }
+    .rank-row > *:nth-child(7){ grid-column:3; grid-row:2; }
+    .wr-bar{ display:none; }
+    .wr-top{ font-size:11px; }
+    .highlights-grid{ grid-template-columns:1fr 1fr; }
+    .timer-box{ min-width:60px; padding:10px 12px; }
+    .toast-container{ left:12px; right:12px; max-width:none; }
+    .historial-item{ flex-wrap:wrap; }
+    .historial-time{ width:100%; }
+    .timer-val{ font-size:22px; }
+    header{ grid-template-columns:1fr; justify-items:center; gap:12px; }
+    header > div:first-child{ grid-column:1; }
+    header > .live-indicator{ grid-column:1; justify-self:center; }
+    .first-win-card{ flex-direction:column; align-items:flex-start; }
+    .first-win-meta{ margin-left:0; }
+  }
+  @media (max-width:420px){
+    .highlights-grid{ grid-template-columns:1fr; }
+  }
+  /* ── Estilo alternativo: Neón Competitivo ── */
+  .highlight-card, .history-panel, .historial-logros, .countdown-container, .timer-box{
+    backdrop-filter:blur(12px);
+  }
+  .historial-item:hover{ background:rgba(168,85,247,.06); }
+  .wr-fill{ box-shadow:0 0 8px rgba(34,211,238,.5); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div><h1 id="titulo">SoloQReto</h1></div>
+    <div class="live-indicator" id="live-indicator">
+      <span class="pulse-dot"></span>
+      <span id="live-indicator-text">Cargando…</span>
+    </div>
+  </header>
+
+  <div class="podium-grid" id="podium-container"></div>
+
+  <!-- Bloque superior: primera victoria + 3 tops en pirámide -->
+  <div class="highlights-grid" id="highlights-container"></div>
+
+  <section id="seccion-ranking">
+    <div class="filter-bar">
+      <div class="section-title" style="margin:0;"><h2>Ranking Global</h2></div>
+      <select id="elo-filter">
+        <option value="ALL">Todos los Elos</option>
+        <option value="CHALLENGER">Challenger</option>
+        <option value="GRANDMASTER">Grandmaster</option>
+        <option value="MASTER">Master</option>
+        <option value="DIAMOND">Diamond</option>
+        <option value="EMERALD">Emerald</option>
+        <option value="PLATINUM">Platinum</option>
+        <option value="GOLD">Gold</option>
+        <option value="SILVER">Silver</option>
+        <option value="BRONZE">Bronze</option>
+        <option value="IRON">Iron</option>
+      </select>
+    </div>
+    <div class="ranking-scroll">
+      <div class="rank-head">
+        <span>#</span><span>Jugador</span><span></span><span>Rol (10p)</span><span>Rango</span><span>LP</span><span>Winrate</span>
+      </div>
+      <div class="ranking" id="ranking-list"></div>
+    </div>
+  </section>
+
+  <section id="seccion-historial">
+    <div class="section-title">
+      <h2>Historial Individual</h2>
+      <span>Últimas 5 partidas Solo/Duo</span>
+    </div>
+    <div class="history-panel" id="history-panel">
+      <p class="empty-state">Haz clic en la fila de un jugador para ver su historial rápido.</p>
+    </div>
+  </section>
+
+  <section id="seccion-semanales">
+    <div class="section-title" style="margin-bottom:16px;">
+      <h2>Destacados de la Semana</h2>
+      <span>Últimos 7 días</span>
+    </div>
+    <div class="highlights-grid" id="weekly-highlights-container"></div>
+  </section>
+
+  <section id="seccion-historial-logros">
+    <div class="section-title" style="margin-bottom:16px;">
+      <h2>Historial de Logros</h2>
+      <span>Cambios recientes en los grandes logros del grupo</span>
+    </div>
+    <div class="historial-logros" id="historial-logros-container"></div>
+  </section>
+
+  <div class="countdown-container">
+    <h2>⏳ Fin de Temporada</h2>
+    <div class="timer-boxes" id="countdown">
+      <div class="timer-box"><div class="timer-val" id="cd-days">0</div><div class="timer-label">Días</div></div>
+      <div class="timer-box"><div class="timer-val" id="cd-hours">0</div><div class="timer-label">Horas</div></div>
+      <div class="timer-box"><div class="timer-val" id="cd-mins">0</div><div class="timer-label">Min</div></div>
+      <div class="timer-box"><div class="timer-val" id="cd-secs">0</div><div class="timer-label">Seg</div></div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <img src="SoloQRetoLogo.svg" alt="Logo SoloQ Reto" class="footer-logo">
+    <p>creado por KyoSumiVT</p>
+  </footer>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<div class="fab-menu" id="fabMenu">
+  <div class="fab-options">
+    <a class="fab-option" href="campeones.html">
+      <span class="fab-option-label">Campeones</span>
+      <span class="fab-option-icon">🏆</span>
+    </a>
+    <a class="fab-option" href="versus.html">
+      <span class="fab-option-label">Versus</span>
+      <span class="fab-option-icon">⚔️</span>
+    </a>
+  </div>
+  <button class="fab-main" id="fabMainBtn" type="button" aria-label="Menú de navegación" title="Menú">+</button>
+</div>
+<script>
+(function(){
+  var menu = document.getElementById('fabMenu');
+  var btn  = document.getElementById('fabMainBtn');
+  if(!menu || !btn) return;
+  btn.addEventListener('click', function(e){ e.stopPropagation(); menu.classList.toggle('open'); });
+  document.addEventListener('click', function(e){ if(menu.classList.contains('open') && !menu.contains(e.target)) menu.classList.remove('open'); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') menu.classList.remove('open'); });
+})();
+</script>
+
+<script>
+window.addEventListener('load', () => {
+  const TIER_ORDER   = ['IRON','BRONZE','SILVER','GOLD','PLATINUM','EMERALD','DIAMOND','MASTER','GRANDMASTER','CHALLENGER'];
+  const DIVISIONLESS = ['MASTER','GRANDMASTER','CHALLENGER'];
+  const DIV_NUM      = { 'IV':0,'III':1,'II':2,'I':3 };
+  const MASTER_PLUS_BASE = 7 * 4 * 100;
+  const MINI_CREST_BASE  = 'https://raw.communitydragon.org/14.10/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/';
+
+  function getEmblemUrl(rango) {
+    const tier  = (rango || 'unranked').split(' ')[0].toLowerCase();
+    const valid = ['iron','bronze','silver','gold','platinum','emerald','diamond','master','grandmaster','challenger'];
+    return `${MINI_CREST_BASE}${valid.includes(tier) ? tier : 'unranked'}.png`;
+  }
+
+  const state = { players:[], liveData:{}, selectedId:null, filterElo:'ALL', lastUpdate:null, reyTemporada:null };
+  const REFRESH_MS = 15000;
+
+  // FIX: DDragon es sensible a mayúsculas/minúsculas en el nombre de archivo,
+  // y en un puñado de campeones el "championName" que guarda la API de Riot
+  // no coincide exactamente con el nombre real del archivo en DDragon. El
+  // caso clásico es FiddleSticks: Riot lo guarda como "FiddleSticks" (S
+  // mayúscula) pero el ícono real es "Fiddlesticks.png" (s minúscula) — por
+  // eso su imagen nunca cargaba aunque el resto sí. Se usa en todos los
+  // lugares de esta página que arman una URL de ícono de campeón.
+  const CHAMPION_ID_OVERRIDES = { FiddleSticks: 'Fiddlesticks' };
+  const champKey = (name) => {
+    const clean = (name || '').replace(/[^a-zA-Z0-9]/g, '');
+    return CHAMPION_ID_OVERRIDES[clean] || clean;
+  };
+
+  // Runas — igual que en partida.html: el id de la runa (perk_principal /
+  // estilo_secundario) ya viene guardado en datos.json (historial de cada
+  // jugador), pero el ÍCONO hay que resolverlo vía el catálogo de DDragon.
+  // Se pide una sola vez (no en cada refresh de 15s) y se cachea en memoria.
+  const DDRAGON = 'https://ddragon.leagueoflegends.com/cdn/16.18.1';
+  // FIX: a diferencia de campeón/item/hechizo (que sí viven bajo la carpeta
+  // versionada /cdn/<version>/img/...), los íconos de runas NO están
+  // versionados en DDragon — viven en /cdn/img/... a secas (el mismo patrón
+  // que ya usa el splash art en perfil.html: /cdn/img/champion/loading/...).
+  // Pedirlos con el número de versión delante daba 403 y por eso nunca
+  // cargaban, aunque el catálogo (que sí es versionado) se descargaba bien.
+  const DDRAGON_IMG_BASE = 'https://ddragon.leagueoflegends.com/cdn/img';
+  let runasMap = {};
+  let runasCatalogoPromise = null;
+  function cargarCatalogoRunas(){
+    if (runasCatalogoPromise) return runasCatalogoPromise;
+    runasCatalogoPromise = fetch(`${DDRAGON}/data/en_US/runesReforged.json`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        (data || []).forEach(estilo => {
+          runasMap[estilo.id] = estilo.icon;
+          (estilo.slots || []).forEach(slot => {
+            (slot.runes || []).forEach(r => { runasMap[r.id] = r.icon; });
+          });
+        });
+      })
+      .catch(e => console.error('no se pudo cargar el catálogo de runas', e));
+    return runasCatalogoPromise;
+  }
+  const runeUrl = (perkId) => (perkId && runasMap[perkId]) ? `${DDRAGON_IMG_BASE}/${runasMap[perkId]}` : null;
+  // Historial de logros — null = todavía no se ha visto ningún evento en
+  // esta sesión del navegador (se usa para no lanzar popups de cosas
+  // viejas apenas se abre la página, solo de lo que pasa DESPUÉS).
+  // Dos sets separados (uno por stream: historial de logros vs.
+  // rivalidades en vivo) para que cada uno tenga su propio "primer
+  // vistazo" — si compartieran uno solo, el segundo stream en procesarse
+  // en cada refresco encontraría el set ya inicializado por el primero y
+  // lanzaría toasts de TODO lo viejo la primera vez que abrís la página.
+  let eventosVistos = null;
+  let eventosVistosVivo = null;
+
+  // ─────────────────────────────────────────────────────
+  // Sonido + vibración para las notificaciones (toasts).
+  // Los navegadores bloquean el audio hasta que la persona haya
+  // interactuado al menos una vez con la página (política estándar
+  // "autoplay") — por eso se "desbloquea" el AudioContext en el primer
+  // click/tecla/touch que ocurra, así ya queda listo para cuando llegue
+  // el primer logro/adelantamiento real.
+  // ─────────────────────────────────────────────────────
+  let audioCtx = null;
+  function getAudioCtx(){
+    if(!audioCtx){
+      try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e){ return null; } // navegador sin soporte de Web Audio — no rompe nada
+    }
+    return audioCtx;
+  }
+  ['click','keydown','touchstart'].forEach(evt => {
+    window.addEventListener(evt, () => {
+      const ctx = getAudioCtx();
+      if(ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
+    }, { once:true, passive:true });
+  });
+
+  function reproducirSonidoLogro(){
+    const ctx = getAudioCtx();
+    if(!ctx) return;
+    if(ctx.state === 'suspended'){ ctx.resume().catch(() => {}); }
+    try{
+      const ahora = ctx.currentTime;
+      // Dos notas ascendentes cortas (estilo "ding-ding" de logro) — nada
+      // de archivos de audio externos, se generan con Web Audio API.
+      [660, 880].forEach((freq, i) => {
+        const inicio = ahora + i * 0.12;
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, inicio);
+        gain.gain.linearRampToValueAtTime(0.15, inicio + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, inicio + 0.35);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(inicio);
+        osc.stop(inicio + 0.4);
+      });
+    }catch(e){ /* si algo falla generando el sonido, simplemente no suena */ }
+  }
+
+  function vibrarSiPosible(){
+    // Solo funciona en celulares Android con Chrome — iPhones no soportan
+    // la Vibration API, así que ahí simplemente no pasa nada (sin errores).
+    try{ if(navigator.vibrate) navigator.vibrate([80, 40, 80]); }catch(e){}
+  }
+
+  const podiumContainerEl     = document.getElementById('podium-container');
+  const highlightsContainerEl = document.getElementById('highlights-container');
+  const rankingListEl         = document.getElementById('ranking-list');
+  const historyPanelEl        = document.getElementById('history-panel');
+  const eloFilterEl           = document.getElementById('elo-filter');
+  const liveIndicatorTextEl   = document.getElementById('live-indicator-text');
+
+  eloFilterEl.addEventListener('change', e => { state.filterElo = e.target.value; renderRanking(); });
+
+  init();
+  startCountdown();
+
+  function init(){
+    refreshData();
+    setInterval(refreshData, REFRESH_MS);
+    setInterval(tickLiveIndicator, 1000);
+    document.addEventListener('visibilitychange', () => { if(!document.hidden) refreshData(); });
+  }
+
+  async function refreshData(){
+    try{
+      // FIX: raw.githubusercontent.com en vez de jsDelivr — jsDelivr cachea
+      // archivos de rama (@main) durante horas y la purga no era confiable.
+      // raw.githubusercontent.com refleja el push casi al instante.
+      const CDN = 'https://raw.githubusercontent.com/KyoSharkCode/SoloQApuesta/main';
+      // FIX: cargarCatalogoRunas() se disparaba en init() sin esperar
+      // ("fire and forget"), así que en la PRIMERA carga podía renderizarse
+      // el historial antes de que el catálogo de runas hubiera llegado —
+      // runeUrl() devolvía null para todo. Ahora se espera junto con
+      // datos.json, igual que ya se hacía en partida.html.
+      const [res] = await Promise.all([
+        fetch(`${CDN}/datos.json?t=${Date.now()}`, { cache:'no-store' }),
+        cargarCatalogoRunas(),
+      ]);
+      if(!res.ok) throw new Error();
+      const rawData   = await res.json();
+      const rawPlayers = Array.isArray(rawData) ? rawData : (rawData.jugadores || []);
+
+      try {
+        const liveRes = await fetch(`${CDN}/live_data.json?t=${Date.now()}`, { cache:'no-store' });
+        if(liveRes.ok) state.liveData = await liveRes.json();
+      } catch(e) { console.log('No hay datos en vivo aún.'); }
+
+      state.players = rawPlayers.map(p => {
+        const rankParts = (p.rango || 'Unranked').split(' ');
+        return {
+          id: p.nombre, nombre: p.nombre, icono: p.icono || 1,
+          rango: rankParts[0], division: rankParts.slice(1).join(' '),
+          lp: p.lp || 0, winrate: parseInt(p.winrate) || 0, rol: p.rol_principal || 'N/A',
+          partidas: (p.historial || []).map(h => ({
+            campeon: h.campeon, kda: h.kda,
+            resultado: (h.resultado || '').toLowerCase(),
+            duracion: h.duracion || null,
+            lpChange: (typeof h.lp_change === 'number') ? h.lp_change : null,
+            hechizos: Array.isArray(h.hechizos) ? h.hechizos : [],
+            duoCon: Array.isArray(h.duo_con) ? h.duo_con : [],
+            matchId: h.match_id || null,
+            perkPrincipal: h.perk_principal || null,
+            estiloSecundario: h.estilo_secundario || null,
+            posibleEgida: !!h.posible_egida
+          })),
+          historialLP: p.progreso_lp || [],
+          // Últimas 10 partidas — para los 3 tops superiores
+          killsRecientes:        p.kills_recientes          || 0,
+          pentakillsRecientes:   p.pentakills_recientes     || 0,
+          visionPromedioReciente:p.vision_promedio_reciente || 0,
+          // Últimos 7 días — para los destacados de la semana
+          killsSemana:            p.kills_semana              || 0,
+          pentakillsSemana:       p.pentakills_semana         || 0,
+          visionPromedioSemana:   p.vision_promedio_semana    || 0,
+          primerasSangreSemana:   p.primeras_sangre_semana    || 0,
+          kdaPromedioSemana:      p.kda_promedio_semana       || 0,
+          kdaPerfectoSemana:      !!p.kda_perfecto_semana,
+          campeonesGanadosSemana: p.campeones_ganados_semana  || 0,
+          asistenciasSemana:      p.asistencias_semana        || 0,
+          // FIX: partidas_semana — conteo real de partidas procesadas
+          partidasSemana:         p.partidas_semana           || 0,
+          maxPartidasEnUnDia:     p.max_partidas_en_un_dia    || 0,
+          // FIX: primera_victoria_hoy es un objeto {timestamp, campeon, kda, hechizos, equipo, duracion}
+          primeraVictoriaHoy:     p.primera_victoria_hoy      || null,
+          // Dúo más frecuente de la semana — {nombre, partidas} o null
+          duoSemana:              p.duo_semana                || null,
+          // El Farmeador — {cs_por_min, cs, campeon} o null
+          csMinSemana:            p.cs_min_semana             || null,
+          // El Defensor — {damage_taken, campeon} o null
+          danioRecibidoSemana:    p.danio_recibido_semana     || null,
+          // El Ladrón / El Destructor / Stop — sumas de la semana
+          objetivosRobadosSemana:      p.objetivos_robados_semana      || 0,
+          estructurasDestruidasSemana: p.estructuras_destruidas_semana || 0,
+          tiempoCcSemana:               p.tiempo_cc_semana              || 0
+        };
+      }).sort((a,b) => rankScore(b) - rankScore(a));
+
+      // Rey de la Temporada — {"jugador":..,"dias":..} o null, ya calculado por el bot
+      state.reyTemporada = (!Array.isArray(rawData) && rawData.rey_temporada) || null;
+
+      renderTop1();
+      renderHighlights();    // primera victoria + 3 tops (últimas 10)
+      renderRanking();
+      renderWeeklyHighlights(); // destacados semana (7 días)
+
+      // Historial de logros — feed permanente + popup cuando cambia algo mientras miras la página
+      const eventos = Array.isArray(rawData.eventos) ? rawData.eventos : [];
+      renderHistorialLogros(eventos);
+      procesarEventosNuevos(eventos);
+
+      // Rivalidades en vivo ("X está en contra de Y") — vienen de
+      // live_data.json (las genera live_status.py, no actualizar_datos.py),
+      // así que es un stream de eventos aparte. Solo se avisa como toast —
+      // a diferencia del historial de logros de arriba, no queda en el feed
+      // permanente, porque es información puntual de una partida en curso,
+      // no un logro de temporada. Reusa el mismo pipeline (procesarEventosNuevos/
+      // mostrarToast) porque claveEvento() ya distingue por tipo+jugadores.
+      const eventosVivo = Array.isArray(state.liveData && state.liveData._eventos_vivo)
+        ? state.liveData._eventos_vivo : [];
+      procesarEventosVivoNuevos(eventosVivo);
+
+      const seleccionValida = state.players.some(p => p.id === state.selectedId);
+      if(state.players.length){
+        selectPlayer(seleccionValida ? state.selectedId : state.players[0].id);
+      }
+
+      state.lastUpdate = Date.now();
+      tickLiveIndicator();
+
+    }catch(err){
+      console.warn('No se pudo refrescar datos.json', err);
+      if(state.players.length === 0){
+        rankingListEl.innerHTML = `<p class="empty-state">Espera a que el bot recolecte la información en un par de minutos y recarga la página.</p>`;
+      }
+    }
+  }
+
+  function tickLiveIndicator(){
+    if(!liveIndicatorTextEl) return;
+    if(!state.lastUpdate){ liveIndicatorTextEl.textContent = 'Cargando…'; return; }
+    const secs = Math.floor((Date.now() - state.lastUpdate) / 1000);
+    if(secs < 5)       liveIndicatorTextEl.textContent = 'Actualizado ahora';
+    else if(secs < 60) liveIndicatorTextEl.textContent = `Actualizado hace ${secs}s`;
+    else               liveIndicatorTextEl.textContent = `Actualizado hace ${Math.floor(secs/60)}m`;
+  }
+
+  function eloScore(rango, division, lp){
+    const tier = (rango||'').toUpperCase();
+    const ti   = TIER_ORDER.indexOf(tier);
+    if(ti === -1) return null;
+    if(DIVISIONLESS.includes(tier)) return MASTER_PLUS_BASE + Math.max(0, lp||0);
+    const dn = DIV_NUM[(division||'').toUpperCase()];
+    if(dn === undefined) return null;
+    return (ti*4+dn)*100 + Math.max(0, Math.min(100, lp||0));
+  }
+  function rankScore(p){ const s = eloScore(p.rango,p.division,p.lp); return s===null?-100000:s; }
+  function getAvatarUrl(iconId){ return `https://ddragon.leagueoflegends.com/cdn/16.18.1/img/profileicon/${iconId}.png`; }
+  // Fallback cuando el ícono de perfil es tan nuevo que Data Dragon (fijado
+  // a esta versión) todavía no lo publicó — pasa cada vez que alguien
+  // cambia a un ícono recién salido. En vez del recuadro roto "Icon", cae a
+  // un ícono clásico que existe en cualquier versión de Data Dragon.
+  const AVATAR_ONERROR = `this.onerror=null;this.src='${getAvatarUrl(1)}';`;
+
+  // ── Empates en highlights ──
+  // El perfil (renderBadges en perfil.html) usa comparaciones INCLUSIVAS
+  // (>=) para que, si dos jugadores quedan empatados en una estadística
+  // semanal, AMBOS reciban el badge en su propio perfil. Estas dos
+  // funciones permiten que las highlight-cards del index reflejen el
+  // mismo empate en vez de quedarse solo con el primero que aparezca en
+  // state.players (que era la causa de inconsistencias como "Maestro del
+  // Pool" mostrando a alguien distinto que en su perfil).
+  function avatarStackHtml(players){
+    if(players.length<=1) return `<img class="highlight-avatar" src="${getAvatarUrl(players[0].icono)}" alt="" onerror="${AVATAR_ONERROR}">`;
+    return `<div class="highlight-avatars-multi">${players.slice(0,4).map((p,i)=>
+      `<img class="highlight-avatar" src="${getAvatarUrl(p.icono)}" alt="" onerror="${AVATAR_ONERROR}" style="z-index:${10-i};${i>0?'margin-left:-14px;':''}">`
+    ).join('')}</div>`;
+  }
+  function namesJoined(players){ return players.map(p=>p.nombre.split('#')[0]).join(' & '); }
+
+  function rankDisplayOf(p){
+    const tierPretty = p.rango.charAt(0) + p.rango.slice(1).toLowerCase();
+    return DIVISIONLESS.includes((p.rango||'').toUpperCase()) ? tierPretty : `${tierPretty} ${p.division}`;
+  }
+
+  // Splash art elegida por cada jugador para el fondo de su tarjeta del
+  // podio (Top 1/2/3) — Riot no expone por API cuál es la skin que más usa
+  // cada quien, así que esto es una elección manual que cada jugador hizo.
+  // Se guarda por id (Riot ID completo, igual que en JUGADORES) para que
+  // no importe en qué puesto del podio termine cayendo cada quien.
+  const PODIUM_SPLASH = {
+    'Galactic Shark#AYK': { campeon:'Aurora', skin:1  }, // Conejita Guerrera
+    'El Buñuelito#KyA':   { campeon:'Ahri',   skin:85 }, // Espíritu Legendario
+    'Pinea#Pinea':        { campeon:'Fiora',  skin:50 }, // Bestia Lunar
+    'Ostia#LAN':          { campeon:'Lux',    skin:3  }, // Comando
+    'ゆうき まこと#1411':    { campeon:'Poppy',  skin:1  }, // de Noxus
+    'adrianNOOBYT#LAN':   { campeon:'Vayne',  skin:11 }, // Projecto
+  };
+  function podiumSplashUrl(id){
+    const s = PODIUM_SPLASH[id];
+    return s ? `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${s.campeon}_${s.skin}.jpg` : null;
+  }
+
+  function renderTop1(){
+    if(!state.players.length) return;
+    // Podio de premiación: #2 y #3 flanquean a #1 (elevado y más grande).
+    // Si el grupo tiene menos de 3 jugadores con rango válido, simplemente
+    // no se renderiza la tarjeta que falte.
+    const medal = { 1:'👑', 2:'🥈', 3:'🥉' };
+    const badge = { 1:'Top 1 Actual', 2:'Top 2', 3:'Top 3' };
+    const card = (p, rank) => {
+      if(!p) return '';
+      const splash    = podiumSplashUrl(p.id);
+      const splashHtml= splash ? `<div class="podium-splash" style="background-image:url('${splash}')"></div><div class="podium-scrim"></div>` : '';
+      return `
+      <div class="podium-card rank${rank}${splash?' has-splash':''}" data-rank="${rank}">
+        ${splashHtml}
+        <span class="podium-shine"></span>
+        <span class="podium-badge">${badge[rank]}</span>
+        <span class="podium-medal">${medal[rank]}</span>
+        <img class="podium-avatar" src="${getAvatarUrl(p.icono)}" alt="Avatar" onerror="${AVATAR_ONERROR}">
+        <h3><a href="perfil.html?jugador=${encodeURIComponent(p.id)}" class="profile-link" style="padding:0;">${p.nombre}</a></h3>
+        <p class="podium-role">${p.rol}</p>
+        <p class="podium-lp">${p.lp} LP</p>
+        <p class="podium-tier"><img class="podium-emblem" src="${getEmblemUrl(p.rango)}" alt="${p.rango}" onerror="this.style.display='none'">${rankDisplayOf(p)}</p>
+      </div>`;
+    };
+    podiumContainerEl.innerHTML = card(state.players[0],1) + card(state.players[1],2) + card(state.players[2],3);
+  }
+
+  // ─────────────────────────────────────────────────────
+  // renderHighlights — PIRÁMIDE: primera victoria (ancho
+  // completo) + 3 tops de las ÚLTIMAS 10 PARTIDAS abajo
+  // ─────────────────────────────────────────────────────
+  function renderHighlights(){
+    if(!state.players.length){ highlightsContainerEl.innerHTML = ''; return; }
+
+    // Primera victoria del día — objeto {timestamp(ms), campeon, kda, hechizos, equipo, duracion}
+    let pvPlayer = null, pvTs = Infinity;
+    state.players.forEach(p => {
+      const pv = p.primeraVictoriaHoy;
+      // FIX: timestamp es en ms (número), comparamos directamente
+      if(pv && typeof pv === 'object' && typeof pv.timestamp === 'number'){
+        if(pv.timestamp < pvTs){ pvTs = pv.timestamp; pvPlayer = p; }
+      }
+    });
+
+    let pvHtml;
+    if(pvPlayer){
+      const pv        = pvPlayer.primeraVictoriaHoy;
+      const hora      = new Date(pv.timestamp).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+      const champClean= champKey(pv.campeon);
+      const spells    = (pv.hechizos||[]).map(h =>
+        `<img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/spell/${h}.png" title="${h}" onerror="this.style.display='none'">`
+      ).join('');
+      const sideClass = pv.equipo === 'blue' ? 'blue' : 'red';
+      const sideLabel = pv.equipo === 'blue' ? 'Lado Azul' : 'Lado Rojo';
+      pvHtml = `
+        <div class="first-win-card">
+          <span class="first-win-badge">🌅 Primera Victoria del Día</span>
+          <img class="first-win-avatar" src="${getAvatarUrl(pvPlayer.icono)}" alt="Avatar" onerror="${AVATAR_ONERROR}" style="margin-top:12px;">
+          <img class="first-win-champ"  src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/champion/${champClean}.png" alt="${pv.campeon}" onerror="this.style.display='none'" style="margin-top:12px;">
+          <div class="first-win-info" style="margin-top:12px;">
+            <span class="first-win-name">${pvPlayer.nombre.split('#')[0]}</span>
+            <span class="first-win-kda">${pv.campeon} · ${pv.kda} KDA</span>
+          </div>
+          <div class="first-win-meta">
+            <div class="first-win-spells">${spells}</div>
+            <span class="first-win-side ${sideClass}">${sideLabel}</span>
+            <span class="first-win-dur">${pv.duracion}</span>
+            <span class="first-win-time">${hora} h</span>
+          </div>
+        </div>`;
+    } else {
+      pvHtml = `
+        <div class="first-win-card" style="justify-content:center;opacity:.6;">
+          <div class="highlight-icon">🌅</div>
+          <div class="highlight-body">
+            <p class="highlight-label">Primera Victoria del Día</p>
+            <p class="highlight-empty">Nadie ha ganado hoy todavía.</p>
+          </div>
+        </div>`;
+    }
+
+    // 3 tops — usan campos _recientes (últimas 10 partidas)
+    const categorias = [
+      { icon:'⚔️', label:'Top Asesino (10p)',    campo:'killsRecientes',         sufijo:'kills',        vacio:'Nadie ha registrado kills todavía.' },
+      { icon:'👁️', label:'Top Observador (10p)', campo:'visionPromedioReciente', sufijo:'visión prom.', vacio:'Sin datos de visión aún.' },
+    ];
+    const catCards = categorias.map(cat => {
+      // FIX: antes se usaba sort()[0], que se queda con un solo "ganador"
+      // arbitrario (orden de array) aunque haya empate real — igual que
+      // pasaba con "Maestro del Pool". Ahora, igual que el perfil (>=),
+      // se juntan TODOS los jugadores empatados en el máximo.
+      let max=-1;
+      state.players.forEach(p => { const v=p[cat.campo]||0; if(v>max) max=v; });
+      const lideres = max>0 ? state.players.filter(p => (p[cat.campo]||0) >= max) : [];
+      if(!lideres.length) return `
+        <div class="highlight-card">
+          <div class="highlight-icon">${cat.icon}</div>
+          <div class="highlight-body"><p class="highlight-label">${cat.label}</p><p class="highlight-empty">${cat.vacio}</p></div>
+        </div>`;
+      return `
+        <div class="highlight-card">
+          <div class="highlight-icon">${cat.icon}</div>
+          <div class="highlight-body">
+            <p class="highlight-label">${cat.label}</p>
+            <p class="highlight-player" title="${namesJoined(lideres)}">${namesJoined(lideres)}</p>
+            <p class="highlight-value">${max} ${cat.sufijo}</p>
+          </div>
+        </div>`;
+    });
+
+    // Sin rendirse — se subió acá desde "Destacados de la semana" (antes
+    // vivía junto a Agresivo/KDA Player/etc, ahora acompaña a los otros 2
+    // "tops" de arriba). Mismo criterio de siempre: mínimo 3 partidas en
+    // el día, empate inclusivo (>=), igual que el perfil.
+    let maxDiaTop=-1;
+    state.players.forEach(p => { const v=p.maxPartidasEnUnDia||0; if(v>maxDiaTop) maxDiaTop=v; });
+    const sinRendirseTop = maxDiaTop>=3 ? state.players.filter(p=>(p.maxPartidasEnUnDia||0)>=3 && (p.maxPartidasEnUnDia||0)>=maxDiaTop) : [];
+    const sinRendirseTopHtml = sinRendirseTop.length>0 ? `
+      <div class="highlight-card">
+        <div class="highlight-icon">😤</div>
+        <div class="highlight-body">
+          <p class="highlight-label">Sin rendirse</p>
+          <p class="highlight-player" title="${namesJoined(sinRendirseTop)}">${namesJoined(sinRendirseTop)}</p>
+          <p class="highlight-value">${maxDiaTop} partida${maxDiaTop===1?'':'s'} jugadas hoy</p>
+        </div>
+      </div>` : `
+      <div class="highlight-card">
+        <div class="highlight-icon">😤</div>
+        <div class="highlight-body"><p class="highlight-label">Sin rendirse</p><p class="highlight-empty">Nadie ha jugado 3 o más partidas hoy todavía.</p></div>
+      </div>`;
+
+    // FIX: primera victoria ocupa grid-column 1/-1 (ya está en el CSS .first-win-card)
+    // Los 3 de abajo van: Top Asesino - Sin rendirse - Top Observador
+    highlightsContainerEl.innerHTML = pvHtml + catCards[0] + sinRendirseTopHtml + catCards[1];
+  }
+
+  // ─────────────────────────────────────────────────────
+  // renderWeeklyHighlights — todo usa campos _semana (7d)
+  // ─────────────────────────────────────────────────────
+  function renderWeeklyHighlights(){
+    const container = document.getElementById('weekly-highlights-container');
+    if(!state.players.length){ container.innerHTML=''; return; }
+
+    let otpPlayer=null, otpChamp='', otpPercent=0;
+    let grinder=null, maxTime=0;
+    let duoPlayer=null, duoCompanero='', maxDuo=-1;
+    let farmeador=null, maxCsMin=-1, farmeadorChamp='';
+    let defensor=null, maxDanioPct=-1, defensorChamp='', defensorDanioBruto=0;
+
+    // FIX (consistencia con el perfil): estas 7 categorías también existen
+    // como badge en perfil.html, que usa comparaciones INCLUSIVAS (>=) —
+    // si dos jugadores empatan, el perfil se lo muestra a AMBOS. Acá antes
+    // se usaba ">" estricto guardando un solo "ganador" (el primero que
+    // apareciera en state.players), así que en un empate el index sólo
+    // mostraba a uno de los dos aunque el perfil se lo mostrara a los dos
+    // (ej: "Maestro del Pool" mostrando a Buñuelito en el index mientras
+    // el perfil de Ostia, empatada con él, también se lo mostraba a ella).
+    // Ahora se guardan TODOS los datos por jugador y se arma el set de
+    // empatados después, igual que hace el perfil.
+    const climbData=[];               // {p, d}
+    let maxClimb=-Infinity;
+    let maxSangre=-1;
+    let maxKda=-1;
+    let maxChamps=-1;
+    let minPartidas=Infinity;
+    let maxAsistencias=-1;
+    let maxPentakills=-1;
+    let maxRobados=-1;
+    let maxEstructuras=-1;
+    let maxCc=-1;
+
+    const now=Date.now(), ONE_WEEK=7*24*60*60*1000;
+
+    state.players.forEach(p => {
+      // OTP — últimas 10 partidas
+      if(p.partidas && p.partidas.length > 0){
+        const cc={};
+        p.partidas.forEach(m => { cc[m.campeon]=(cc[m.campeon]||0)+1; });
+        let maxC=0, champ='';
+        for(const c in cc){ if(cc[c]>maxC){ maxC=cc[c]; champ=c; } }
+        const pct=Math.round((maxC/p.partidas.length)*100);
+        if(pct>otpPercent){ otpPercent=pct; otpChamp=champ; otpPlayer=p; }
+      }
+      // Escalador — LP histórico semana
+      if(p.historialLP && p.historialLP.length > 0){
+        const hist=[...p.historialLP].filter(pt=>pt.fecha&&(now-new Date(pt.fecha).getTime()<=ONE_WEEK)).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
+        if(hist.length>0){
+          const curSc  =eloScore(p.rango,p.division,p.lp);
+          let firstSc=eloScore(hist[0].rango||p.rango,hist[0].division!==undefined?hist[0].division:p.division,hist[0].lp);
+          // FIX: si el punto más viejo de la semana es "Unranked" (el
+          // jugador todavía no había hecho sus partidas de colocación),
+          // eloScore no puede convertirlo a un número y devuelve null —
+          // antes eso descartaba al jugador ENTERO del cálculo, así que
+          // alguien que subió de Unranked a un rango real esta semana
+          // (un progreso enorme) nunca se consideraba para el badge.
+          // Ahora, igual que ya hace rankScore() para el ranking general,
+          // un punto de partida sin rango válido se trata como el fondo
+          // de la escala — así su rango actual sí cuenta como una subida
+          // completa desde cero, en vez de dejarlo afuera del cálculo.
+          if(firstSc===null) firstSc = -100000;
+          if(curSc!==null&&firstSc!==null){ const d=curSc-firstSc; climbData.push({p,d}); if(d>maxClimb) maxClimb=d; }
+        }
+      }
+      // Grinder — duración acumulada últimas 10
+      if(p.partidas && p.partidas.length > 0){
+        let t=0;
+        p.partidas.forEach(m=>{
+          if(typeof m.duracion==='string'){ const pts=m.duracion.replace('min','').split(':'); t+= pts.length===2?parseInt(pts[0])*60+parseInt(pts[1]):parseInt(pts[0])*60; }
+        });
+        if(t>maxTime){maxTime=t;grinder=p;}
+      }
+      // Campos semana — sólo se guarda el máximo acá; el/los ganador(es)
+      // se calculan después de este forEach con un segundo filtro >=,
+      // para poder capturar empates (ver comentario arriba).
+      if((p.primerasSangreSemana||0)>maxSangre)    maxSangre = p.primerasSangreSemana||0;
+      if((p.kdaPromedioSemana||0)>maxKda)          maxKda    = p.kdaPromedioSemana||0;
+      if((p.campeonesGanadosSemana||0)>maxChamps)  maxChamps = p.campeonesGanadosSemana||0;
+      // Tortuga — menos partidas de la semana (mínimo 1 para aparecer)
+      if(p.partidasSemana > 0 && p.partidasSemana < minPartidas) minPartidas = p.partidasSemana;
+      // Asistente — más asistencias de la semana
+      if((p.asistenciasSemana||0) > maxAsistencias) maxAsistencias = p.asistenciasSemana||0;
+      // Pentakills — últimos 7 días (antes vivía en "últimas 10 partidas")
+      if((p.pentakillsSemana||0) > maxPentakills) maxPentakills = p.pentakillsSemana||0;
+      // El Ladrón — objetivos robados en la semana
+      if((p.objetivosRobadosSemana||0) > maxRobados) maxRobados = p.objetivosRobadosSemana||0;
+      // El Destructor — estructuras (torres/inhibidores) destruidas en la semana
+      if((p.estructurasDestruidasSemana||0) > maxEstructuras) maxEstructuras = p.estructurasDestruidasSemana||0;
+      // Stop — tiempo de CC aplicado a enemigos en la semana (segundos)
+      if((p.tiempoCcSemana||0) > maxCc) maxCc = p.tiempoCcSemana||0;
+      // Dúo Dinámico — la pareja que más veces jugó junta esta semana
+      if(p.duoSemana && (p.duoSemana.partidas||0) > maxDuo){
+        maxDuo=p.duoSemana.partidas; duoPlayer=p; duoCompanero=p.duoSemana.nombre;
+      }
+      // El Farmeador — mejor CS/min en una sola partida de la semana
+      if(p.csMinSemana && (p.csMinSemana.cs_por_min||0) > maxCsMin){
+        maxCsMin=p.csMinSemana.cs_por_min; farmeador=p; farmeadorChamp=p.csMinSemana.campeon||'';
+      }
+      // El Defensor — mayor % del daño recibido de SU EQUIPO en una sola
+      // partida de la semana (no daño en bruto — así no se lo queda
+      // siempre el mismo jugador solo por jugar un campeón tanque/jungla).
+      // FIX: entradas viejas (de antes de este cambio) no tienen
+      // "danio_recibido_pct" — con "||0" el valor de comparación caía a 0
+      // pero se ASIGNABA igual el "undefined" real a maxDanioPct, y luego
+      // ninguna comparación futura (número > undefined) es nunca true en
+      // JS, dejando el badge roto en cuanto el primer jugador de la lista
+      // tenía datos viejos. Ahora esas entradas simplemente se ignoran
+      // hasta que se autodepuren de la ventana de 7 días.
+      if(p.danioRecibidoSemana && typeof p.danioRecibidoSemana.danio_recibido_pct === 'number'
+         && p.danioRecibidoSemana.danio_recibido_pct > maxDanioPct){
+        maxDanioPct=p.danioRecibidoSemana.danio_recibido_pct; defensor=p; defensorChamp=p.danioRecibidoSemana.campeon||'';
+        defensorDanioBruto=p.danioRecibidoSemana.damage_taken||0;
+      }
+    });
+
+    if(!otpPlayer) otpPlayer=state.players[0];
+    if(!grinder)   grinder  =state.players[0];
+    if(!otpChamp)  otpChamp ='Desconocido';
+
+    const otpChampImg=`https://ddragon.leagueoflegends.com/cdn/16.18.1/img/champion/${champKey(otpChamp)}.png`;
+
+    // Sets de ganadores empatados (>= / <= inclusivo, igual que el perfil).
+    const climbers        = maxClimb>0        ? climbData.filter(cd=>cd.d>=maxClimb).map(cd=>cd.p) : [];
+    const agresivos        = maxSangre>0        ? state.players.filter(p=>(p.primerasSangreSemana||0)>=maxSangre) : [];
+    const kdaWinners        = maxKda>0        ? state.players.filter(p=>(p.kdaPromedioSemana||0)>=maxKda) : [];
+    const kdaPlayerPerfecto = kdaWinners.length>0 && kdaWinners.every(p=>p.kdaPerfectoSemana);
+    const champPoolWinners = maxChamps>0        ? state.players.filter(p=>(p.campeonesGanadosSemana||0)>=maxChamps) : [];
+    const tortugas         = minPartidas<Infinity ? state.players.filter(p=>(p.partidasSemana||0)>0 && (p.partidasSemana||0)<=minPartidas) : [];
+    const asistentes        = maxAsistencias>0 ? state.players.filter(p=>(p.asistenciasSemana||0)>=maxAsistencias) : [];
+    const pentakillers      = maxPentakills>0   ? state.players.filter(p=>(p.pentakillsSemana||0)>=maxPentakills) : [];
+    const ladrones          = maxRobados>0      ? state.players.filter(p=>(p.objetivosRobadosSemana||0)>=maxRobados) : [];
+    const destructores      = maxEstructuras>0  ? state.players.filter(p=>(p.estructurasDestruidasSemana||0)>=maxEstructuras) : [];
+    const ccMasters         = maxCc>0           ? state.players.filter(p=>(p.tiempoCcSemana||0)>=maxCc) : [];
+
+    const climberHtml=climbers.length>0?`
+      <div class="highlight-card">${avatarStackHtml(climbers)}
+        <div class="highlight-body"><p class="highlight-label">El Escalador</p><p class="highlight-player" title="${namesJoined(climbers)}">${namesJoined(climbers)}</p><p class="highlight-value" style="color:var(--win);">Mejor jugador de la semana</p></div></div>`
+      :`<div class="highlight-card"><div class="highlight-icon">📈</div><div class="highlight-body"><p class="highlight-label">El Escalador</p><p class="highlight-empty">Nadie ha subido de LP esta semana todavía.</p></div></div>`;
+
+    const agresivoHtml=agresivos.length>0?`
+      <div class="highlight-card">${avatarStackHtml(agresivos)}
+        <div class="highlight-body"><p class="highlight-label">🩸 Agresivo</p><p class="highlight-player" title="${namesJoined(agresivos)}">${namesJoined(agresivos)}</p><p class="highlight-value">${maxSangre} primera${maxSangre===1?'':'s'} sangre</p></div></div>`
+      :`<div class="highlight-card"><div class="highlight-icon">🩸</div><div class="highlight-body"><p class="highlight-label">Agresivo</p><p class="highlight-empty">Nadie ha conseguido primera sangre esta semana.</p></div></div>`;
+
+    const kdaHtml=kdaWinners.length>0?`
+      <div class="highlight-card">${avatarStackHtml(kdaWinners)}
+        <div class="highlight-body"><p class="highlight-label">📊 KDA Player</p><p class="highlight-player" title="${namesJoined(kdaWinners)}">${namesJoined(kdaWinners)}</p><p class="highlight-value">${kdaPlayerPerfecto?'Perfect':maxKda} KDA</p></div></div>`
+      :`<div class="highlight-card"><div class="highlight-icon">📊</div><div class="highlight-body"><p class="highlight-label">KDA Player</p><p class="highlight-empty">Sin partidas suficientes esta semana.</p></div></div>`;
+
+    const champPoolHtml=champPoolWinners.length>0?`
+      <div class="highlight-card">${avatarStackHtml(champPoolWinners)}
+        <div class="highlight-body"><p class="highlight-label">🎭 Maestro del Champion Pool</p><p class="highlight-player" title="${namesJoined(champPoolWinners)}">${namesJoined(champPoolWinners)}</p><p class="highlight-value">${maxChamps} campeones distintos ganados</p></div></div>`
+      :`<div class="highlight-card"><div class="highlight-icon">🎭</div><div class="highlight-body"><p class="highlight-label">Maestro del Champion Pool</p><p class="highlight-empty">Nadie ha ganado esta semana todavía.</p></div></div>`;
+
+    const tortugaHtml=tortugas.length>0?`
+      <div class="highlight-card">${avatarStackHtml(tortugas)}
+        <div class="highlight-body"><p class="highlight-label">🐢 El Tortuga</p><p class="highlight-player" title="${namesJoined(tortugas)}">${namesJoined(tortugas)}</p><p class="highlight-value">${minPartidas} partida${minPartidas===1?'':'s'} esta semana</p></div></div>`
+      :`<div class="highlight-card"><div class="highlight-icon">🐢</div><div class="highlight-body"><p class="highlight-label">El Tortuga</p><p class="highlight-empty">Nadie ha jugado esta semana aún.</p></div></div>`;
+
+    const asistenteHtml=asistentes.length>0?`
+      <div class="highlight-card">${avatarStackHtml(asistentes)}
+        <div class="highlight-body"><p class="highlight-label">🤝 El Asistente</p><p class="highlight-player" title="${namesJoined(asistentes)}">${namesJoined(asistentes)}</p><p class="highlight-value">${maxAsistencias} asistencias esta semana</p></div></div>`
+      :`<div class="highlight-card"><div class="highlight-icon">🤝</div><div class="highlight-body"><p class="highlight-label">El Asistente</p><p class="highlight-empty">Sin datos de asistencias aún.</p></div></div>`;
+
+    const pentakillsHtml=pentakillers.length>0?`
+      <div class="highlight-card">${avatarStackHtml(pentakillers)}
+        <div class="highlight-body"><p class="highlight-label">💀 Pentakills</p><p class="highlight-player" title="${namesJoined(pentakillers)}">${namesJoined(pentakillers)}</p><p class="highlight-value">${maxPentakills} pentakill${maxPentakills===1?'':'s'} esta semana</p></div></div>`
+      :`<div class="highlight-card"><div class="highlight-icon">💀</div><div class="highlight-body"><p class="highlight-label">Pentakills</p><p class="highlight-empty">Nadie ha conseguido una pentakill esta semana.</p></div></div>`;
+
+    const ladronHtml=ladrones.length>0?`
+      <div class="highlight-card">${avatarStackHtml(ladrones)}
+        <div class="highlight-body"><p class="highlight-label">🥷 El Ladrón</p><p class="highlight-player" title="${namesJoined(ladrones)}">${namesJoined(ladrones)}</p><p class="highlight-value">${maxRobados} objetivo${maxRobados===1?'':'s'} robado${maxRobados===1?'':'s'} esta semana</p></div></div>`
+      :`<div class="highlight-card"><div class="highlight-icon">🥷</div><div class="highlight-body"><p class="highlight-label">El Ladrón</p><p class="highlight-empty">Nadie ha robado un objetivo esta semana.</p></div></div>`;
+
+    const destructorHtml=destructores.length>0?`
+      <div class="highlight-card">${avatarStackHtml(destructores)}
+        <div class="highlight-body"><p class="highlight-label">💥 El Destructor</p><p class="highlight-player" title="${namesJoined(destructores)}">${namesJoined(destructores)}</p><p class="highlight-value">${maxEstructuras} estructura${maxEstructuras===1?'':'s'} destruida${maxEstructuras===1?'':'s'} esta semana</p></div></div>`
+      :`<div class="highlight-card"><div class="highlight-icon">💥</div><div class="highlight-body"><p class="highlight-label">El Destructor</p><p class="highlight-empty">Nadie ha destruido una estructura esta semana.</p></div></div>`;
+
+    const stopSegundos = maxCc>0 ? Math.round(maxCc) : 0;
+    const stopHtml=ccMasters.length>0?`
+      <div class="highlight-card">${avatarStackHtml(ccMasters)}
+        <div class="highlight-body"><p class="highlight-label">🛑 Stop</p><p class="highlight-player" title="${namesJoined(ccMasters)}">${namesJoined(ccMasters)}</p><p class="highlight-value">${stopSegundos}s de CC esta semana</p></div></div>`
+      :`<div class="highlight-card"><div class="highlight-icon">🛑</div><div class="highlight-body"><p class="highlight-label">Stop</p><p class="highlight-empty">Nadie ha inmovilizado a un enemigo esta semana.</p></div></div>`;
+
+    const duoHtml=(duoPlayer&&maxDuo>0)?`
+      <div class="highlight-card"><img class="highlight-avatar" src="${getAvatarUrl(duoPlayer.icono)}" alt="" onerror="${AVATAR_ONERROR}">
+        <div class="highlight-body"><p class="highlight-label">🎮 Dúo Dinámico</p><p class="highlight-player">${duoPlayer.nombre.split('#')[0]} &amp; ${duoCompanero}</p><p class="highlight-value">${maxDuo} partida${maxDuo===1?'':'s'} juntos esta semana</p></div></div>`
+      :`<div class="highlight-card"><div class="highlight-icon">🎮</div><div class="highlight-body"><p class="highlight-label">Dúo Dinámico</p><p class="highlight-empty">Nadie ha jugado en dúo esta semana.</p></div></div>`;
+
+    const farmeadorChampImg=`https://ddragon.leagueoflegends.com/cdn/16.18.1/img/champion/${champKey(farmeadorChamp)}.png`;
+    const farmeadorHtml=(farmeador&&maxCsMin>0)?`
+      <div class="highlight-card"><img class="highlight-avatar" src="${getAvatarUrl(farmeador.icono)}" alt="" onerror="${AVATAR_ONERROR}">
+        <div class="highlight-body"><p class="highlight-label">🌾 El Farmeador</p><p class="highlight-player">${farmeador.nombre}</p>
+          <div class="otp-champ-info">
+            <img class="champ-icon-small" src="${farmeadorChampImg}" onerror="this.style.display='none'">
+            <span class="highlight-value">${maxCsMin} CS/min con ${farmeadorChamp}</span>
+          </div>
+        </div></div>`
+      :`<div class="highlight-card"><div class="highlight-icon">🌾</div><div class="highlight-body"><p class="highlight-label">El Farmeador</p><p class="highlight-empty">Sin partidas suficientes esta semana.</p></div></div>`;
+
+    const defensorChampImg=`https://ddragon.leagueoflegends.com/cdn/16.18.1/img/champion/${champKey(defensorChamp)}.png`;
+    const defensorHtml=(defensor&&maxDanioPct>0)?`
+      <div class="highlight-card"><img class="highlight-avatar" src="${getAvatarUrl(defensor.icono)}" alt="" onerror="${AVATAR_ONERROR}">
+        <div class="highlight-body"><p class="highlight-label">🛡️ El Defensor</p><p class="highlight-player">${defensor.nombre}</p>
+          <div class="otp-champ-info">
+            <img class="champ-icon-small" src="${defensorChampImg}" onerror="this.style.display='none'">
+            <span class="highlight-value">${maxDanioPct}% del daño de su equipo (${defensorDanioBruto.toLocaleString('es-ES')}) con ${defensorChamp}</span>
+          </div>
+        </div></div>`
+      :`<div class="highlight-card"><div class="highlight-icon">🛡️</div><div class="highlight-body"><p class="highlight-label">El Defensor</p><p class="highlight-empty">Sin partidas suficientes esta semana.</p></div></div>`;
+
+    // Rey de la Temporada — a diferencia de "TOP 1 ACTUAL" (quién está
+    // primero AHORA), esto suma los días TOTALES que cada quien ha
+    // pasado en el puesto #1 desde que existe el ranking. Lo calcula el
+    // bot en cada corrida (rawData.rey_temporada); acá solo se muestra.
+    const rey = state.reyTemporada;
+    const reyPlayer = rey ? state.players.find(p => p.nombre.split('#')[0] === rey.jugador) : null;
+    const reyHtml = (rey && reyPlayer) ? `
+      <div class="highlight-card rey-card"><img class="highlight-avatar" src="${getAvatarUrl(reyPlayer.icono)}" alt="" onerror="${AVATAR_ONERROR}">
+        <div class="highlight-body"><p class="highlight-label">👑 Rey de la Temporada</p><p class="highlight-player">${reyPlayer.nombre}</p><p class="highlight-value" style="color:#fbbf24;">${rey.dias} día${rey.dias===1?'':'s'} acumulados en el Top 1</p></div></div>`
+      : `<div class="highlight-card rey-card"><div class="highlight-icon">👑</div><div class="highlight-body"><p class="highlight-label">Rey de la Temporada</p><p class="highlight-empty">Todavía no hay suficiente historial.</p></div></div>`;
+
+    container.innerHTML = `
+      <div class="highlight-card">
+        <img class="highlight-avatar" src="${getAvatarUrl(otpPlayer.icono)}" alt="" onerror="${AVATAR_ONERROR}">
+        <div class="highlight-body">
+          <p class="highlight-label">OTP del Torneo</p>
+          <p class="highlight-player">${otpPlayer.nombre}</p>
+          <div class="otp-champ-info">
+            <img class="champ-icon-small" src="${otpChampImg}" onerror="this.style.display='none'">
+            <span class="highlight-value">${otpChamp} (${otpPercent}% de las partidas)</span>
+          </div>
+        </div>
+      </div>
+      ${climberHtml}
+      <div class="highlight-card">
+        <img class="highlight-avatar" src="${getAvatarUrl(grinder.icono)}" alt="" onerror="${AVATAR_ONERROR}">
+        <div class="highlight-body"><p class="highlight-label">Horas en la grieta</p><p class="highlight-player">${grinder.nombre}</p><p class="highlight-value" style="color:#fbbf24;">¿Le tienes miedo a la Pala?🪏</p></div>
+      </div>
+      ${agresivoHtml}${kdaHtml}${champPoolHtml}${tortugaHtml}${asistenteHtml}${pentakillsHtml}${duoHtml}${farmeadorHtml}${defensorHtml}${ladronHtml}${destructorHtml}${stopHtml}${reyHtml}`;
+  }
+
+  // ─────────────────────────────────────────────────────
+  // Historial de logros — feed permanente + popup en vivo.
+  // Los eventos ("X le quitó tal badge a Y", "nuevo récord de
+  // temporada"...) los genera el bot en cada corrida y vienen ya
+  // armados en datos.json (rawData.eventos). Aquí solo se muestran.
+  // ─────────────────────────────────────────────────────
+  function tiempoRelativo(fechaISO){
+    if(!fechaISO) return '';
+    const ms = Date.now() - new Date(fechaISO).getTime();
+    if(ms < 0 || isNaN(ms)) return '';
+    const min = Math.floor(ms / 60000);
+    if(min < 1)  return 'justo ahora';
+    if(min < 60) return `hace ${min} min`;
+    const horas = Math.floor(min / 60);
+    if(horas < 24) return `hace ${horas} h`;
+    const dias = Math.floor(horas / 24);
+    return `hace ${dias} día${dias===1?'':'s'}`;
+  }
+
+  // La mayoría de los eventos usan un emoji como ícono ("🌟", "⚔️", etc.),
+  // pero "posible_egida" usa el ícono real de Riot para Égida de Valor
+  // (guardado local en icons/, no un emoji) — si "icono" termina en una
+  // extensión de imagen se muestra como <img>, si no, se muestra tal cual
+  // (el emoji). Así el resto de los eventos no necesita tocarse.
+  function iconoHtml(icono){
+    if (typeof icono === 'string' && /\.(svg|png)$/i.test(icono)) {
+      // Tamaño fijo (no %) porque ni .toast-icon ni .historial-icon tienen
+      // un ancho definido propio — se dimensionan solos por el font-size
+      // del emoji que normalmente contienen, así que un % no tendría contra
+      // qué calcularse.
+      return `<img src="${icono}" alt="" style="width:22px;height:22px;object-fit:contain;">`;
+    }
+    return icono || '🏅';
+  }
+
+  function textoEvento(e){
+    if(e.tipo === 'badge_semanal'){
+      return e.jugador_anterior
+        ? `<b>${e.jugador_nuevo}</b> reclamó ${e.categoria_label}, quitándoselo a <b>${e.jugador_anterior}</b>`
+        : `<b>${e.jugador_nuevo}</b> reclamó ${e.categoria_label} por primera vez`;
+    }
+    if(e.tipo === 'record_lp'){
+      return `<b>${e.jugador_nuevo}</b> alcanzó un nuevo récord de temporada`;
+    }
+    if(e.tipo === 'primera_victoria_dia'){
+      return `<b>${e.jugador_nuevo}</b> consiguió la primera victoria del día`;
+    }
+    if(e.tipo === 'adelantamiento'){
+      return e.top_posicion
+        ? `<b>${e.jugador_nuevo}</b> le ha quitado el Top ${e.top_posicion} a <b>${e.jugador_anterior}</b>`
+        : `<b>${e.jugador_nuevo}</b> ha superado a <b>${e.jugador_anterior}</b>`;
+    }
+    if(e.tipo === 'rey_temporada'){
+      return e.jugador_anterior
+        ? `<b>${e.jugador_nuevo}</b> es el nuevo Rey de la Temporada, se lo quitó a <b>${e.jugador_anterior}</b>`
+        : `<b>${e.jugador_nuevo}</b> es el primer Rey de la Temporada`;
+    }
+    if(e.tipo === 'rivalidad'){
+      return `<b>${e.jugador_nuevo}</b> está en contra de <b>${e.jugador_anterior}</b> esta partida`;
+    }
+    if(e.tipo === 'logro_partida'){
+      return `<b>${e.jugador_nuevo}</b> logró ${e.categoria_label}`;
+    }
+    if(e.tipo === 'posible_egida'){
+      // "Posible" a propósito en el texto: Riot no confirma esto en ninguna
+      // API, es una estimación nuestra por comparación de LP (ver
+      // marcar_posibles_egida() en actualizar_datos.py).
+      return `<b>${e.jugador_nuevo}</b> posiblemente le tocó Égida de Valor (${e.detalle || 'LP doble'})`;
+    }
+    return `<b>${e.jugador_nuevo}</b> logró algo nuevo`;
+  }
+
+  function renderHistorialLogros(eventos){
+    const container = document.getElementById('historial-logros-container');
+    if(!container) return;
+    if(!eventos.length){
+      container.innerHTML = `<div class="historial-empty">Todavía no hay logros registrados — en cuanto alguien reclame un badge o bata un récord, aparece aquí.</div>`;
+      return;
+    }
+    container.innerHTML = eventos.slice(0, 15).map(e => `
+      <div class="historial-item">
+        <div class="historial-icon">${iconoHtml(e.icono)}</div>
+        <div class="historial-body">
+          <p class="historial-text">${textoEvento(e)}</p>
+          ${e.detalle ? `<p class="historial-detalle">${e.detalle}</p>` : ''}
+        </div>
+        <div class="historial-time">${tiempoRelativo(e.timestamp)}</div>
+      </div>`).join('');
+  }
+
+  function claveEvento(e){ return `${e.timestamp}|${e.tipo}|${e.categoria||''}|${e.jugador_nuevo}|${e.jugador_anterior||''}`; }
+
+  // Genérico: procesa un stream de eventos contra SU PROPIO set de
+  // "vistos" (getSet/setSet apuntan a la variable correspondiente) — así
+  // el historial de logros y las rivalidades en vivo no se pisan entre sí.
+  function procesarStreamEventos(eventos, getSet, setSet){
+    if(!Array.isArray(eventos)) return;
+    if(getSet() === null){
+      // Primera carga de esta pestaña — no lanzamos popups de cosas
+      // viejas, solo marcamos lo que ya existe como "visto".
+      setSet(new Set(eventos.map(claveEvento)));
+      return;
+    }
+    // Del más viejo al más nuevo, para que si hay varios se muestren en orden.
+    [...eventos].reverse().forEach(e => {
+      const clave = claveEvento(e);
+      if(!getSet().has(clave)){
+        getSet().add(clave);
+        mostrarToast(e);
+      }
+    });
+  }
+
+  function procesarEventosNuevos(eventos){
+    procesarStreamEventos(eventos, () => eventosVistos, s => { eventosVistos = s; });
+  }
+
+  function procesarEventosVivoNuevos(eventos){
+    procesarStreamEventos(eventos, () => eventosVistosVivo, s => { eventosVistosVivo = s; });
+  }
+
+  function mostrarToast(evento){
+    const container = document.getElementById('toast-container');
+    if(!container) return;
+    reproducirSonidoLogro();
+    vibrarSiPosible();
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.innerHTML = `
+      <div class="toast-icon">${iconoHtml(evento.icono)}</div>
+      <div class="toast-body">
+        <p class="toast-title">${textoEvento(evento)}</p>
+        ${evento.detalle ? `<p class="toast-sub">${evento.detalle}</p>` : ''}
+      </div>`;
+    container.appendChild(el);
+    setTimeout(() => {
+      el.classList.add('toast-out');
+      el.addEventListener('animationend', () => el.remove(), { once:true });
+    }, 6000);
+  }
+
+  function getTrendArrow(p){
+    const hist=(p.historialLP||[]).filter(pt=>pt.fecha);
+    if(hist.length<2) return '';
+    const ord=[...hist].sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
+    const ul=ord[ord.length-1], an=ord[ord.length-2];
+    const sU=eloScore(ul.rango||p.rango,ul.division!==undefined?ul.division:p.division,ul.lp);
+    const sA=eloScore(an.rango||p.rango,an.division!==undefined?an.division:p.division,an.lp);
+    if(sU===null||sA===null||sU===sA) return '';
+    return sU>sA?`<span class="trend-arrow up" title="Subió">▲</span>`:`<span class="trend-arrow down" title="Bajó">▼</span>`;
+  }
+
+  function getStreakType(partidas){
+    if(!partidas||partidas.length<3) return '';
+    let w=0;
+    for(let i=0;i<Math.min(partidas.length,10);i++){ if(partidas[i].resultado==='victoria') w++; else break; }
+    if(w>=3) return 'fire';
+    let l=0;
+    for(let i=0;i<Math.min(partidas.length,10);i++){ if(partidas[i].resultado==='derrota') l++; else break; }
+    if(l>=3) return 'ice';
+    return '';
+  }
+  function getStreakEmoji(partidas){
+    const t=getStreakType(partidas);
+    return t==='fire'?'🔥':t==='ice'?'❄️':'';
+  }
+
+  function renderRanking(){
+    rankingListEl.innerHTML='';
+    const filtrados=state.players.filter(p=>state.filterElo==='ALL'||(p.rango||'').toUpperCase()===state.filterElo);
+    if(!filtrados.length){ rankingListEl.innerHTML=`<p class="empty-state">Nadie está en este elo todavía.</p>`; return; }
+
+    filtrados.forEach((p,i)=>{
+      const streakType=getStreakType(p.partidas);
+      const row=document.createElement('button');
+      row.className='rank-row'+(p.id===state.selectedId?' active':'')+(streakType?` streak-${streakType}`:'');
+      row.addEventListener('click', e=>{ if(e.target.tagName.toLowerCase()!=='a') selectPlayer(p.id); });
+
+      const tierPretty =p.rango.charAt(0)+p.rango.slice(1).toLowerCase();
+      const rankDisplay=DIVISIONLESS.includes((p.rango||'').toUpperCase())?tierPretty:`${tierPretty} ${p.division}`;
+      const liveStatus =state.liveData[p.id]||{en_partida:false};
+      const duoTagHtml =(liveStatus.en_partida && Array.isArray(liveStatus.duo_con) && liveStatus.duo_con.length)
+        ?`<span class="duo-tag">🎮 con ${liveStatus.duo_con.join(', ')}</span>`:'';
+      const statusHtml =liveStatus.en_partida
+        ?`<span class="status-chip in-game">En Partida</span>${duoTagHtml}`
+        :`<span class="status-chip offline">Offline</span>`;
+      const posClass  =i===0?'pos-1':i===1?'pos-2':i===2?'pos-3':'';
+      const posContent=i===0?'👑':(i+1);
+      const streakEmoji=getStreakEmoji(p.partidas);
+
+      row.innerHTML=`
+        <span class="rank-pos ${posClass}">${posContent}</span>
+        <span class="player-cell">
+          <img class="avatar" src="${getAvatarUrl(p.icono)}" alt="Icon" onerror="${AVATAR_ONERROR}">
+          <a href="perfil.html?jugador=${encodeURIComponent(p.id)}" class="profile-link">${p.nombre} ${streakEmoji}</a>
+        </span>
+        <span class="status-cell">${statusHtml}</span>
+        <span class="role-cell">${getTrendArrow(p)}<span class="role-badge">${p.rol}</span></span>
+        <span class="tier-badge">
+          <img class="tier-emblem" src="${getEmblemUrl(p.rango)}" alt="${p.rango}" onerror="this.style.display='none'">
+          <span>${rankDisplay}</span>
+        </span>
+        <span class="lp-cell">${p.lp} LP</span>
+        <span class="wr-cell">
+          <span class="wr-top"><span>${p.winrate}% WR</span></span>
+          <div class="wr-bar"><div class="wr-fill" style="width:${p.winrate}%"></div></div>
+        </span>`;
+      rankingListEl.appendChild(row);
+    });
+  }
+
+  function selectPlayer(id){
+    state.selectedId=id;
+    renderRanking();
+    const player=state.players.find(p=>p.id===id);
+    const matchesHtml=player.partidas.slice(0,5).map(m=>{
+      const spellsHtml=(m.hechizos||[]).map(h=>
+        `<img src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/spell/${h}.png" title="${h}" onerror="this.style.display='none'">`
+      ).join('');
+      // Runas — mismo criterio que partida.html: keystone arriba, árbol
+      // secundario abajo, se omiten en silencio si el catálogo no cargó.
+      const keystoneUrl   = runeUrl(m.perkPrincipal);
+      const secundariaUrl = runeUrl(m.estiloSecundario);
+      const runesHtml = (keystoneUrl || secundariaUrl) ? `
+        <span class="match-runes">
+          ${keystoneUrl ? `<img src="${keystoneUrl}" alt="runa principal" onerror="this.style.visibility='hidden'">` : ''}
+          ${secundariaUrl ? `<img src="${secundariaUrl}" alt="árbol secundario" onerror="this.style.visibility='hidden'">` : ''}
+        </span>` : '';
+      const tag       = m.matchId ? 'a' : 'div';
+      const hrefAttr  = m.matchId ? `href="partida.html?match_id=${encodeURIComponent(m.matchId)}&jugador=${encodeURIComponent(id)}"` : '';
+      // "~ Égida de Valor" — mismo indicio estimado que en perfil.html (ver
+      // marcar_posibles_egida() en actualizar_datos.py): esta victoria ganó
+      // bastante más LP que las otras victorias recientes del jugador.
+      const egidaHtml = m.posibleEgida
+        ? `<span class="egida-tag" title="Ganaste bastante más LP de lo normal en esta partida — probablemente te tocó Égida de Valor (LP doble por autocompletado). Riot no confirma esto directamente, es una estimación.">~ <img src="icons/egida-de-valor.svg" alt=""> Égida de Valor</span>`
+        : '';
+      return `
+      <${tag} class="match" ${hrefAttr}>
+        <span class="match-icons">
+          <img class="champ-icon" src="https://ddragon.leagueoflegends.com/cdn/16.18.1/img/champion/${champKey(m.campeon)}.png" onerror="this.style.visibility='hidden'">
+          ${spellsHtml?`<span class="match-spells">${spellsHtml}</span>`:''}
+          ${runesHtml}
+        </span>
+        <span>
+          <div class="match-champ">${m.campeon}</div>
+          <div class="match-kda">${m.kda} KDA</div>
+          ${m.duoCon&&m.duoCon.length?`<div class="match-duo">🎮 Dúo con ${m.duoCon.join(', ')}</div>`:''}
+        </span>
+        <span class="match-result-block">
+          <span class="result-chip ${m.resultado}">${m.resultado==='victoria'?'Victoria':m.resultado==='remake'?'Remake':'Derrota'}</span>
+          ${m.lpChange!==null
+            ?`<span class="lp-change ${m.lpChange>=0?'win':'loss'}">${m.lpChange>=0?'+':''}${m.lpChange} LP</span>`
+            :m.duracion?`<span class="lp-change" style="color:var(--text-faint);font-weight:600;">${m.duracion}</span>`:''}
+          ${egidaHtml}
+        </span>
+      </${tag}>`;
+    }).join('');
+    historyPanelEl.innerHTML=`<div class="matches">${matchesHtml}</div>`;
+  }
+
+  function startCountdown(){
+    const targetDate=new Date('2027-01-01T00:00:00').getTime();
+    function update(){
+      const d=targetDate-new Date().getTime();
+      if(d<0) return;
+      document.getElementById('cd-days').innerText =Math.floor(d/(1000*60*60*24));
+      document.getElementById('cd-hours').innerText=Math.floor((d%(1000*60*60*24))/(1000*60*60));
+      document.getElementById('cd-mins').innerText =Math.floor((d%(1000*60*60))/(1000*60));
+      document.getElementById('cd-secs').innerText =Math.floor((d%(1000*60))/1000);
+    }
+    update(); setInterval(update,1000);
+  }
+});
+</script>
+</body>
+</html>

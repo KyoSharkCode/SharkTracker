@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>SharkTracker — Login (prueba)</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 420px; margin: 60px auto; padding: 0 20px; color: #1f2937; }
+  button { background:#5865F2; color:#fff; border:none; padding:10px 18px; border-radius:6px; font-size:15px; cursor:pointer; }
+  button:hover { opacity:0.9; }
+  input { padding:8px; width:100%; box-sizing:border-box; margin-bottom:8px; }
+  #status { margin-top:16px; padding:10px; border-radius:6px; font-size:14px; display:none; }
+  .ok  { background:#d1fae5; color:#065f46; display:block !important; }
+  .err { background:#fee2e2; color:#991b1b; display:block !important; }
+  #claim-form { display:none; margin-top:24px; }
+</style>
+</head>
+<body>
+  <h1>SharkTracker</h1>
+  <p>Página de prueba — login con Discord + registro contra el roster.</p>
+
+  <div id="logged-out">
+    <button id="btn-discord">Entrar con Discord</button>
+  </div>
+
+  <div id="logged-in" style="display:none">
+    <p>Sesión iniciada como <strong id="discord-user"></strong>.</p>
+    <button id="btn-logout">Cerrar sesión</button>
+
+    <div id="claim-form">
+      <h3>Vincula tu cuenta de LoL</h3>
+      <input id="game-name" placeholder="Nombre de invocador (ej: Pinea)">
+      <input id="tag-line" placeholder="Tag (ej: Pinea, sin #)">
+      <button id="btn-claim">Vincular</button>
+    </div>
+  </div>
+
+  <div id="status"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    // Seguro de tener acá: la anon key está protegida por las
+    // políticas RLS del esquema, no por ser secreta.
+    const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const $ = (id) => document.getElementById(id);
+    const statusEl = $('status');
+
+    function showStatus(msg, ok) {
+      statusEl.textContent = msg;
+      statusEl.className = ok ? 'ok' : 'err';
+    }
+
+    async function refreshUI() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        $('logged-out').style.display = 'block';
+        $('logged-in').style.display = 'none';
+        return;
+      }
+
+      $('logged-out').style.display = 'none';
+      $('logged-in').style.display = 'block';
+      $('discord-user').textContent =
+        session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.id;
+
+      const { data: profile } = await supabase
+        .from('player_profiles')
+        .select('player_id, display_name')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      if (profile) {
+        $('claim-form').style.display = 'none';
+        showStatus(`Ya vinculado como "${profile.display_name}". Todo listo.`, true);
+      } else {
+        $('claim-form').style.display = 'block';
+      }
+    }
+
+    $('btn-discord').addEventListener('click', async () => {
+      await supabase.auth.signInWithOAuth({
+        provider: 'discord',
+        options: { redirectTo: window.location.href }
+      });
+    });
+
+    $('btn-logout').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      refreshUI();
+    });
+
+    $('btn-claim').addEventListener('click', async () => {
+      const gameName = $('game-name').value.trim();
+      const tagLine  = $('tag-line').value.trim();
+      if (!gameName || !tagLine) {
+        showStatus('Completa ambos campos.', false);
+        return;
+      }
+      const { data, error } = await supabase.rpc('claim_player', {
+        p_game_name: gameName,
+        p_tag_line: tagLine
+      });
+      if (error) {
+        showStatus(`Rechazado: ${error.message}`, false);
+      } else {
+        showStatus(`¡Vinculado como ${data.riot_game_name}#${data.riot_tag_line}!`, true);
+        $('claim-form').style.display = 'none';
+      }
+    });
+
+    refreshUI();
+  </script>
+</body>
+</html>

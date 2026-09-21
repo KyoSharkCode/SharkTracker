@@ -1,0 +1,7120 @@
+{
+  "ultimaActualizacion": "2026-09-21T20:38:25.764887",
+  "jugadores": [
+    {
+      "nombre": "Pinea#Pinea",
+      "icono": 7126,
+      "rango": "Platinum IV",
+      "lp": 0,
+      "winrate": "54%",
+      "elo_score": 1600,
+      "record_lp_score": 1658,
+      "record_lp_label": "Platinum IV (58 LP)",
+      "escalador_semana": -12,
+      "rol_principal": "Top",
+      "top_roles": [
+        {
+          "rol": "Top",
+          "cantidad": 9
+        },
+        {
+          "rol": "Support",
+          "cantidad": 1
+        }
+      ],
+      "top_recientes": [
+        {
+          "campeon": "Fiora",
+          "cantidad": 9
+        },
+        {
+          "campeon": "Nautilus",
+          "cantidad": 1
+        }
+      ],
+      "maestrias": [
+        {
+          "campeon": "Fiora",
+          "nivel": 42,
+          "puntos": "434.629"
+        },
+        {
+          "campeon": "Irelia",
+          "nivel": 17,
+          "puntos": "152.881"
+        },
+        {
+          "campeon": "Nasus",
+          "nivel": 15,
+          "puntos": "135.478"
+        }
+      ],
+      "progreso_lp": [
+        {
+          "fecha": "15/08 13:11",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T13:20:22.174535",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T13:25:09",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T15:12:01",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T15:41:16",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T15:47:07",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T16:18:27",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T16:20:45",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T16:38:35",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T18:02:20",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T19:43:49",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T19:51:30",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T20:00:57",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T20:03:28",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T20:08:59",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T20:28:41",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T20:51:33",
+          "lp": 58
+        },
+        {
+          "fecha": "2026-08-15T21:33:24",
+          "lp": 37
+        },
+        {
+          "fecha": "2026-08-15T21:58:51",
+          "lp": 37
+        },
+        {
+          "fecha": "2026-08-15T23:22:03",
+          "lp": 56
+        },
+        {
+          "fecha": "2026-08-16T00:50:28",
+          "lp": 35
+        },
+        {
+          "fecha": "2026-08-16T14:44:01",
+          "lp": 35,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-16T18:56:21",
+          "lp": 53,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-16T20:21:19",
+          "lp": 30,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-16T21:07:19",
+          "lp": 7,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-17T03:07:19",
+          "lp": 24,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-17T03:35:24",
+          "lp": 41,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-17T04:07:18",
+          "lp": 59,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-17T04:49:20",
+          "lp": 77,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-17T17:20:52",
+          "lp": 55,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-17T17:26:40",
+          "lp": 73,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-17T18:21:19",
+          "lp": 51,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-17T19:05:27",
+          "lp": 69,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-18T00:05:25",
+          "lp": 88,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-18T00:50:37",
+          "lp": 67,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-18T02:05:30",
+          "lp": 86,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-18T02:35:26",
+          "lp": 65,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-18T03:10:32",
+          "lp": 44,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-18T04:02:07",
+          "lp": 62,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-18T04:35:27",
+          "lp": 57,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-18T22:39:54Z",
+          "lp": 93,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-18T22:55:29Z",
+          "lp": 12,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T00:03:30Z",
+          "lp": 31,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T00:51:21Z",
+          "lp": 51,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T01:27:26Z",
+          "lp": 31,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T02:30:47Z",
+          "lp": 10,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T04:57:20Z",
+          "lp": 29,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T05:33:23Z",
+          "lp": 8,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T06:06:21Z",
+          "lp": 86,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-19T21:09:20Z",
+          "lp": 64,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-19T21:48:35Z",
+          "lp": 82,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-19T22:17:16Z",
+          "lp": 1,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T22:50:40Z",
+          "lp": 20,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T23:27:17Z",
+          "lp": 40,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-20T00:03:21Z",
+          "lp": 60,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-20T00:45:34Z",
+          "lp": 40,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-20T01:09:20Z",
+          "lp": 20,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-20T01:51:17Z",
+          "lp": 40,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-20T02:27:18Z",
+          "lp": 20,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-20T03:09:19Z",
+          "lp": 99,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-20T20:54:24Z",
+          "lp": 18,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-20T21:28:26Z",
+          "lp": 97,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-20T22:18:28Z",
+          "lp": 16,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-21T01:12:20Z",
+          "lp": 95,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-21T02:10:33Z",
+          "lp": 74,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-21T02:38:22Z",
+          "lp": 93,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-21T03:18:24Z",
+          "lp": 12,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-21T03:58:23Z",
+          "lp": 32,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-21T04:32:23Z",
+          "lp": 52,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-21T05:20:31Z",
+          "lp": 73,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-21T17:12:28Z",
+          "lp": 54,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-21T19:52:21Z",
+          "lp": 74,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-22T02:58:22Z",
+          "lp": 55,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-22T03:40:35Z",
+          "lp": 35,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-22T04:20:35Z",
+          "lp": 55,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-22T04:57:09Z",
+          "lp": 75,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-22T05:30:42Z",
+          "lp": 96,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-23T02:00:51Z",
+          "lp": 16,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-23T02:40:32Z",
+          "lp": 97,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-23T03:28:20Z",
+          "lp": 17,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-23T04:02:22Z",
+          "lp": 38,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-23T04:38:21Z",
+          "lp": 19,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-23T19:26:23Z",
+          "lp": 40,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-23T20:02:21Z",
+          "lp": 61,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-23T20:26:19Z",
+          "lp": 82,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-23T20:56:20Z",
+          "lp": 63,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-23T23:06:22Z",
+          "lp": 84,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-24T03:04:26Z",
+          "lp": 65,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-24T03:56:22Z",
+          "lp": 86,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-24T04:36:22Z",
+          "lp": 8,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-24T05:12:22Z",
+          "lp": 30,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-24T19:30:46Z",
+          "lp": 12,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-24T20:58:24Z",
+          "lp": 34,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T00:30:44Z",
+          "lp": 16,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T01:42:22Z",
+          "lp": 0,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T01:44:22Z",
+          "lp": 16,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T02:30:46Z",
+          "lp": 37,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T03:04:21Z",
+          "lp": 58,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T03:46:21Z",
+          "lp": 79,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T04:30:43Z",
+          "lp": 60,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T05:12:23Z",
+          "lp": 81,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T16:56:23Z",
+          "lp": 62,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-26T04:10:35Z",
+          "lp": 83,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-26T04:52:21Z",
+          "lp": 64,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-26T05:38:23Z",
+          "lp": 85,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-26T15:58:41Z",
+          "lp": 66,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-26T19:24:21Z",
+          "lp": 87,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-26T21:18:22Z",
+          "lp": 8,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-26T21:50:31Z",
+          "lp": 29,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-26T22:26:24Z",
+          "lp": 50,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-27T00:32:22Z",
+          "lp": 72,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-27T01:14:19Z",
+          "lp": 94,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-27T02:04:24Z",
+          "lp": 16,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-27T02:44:23Z",
+          "lp": 38,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-27T03:30:44Z",
+          "lp": 20,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-27T04:04:23Z",
+          "lp": 2,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-27T16:28:31Z",
+          "lp": 84,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-27T19:34:23Z",
+          "lp": 6,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-27T20:16:25Z",
+          "lp": 88,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-28T16:16:26Z",
+          "lp": 10,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-28T17:11:39Z",
+          "lp": 32,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-28T21:14:21Z",
+          "lp": 54,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-29T02:52:24Z",
+          "lp": 75,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-29T03:24:29Z",
+          "lp": 56,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-29T04:02:25Z",
+          "lp": 77,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-29T04:10:34Z",
+          "lp": 72,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-29T16:28:20Z",
+          "lp": 53,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-30T00:12:21Z",
+          "lp": 74,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-30T02:50:34Z",
+          "lp": 55,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-30T03:26:22Z",
+          "lp": 35,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-30T04:10:42Z",
+          "lp": 15,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-31T00:10:33Z",
+          "lp": 55,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-31T02:14:22Z",
+          "lp": 75,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-31T03:02:23Z",
+          "lp": 95,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-31T03:38:24Z",
+          "lp": 75,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-31T17:14:23Z",
+          "lp": 55,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-31T17:48:20Z",
+          "lp": 75,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-31T18:26:22Z",
+          "lp": 55,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-31T21:26:21Z",
+          "lp": 35,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-31T22:12:25Z",
+          "lp": 14,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-01T00:34:20Z",
+          "lp": 93,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-01T02:18:22Z",
+          "lp": 12,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-01T03:00:57Z",
+          "lp": 91,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-02T00:14:36Z",
+          "lp": 10,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-02T00:58:23Z",
+          "lp": 29,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-02T01:40:37Z",
+          "lp": 8,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-02T02:46:21Z",
+          "lp": 28,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-02T03:38:20Z",
+          "lp": 8,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-02T20:26:27Z",
+          "lp": 28,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-03T01:18:22Z",
+          "lp": 48,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-03T02:22:22Z",
+          "lp": 28,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-03T03:04:20Z",
+          "lp": 8,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-03T21:02:21Z",
+          "lp": 28,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-03T21:54:21Z",
+          "lp": 48,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-04T04:58:22Z",
+          "lp": 28,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-05T20:46:18Z",
+          "lp": 8,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-05T23:34:23Z",
+          "lp": 28,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-06T00:42:21Z",
+          "lp": 48,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-06T01:20:31Z",
+          "lp": 68,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-06T01:48:20Z",
+          "lp": 88,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-06T02:20:31Z",
+          "lp": 8,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-06T02:56:21Z",
+          "lp": 28,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-06T19:52:19Z",
+          "lp": 49,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-06T20:38:24Z",
+          "lp": 30,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-06T21:28:21Z",
+          "lp": 51,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-06T22:08:19Z",
+          "lp": 72,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-06T22:52:19Z",
+          "lp": 53,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-07T02:38:21Z",
+          "lp": 74,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-07T03:12:24Z",
+          "lp": 95,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-07T04:00:49Z",
+          "lp": 16,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-07T04:32:20Z",
+          "lp": 0,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-07T22:20:32Z",
+          "lp": 21,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-08T00:26:21Z",
+          "lp": 42,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-08T01:00:53Z",
+          "lp": 23,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-08T01:50:31Z",
+          "lp": 4,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-08T02:48:59Z",
+          "lp": 25,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-08T20:00:52Z",
+          "lp": 6,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-08T20:44:25Z",
+          "lp": 27,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-09T02:20:32Z",
+          "lp": 8,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-09T03:06:26Z",
+          "lp": 0,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-11T03:04:24Z",
+          "lp": 19,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-11T03:42:19Z",
+          "lp": 38,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-12T01:44:55Z",
+          "lp": 58,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-12T02:38:22Z",
+          "lp": 38,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-12T03:16:21Z",
+          "lp": 17,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-12T03:56:20Z",
+          "lp": 0,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-14T02:11:09Z",
+          "lp": 19,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-14T02:40:34Z",
+          "lp": 38,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-14T03:12:22Z",
+          "lp": 17,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-16T02:10:35Z",
+          "lp": 12,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-16T02:36:22Z",
+          "lp": 0,
+          "rango": "Platinum",
+          "division": "IV"
+        }
+      ],
+      "historial": [
+        {
+          "match_id": "LA1_1748997964",
+          "campeon": "Fiora",
+          "kda": "2/5/0 (0.4)",
+          "resultado": "Derrota",
+          "duracion": "16min",
+          "lp_change": -12,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "El Buñuelito"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8300,
+          "wards_control": 1,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748560064",
+          "campeon": "Fiora",
+          "kda": "0/6/0 (0.0)",
+          "resultado": "Derrota",
+          "duracion": "21min",
+          "lp_change": -21,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "El Buñuelito"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8300,
+          "wards_control": 1,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748547871",
+          "campeon": "Fiora",
+          "kda": "2/0/0 (Perfect)",
+          "resultado": "Victoria",
+          "duracion": "16min",
+          "lp_change": 19,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "El Buñuelito"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8300,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748527657",
+          "campeon": "Fiora",
+          "kda": "4/8/8 (1.5)",
+          "resultado": "Victoria",
+          "duracion": "42min",
+          "lp_change": 19,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "El Buñuelito"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8300,
+          "wards_control": 1,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748030454",
+          "campeon": "Nautilus",
+          "kda": "1/9/9 (1.11)",
+          "resultado": "Derrota",
+          "duracion": "26min",
+          "lp_change": -17,
+          "hechizos": [
+            "SummonerExhaust",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "El Buñuelito"
+          ],
+          "perk_principal": 8351,
+          "estilo_secundario": 8400,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748014741",
+          "campeon": "Fiora",
+          "kda": "6/5/0 (1.2)",
+          "resultado": "Derrota",
+          "duracion": "26min",
+          "lp_change": -21,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "El Buñuelito"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8300,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748003167",
+          "campeon": "Fiora",
+          "kda": "0/8/4 (0.5)",
+          "resultado": "Derrota",
+          "duracion": "37min",
+          "lp_change": -20,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "El Buñuelito"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8300,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1747983277",
+          "campeon": "Fiora",
+          "kda": "16/8/8 (3.0)",
+          "resultado": "Victoria",
+          "duracion": "46min",
+          "lp_change": 20,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "El Buñuelito"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8300,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1747799873",
+          "campeon": "Fiora",
+          "kda": "7/4/5 (3.0)",
+          "resultado": "Victoria",
+          "duracion": "27min",
+          "lp_change": 19,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "El Buñuelito"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8300,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1747794453",
+          "campeon": "Fiora",
+          "kda": "4/2/0 (2.0)",
+          "resultado": "Victoria",
+          "duracion": "15min",
+          "lp_change": 19,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "El Buñuelito"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8300,
+          "wards_control": 0,
+          "posible_egida": false
+        }
+      ],
+      "kills_recientes": 42,
+      "pentakills_recientes": 0,
+      "vision_promedio_reciente": 25,
+      "kills_semana": 2,
+      "pentakills_semana": 0,
+      "vision_promedio_semana": 16,
+      "primeras_sangre_semana": 0,
+      "kda_promedio_semana": 0.4,
+      "kda_perfecto_semana": false,
+      "campeones_ganados_semana": 0,
+      "asistencias_semana": 0,
+      "partidas_semana": 1,
+      "partidas_semana_detalle": [
+        {
+          "fin_seg": 1789526132.827,
+          "kills": 2,
+          "muertes": 5,
+          "asistencias": 0,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 16,
+          "campeon": "Fiora",
+          "victoria": false,
+          "duo_con": [
+            "El Buñuelito"
+          ],
+          "cs": 101,
+          "duracion_seg": 989,
+          "damage_taken": 11677,
+          "danio_recibido_pct": 21.5,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 2
+        }
+      ],
+      "duo_semana": {
+        "nombre": "El Buñuelito",
+        "partidas": 1
+      },
+      "cs_min_semana": {
+        "cs_por_min": 6.1,
+        "cs": 101,
+        "campeon": "Fiora"
+      },
+      "danio_recibido_semana": {
+        "danio_recibido_pct": 21.5,
+        "damage_taken": 11677,
+        "campeon": "Fiora"
+      },
+      "objetivos_robados_semana": 0,
+      "estructuras_destruidas_semana": 0,
+      "tiempo_cc_semana": 2,
+      "max_partidas_en_un_dia": 0,
+      "primera_victoria_hoy": null,
+      "dia_referencia": 1789963200
+    },
+    {
+      "nombre": "Galactic Shark#AYK",
+      "icono": 6664,
+      "rango": "Gold III",
+      "lp": 58,
+      "winrate": "49%",
+      "elo_score": 1358,
+      "record_lp_score": 1414,
+      "record_lp_label": "Gold II (14 LP)",
+      "escalador_semana": null,
+      "rol_principal": "Jungla",
+      "top_roles": [
+        {
+          "rol": "Jungla",
+          "cantidad": 8
+        },
+        {
+          "rol": "Support",
+          "cantidad": 1
+        }
+      ],
+      "top_recientes": [
+        {
+          "campeon": "Shyvana",
+          "cantidad": 6
+        },
+        {
+          "campeon": "Neeko",
+          "cantidad": 1
+        },
+        {
+          "campeon": "Briar",
+          "cantidad": 1
+        }
+      ],
+      "maestrias": [
+        {
+          "campeon": "Akali",
+          "nivel": 31,
+          "puntos": "332.529"
+        },
+        {
+          "campeon": "Poppy",
+          "nivel": 20,
+          "puntos": "203.060"
+        },
+        {
+          "campeon": "Lillia",
+          "nivel": 17,
+          "puntos": "155.358"
+        }
+      ],
+      "progreso_lp": [
+        {
+          "fecha": "15/08 13:11",
+          "lp": 55
+        },
+        {
+          "fecha": "2026-08-15T13:20:22.174535",
+          "lp": 55
+        },
+        {
+          "fecha": "2026-08-15T13:25:09",
+          "lp": 55
+        },
+        {
+          "fecha": "2026-08-15T15:12:01",
+          "lp": 55
+        },
+        {
+          "fecha": "2026-08-15T15:41:16",
+          "lp": 55
+        },
+        {
+          "fecha": "2026-08-15T15:47:07",
+          "lp": 55
+        },
+        {
+          "fecha": "2026-08-15T16:18:27",
+          "lp": 55
+        },
+        {
+          "fecha": "2026-08-15T16:20:45",
+          "lp": 55
+        },
+        {
+          "fecha": "2026-08-15T16:38:35",
+          "lp": 55
+        },
+        {
+          "fecha": "2026-08-15T18:02:20",
+          "lp": 55
+        },
+        {
+          "fecha": "2026-08-15T19:43:49",
+          "lp": 85
+        },
+        {
+          "fecha": "2026-08-15T19:51:30",
+          "lp": 85
+        },
+        {
+          "fecha": "2026-08-15T20:00:57",
+          "lp": 85
+        },
+        {
+          "fecha": "2026-08-15T20:03:28",
+          "lp": 85
+        },
+        {
+          "fecha": "2026-08-15T20:08:59",
+          "lp": 85
+        },
+        {
+          "fecha": "2026-08-15T20:28:41",
+          "lp": 85
+        },
+        {
+          "fecha": "2026-08-15T20:51:33",
+          "lp": 85
+        },
+        {
+          "fecha": "2026-08-15T21:33:24",
+          "lp": 70
+        },
+        {
+          "fecha": "2026-08-15T21:58:51",
+          "lp": 70
+        },
+        {
+          "fecha": "2026-08-15T22:52:33",
+          "lp": 60
+        },
+        {
+          "fecha": "2026-08-16T00:50:28",
+          "lp": 50
+        },
+        {
+          "fecha": "2026-08-16T14:44:01",
+          "lp": 50,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-16T16:07:18",
+          "lp": 80,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-16T18:07:20",
+          "lp": 10,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-16T19:04:08",
+          "lp": 0,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-17T13:00:52",
+          "lp": 90,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-17T13:42:23",
+          "lp": 19,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-18T22:39:54Z",
+          "lp": 47,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-19T07:15:30Z",
+          "lp": 75,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-19T10:00:20Z",
+          "lp": 63,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-20T20:48:25Z",
+          "lp": 90,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-20T21:28:26Z",
+          "lp": 77,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-20T22:20:33Z",
+          "lp": 64,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-20T23:52:20Z",
+          "lp": 50,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-22T13:14:21Z",
+          "lp": 76,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-22T14:04:20Z",
+          "lp": 62,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-22T15:00:52Z",
+          "lp": 14,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-22T22:26:19Z",
+          "lp": 0,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T19:26:23Z",
+          "lp": 24,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T20:02:21Z",
+          "lp": 48,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T20:26:19Z",
+          "lp": 73,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T20:56:20Z",
+          "lp": 57,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-24T19:50:35Z",
+          "lp": 41,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-24T20:40:35Z",
+          "lp": 65,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T08:48:22Z",
+          "lp": 13,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-25T22:24:22Z",
+          "lp": 96,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-26T21:50:31Z",
+          "lp": 19,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-26T22:02:20Z",
+          "lp": 14,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-27T06:54:21Z",
+          "lp": 97,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-27T11:14:22Z",
+          "lp": 20,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-27T19:34:23Z",
+          "lp": 43,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-27T20:16:25Z",
+          "lp": 26,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-28T16:16:26Z",
+          "lp": 49,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-28T17:11:39Z",
+          "lp": 72,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-29T15:34:22Z",
+          "lp": 54,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-29T16:28:20Z",
+          "lp": 36,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-31T21:26:21Z",
+          "lp": 58,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-31T22:22:21Z",
+          "lp": 80,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-02T13:48:28Z",
+          "lp": 2,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-05T14:04:20Z",
+          "lp": 84,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-05T15:02:20Z",
+          "lp": 66,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-05T16:28:20Z",
+          "lp": 88,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-05T17:12:21Z",
+          "lp": 70,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-05T23:34:23Z",
+          "lp": 92,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-07T22:20:32Z",
+          "lp": 14,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-12T11:56:23Z",
+          "lp": 96,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-12T12:32:21Z",
+          "lp": 77,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-12T13:10:50Z",
+          "lp": 58,
+          "rango": "Gold",
+          "division": "III"
+        }
+      ],
+      "historial": [
+        {
+          "match_id": "LA1_1748114281",
+          "campeon": "Shyvana",
+          "kda": "3/8/8 (1.38)",
+          "resultado": "Derrota",
+          "duracion": "24min",
+          "lp_change": -19,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerSmite"
+          ],
+          "duo_con": [
+            "ゆうき まこと"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8400,
+          "wards_control": 7,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748110840",
+          "campeon": "Neeko",
+          "kda": "1/12/12 (1.08)",
+          "resultado": "Derrota",
+          "duracion": "27min",
+          "lp_change": -19,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerDot"
+          ],
+          "duo_con": [
+            "ゆうき まこと"
+          ],
+          "perk_principal": 8229,
+          "estilo_secundario": 8300,
+          "wards_control": 17,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748109653",
+          "campeon": "Briar",
+          "kda": "8/10/3 (1.1)",
+          "resultado": "Derrota",
+          "duracion": "31min",
+          "lp_change": -18,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerSmite"
+          ],
+          "duo_con": [
+            "ゆうき まこと"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8100,
+          "wards_control": 8,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1747061110",
+          "campeon": "Shyvana",
+          "kda": "9/5/11 (4.0)",
+          "resultado": "Victoria",
+          "duracion": "39min",
+          "lp_change": 22,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerSmite"
+          ],
+          "duo_con": [
+            "Pinea"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8400,
+          "wards_control": 8,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1746562479",
+          "campeon": "Lillia",
+          "kda": "2/3/5 (2.33)",
+          "resultado": "Victoria",
+          "duracion": "22min",
+          "lp_change": 22,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerSmite"
+          ],
+          "duo_con": [
+            "Pinea"
+          ],
+          "perk_principal": 8010,
+          "estilo_secundario": 8300,
+          "wards_control": 6,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1746480949",
+          "campeon": "Shyvana",
+          "kda": "8/1/13 (21.0)",
+          "resultado": "Derrota",
+          "duracion": "29min",
+          "lp_change": -18,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerSmite"
+          ],
+          "duo_con": [
+            "ゆうき まこと"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8400,
+          "wards_control": 6,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1746475107",
+          "campeon": "Shyvana",
+          "kda": "10/7/13 (3.29)",
+          "resultado": "Victoria",
+          "duracion": "45min",
+          "lp_change": 22,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerSmite"
+          ],
+          "duo_con": [
+            "ゆうき まこと"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8400,
+          "wards_control": 7,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1746464960",
+          "campeon": "Shyvana",
+          "kda": "3/6/6 (1.5)",
+          "resultado": "Derrota",
+          "duracion": "31min",
+          "lp_change": -18,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerSmite"
+          ],
+          "duo_con": [
+            "Ostia"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8400,
+          "wards_control": 7,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1746463782",
+          "campeon": "Shyvana",
+          "kda": "—",
+          "resultado": "Remake",
+          "duracion": "1:10",
+          "lp_change": null,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerSmite"
+          ],
+          "duo_con": [
+            "Ostia"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8400,
+          "wards_control": null,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1746467378",
+          "campeon": "Shyvana",
+          "kda": "2/6/3 (0.83)",
+          "resultado": "Derrota",
+          "duracion": "25min",
+          "lp_change": -18,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerSmite"
+          ],
+          "duo_con": [
+            "Ostia"
+          ],
+          "perk_principal": 8005,
+          "estilo_secundario": 8400,
+          "wards_control": 8,
+          "posible_egida": false
+        }
+      ],
+      "kills_recientes": 46,
+      "pentakills_recientes": 0,
+      "vision_promedio_reciente": 41,
+      "kills_semana": 0,
+      "pentakills_semana": 0,
+      "vision_promedio_semana": 0,
+      "primeras_sangre_semana": 0,
+      "kda_promedio_semana": 0,
+      "kda_perfecto_semana": false,
+      "campeones_ganados_semana": 0,
+      "asistencias_semana": 0,
+      "partidas_semana": 0,
+      "partidas_semana_detalle": [],
+      "duo_semana": null,
+      "cs_min_semana": null,
+      "danio_recibido_semana": null,
+      "objetivos_robados_semana": 0,
+      "estructuras_destruidas_semana": 0,
+      "tiempo_cc_semana": 0,
+      "max_partidas_en_un_dia": 0,
+      "primera_victoria_hoy": null,
+      "dia_referencia": 1789963200
+    },
+    {
+      "nombre": "El Buñuelito#KyA",
+      "icono": 7216,
+      "rango": "Gold II",
+      "lp": 13,
+      "winrate": "50%",
+      "elo_score": 1413,
+      "record_lp_score": 1507,
+      "record_lp_label": "Gold I (7 LP)",
+      "escalador_semana": -20,
+      "rol_principal": "Mid",
+      "top_roles": [
+        {
+          "rol": "Mid",
+          "cantidad": 8
+        },
+        {
+          "rol": "ADC",
+          "cantidad": 2
+        }
+      ],
+      "top_recientes": [
+        {
+          "campeon": "Zoe",
+          "cantidad": 3
+        },
+        {
+          "campeon": "Ahri",
+          "cantidad": 2
+        },
+        {
+          "campeon": "Lux",
+          "cantidad": 2
+        }
+      ],
+      "maestrias": [
+        {
+          "campeon": "Zoe",
+          "nivel": 26,
+          "puntos": "261.604"
+        },
+        {
+          "campeon": "Caitlyn",
+          "nivel": 25,
+          "puntos": "246.505"
+        },
+        {
+          "campeon": "Seraphine",
+          "nivel": 23,
+          "puntos": "235.636"
+        }
+      ],
+      "progreso_lp": [
+        {
+          "fecha": "15/08 13:11",
+          "lp": 57
+        },
+        {
+          "fecha": "2026-08-15T13:20:22.174535",
+          "lp": 57
+        },
+        {
+          "fecha": "2026-08-15T13:25:09",
+          "lp": 57
+        },
+        {
+          "fecha": "2026-08-15T15:12:01",
+          "lp": 57
+        },
+        {
+          "fecha": "2026-08-15T15:41:16",
+          "lp": 57
+        },
+        {
+          "fecha": "2026-08-15T15:47:07",
+          "lp": 57
+        },
+        {
+          "fecha": "2026-08-15T16:18:27",
+          "lp": 57
+        },
+        {
+          "fecha": "2026-08-15T16:20:45",
+          "lp": 57
+        },
+        {
+          "fecha": "2026-08-15T16:38:35",
+          "lp": 57
+        },
+        {
+          "fecha": "2026-08-15T18:02:20",
+          "lp": 76
+        },
+        {
+          "fecha": "2026-08-15T19:43:49",
+          "lp": 94
+        },
+        {
+          "fecha": "2026-08-15T19:51:30",
+          "lp": 94
+        },
+        {
+          "fecha": "2026-08-15T20:00:57",
+          "lp": 94
+        },
+        {
+          "fecha": "2026-08-15T20:03:28",
+          "lp": 94
+        },
+        {
+          "fecha": "2026-08-15T20:08:59",
+          "lp": 72
+        },
+        {
+          "fecha": "2026-08-15T20:28:41",
+          "lp": 72
+        },
+        {
+          "fecha": "2026-08-15T20:51:33",
+          "lp": 72
+        },
+        {
+          "fecha": "2026-08-15T21:33:24",
+          "lp": 72
+        },
+        {
+          "fecha": "2026-08-15T21:58:51",
+          "lp": 72
+        },
+        {
+          "fecha": "2026-08-16T05:03:23",
+          "lp": 5
+        },
+        {
+          "fecha": "2026-08-16T05:59:03",
+          "lp": 22
+        },
+        {
+          "fecha": "2026-08-16T14:44:01",
+          "lp": 22,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-16T17:28:22",
+          "lp": 58,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-16T18:14:20",
+          "lp": 35,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-16T20:21:19",
+          "lp": 12,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-16T21:07:19",
+          "lp": 89,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-16T22:28:20",
+          "lp": 66,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-17T02:21:20",
+          "lp": 42,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-17T03:07:19",
+          "lp": 58,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-17T03:35:24",
+          "lp": 75,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-17T04:07:18",
+          "lp": 92,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-17T04:49:20",
+          "lp": 9,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-17T22:20:36",
+          "lp": 27,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-18T00:05:25",
+          "lp": 45,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-18T00:50:37",
+          "lp": 23,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-18T02:05:30",
+          "lp": 41,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-18T02:35:26",
+          "lp": 19,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-18T03:10:32",
+          "lp": 97,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-18T04:02:07",
+          "lp": 15,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-18T22:39:54Z",
+          "lp": 93,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-18T23:00:52Z",
+          "lp": 71,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T00:03:30Z",
+          "lp": 89,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T00:51:21Z",
+          "lp": 7,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-19T01:27:26Z",
+          "lp": 85,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T02:30:47Z",
+          "lp": 62,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T04:57:20Z",
+          "lp": 79,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T05:33:23Z",
+          "lp": 56,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T06:06:21Z",
+          "lp": 33,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-20T00:45:34Z",
+          "lp": 10,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-20T01:09:20Z",
+          "lp": 86,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-20T01:51:17Z",
+          "lp": 18,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-20T02:27:18Z",
+          "lp": 94,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-20T03:09:19Z",
+          "lp": 70,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-20T04:15:31Z",
+          "lp": 86,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-20T06:42:21Z",
+          "lp": 18,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-20T19:30:49Z",
+          "lp": 35,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-21T02:10:33Z",
+          "lp": 12,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-21T02:38:22Z",
+          "lp": 29,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-21T03:18:24Z",
+          "lp": 46,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-21T03:58:23Z",
+          "lp": 64,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-21T04:32:23Z",
+          "lp": 83,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-21T05:20:31Z",
+          "lp": 2,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-21T06:18:21Z",
+          "lp": 21,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-21T18:18:22Z",
+          "lp": 41,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-22T02:18:22Z",
+          "lp": 61,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-22T02:58:22Z",
+          "lp": 41,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-22T03:40:35Z",
+          "lp": 21,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-22T04:20:35Z",
+          "lp": 41,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-22T04:57:09Z",
+          "lp": 61,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-22T05:30:42Z",
+          "lp": 81,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-22T17:00:54Z",
+          "lp": 62,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-22T19:12:25Z",
+          "lp": 82,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-22T19:48:22Z",
+          "lp": 62,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-22T20:40:32Z",
+          "lp": 42,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-22T22:20:33Z",
+          "lp": 62,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-23T00:58:24Z",
+          "lp": 82,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-23T02:00:51Z",
+          "lp": 3,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T02:40:32Z",
+          "lp": 0,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T03:28:20Z",
+          "lp": 20,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T04:02:22Z",
+          "lp": 40,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T04:38:21Z",
+          "lp": 21,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T04:48:20Z",
+          "lp": 16,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T19:22:24Z",
+          "lp": 36,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T20:16:20Z",
+          "lp": 17,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T20:48:19Z",
+          "lp": 0,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T23:06:22Z",
+          "lp": 20,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-24T03:04:26Z",
+          "lp": 0,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-24T03:56:22Z",
+          "lp": 20,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-24T04:36:22Z",
+          "lp": 40,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-24T05:12:22Z",
+          "lp": 61,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T00:30:44Z",
+          "lp": 42,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T01:42:22Z",
+          "lp": 22,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T01:44:22Z",
+          "lp": 42,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T02:30:46Z",
+          "lp": 62,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T03:04:21Z",
+          "lp": 82,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T03:46:21Z",
+          "lp": 22,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-25T04:30:43Z",
+          "lp": 2,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-25T05:12:23Z",
+          "lp": 22,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-25T20:02:21Z",
+          "lp": 2,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-25T22:14:25Z",
+          "lp": 82,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-26T01:28:21Z",
+          "lp": 1,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-26T02:34:20Z",
+          "lp": 21,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-26T03:44:21Z",
+          "lp": 41,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-26T04:10:35Z",
+          "lp": 61,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-26T04:52:21Z",
+          "lp": 41,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-26T05:38:23Z",
+          "lp": 61,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-27T00:32:22Z",
+          "lp": 82,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-27T01:14:19Z",
+          "lp": 3,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-27T02:04:24Z",
+          "lp": 24,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-27T02:44:23Z",
+          "lp": 46,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-27T03:30:44Z",
+          "lp": 28,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-27T04:02:20Z",
+          "lp": 10,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-29T02:52:24Z",
+          "lp": 31,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-29T03:24:29Z",
+          "lp": 12,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-29T04:02:25Z",
+          "lp": 33,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-29T20:44:21Z",
+          "lp": 54,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-30T00:12:21Z",
+          "lp": 75,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-30T02:50:34Z",
+          "lp": 56,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-30T03:26:22Z",
+          "lp": 37,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-30T04:10:42Z",
+          "lp": 17,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-30T18:14:24Z",
+          "lp": 97,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-30T23:08:25Z",
+          "lp": 77,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-31T00:48:24Z",
+          "lp": 97,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-31T01:24:20Z",
+          "lp": 77,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-31T03:02:23Z",
+          "lp": 97,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-31T03:38:24Z",
+          "lp": 77,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-31T18:26:22Z",
+          "lp": 56,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-31T19:12:20Z",
+          "lp": 35,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-31T21:26:21Z",
+          "lp": 14,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-31T22:12:25Z",
+          "lp": 92,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-01T02:18:22Z",
+          "lp": 10,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-01T03:00:57Z",
+          "lp": 88,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-02T00:14:36Z",
+          "lp": 6,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-02T00:58:23Z",
+          "lp": 25,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-02T01:40:37Z",
+          "lp": 4,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-02T02:46:21Z",
+          "lp": 23,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-02T03:38:20Z",
+          "lp": 2,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-03T01:18:22Z",
+          "lp": 21,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-03T01:48:21Z",
+          "lp": 16,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-03T02:22:22Z",
+          "lp": 95,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-03T03:04:20Z",
+          "lp": 74,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-03T03:44:22Z",
+          "lp": 93,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-03T04:40:31Z",
+          "lp": 72,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-04T02:56:26Z",
+          "lp": 91,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-04T03:42:22Z",
+          "lp": 70,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-04T04:58:22Z",
+          "lp": 49,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-05T02:22:21Z",
+          "lp": 68,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-05T02:56:20Z",
+          "lp": 47,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-05T20:46:18Z",
+          "lp": 26,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-05T23:58:57Z",
+          "lp": 4,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-06T00:44:19Z",
+          "lp": 0,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-06T03:48:19Z",
+          "lp": 34,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-06T04:18:57Z",
+          "lp": 52,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-06T04:40:29Z",
+          "lp": 70,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-06T05:24:18Z",
+          "lp": 89,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-06T06:00:50Z",
+          "lp": 8,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-06T21:42:21Z",
+          "lp": 27,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-06T22:20:31Z",
+          "lp": 47,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-06T22:56:20Z",
+          "lp": 67,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-06T23:16:19Z",
+          "lp": 88,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-07T00:06:20Z",
+          "lp": 9,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-07T02:38:21Z",
+          "lp": 30,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-07T03:12:24Z",
+          "lp": 52,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-07T04:00:49Z",
+          "lp": 74,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-07T04:32:20Z",
+          "lp": 56,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-08T00:26:21Z",
+          "lp": 1,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-08T01:00:53Z",
+          "lp": 82,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-08T01:50:31Z",
+          "lp": 63,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-08T02:48:59Z",
+          "lp": 84,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-08T03:20:32Z",
+          "lp": 5,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-08T20:00:52Z",
+          "lp": 86,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-08T20:44:25Z",
+          "lp": 7,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-09T02:20:32Z",
+          "lp": 88,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-09T03:06:26Z",
+          "lp": 68,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-10T01:28:23Z",
+          "lp": 48,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-10T02:06:22Z",
+          "lp": 28,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-11T03:04:24Z",
+          "lp": 48,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-11T03:42:19Z",
+          "lp": 69,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-12T01:44:55Z",
+          "lp": 90,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-12T02:38:22Z",
+          "lp": 71,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-12T03:16:21Z",
+          "lp": 52,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-12T03:56:20Z",
+          "lp": 32,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-14T02:11:09Z",
+          "lp": 52,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-14T02:40:34Z",
+          "lp": 72,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-14T03:12:22Z",
+          "lp": 53,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-16T02:36:22Z",
+          "lp": 33,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-17T18:42:24Z",
+          "lp": 13,
+          "rango": "Gold",
+          "division": "II"
+        }
+      ],
+      "historial": [
+        {
+          "match_id": "LA1_1749362328",
+          "campeon": "Ahri",
+          "kda": "0/3/0 (0.0)",
+          "resultado": "Derrota",
+          "duracion": "15min",
+          "lp_change": -20,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerTeleport"
+          ],
+          "duo_con": [],
+          "perk_principal": 8992,
+          "estilo_secundario": 8100,
+          "wards_control": 3,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748997964",
+          "campeon": "Lux",
+          "kda": "0/7/3 (0.43)",
+          "resultado": "Derrota",
+          "duracion": "16min",
+          "lp_change": -20,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerTeleport"
+          ],
+          "duo_con": [
+            "Pinea"
+          ],
+          "perk_principal": 8229,
+          "estilo_secundario": 8100,
+          "wards_control": 1,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748560064",
+          "campeon": "Zoe",
+          "kda": "0/9/2 (0.22)",
+          "resultado": "Derrota",
+          "duracion": "21min",
+          "lp_change": -19,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerBarrier"
+          ],
+          "duo_con": [
+            "Pinea"
+          ],
+          "perk_principal": 8128,
+          "estilo_secundario": 8200,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748547871",
+          "campeon": "Zoe",
+          "kda": "4/1/2 (6.0)",
+          "resultado": "Victoria",
+          "duracion": "16min",
+          "lp_change": 20,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerBarrier"
+          ],
+          "duo_con": [
+            "Pinea"
+          ],
+          "perk_principal": 8112,
+          "estilo_secundario": 8200,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748527657",
+          "campeon": "Lux",
+          "kda": "10/9/15 (2.78)",
+          "resultado": "Victoria",
+          "duracion": "42min",
+          "lp_change": 20,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerBarrier"
+          ],
+          "duo_con": [
+            "Pinea"
+          ],
+          "perk_principal": 8229,
+          "estilo_secundario": 8000,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748030454",
+          "campeon": "Veigar",
+          "kda": "5/6/9 (2.33)",
+          "resultado": "Derrota",
+          "duracion": "26min",
+          "lp_change": -20,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerTeleport"
+          ],
+          "duo_con": [
+            "Pinea"
+          ],
+          "perk_principal": 8369,
+          "estilo_secundario": 8200,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748014741",
+          "campeon": "Caitlyn",
+          "kda": "3/5/4 (1.4)",
+          "resultado": "Derrota",
+          "duracion": "26min",
+          "lp_change": -19,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerBarrier"
+          ],
+          "duo_con": [
+            "Pinea"
+          ],
+          "perk_principal": 8008,
+          "estilo_secundario": 8200,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748003167",
+          "campeon": "Zoe",
+          "kda": "8/14/7 (1.07)",
+          "resultado": "Derrota",
+          "duracion": "37min",
+          "lp_change": -19,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerTeleport"
+          ],
+          "duo_con": [
+            "Pinea"
+          ],
+          "perk_principal": 8128,
+          "estilo_secundario": 8200,
+          "wards_control": 1,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1747983277",
+          "campeon": "Caitlyn",
+          "kda": "8/13/9 (1.31)",
+          "resultado": "Victoria",
+          "duracion": "46min",
+          "lp_change": 21,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerBarrier"
+          ],
+          "duo_con": [
+            "Pinea"
+          ],
+          "perk_principal": 8008,
+          "estilo_secundario": 8200,
+          "wards_control": 2,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1747799873",
+          "campeon": "Ahri",
+          "kda": "4/1/10 (14.0)",
+          "resultado": "Victoria",
+          "duracion": "27min",
+          "lp_change": 21,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerTeleport"
+          ],
+          "duo_con": [
+            "Pinea"
+          ],
+          "perk_principal": 8992,
+          "estilo_secundario": 8100,
+          "wards_control": 1,
+          "posible_egida": false
+        }
+      ],
+      "kills_recientes": 42,
+      "pentakills_recientes": 0,
+      "vision_promedio_reciente": 22,
+      "kills_semana": 0,
+      "pentakills_semana": 0,
+      "vision_promedio_semana": 11,
+      "primeras_sangre_semana": 0,
+      "kda_promedio_semana": 0.3,
+      "kda_perfecto_semana": false,
+      "campeones_ganados_semana": 0,
+      "asistencias_semana": 3,
+      "partidas_semana": 2,
+      "partidas_semana_detalle": [
+        {
+          "fin_seg": 1789670500.662,
+          "kills": 0,
+          "muertes": 3,
+          "asistencias": 0,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 12,
+          "campeon": "Ahri",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 100,
+          "duracion_seg": 947,
+          "damage_taken": 10020,
+          "danio_recibido_pct": 20.9,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 19
+        },
+        {
+          "fin_seg": 1789526132.827,
+          "kills": 0,
+          "muertes": 7,
+          "asistencias": 3,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 10,
+          "campeon": "Lux",
+          "victoria": false,
+          "duo_con": [
+            "Pinea"
+          ],
+          "cs": 62,
+          "duracion_seg": 989,
+          "damage_taken": 10404,
+          "danio_recibido_pct": 19.2,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 33
+        }
+      ],
+      "duo_semana": {
+        "nombre": "Pinea",
+        "partidas": 1
+      },
+      "cs_min_semana": {
+        "cs_por_min": 6.3,
+        "cs": 100,
+        "campeon": "Ahri"
+      },
+      "danio_recibido_semana": {
+        "danio_recibido_pct": 20.9,
+        "damage_taken": 10020,
+        "campeon": "Ahri"
+      },
+      "objetivos_robados_semana": 0,
+      "estructuras_destruidas_semana": 0,
+      "tiempo_cc_semana": 52,
+      "max_partidas_en_un_dia": 0,
+      "primera_victoria_hoy": null,
+      "dia_referencia": 1789963200
+    },
+    {
+      "nombre": "ゆうき まこと#1411",
+      "icono": 5935,
+      "rango": "Platinum IV",
+      "lp": 49,
+      "winrate": "58%",
+      "elo_score": 1649,
+      "record_lp_score": 1683,
+      "record_lp_label": "Platinum IV (83 LP)",
+      "escalador_semana": null,
+      "rol_principal": "Top",
+      "top_roles": [
+        {
+          "rol": "Top",
+          "cantidad": 10
+        }
+      ],
+      "top_recientes": [
+        {
+          "campeon": "Poppy",
+          "cantidad": 6
+        },
+        {
+          "campeon": "Singed",
+          "cantidad": 3
+        },
+        {
+          "campeon": "Nasus",
+          "cantidad": 1
+        }
+      ],
+      "maestrias": [
+        {
+          "campeon": "Poppy",
+          "nivel": 82,
+          "puntos": "876.697"
+        },
+        {
+          "campeon": "Teemo",
+          "nivel": 34,
+          "puntos": "349.660"
+        },
+        {
+          "campeon": "Morgana",
+          "nivel": 28,
+          "puntos": "281.029"
+        }
+      ],
+      "progreso_lp": [
+        {
+          "fecha": "15/08 13:11",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T13:20:22.174535",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T13:25:09",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T15:12:01",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T15:41:16",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T15:47:07",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T16:18:27",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T16:20:45",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T16:38:35",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T18:02:20",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T19:43:49",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T19:51:30",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T20:00:57",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T20:03:28",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T20:08:59",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T20:28:41",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T20:51:33",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T21:33:24",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-15T21:58:51",
+          "lp": 75
+        },
+        {
+          "fecha": "2026-08-16T14:00:49",
+          "lp": 5
+        },
+        {
+          "fecha": "2026-08-16T14:44:01",
+          "lp": 5,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-16T17:42:22",
+          "lp": 95,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-17T09:21:19",
+          "lp": 85,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-17T10:14:22",
+          "lp": 15,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-20T08:09:24Z",
+          "lp": 45,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-20T08:51:34Z",
+          "lp": 75,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-20T09:30:45Z",
+          "lp": 65,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-23T08:20:30Z",
+          "lp": 95,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-23T09:06:20Z",
+          "lp": 25,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-23T09:44:20Z",
+          "lp": 85,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-24T07:16:24Z",
+          "lp": 15,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-24T07:50:30Z",
+          "lp": 45,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-24T08:18:20Z",
+          "lp": 35,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-25T08:48:22Z",
+          "lp": 65,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-27T08:12:22Z",
+          "lp": 95,
+          "rango": "Gold",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-27T08:48:24Z",
+          "lp": 25,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-30T09:24:22Z",
+          "lp": 54,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-05T16:28:20Z",
+          "lp": 83,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-05T17:12:21Z",
+          "lp": 72,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-12T11:56:23Z",
+          "lp": 60,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-12T12:32:21Z",
+          "lp": 48,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-12T13:10:50Z",
+          "lp": 35,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-13T08:18:22Z",
+          "lp": 62,
+          "rango": "Platinum",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-13T09:03:52Z",
+          "lp": 49,
+          "rango": "Platinum",
+          "division": "IV"
+        }
+      ],
+      "historial": [
+        {
+          "match_id": "LA1_1748360983",
+          "campeon": "Poppy",
+          "kda": "9/8/11 (2.5)",
+          "resultado": "Derrota",
+          "duracion": "37min",
+          "lp_change": -13,
+          "hechizos": [
+            "SummonerTeleport",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8437,
+          "estilo_secundario": 8200,
+          "wards_control": 9,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748357931",
+          "campeon": "Nasus",
+          "kda": "8/1/10 (18.0)",
+          "resultado": "Victoria",
+          "duracion": "25min",
+          "lp_change": 27,
+          "hechizos": [
+            "SummonerHaste",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8021,
+          "estilo_secundario": 8400,
+          "wards_control": 4,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748114281",
+          "campeon": "Singed",
+          "kda": "6/8/1 (0.88)",
+          "resultado": "Derrota",
+          "duracion": "24min",
+          "lp_change": -13,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "Galactic Shark"
+          ],
+          "perk_principal": 8010,
+          "estilo_secundario": 8200,
+          "wards_control": 4,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748110840",
+          "campeon": "Poppy",
+          "kda": "5/5/5 (2.0)",
+          "resultado": "Derrota",
+          "duracion": "27min",
+          "lp_change": -12,
+          "hechizos": [
+            "SummonerTeleport",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "Galactic Shark"
+          ],
+          "perk_principal": 8437,
+          "estilo_secundario": 8200,
+          "wards_control": 9,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1748109653",
+          "campeon": "Poppy",
+          "kda": "1/9/5 (0.67)",
+          "resultado": "Derrota",
+          "duracion": "31min",
+          "lp_change": -12,
+          "hechizos": [
+            "SummonerTeleport",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "Galactic Shark"
+          ],
+          "perk_principal": 8437,
+          "estilo_secundario": 8200,
+          "wards_control": 6,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1746480949",
+          "campeon": "Singed",
+          "kda": "4/6/2 (1.0)",
+          "resultado": "Derrota",
+          "duracion": "29min",
+          "lp_change": -11,
+          "hechizos": [
+            "SummonerTeleport",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "Galactic Shark"
+          ],
+          "perk_principal": 8010,
+          "estilo_secundario": 8200,
+          "wards_control": 7,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1746475107",
+          "campeon": "Poppy",
+          "kda": "5/8/12 (2.12)",
+          "resultado": "Victoria",
+          "duracion": "45min",
+          "lp_change": 29,
+          "hechizos": [
+            "SummonerTeleport",
+            "SummonerFlash"
+          ],
+          "duo_con": [
+            "Galactic Shark"
+          ],
+          "perk_principal": 8437,
+          "estilo_secundario": 8200,
+          "wards_control": 4,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1745016305",
+          "campeon": "Poppy",
+          "kda": "4/3/4 (2.67)",
+          "resultado": "Victoria",
+          "duracion": "31min",
+          "lp_change": 29,
+          "hechizos": [
+            "SummonerTeleport",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8437,
+          "estilo_secundario": 8200,
+          "wards_control": 8,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1745015096",
+          "campeon": "Singed",
+          "kda": "7/9/13 (2.22)",
+          "resultado": "Derrota",
+          "duracion": "32min",
+          "lp_change": 29,
+          "hechizos": [
+            "SummonerTeleport",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8010,
+          "estilo_secundario": 8200,
+          "wards_control": 7,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1744253939",
+          "campeon": "Poppy",
+          "kda": "3/4/6 (2.25)",
+          "resultado": "Victoria",
+          "duracion": "29min",
+          "lp_change": 30,
+          "hechizos": [
+            "SummonerTeleport",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8437,
+          "estilo_secundario": 8200,
+          "wards_control": 3,
+          "posible_egida": false
+        }
+      ],
+      "kills_recientes": 52,
+      "pentakills_recientes": 0,
+      "vision_promedio_reciente": 34,
+      "kills_semana": 0,
+      "pentakills_semana": 0,
+      "vision_promedio_semana": 0,
+      "primeras_sangre_semana": 0,
+      "kda_promedio_semana": 0,
+      "kda_perfecto_semana": false,
+      "campeones_ganados_semana": 0,
+      "asistencias_semana": 0,
+      "partidas_semana": 0,
+      "partidas_semana_detalle": [],
+      "duo_semana": null,
+      "cs_min_semana": null,
+      "danio_recibido_semana": null,
+      "objetivos_robados_semana": 0,
+      "estructuras_destruidas_semana": 0,
+      "tiempo_cc_semana": 0,
+      "max_partidas_en_un_dia": 0,
+      "primera_victoria_hoy": null,
+      "dia_referencia": 1789963200
+    },
+    {
+      "nombre": "adrianNOOBYT#LAN",
+      "icono": 7213,
+      "rango": "Gold II",
+      "lp": 72,
+      "winrate": "54%",
+      "elo_score": 1472,
+      "record_lp_score": 1492,
+      "record_lp_label": "Gold II (92 LP)",
+      "escalador_semana": 111,
+      "rol_principal": "Mid",
+      "top_roles": [
+        {
+          "rol": "Mid",
+          "cantidad": 8
+        },
+        {
+          "rol": "Support",
+          "cantidad": 1
+        }
+      ],
+      "top_recientes": [
+        {
+          "campeon": "Akali",
+          "cantidad": 6
+        },
+        {
+          "campeon": "Yone",
+          "cantidad": 2
+        },
+        {
+          "campeon": "Poppy",
+          "cantidad": 1
+        }
+      ],
+      "maestrias": [
+        {
+          "campeon": "Akali",
+          "nivel": 45,
+          "puntos": "532.173"
+        },
+        {
+          "campeon": "Warwick",
+          "nivel": 12,
+          "puntos": "149.443"
+        },
+        {
+          "campeon": "Vayne",
+          "nivel": 11,
+          "puntos": "94.043"
+        }
+      ],
+      "progreso_lp": [
+        {
+          "fecha": "2026-08-15T16:20:45",
+          "lp": 0
+        },
+        {
+          "fecha": "2026-08-15T16:38:35",
+          "lp": 0
+        },
+        {
+          "fecha": "2026-08-15T18:02:20",
+          "lp": 0
+        },
+        {
+          "fecha": "2026-08-15T19:43:49",
+          "lp": 0
+        },
+        {
+          "fecha": "2026-08-15T19:51:30",
+          "lp": 0
+        },
+        {
+          "fecha": "2026-08-15T20:00:57",
+          "lp": 0
+        },
+        {
+          "fecha": "2026-08-15T20:03:28",
+          "lp": 0
+        },
+        {
+          "fecha": "2026-08-15T20:08:59",
+          "lp": 0
+        },
+        {
+          "fecha": "2026-08-15T20:28:41",
+          "lp": 0
+        },
+        {
+          "fecha": "2026-08-15T20:51:33",
+          "lp": 0
+        },
+        {
+          "fecha": "2026-08-15T21:33:24",
+          "lp": 0
+        },
+        {
+          "fecha": "2026-08-15T21:58:51",
+          "lp": 0
+        },
+        {
+          "fecha": "2026-08-16T07:45:43",
+          "lp": 5
+        },
+        {
+          "fecha": "2026-08-16T14:44:01",
+          "lp": 5,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-16T19:53:58",
+          "lp": 35,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-16T20:28:23",
+          "lp": 25,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-16T21:14:21",
+          "lp": 55,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-16T22:49:18",
+          "lp": 85,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-17T01:21:20",
+          "lp": 15,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-17T23:20:34",
+          "lp": 5,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-18T00:30:41",
+          "lp": 65,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-18T01:25:27",
+          "lp": 55,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-18T02:05:30",
+          "lp": 85,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-18T03:55:26",
+          "lp": 75,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-19T03:30:42Z",
+          "lp": 64,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-19T04:12:32Z",
+          "lp": 92,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-19T05:42:32Z",
+          "lp": 79,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-19T23:15:32Z",
+          "lp": 66,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-19T23:57:19Z",
+          "lp": 52,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-20T00:39:22Z",
+          "lp": 78,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-20T01:33:21Z",
+          "lp": 4,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-20T02:21:20Z",
+          "lp": 0,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-22T05:46:22Z",
+          "lp": 26,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-22T06:22:21Z",
+          "lp": 78,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-22T07:16:19Z",
+          "lp": 63,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-22T08:02:25Z",
+          "lp": 88,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-22T09:02:41Z",
+          "lp": 73,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-22T22:48:20Z",
+          "lp": 98,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-22T23:28:24Z",
+          "lp": 83,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T00:10:32Z",
+          "lp": 7,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-24T05:30:45Z",
+          "lp": 57,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-24T06:20:30Z",
+          "lp": 81,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-27T17:04:22Z",
+          "lp": 5,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-27T18:26:24Z",
+          "lp": 30,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-28T01:38:20Z",
+          "lp": 55,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-28T02:22:25Z",
+          "lp": 40,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-28T16:24:25Z",
+          "lp": 65,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-28T17:14:22Z",
+          "lp": 50,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-29T05:10:30Z",
+          "lp": 74,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-29T05:50:32Z",
+          "lp": 58,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-29T19:32:21Z",
+          "lp": 82,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-29T22:56:21Z",
+          "lp": 6,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-29T23:40:32Z",
+          "lp": 90,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-31T23:14:21Z",
+          "lp": 14,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-31T23:22:20Z",
+          "lp": 98,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-01T02:14:24Z",
+          "lp": 22,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-01T02:50:33Z",
+          "lp": 47,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-01T03:22:23Z",
+          "lp": 32,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-01T04:06:21Z",
+          "lp": 16,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-01T04:40:37Z",
+          "lp": 40,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-01T05:20:08Z",
+          "lp": 64,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-01T17:32:21Z",
+          "lp": 48,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-02T07:44:21Z",
+          "lp": 32,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-02T08:20:34Z",
+          "lp": 15,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-02T16:40:31Z",
+          "lp": 38,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-02T17:18:21Z",
+          "lp": 61,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-03T00:00:55Z",
+          "lp": 44,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-03T00:50:30Z",
+          "lp": 27,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-03T01:32:23Z",
+          "lp": 50,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-03T02:06:26Z",
+          "lp": 73,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-03T04:48:27Z",
+          "lp": 56,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-03T05:34:20Z",
+          "lp": 38,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-03T06:18:20Z",
+          "lp": 20,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-03T07:04:23Z",
+          "lp": 2,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-03T07:56:23Z",
+          "lp": 84,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-03T18:42:22Z",
+          "lp": 65,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-03T19:08:23Z",
+          "lp": 86,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-04T04:10:35Z",
+          "lp": 7,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-04T04:30:43Z",
+          "lp": 29,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-04T05:10:31Z",
+          "lp": 11,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-04T05:46:23Z",
+          "lp": 33,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-04T06:24:21Z",
+          "lp": 55,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-05T03:42:21Z",
+          "lp": 77,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-05T04:20:29Z",
+          "lp": 99,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-05T05:28:19Z",
+          "lp": 22,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-05T20:40:29Z",
+          "lp": 5,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-05T21:20:34Z",
+          "lp": 27,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-07T21:44:21Z",
+          "lp": 9,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-07T22:20:32Z",
+          "lp": 0,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-07T23:18:19Z",
+          "lp": 21,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-08T00:12:22Z",
+          "lp": 42,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-08T02:06:25Z",
+          "lp": 23,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-08T06:16:21Z",
+          "lp": 44,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-08T07:12:20Z",
+          "lp": 65,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-08T17:16:21Z",
+          "lp": 46,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-08T17:58:22Z",
+          "lp": 67,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-08T19:50:36Z",
+          "lp": 48,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-09T05:12:24Z",
+          "lp": 69,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-09T05:48:21Z",
+          "lp": 90,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-10T04:26:20Z",
+          "lp": 71,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-10T05:08:20Z",
+          "lp": 52,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-10T05:48:23Z",
+          "lp": 32,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-10T06:30:53Z",
+          "lp": 52,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-10T07:20:34Z",
+          "lp": 73,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-13T04:30:44Z",
+          "lp": 94,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-13T05:22:19Z",
+          "lp": 75,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-14T05:26:19Z",
+          "lp": 96,
+          "rango": "Gold",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-14T06:30:47Z",
+          "lp": 17,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-14T07:26:20Z",
+          "lp": 59,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-14T18:38:20Z",
+          "lp": 40,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-15T04:10:30Z",
+          "lp": 61,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-15T04:50:32Z",
+          "lp": 82,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-15T05:30:42Z",
+          "lp": 63,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-15T17:40:32Z",
+          "lp": 84,
+          "rango": "Gold",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-15T18:20:31Z",
+          "lp": 5,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-17T04:14:19Z",
+          "lp": 26,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-17T04:44:20Z",
+          "lp": 48,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-18T04:42:26Z",
+          "lp": 30,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-18T05:18:19Z",
+          "lp": 11,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-18T06:06:20Z",
+          "lp": 32,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-19T05:48:19Z",
+          "lp": 13,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-19T16:46:20Z",
+          "lp": 33,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-19T20:56:20Z",
+          "lp": 52,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-19T21:42:20Z",
+          "lp": 72,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-19T22:34:22Z",
+          "lp": 52,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-20T18:14:19Z",
+          "lp": 72,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-20T19:06:21Z",
+          "lp": 92,
+          "rango": "Gold",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-20T20:02:19Z",
+          "lp": 72,
+          "rango": "Gold",
+          "division": "II"
+        }
+      ],
+      "historial": [
+        {
+          "match_id": "LA1_1750085191",
+          "campeon": "Akali",
+          "kda": "7/13/6 (1.0)",
+          "resultado": "Derrota",
+          "duracion": "44min",
+          "lp_change": -20,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8112,
+          "estilo_secundario": 8400,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1750070897",
+          "campeon": "Akali",
+          "kda": "12/2/8 (10.0)",
+          "resultado": "Victoria",
+          "duracion": "28min",
+          "lp_change": 20,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8112,
+          "estilo_secundario": 8400,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1750063623",
+          "campeon": "Akali",
+          "kda": "22/3/8 (10.0)",
+          "resultado": "Victoria",
+          "duracion": "30min",
+          "lp_change": 20,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8112,
+          "estilo_secundario": 8400,
+          "wards_control": 3,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749857683",
+          "campeon": "Akali",
+          "kda": "13/10/9 (2.2)",
+          "resultado": "Derrota",
+          "duracion": "34min",
+          "lp_change": -20,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8112,
+          "estilo_secundario": 8400,
+          "wards_control": 4,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749847228",
+          "campeon": "Yone",
+          "kda": "10/15/13 (1.53)",
+          "resultado": "Victoria",
+          "duracion": "41min",
+          "lp_change": 20,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8008,
+          "estilo_secundario": 8400,
+          "wards_control": 1,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749840316",
+          "campeon": "Yone",
+          "kda": "0/7/5 (0.71)",
+          "resultado": "Victoria",
+          "duracion": "22min",
+          "lp_change": 19,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8008,
+          "estilo_secundario": 8400,
+          "wards_control": 2,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749803025",
+          "campeon": "Poppy",
+          "kda": "0/7/1 (0.14)",
+          "resultado": "Derrota",
+          "duracion": "23min",
+          "lp_change": 19,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8439,
+          "estilo_secundario": 8300,
+          "wards_control": 8,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749793925",
+          "campeon": "Akali",
+          "kda": "12/8/8 (2.5)",
+          "resultado": "Victoria",
+          "duracion": "35min",
+          "lp_change": 20,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8112,
+          "estilo_secundario": 8400,
+          "wards_control": 3,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749792797",
+          "campeon": "Akali",
+          "kda": "—",
+          "resultado": "Remake",
+          "duracion": "1:16",
+          "lp_change": null,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8112,
+          "estilo_secundario": 8400,
+          "wards_control": null,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749747166",
+          "campeon": "Akali",
+          "kda": "8/9/1 (1.0)",
+          "resultado": "Derrota",
+          "duracion": "29min",
+          "lp_change": 20,
+          "hechizos": [
+            "SummonerDot",
+            "SummonerFlash"
+          ],
+          "duo_con": [],
+          "perk_principal": 8112,
+          "estilo_secundario": 8400,
+          "wards_control": 2,
+          "posible_egida": false
+        }
+      ],
+      "kills_recientes": 84,
+      "pentakills_recientes": 0,
+      "vision_promedio_reciente": 34,
+      "kills_semana": 177,
+      "pentakills_semana": 0,
+      "vision_promedio_semana": 34,
+      "primeras_sangre_semana": 3,
+      "kda_promedio_semana": 2.08,
+      "kda_perfecto_semana": false,
+      "campeones_ganados_semana": 2,
+      "asistencias_semana": 120,
+      "partidas_semana": 20,
+      "partidas_semana_detalle": [
+        {
+          "fin_seg": 1789934466.693,
+          "kills": 7,
+          "muertes": 13,
+          "asistencias": 6,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 45,
+          "campeon": "Akali",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 220,
+          "duracion_seg": 2650,
+          "damage_taken": 48489,
+          "danio_recibido_pct": 20.7,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 3,
+          "tiempo_cc": 4
+        },
+        {
+          "fin_seg": 1789931098.227,
+          "kills": 12,
+          "muertes": 2,
+          "asistencias": 8,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 28,
+          "campeon": "Akali",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 190,
+          "duracion_seg": 1706,
+          "damage_taken": 24969,
+          "danio_recibido_pct": 19.2,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 1,
+          "tiempo_cc": 4
+        },
+        {
+          "fin_seg": 1789927976.873,
+          "kills": 22,
+          "muertes": 3,
+          "asistencias": 8,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 31,
+          "campeon": "Akali",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 184,
+          "duracion_seg": 1813,
+          "damage_taken": 34919,
+          "danio_recibido_pct": 21.2,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 3,
+          "tiempo_cc": 4
+        },
+        {
+          "fin_seg": 1789857176.139,
+          "kills": 13,
+          "muertes": 10,
+          "asistencias": 9,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 41,
+          "campeon": "Akali",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 184,
+          "duracion_seg": 2094,
+          "damage_taken": 38866,
+          "danio_recibido_pct": 18.9,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 3
+        },
+        {
+          "fin_seg": 1789854104.951,
+          "kills": 10,
+          "muertes": 15,
+          "asistencias": 13,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 30,
+          "campeon": "Yone",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 255,
+          "duracion_seg": 2508,
+          "damage_taken": 45059,
+          "danio_recibido_pct": 24.0,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 2,
+          "tiempo_cc": 45
+        },
+        {
+          "fin_seg": 1789851313.951,
+          "kills": 0,
+          "muertes": 7,
+          "asistencias": 5,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 18,
+          "campeon": "Yone",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 106,
+          "duracion_seg": 1340,
+          "damage_taken": 18674,
+          "danio_recibido_pct": 23.9,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 2,
+          "tiempo_cc": 14
+        },
+        {
+          "fin_seg": 1789838051.334,
+          "kills": 0,
+          "muertes": 7,
+          "asistencias": 1,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 49,
+          "campeon": "Poppy",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 51,
+          "duracion_seg": 1415,
+          "damage_taken": 17522,
+          "danio_recibido_pct": 16.8,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 16
+        },
+        {
+          "fin_seg": 1789836306.727,
+          "kills": 12,
+          "muertes": 8,
+          "asistencias": 8,
+          "pentakills": 0,
+          "primera_sangre": true,
+          "vision": 48,
+          "campeon": "Akali",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 180,
+          "duracion_seg": 2113,
+          "damage_taken": 35855,
+          "danio_recibido_pct": 16.6,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 2,
+          "tiempo_cc": 3
+        },
+        {
+          "fin_seg": 1789799015.803,
+          "kills": 8,
+          "muertes": 9,
+          "asistencias": 1,
+          "pentakills": 0,
+          "primera_sangre": true,
+          "vision": 20,
+          "campeon": "Akali",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 137,
+          "duracion_seg": 1790,
+          "damage_taken": 39308,
+          "danio_recibido_pct": 27.7,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 5
+        },
+        {
+          "fin_seg": 1789796831.349,
+          "kills": 13,
+          "muertes": 7,
+          "asistencias": 6,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 50,
+          "campeon": "Akali",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 204,
+          "duracion_seg": 1933,
+          "damage_taken": 32379,
+          "danio_recibido_pct": 20.2,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 1,
+          "tiempo_cc": 5
+        },
+        {
+          "fin_seg": 1789711464.836,
+          "kills": 17,
+          "muertes": 4,
+          "asistencias": 5,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 45,
+          "campeon": "Akali",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 171,
+          "duracion_seg": 1881,
+          "damage_taken": 30285,
+          "danio_recibido_pct": 22.2,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 2,
+          "tiempo_cc": 6
+        },
+        {
+          "fin_seg": 1789708636.028,
+          "kills": 8,
+          "muertes": 11,
+          "asistencias": 5,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 29,
+          "campeon": "Akali",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 127,
+          "duracion_seg": 1734,
+          "damage_taken": 34056,
+          "danio_recibido_pct": 22.2,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 1,
+          "tiempo_cc": 5
+        },
+        {
+          "fin_seg": 1789706506.796,
+          "kills": 2,
+          "muertes": 7,
+          "asistencias": 2,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 34,
+          "campeon": "Trundle",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 214,
+          "duracion_seg": 1974,
+          "damage_taken": 39120,
+          "danio_recibido_pct": 30.2,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 1,
+          "tiempo_cc": 31
+        },
+        {
+          "fin_seg": 1789620199.671,
+          "kills": 12,
+          "muertes": 2,
+          "asistencias": 2,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 24,
+          "campeon": "Akali",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 157,
+          "duracion_seg": 1590,
+          "damage_taken": 19265,
+          "danio_recibido_pct": 16.8,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 1,
+          "tiempo_cc": 4
+        },
+        {
+          "fin_seg": 1789618354.877,
+          "kills": 7,
+          "muertes": 5,
+          "asistencias": 7,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 38,
+          "campeon": "Akali",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 164,
+          "duracion_seg": 1832,
+          "damage_taken": 26409,
+          "danio_recibido_pct": 19.8,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 2
+        },
+        {
+          "fin_seg": 1789496319.29,
+          "kills": 12,
+          "muertes": 6,
+          "asistencias": 8,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 41,
+          "campeon": "Akali",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 171,
+          "duracion_seg": 1744,
+          "damage_taken": 26552,
+          "danio_recibido_pct": 21.1,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 1,
+          "tiempo_cc": 3
+        },
+        {
+          "fin_seg": 1789494022.944,
+          "kills": 9,
+          "muertes": 9,
+          "asistencias": 12,
+          "pentakills": 0,
+          "primera_sangre": true,
+          "vision": 45,
+          "campeon": "Akali",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 185,
+          "duracion_seg": 2280,
+          "damage_taken": 39184,
+          "danio_recibido_pct": 20.0,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 1,
+          "tiempo_cc": 5
+        },
+        {
+          "fin_seg": 1789450141.638,
+          "kills": 1,
+          "muertes": 11,
+          "asistencias": 5,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 22,
+          "campeon": "Yone",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 213,
+          "duracion_seg": 1982,
+          "damage_taken": 33256,
+          "danio_recibido_pct": 17.8,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 25
+        },
+        {
+          "fin_seg": 1789447755.352,
+          "kills": 10,
+          "muertes": 7,
+          "asistencias": 9,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 36,
+          "campeon": "Akali",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 215,
+          "duracion_seg": 2155,
+          "damage_taken": 36637,
+          "danio_recibido_pct": 20.8,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 1,
+          "tiempo_cc": 4
+        },
+        {
+          "fin_seg": 1789445317.315,
+          "kills": 2,
+          "muertes": 0,
+          "asistencias": 0,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 4,
+          "campeon": "Akali",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 56,
+          "duracion_seg": 544,
+          "damage_taken": 5136,
+          "danio_recibido_pct": 25.4,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 0
+        }
+      ],
+      "duo_semana": null,
+      "cs_min_semana": {
+        "cs_por_min": 6.7,
+        "cs": 190,
+        "campeon": "Akali"
+      },
+      "danio_recibido_semana": {
+        "danio_recibido_pct": 30.2,
+        "damage_taken": 39120,
+        "campeon": "Trundle"
+      },
+      "objetivos_robados_semana": 0,
+      "estructuras_destruidas_semana": 22,
+      "tiempo_cc_semana": 188,
+      "max_partidas_en_un_dia": 0,
+      "primera_victoria_hoy": null,
+      "dia_referencia": 1789963200
+    },
+    {
+      "nombre": "Ostia#LAN",
+      "icono": 6205,
+      "rango": "Silver III",
+      "lp": 80,
+      "winrate": "50%",
+      "elo_score": 980,
+      "record_lp_score": 1112,
+      "record_lp_label": "Silver I (12 LP)",
+      "escalador_semana": -80,
+      "rol_principal": "Top",
+      "top_roles": [
+        {
+          "rol": "Top",
+          "cantidad": 8
+        }
+      ],
+      "top_recientes": [
+        {
+          "campeon": "Illaoi",
+          "cantidad": 4
+        },
+        {
+          "campeon": "Darius",
+          "cantidad": 3
+        },
+        {
+          "campeon": "Kled",
+          "cantidad": 1
+        }
+      ],
+      "maestrias": [
+        {
+          "campeon": "Lux",
+          "nivel": 22,
+          "puntos": "229.795"
+        },
+        {
+          "campeon": "Swain",
+          "nivel": 15,
+          "puntos": "133.622"
+        },
+        {
+          "campeon": "Illaoi",
+          "nivel": 11,
+          "puntos": "89.876"
+        }
+      ],
+      "progreso_lp": [
+        {
+          "fecha": "2026-08-16T21:58:51",
+          "lp": 0,
+          "rango": "Unranked",
+          "division": ""
+        },
+        {
+          "fecha": "2026-08-18T08:55:26",
+          "lp": 43,
+          "rango": "Bronze",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-18T09:35:28",
+          "lp": 33,
+          "rango": "Bronze",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-18T19:25:26",
+          "lp": 63,
+          "rango": "Bronze",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-18T20:25:25",
+          "lp": 93,
+          "rango": "Bronze",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-08-18T20:50:33",
+          "lp": 23,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-18T22:55:29Z",
+          "lp": 53,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T08:50:07Z",
+          "lp": 83,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T10:00:20Z",
+          "lp": 73,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T19:39:20Z",
+          "lp": 63,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T20:48:25Z",
+          "lp": 52,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T21:09:20Z",
+          "lp": 40,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T21:48:35Z",
+          "lp": 68,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T22:17:16Z",
+          "lp": 96,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-19T22:50:40Z",
+          "lp": 24,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-19T23:27:17Z",
+          "lp": 53,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-20T00:00:53Z",
+          "lp": 11,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-20T13:45:34Z",
+          "lp": 0,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-20T20:54:24Z",
+          "lp": 27,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-20T21:28:26Z",
+          "lp": 14,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-20T22:18:28Z",
+          "lp": 41,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-20T23:52:20Z",
+          "lp": 28,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-21T00:34:20Z",
+          "lp": 14,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-21T01:12:20Z",
+          "lp": 0,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-21T18:28:21Z",
+          "lp": 22,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-21T19:14:20Z",
+          "lp": 45,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-21T19:52:21Z",
+          "lp": 68,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-21T23:26:21Z",
+          "lp": 49,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-22T00:10:32Z",
+          "lp": 30,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-22T19:08:22Z",
+          "lp": 51,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T18:32:24Z",
+          "lp": 72,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T19:22:24Z",
+          "lp": 93,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T20:16:20Z",
+          "lp": 74,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-23T20:48:19Z",
+          "lp": 55,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-24T12:32:20Z",
+          "lp": 36,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-24T13:44:20Z",
+          "lp": 16,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-24T19:30:46Z",
+          "lp": 0,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-24T20:58:24Z",
+          "lp": 15,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T15:00:59Z",
+          "lp": 0,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-25T19:02:21Z",
+          "lp": 50,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-25T21:18:22Z",
+          "lp": 28,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-25T22:04:24Z",
+          "lp": 46,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-26T13:30:50Z",
+          "lp": 64,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-26T14:20:35Z",
+          "lp": 83,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-26T19:22:28Z",
+          "lp": 62,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-26T21:28:24Z",
+          "lp": 40,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-26T22:18:23Z",
+          "lp": 58,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-27T12:52:20Z",
+          "lp": 37,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-28T16:20:35Z",
+          "lp": 14,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-28T16:58:22Z",
+          "lp": 91,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-28T17:58:20Z",
+          "lp": 25,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-28T18:48:22Z",
+          "lp": 42,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-28T19:31:17Z",
+          "lp": 59,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-28T21:28:20Z",
+          "lp": 36,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-28T23:02:23Z",
+          "lp": 12,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-29T09:50:34Z",
+          "lp": 28,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-29T10:30:45Z",
+          "lp": 45,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-29T11:15:32Z",
+          "lp": 22,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-29T12:10:33Z",
+          "lp": 99,
+          "rango": "Bronze",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-08-29T14:02:43Z",
+          "lp": 16,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-30T13:58:24Z",
+          "lp": 33,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-30T15:28:22Z",
+          "lp": 51,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-30T16:24:23Z",
+          "lp": 69,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-30T22:48:20Z",
+          "lp": 87,
+          "rango": "Bronze",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-08-30T23:26:20Z",
+          "lp": 25,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-31T00:10:33Z",
+          "lp": 44,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-31T00:48:24Z",
+          "lp": 63,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-31T01:24:20Z",
+          "lp": 42,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-31T02:14:22Z",
+          "lp": 61,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-31T15:40:34Z",
+          "lp": 81,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-31T16:28:26Z",
+          "lp": 61,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-31T17:14:23Z",
+          "lp": 41,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-31T17:48:20Z",
+          "lp": 60,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-31T19:12:20Z",
+          "lp": 39,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-31T21:26:21Z",
+          "lp": 58,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-08-31T22:22:21Z",
+          "lp": 78,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-01T00:34:20Z",
+          "lp": 58,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-02T00:46:18Z",
+          "lp": 37,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-02T01:20:32Z",
+          "lp": 56,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-02T02:12:23Z",
+          "lp": 75,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-02T13:10:33Z",
+          "lp": 94,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-02T13:48:28Z",
+          "lp": 14,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-02T15:38:26Z",
+          "lp": 93,
+          "rango": "Silver",
+          "division": "IV"
+        },
+        {
+          "fecha": "2026-09-02T20:26:27Z",
+          "lp": 12,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-03T09:12:26Z",
+          "lp": 31,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-03T10:18:26Z",
+          "lp": 51,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-03T13:10:36Z",
+          "lp": 31,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-03T13:58:22Z",
+          "lp": 10,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-03T15:20:35Z",
+          "lp": 29,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-03T21:02:21Z",
+          "lp": 67,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-03T21:54:21Z",
+          "lp": 86,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-04T12:52:23Z",
+          "lp": 66,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-04T13:48:23Z",
+          "lp": 85,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-04T15:42:26Z",
+          "lp": 65,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-04T16:42:47Z",
+          "lp": 84,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-05T13:08:24Z",
+          "lp": 4,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-05T14:04:20Z",
+          "lp": 84,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-05T15:02:20Z",
+          "lp": 64,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-06T00:42:21Z",
+          "lp": 83,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-06T01:20:31Z",
+          "lp": 3,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-06T01:48:20Z",
+          "lp": 23,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-06T02:20:31Z",
+          "lp": 44,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-06T02:56:21Z",
+          "lp": 65,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-06T15:30:40Z",
+          "lp": 86,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-06T16:10:31Z",
+          "lp": 67,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-06T19:52:19Z",
+          "lp": 88,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-06T20:38:24Z",
+          "lp": 69,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-06T21:28:21Z",
+          "lp": 90,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-06T22:08:19Z",
+          "lp": 12,
+          "rango": "Silver",
+          "division": "I"
+        },
+        {
+          "fecha": "2026-09-06T22:52:19Z",
+          "lp": 94,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-07T10:20:32Z",
+          "lp": 75,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-07T20:00:57Z",
+          "lp": 55,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-08T21:00:52Z",
+          "lp": 34,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-09T18:00:55Z",
+          "lp": 13,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-09T18:50:33Z",
+          "lp": 32,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-10T21:44:57Z",
+          "lp": 11,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-10T22:30:46Z",
+          "lp": 90,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-11T21:32:22Z",
+          "lp": 8,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-11T22:20:32Z",
+          "lp": 87,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-11T23:14:20Z",
+          "lp": 23,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-13T21:34:21Z",
+          "lp": 41,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-15T23:00:53Z",
+          "lp": 60,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-15T23:30:46Z",
+          "lp": 79,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-16T00:00:54Z",
+          "lp": 58,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-16T22:58:21Z",
+          "lp": 77,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-16T23:48:20Z",
+          "lp": 56,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-17T00:26:20Z",
+          "lp": 35,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-17T21:01:16Z",
+          "lp": 14,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-17T22:28:20Z",
+          "lp": 93,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-17T23:06:24Z",
+          "lp": 12,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-18T21:20:32Z",
+          "lp": 90,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-18T21:56:23Z",
+          "lp": 8,
+          "rango": "Silver",
+          "division": "II"
+        },
+        {
+          "fecha": "2026-09-18T22:44:19Z",
+          "lp": 86,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-18T23:26:22Z",
+          "lp": 63,
+          "rango": "Silver",
+          "division": "III"
+        },
+        {
+          "fecha": "2026-09-19T00:06:24Z",
+          "lp": 80,
+          "rango": "Silver",
+          "division": "III"
+        }
+      ],
+      "historial": [
+        {
+          "match_id": "LA1_1749629740",
+          "campeon": "Illaoi",
+          "kda": "3/6/6 (1.5)",
+          "resultado": "Victoria",
+          "duracion": "34min",
+          "lp_change": 17,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerTeleport"
+          ],
+          "duo_con": [],
+          "perk_principal": 8010,
+          "estilo_secundario": 8400,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749623296",
+          "campeon": "Illaoi",
+          "kda": "5/10/10 (1.5)",
+          "resultado": "Derrota",
+          "duracion": "37min",
+          "lp_change": -23,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerTeleport"
+          ],
+          "duo_con": [],
+          "perk_principal": 8010,
+          "estilo_secundario": 8400,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749616201",
+          "campeon": "Illaoi",
+          "kda": "7/5/3 (2.0)",
+          "resultado": "Derrota",
+          "duracion": "33min",
+          "lp_change": -22,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerTeleport"
+          ],
+          "duo_con": [],
+          "perk_principal": 8010,
+          "estilo_secundario": 8400,
+          "wards_control": 1,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749613562",
+          "campeon": "Ziggs",
+          "kda": "—",
+          "resultado": "Remake",
+          "duracion": "1:11",
+          "lp_change": null,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerTeleport"
+          ],
+          "duo_con": [],
+          "perk_principal": 8229,
+          "estilo_secundario": 8000,
+          "wards_control": null,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749607431",
+          "campeon": "Illaoi",
+          "kda": "3/7/12 (2.14)",
+          "resultado": "Victoria",
+          "duracion": "30min",
+          "lp_change": 18,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerTeleport"
+          ],
+          "duo_con": [],
+          "perk_principal": 8010,
+          "estilo_secundario": 8400,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749597610",
+          "campeon": "Darius",
+          "kda": "8/6/4 (2.0)",
+          "resultado": "Derrota",
+          "duracion": "37min",
+          "lp_change": -22,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerDot"
+          ],
+          "duo_con": [],
+          "perk_principal": 8010,
+          "estilo_secundario": 8400,
+          "wards_control": 1,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749595849",
+          "campeon": "Kled",
+          "kda": "0/1/0 (0.0)",
+          "resultado": "Derrota",
+          "duracion": "5min",
+          "lp_change": -22,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerDot"
+          ],
+          "duo_con": [],
+          "perk_principal": 8010,
+          "estilo_secundario": 8400,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749399738",
+          "campeon": "Darius",
+          "kda": "4/5/3 (1.4)",
+          "resultado": "Victoria",
+          "duracion": "30min",
+          "lp_change": 19,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerDot"
+          ],
+          "duo_con": [],
+          "perk_principal": 8010,
+          "estilo_secundario": 8400,
+          "wards_control": 0,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749392697",
+          "campeon": "Darius",
+          "kda": "7/5/3 (2.0)",
+          "resultado": "Derrota",
+          "duracion": "31min",
+          "lp_change": -21,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerDot"
+          ],
+          "duo_con": [],
+          "perk_principal": 8010,
+          "estilo_secundario": 8400,
+          "wards_control": 1,
+          "posible_egida": false
+        },
+        {
+          "match_id": "LA1_1749390984",
+          "campeon": "Lux",
+          "kda": "—",
+          "resultado": "Remake",
+          "duracion": "1:12",
+          "lp_change": null,
+          "hechizos": [
+            "SummonerFlash",
+            "SummonerTeleport"
+          ],
+          "duo_con": [],
+          "perk_principal": 8229,
+          "estilo_secundario": 8100,
+          "wards_control": null,
+          "posible_egida": false
+        }
+      ],
+      "kills_recientes": 37,
+      "pentakills_recientes": 0,
+      "vision_promedio_reciente": 24,
+      "kills_semana": 52,
+      "pentakills_semana": 0,
+      "vision_promedio_semana": 25,
+      "primeras_sangre_semana": 0,
+      "kda_promedio_semana": 1.68,
+      "kda_perfecto_semana": false,
+      "campeones_ganados_semana": 3,
+      "asistencias_semana": 76,
+      "partidas_semana": 15,
+      "partidas_semana_detalle": [
+        {
+          "fin_seg": 1789776297.395,
+          "kills": 3,
+          "muertes": 6,
+          "asistencias": 6,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 26,
+          "campeon": "Illaoi",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 221,
+          "duracion_seg": 2041,
+          "damage_taken": 34822,
+          "danio_recibido_pct": 19.2,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 1,
+          "tiempo_cc": 14
+        },
+        {
+          "fin_seg": 1789773960.819,
+          "kills": 5,
+          "muertes": 10,
+          "asistencias": 10,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 35,
+          "campeon": "Illaoi",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 225,
+          "duracion_seg": 2264,
+          "damage_taken": 51104,
+          "danio_recibido_pct": 19.8,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 10
+        },
+        {
+          "fin_seg": 1789771403.717,
+          "kills": 7,
+          "muertes": 5,
+          "asistencias": 3,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 23,
+          "campeon": "Illaoi",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 258,
+          "duracion_seg": 1993,
+          "damage_taken": 40849,
+          "danio_recibido_pct": 24.5,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 1,
+          "tiempo_cc": 6
+        },
+        {
+          "fin_seg": 1789768490.164,
+          "kills": 3,
+          "muertes": 7,
+          "asistencias": 12,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 27,
+          "campeon": "Illaoi",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 148,
+          "duracion_seg": 1805,
+          "damage_taken": 34235,
+          "danio_recibido_pct": 23.9,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 4,
+          "tiempo_cc": 8
+        },
+        {
+          "fin_seg": 1789766320.928,
+          "kills": 8,
+          "muertes": 6,
+          "asistencias": 4,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 34,
+          "campeon": "Darius",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 200,
+          "duracion_seg": 2275,
+          "damage_taken": 34843,
+          "danio_recibido_pct": 21.4,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 1,
+          "tiempo_cc": 32
+        },
+        {
+          "fin_seg": 1789763652.991,
+          "kills": 0,
+          "muertes": 1,
+          "asistencias": 0,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 4,
+          "campeon": "Kled",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 15,
+          "duracion_seg": 341,
+          "damage_taken": 2309,
+          "danio_recibido_pct": 19.4,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 0
+        },
+        {
+          "fin_seg": 1789686285.382,
+          "kills": 4,
+          "muertes": 5,
+          "asistencias": 3,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 23,
+          "campeon": "Darius",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 173,
+          "duracion_seg": 1830,
+          "damage_taken": 23978,
+          "danio_recibido_pct": 18.8,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 3,
+          "tiempo_cc": 23
+        },
+        {
+          "fin_seg": 1789684091.06,
+          "kills": 7,
+          "muertes": 5,
+          "asistencias": 3,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 16,
+          "campeon": "Darius",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 164,
+          "duracion_seg": 1877,
+          "damage_taken": 32039,
+          "danio_recibido_pct": 21.0,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 17
+        },
+        {
+          "fin_seg": 1789678871.533,
+          "kills": 2,
+          "muertes": 4,
+          "asistencias": 5,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 45,
+          "campeon": "Taric",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 31,
+          "duracion_seg": 1389,
+          "damage_taken": 16731,
+          "danio_recibido_pct": 16.1,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 60
+        },
+        {
+          "fin_seg": 1789604710.943,
+          "kills": 2,
+          "muertes": 9,
+          "asistencias": 6,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 30,
+          "campeon": "Kled",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 124,
+          "duracion_seg": 1888,
+          "damage_taken": 34354,
+          "danio_recibido_pct": 26.2,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 7
+        },
+        {
+          "fin_seg": 1789602462.69,
+          "kills": 3,
+          "muertes": 5,
+          "asistencias": 5,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 21,
+          "campeon": "Kled",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 138,
+          "duracion_seg": 1583,
+          "damage_taken": 31155,
+          "danio_recibido_pct": 21.4,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 1,
+          "tiempo_cc": 4
+        },
+        {
+          "fin_seg": 1789599412.038,
+          "kills": 1,
+          "muertes": 8,
+          "asistencias": 7,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 34,
+          "campeon": "Kled",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 181,
+          "duracion_seg": 2215,
+          "damage_taken": 43684,
+          "danio_recibido_pct": 23.6,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 3
+        },
+        {
+          "fin_seg": 1789516784.575,
+          "kills": 2,
+          "muertes": 2,
+          "asistencias": 0,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 13,
+          "campeon": "Kled",
+          "victoria": false,
+          "duo_con": [],
+          "cs": 78,
+          "duracion_seg": 1148,
+          "damage_taken": 16227,
+          "danio_recibido_pct": 21.5,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 0,
+          "tiempo_cc": 11
+        },
+        {
+          "fin_seg": 1789514958.004,
+          "kills": 3,
+          "muertes": 1,
+          "asistencias": 3,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 20,
+          "campeon": "Kled",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 118,
+          "duracion_seg": 1384,
+          "damage_taken": 17213,
+          "danio_recibido_pct": 20.2,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 1,
+          "tiempo_cc": 3
+        },
+        {
+          "fin_seg": 1789513204.19,
+          "kills": 2,
+          "muertes": 2,
+          "asistencias": 9,
+          "pentakills": 0,
+          "primera_sangre": false,
+          "vision": 30,
+          "campeon": "Kled",
+          "victoria": true,
+          "duo_con": [],
+          "cs": 159,
+          "duracion_seg": 1782,
+          "damage_taken": 28835,
+          "danio_recibido_pct": 26.0,
+          "objetivos_robados": 0,
+          "estructuras_destruidas": 2,
+          "tiempo_cc": 8
+        }
+      ],
+      "duo_semana": null,
+      "cs_min_semana": {
+        "cs_por_min": 7.8,
+        "cs": 258,
+        "campeon": "Illaoi"
+      },
+      "danio_recibido_semana": {
+        "danio_recibido_pct": 26.2,
+        "damage_taken": 34354,
+        "campeon": "Kled"
+      },
+      "objetivos_robados_semana": 0,
+      "estructuras_destruidas_semana": 14,
+      "tiempo_cc_semana": 206,
+      "max_partidas_en_un_dia": 0,
+      "primera_victoria_hoy": null,
+      "dia_referencia": 1789963200
+    }
+  ],
+  "titulares": {
+    "agresivo": {
+      "jugador": "adrianNOOBYT",
+      "valor": 3,
+      "detalle": "3 primeras sangre"
+    },
+    "kda_player": {
+      "jugador": "adrianNOOBYT",
+      "valor": 2.08,
+      "detalle": "2.08 KDA"
+    },
+    "champion_pool": {
+      "jugador": "Ostia",
+      "valor": 3,
+      "detalle": "3 campeones distintos ganados"
+    },
+    "asistente": {
+      "jugador": "adrianNOOBYT",
+      "valor": 120,
+      "detalle": "120 asistencias"
+    },
+    "farmeador": {
+      "jugador": "Ostia",
+      "valor": 7.8,
+      "detalle": "7.8 CS/min con Illaoi"
+    },
+    "defensor": {
+      "jugador": "adrianNOOBYT",
+      "valor": 30.2,
+      "detalle": "30.2% del daño de su equipo (39,120) con Trundle"
+    },
+    "pentakills": null,
+    "escalador": {
+      "jugador": "adrianNOOBYT",
+      "valor": 111,
+      "detalle": "Mejor jugador de la semana"
+    },
+    "tortuga": {
+      "jugador": "Pinea",
+      "valor": 1,
+      "detalle": "1 partida esta semana"
+    },
+    "duo_dinamico": {
+      "jugador": "Pinea",
+      "valor": 1,
+      "detalle": "con El Buñuelito (1 partida juntos)"
+    },
+    "ladron": null,
+    "destructor": {
+      "jugador": "adrianNOOBYT",
+      "valor": 22,
+      "detalle": "22 estructuras destruidas"
+    },
+    "stop": {
+      "jugador": "Ostia",
+      "valor": 206,
+      "detalle": "206s de CC aplicado"
+    }
+  },
+  "eventos": [
+    {
+      "timestamp": "2026-09-21T07:26:23Z",
+      "tipo": "badge_semanal",
+      "categoria": "champion_pool",
+      "categoria_label": "Maestro del Champion Pool",
+      "icono": "🎭",
+      "jugador_nuevo": "Ostia",
+      "jugador_anterior": "adrianNOOBYT",
+      "detalle": "3 campeones distintos ganados"
+    },
+    {
+      "timestamp": "2026-09-21T07:26:23Z",
+      "tipo": "badge_semanal",
+      "categoria": "stop",
+      "categoria_label": "Stop",
+      "icono": "🛑",
+      "jugador_nuevo": "Ostia",
+      "jugador_anterior": "adrianNOOBYT",
+      "detalle": "206s de CC aplicado"
+    },
+    {
+      "timestamp": "2026-09-21T02:40:32Z",
+      "tipo": "badge_semanal",
+      "categoria": "farmeador",
+      "categoria_label": "El Farmeador",
+      "icono": "🌾",
+      "jugador_nuevo": "Ostia",
+      "jugador_anterior": "Pinea",
+      "detalle": "7.8 CS/min con Illaoi"
+    },
+    {
+      "timestamp": "2026-09-20T19:06:21Z",
+      "tipo": "logro_partida",
+      "categoria": "ace:LA1_1750070897",
+      "icono": "⚔️",
+      "categoria_label": "Ace Perfecto",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": null,
+      "detalle": "Akali aniquiló al equipo rival sin bajas propias"
+    },
+    {
+      "timestamp": "2026-09-20T19:06:21Z",
+      "tipo": "record_lp",
+      "icono": "📈",
+      "categoria_label": "Récord de temporada",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": null,
+      "detalle": "Gold II (92 LP)"
+    },
+    {
+      "timestamp": "2026-09-20T18:14:19Z",
+      "tipo": "logro_partida",
+      "categoria": "ace:LA1_1750063623",
+      "icono": "⚔️",
+      "categoria_label": "Ace Perfecto",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": null,
+      "detalle": "Akali aniquiló al equipo rival sin bajas propias"
+    },
+    {
+      "timestamp": "2026-09-20T18:14:19Z",
+      "tipo": "logro_partida",
+      "categoria": "terminador:LA1_1750063623",
+      "icono": "💣",
+      "categoria_label": "Terminador",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": null,
+      "detalle": "Akali dio el golpe final al Nexus"
+    },
+    {
+      "timestamp": "2026-09-20T18:14:19Z",
+      "tipo": "primera_victoria_dia",
+      "icono": "🌅",
+      "categoria_label": "Primera Victoria del Día",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": null,
+      "detalle": null
+    },
+    {
+      "timestamp": "2026-09-20T09:04:21Z",
+      "tipo": "badge_semanal",
+      "categoria": "kda_player",
+      "categoria_label": "KDA Player",
+      "icono": "📊",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": "ゆうき まこと",
+      "detalle": "2.11 KDA"
+    },
+    {
+      "timestamp": "2026-09-20T09:04:21Z",
+      "tipo": "badge_semanal",
+      "categoria": "tortuga",
+      "categoria_label": "El Tortuga",
+      "icono": "🐢",
+      "jugador_nuevo": "Pinea",
+      "jugador_anterior": "ゆうき まこと",
+      "detalle": "4 partidas esta semana"
+    },
+    {
+      "timestamp": "2026-09-20T08:18:21Z",
+      "tipo": "badge_semanal",
+      "categoria": "defensor",
+      "categoria_label": "El Defensor",
+      "icono": "🛡️",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": "ゆうき まこと",
+      "detalle": "30.2% del daño de su equipo (39,120) con Trundle"
+    },
+    {
+      "timestamp": "2026-09-19T22:34:22Z",
+      "tipo": "logro_partida",
+      "categoria": "ace:LA1_1749857683",
+      "icono": "⚔️",
+      "categoria_label": "Ace Perfecto",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": null,
+      "detalle": "Akali aniquiló al equipo rival sin bajas propias"
+    },
+    {
+      "timestamp": "2026-09-19T21:42:20Z",
+      "tipo": "record_lp",
+      "icono": "📈",
+      "categoria_label": "Récord de temporada",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": null,
+      "detalle": "Gold II (72 LP)"
+    },
+    {
+      "timestamp": "2026-09-19T20:56:20Z",
+      "tipo": "record_lp",
+      "icono": "📈",
+      "categoria_label": "Récord de temporada",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": null,
+      "detalle": "Gold II (52 LP)"
+    },
+    {
+      "timestamp": "2026-09-19T20:56:20Z",
+      "tipo": "badge_semanal",
+      "categoria": "stop",
+      "categoria_label": "Stop",
+      "icono": "🛑",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": "Ostia",
+      "detalle": "216s de CC aplicado"
+    },
+    {
+      "timestamp": "2026-09-19T16:46:20Z",
+      "tipo": "logro_partida",
+      "categoria": "terminador:LA1_1749793925",
+      "icono": "💣",
+      "categoria_label": "Terminador",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": null,
+      "detalle": "Akali dio el golpe final al Nexus"
+    },
+    {
+      "timestamp": "2026-09-19T16:46:20Z",
+      "tipo": "adelantamiento",
+      "icono": "🔥",
+      "categoria_label": "Cambio de posición",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": "El Buñuelito",
+      "top_posicion": 3,
+      "detalle": null
+    },
+    {
+      "timestamp": "2026-09-19T16:46:20Z",
+      "tipo": "primera_victoria_dia",
+      "icono": "🌅",
+      "categoria_label": "Primera Victoria del Día",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": null,
+      "detalle": null
+    },
+    {
+      "timestamp": "2026-09-19T13:10:32Z",
+      "tipo": "badge_semanal",
+      "categoria": "tortuga",
+      "categoria_label": "El Tortuga",
+      "icono": "🐢",
+      "jugador_nuevo": "ゆうき まこと",
+      "jugador_anterior": "Galactic Shark",
+      "detalle": "2 partidas esta semana"
+    },
+    {
+      "timestamp": "2026-09-19T11:56:19Z",
+      "tipo": "badge_semanal",
+      "categoria": "agresivo",
+      "categoria_label": "Agresivo",
+      "icono": "🩸",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": "Galactic Shark",
+      "detalle": "2 primeras sangre"
+    },
+    {
+      "timestamp": "2026-09-19T11:56:19Z",
+      "tipo": "badge_semanal",
+      "categoria": "kda_player",
+      "categoria_label": "KDA Player",
+      "icono": "📊",
+      "jugador_nuevo": "ゆうき まこと",
+      "jugador_anterior": "adrianNOOBYT",
+      "detalle": "2.5 KDA"
+    },
+    {
+      "timestamp": "2026-09-19T05:48:19Z",
+      "tipo": "badge_semanal",
+      "categoria": "destructor",
+      "categoria_label": "El Destructor",
+      "icono": "💥",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": "Ostia",
+      "detalle": "16 estructuras destruidas"
+    },
+    {
+      "timestamp": "2026-09-19T05:48:19Z",
+      "tipo": "adelantamiento",
+      "icono": "🔥",
+      "categoria_label": "Cambio de posición",
+      "jugador_nuevo": "El Buñuelito",
+      "jugador_anterior": "adrianNOOBYT",
+      "top_posicion": 3,
+      "detalle": null
+    },
+    {
+      "timestamp": "2026-09-19T03:56:20Z",
+      "tipo": "badge_semanal",
+      "categoria": "agresivo",
+      "categoria_label": "Agresivo",
+      "icono": "🩸",
+      "jugador_nuevo": "Galactic Shark",
+      "jugador_anterior": "Pinea",
+      "detalle": "2 primeras sangre"
+    },
+    {
+      "timestamp": "2026-09-19T02:38:19Z",
+      "tipo": "badge_semanal",
+      "categoria": "stop",
+      "categoria_label": "Stop",
+      "icono": "🛑",
+      "jugador_nuevo": "Ostia",
+      "jugador_anterior": "El Buñuelito",
+      "detalle": "208s de CC aplicado"
+    },
+    {
+      "timestamp": "2026-09-19T01:44:20Z",
+      "tipo": "badge_semanal",
+      "categoria": "champion_pool",
+      "categoria_label": "Maestro del Champion Pool",
+      "icono": "🎭",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": "El Buñuelito",
+      "detalle": "3 campeones distintos ganados"
+    },
+    {
+      "timestamp": "2026-09-19T00:06:24Z",
+      "tipo": "badge_semanal",
+      "categoria": "destructor",
+      "categoria_label": "El Destructor",
+      "icono": "💥",
+      "jugador_nuevo": "Ostia",
+      "jugador_anterior": "adrianNOOBYT",
+      "detalle": "16 estructuras destruidas"
+    },
+    {
+      "timestamp": "2026-09-18T23:14:26Z",
+      "tipo": "badge_semanal",
+      "categoria": "champion_pool",
+      "categoria_label": "Maestro del Champion Pool",
+      "icono": "🎭",
+      "jugador_nuevo": "El Buñuelito",
+      "jugador_anterior": "Ostia",
+      "detalle": "3 campeones distintos ganados"
+    },
+    {
+      "timestamp": "2026-09-18T23:14:26Z",
+      "tipo": "badge_semanal",
+      "categoria": "destructor",
+      "categoria_label": "El Destructor",
+      "icono": "💥",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": "Ostia",
+      "detalle": "15 estructuras destruidas"
+    },
+    {
+      "timestamp": "2026-09-18T22:44:19Z",
+      "tipo": "badge_semanal",
+      "categoria": "destructor",
+      "categoria_label": "El Destructor",
+      "icono": "💥",
+      "jugador_nuevo": "Ostia",
+      "jugador_anterior": "adrianNOOBYT",
+      "detalle": "16 estructuras destruidas"
+    },
+    {
+      "timestamp": "2026-09-18T06:06:20Z",
+      "tipo": "logro_partida",
+      "categoria": "ace:LA1_1749516886",
+      "icono": "⚔️",
+      "categoria_label": "Ace Perfecto",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": null,
+      "detalle": "Akali aniquiló al equipo rival sin bajas propias"
+    },
+    {
+      "timestamp": "2026-09-18T06:06:20Z",
+      "tipo": "adelantamiento",
+      "icono": "🔥",
+      "categoria_label": "Cambio de posición",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": "El Buñuelito",
+      "top_posicion": 3,
+      "detalle": null
+    },
+    {
+      "timestamp": "2026-09-18T06:06:20Z",
+      "tipo": "primera_victoria_dia",
+      "icono": "🌅",
+      "categoria_label": "Primera Victoria del Día",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": null,
+      "detalle": null
+    },
+    {
+      "timestamp": "2026-09-18T05:18:19Z",
+      "tipo": "adelantamiento",
+      "icono": "🔥",
+      "categoria_label": "Cambio de posición",
+      "jugador_nuevo": "El Buñuelito",
+      "jugador_anterior": "adrianNOOBYT",
+      "top_posicion": 3,
+      "detalle": null
+    },
+    {
+      "timestamp": "2026-09-18T04:42:26Z",
+      "tipo": "badge_semanal",
+      "categoria": "destructor",
+      "categoria_label": "El Destructor",
+      "icono": "💥",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": "Ostia",
+      "detalle": "12 estructuras destruidas"
+    },
+    {
+      "timestamp": "2026-09-18T03:42:18Z",
+      "tipo": "badge_semanal",
+      "categoria": "champion_pool",
+      "categoria_label": "Maestro del Champion Pool",
+      "icono": "🎭",
+      "jugador_nuevo": "Ostia",
+      "jugador_anterior": "El Buñuelito",
+      "detalle": "4 campeones distintos ganados"
+    },
+    {
+      "timestamp": "2026-09-17T23:06:24Z",
+      "tipo": "badge_semanal",
+      "categoria": "destructor",
+      "categoria_label": "El Destructor",
+      "icono": "💥",
+      "jugador_nuevo": "Ostia",
+      "jugador_anterior": "Pinea",
+      "detalle": "12 estructuras destruidas"
+    },
+    {
+      "timestamp": "2026-09-17T05:48:21Z",
+      "tipo": "badge_semanal",
+      "categoria": "destructor",
+      "categoria_label": "El Destructor",
+      "icono": "💥",
+      "jugador_nuevo": "Pinea",
+      "jugador_anterior": "adrianNOOBYT",
+      "detalle": "11 estructuras destruidas"
+    },
+    {
+      "timestamp": "2026-09-17T04:44:20Z",
+      "tipo": "logro_partida",
+      "categoria": "ace:LA1_1749277720",
+      "icono": "⚔️",
+      "categoria_label": "Ace Perfecto",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": null,
+      "detalle": "Akali aniquiló al equipo rival sin bajas propias"
+    },
+    {
+      "timestamp": "2026-09-17T04:44:20Z",
+      "tipo": "record_lp",
+      "icono": "📈",
+      "categoria_label": "Récord de temporada",
+      "jugador_nuevo": "adrianNOOBYT",
+      "jugador_anterior": null,
+      "detalle": "Gold II (48 LP)"
+    }
+  ],
+  "titular_primera_victoria_dia": null,
+  "dia_referencia_eventos": 1789963200,
+  "ranking_posiciones": {
+    "ゆうき まこと#1411": 1,
+    "Pinea#Pinea": 2,
+    "adrianNOOBYT#LAN": 3,
+    "El Buñuelito#KyA": 4,
+    "Galactic Shark#AYK": 5,
+    "Ostia#LAN": 6
+  },
+  "tiempo_top1": {
+    "ゆうき まこと": 29.470161
+  },
+  "rey_temporada": {
+    "jugador": "ゆうき まこと",
+    "dias": 29.5
+  }
+}
