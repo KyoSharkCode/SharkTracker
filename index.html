@@ -93,16 +93,24 @@
   .rank-head, .rank-row{display:flex; align-items:center; gap:14px;}
   .rank-head{padding:0 16px 8px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint);}
   .rank-list{display:flex; flex-direction:column; gap:6px;}
-  .rank-row{padding:12px 16px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); position:relative; overflow:hidden;}
-  .rank-row.streak-fire{background:linear-gradient(90deg, rgba(255,95,61,.10), var(--panel) 60%); border-color:rgba(255,95,61,.5); box-shadow:inset 0 0 16px rgba(255,95,61,.18);}
-  .rank-row.streak-ice{background:linear-gradient(90deg, rgba(125,211,252,.09), var(--panel) 60%); border-color:rgba(125,211,252,.45); box-shadow:inset 0 0 16px rgba(125,211,252,.2);}
+  .rank-row{min-height:68px; padding:12px 16px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); position:relative; overflow:hidden; display:flex; align-items:center;}
+  .rank-row.streak-fire{border-color:rgba(255,95,61,.5); box-shadow:inset 0 0 16px rgba(255,95,61,.18);}
+  .rank-row.streak-ice{border-color:rgba(125,211,252,.45); box-shadow:inset 0 0 16px rgba(125,211,252,.2);}
+  /* Campeón de fondo — en vivo si está jugando, si no su "representación"
+     elegida (players.favorite_champion). Tamaño FIJO siempre (min-height
+     de la fila de arriba), no depende de si la imagen carga o no. */
+  .row-splash{position:absolute; inset:0; background-size:cover; background-position:center 15%; filter:blur(1.5px) saturate(1.1); opacity:.55;}
+  .row-scrim{position:absolute; inset:0; background:linear-gradient(90deg, rgba(3,8,18,.35) 0%, rgba(3,8,18,.8) 58%, rgba(3,8,18,.94) 100%);}
+  .row-content{position:relative; z-index:1; display:flex; align-items:center; gap:14px; width:100%;}
   .col-pos{width:24px; font-size:14px; font-weight:700; color:var(--text-faint); text-align:center;}
   .col-pos.pos-1{font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:800; color:var(--gold); text-shadow:0 0 10px rgba(250,204,21,.6);}
-  .col-avatar{position:relative; width:44px; height:44px; border-radius:10px; overflow:hidden; background:#0a1622; border:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px;}
+  .col-avatar{position:relative; width:44px; height:44px; border-radius:50%; overflow:hidden; background:#0a1622; border:2px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px;}
+  .col-role{width:70px;}
+  .role-pill{display:inline-block; background:rgba(0,229,199,.14); color:var(--accent); font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px;}
   .col-avatar img{width:100%; height:100%; object-fit:cover; position:absolute; inset:0;}
   .col-name{flex-grow:1; min-width:0; font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .col-name .duo{font-size:10px; font-weight:700; color:var(--accent);}
-  .twitch-dot{width:16px; height:16px; border-radius:4px; flex-shrink:0;}
+  .twitch-icon{width:16px; height:auto; flex-shrink:0;}
   .col-estado{width:96px; display:flex; align-items:center; gap:6px;}
   .champ-mini{width:20px; height:20px; border-radius:5px; overflow:hidden; flex-shrink:0; background:#0a1622; border:1px solid var(--border);}
   .champ-mini img{width:100%; height:100%; object-fit:cover;}
@@ -233,6 +241,10 @@ try {
 } catch (e) { console.warn('DDragon version fetch falló, usando fallback', e); }
 
 const champIconUrl = (champion) => `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${champion}.png`;
+// Splash "loading screen" — mismo formato/URL que ya usaba el sitio viejo
+// (OLD/index.html: PODIUM_SPLASH), sin versión de parche en la ruta.
+const splashUrl = (champion, skin) => `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champion}_${skin ?? 0}.jpg`;
+const profileIconUrl = (iconId) => iconId ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${iconId}.png` : null;
 const emblemUrl = (tier) => `${MINI_CREST_BASE}${(tier || 'unranked').toLowerCase()}.png`;
 const initials = (name) => (name || '?').replace(/[^\p{L}\p{N}]/gu, '').slice(0, 2).toUpperCase();
 // El orden real ya lo calcula el backend (rank_snapshots.elo_score), que sí
@@ -267,23 +279,38 @@ function renderRanking() {
     row.className = 'rank-row';
     const enPartida = p.live?.in_game;
     const wr = p.rank && (p.rank.wins + p.rank.losses) > 0 ? Math.round(p.rank.wins / (p.rank.wins + p.rank.losses) * 100) : null;
+
+    // Campeón de fondo: en vivo si está jugando, si no su "representación"
+    // elegida (players.favorite_champion) — mismo patrón que ya usaba el
+    // podio del sitio viejo (splash + scrim), ahora en toda la fila.
+    const champBg = enPartida ? p.live.champion : p.favorite_champion;
+    const skinBg = enPartida ? 0 : (p.favorite_skin ?? 0);
+    const splashHtml = champBg
+      ? `<div class="row-splash" style="background-image:url('${splashUrl(champBg, skinBg)}')"></div><div class="row-scrim"></div>`
+      : '';
+
+    const iconUrl = profileIconUrl(p.icon_id);
+    const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="">` : initials(p.riot_game_name);
+
     row.innerHTML = `
-      <div class="col-pos ${idx === 0 ? 'pos-1' : ''}">${idx + 1}</div>
-      <div class="col-avatar">${initials(p.riot_game_name)}</div>
-      <div class="col-name">${p.riot_game_name}
-        ${p.profile.twitch_username ? `<div class="twitch-dot" style="background:${p.stream?.is_live ? '#ff5f3d' : '#4a6178'};" title="Twitch"></div>` : ''}
-      </div>
-      <div class="col-estado">
-        ${enPartida ? `<div class="champ-mini"><img src="${champIconUrl(p.live.champion)}" alt=""></div>` : ''}
-        <span class="status-chip ${enPartida ? 'in-game' : 'offline'}">${enPartida ? 'En partida' : 'Offline'}</span>
-      </div>
-      <div class="col-role">${p.primary_role ?? '—'}</div>
-      <div class="col-rank">
-        <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="">
-        <div class="tier-lp"><div class="tier">${p.rank ? (TIER_LABEL[p.rank.tier] ?? p.rank.tier) + ' ' + (p.rank.division ?? '') : 'Unranked'}</div><div class="lp">${p.rank?.lp ?? 0} LP</div></div>
-      </div>
-      <div class="col-wr">
-        ${wr !== null ? `<div class="wr-pct">${wr}%</div><div class="wr-bar"><div class="wr-fill" style="width:${wr}%"></div></div>` : ''}
+      ${splashHtml}
+      <div class="row-content">
+        <div class="col-pos ${idx === 0 ? 'pos-1' : ''}">${idx + 1}</div>
+        <div class="col-avatar">${avatarHtml}</div>
+        <div class="col-name">${p.riot_game_name}
+          ${p.profile.twitch_username ? `<img class="twitch-icon" src="assets/${p.stream?.is_live ? 'Online_Twitch' : 'Offline_Twitch'}.svg" title="Twitch${p.stream?.is_live ? ' en vivo' : ''}" alt="Twitch">` : ''}
+        </div>
+        <div class="col-estado">
+          <span class="status-chip ${enPartida ? 'in-game' : 'offline'}">${enPartida ? 'En partida' : 'Offline'}</span>
+        </div>
+        <div class="col-role">${p.primary_role ? `<span class="role-pill">${p.primary_role}</span>` : '—'}</div>
+        <div class="col-rank">
+          <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="">
+          <div class="tier-lp"><div class="tier">${p.rank ? (TIER_LABEL[p.rank.tier] ?? p.rank.tier) + ' ' + (p.rank.division ?? '') : 'Unranked'}</div><div class="lp">${p.rank?.lp ?? 0} LP</div></div>
+        </div>
+        <div class="col-wr">
+          ${wr !== null ? `<div class="wr-pct">${wr}%</div><div class="wr-bar"><div class="wr-fill" style="width:${wr}%"></div></div>` : ''}
+        </div>
       </div>`;
     listEl.appendChild(row);
   });
@@ -358,9 +385,11 @@ async function render() {
     const rankNum = idx + 1;
     const div = document.createElement('div');
     div.className = `podium-card ${rankNum === 1 ? 'rank1' : ''}`;
+    const champAvatar = p.live?.in_game ? p.live.champion : p.favorite_champion;
+    const avatarHtml = champAvatar ? `<img src="${champIconUrl(champAvatar)}" alt="">` : initials(p.riot_game_name);
     div.innerHTML = `
       <div class="podium-rank-chip">${rankNum === 1 ? '👑 #1' : '#' + rankNum}</div>
-      <div class="podium-avatar">${initials(p.riot_game_name)}</div>
+      <div class="podium-avatar">${avatarHtml}</div>
       <div class="podium-name">${p.riot_game_name}</div>
       <div class="podium-meta">${p.primary_role ?? 'Sin datos'}${p.top_recent_champions?.[0] ? ' — ' + p.top_recent_champions[0].campeon : ''}</div>
       <div class="podium-lp">${p.rank?.lp ?? 0} LP</div>
