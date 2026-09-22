@@ -123,7 +123,7 @@
   .rank-row.streak-ice{border-color:rgba(125,211,252,.45); box-shadow:inset 0 0 16px rgba(125,211,252,.2); animation:ice-pulse 2.8s ease-in-out infinite;}
   @keyframes fire-pulse{0%,100%{box-shadow:inset 0 0 16px rgba(255,95,61,.18);} 50%{box-shadow:inset 0 0 26px rgba(255,95,61,.34);}}
   @keyframes ice-pulse{0%,100%{box-shadow:inset 0 0 16px rgba(125,211,252,.2);} 50%{box-shadow:inset 0 0 24px rgba(125,211,252,.34);}}
-  .rank-row.streak-fire::after, .rank-row.streak-ice::after{content:''; position:absolute; inset:0; z-index:0; pointer-events:none; background-repeat:repeat; background-size:300% 100%; animation:streak-shimmer 3.6s linear infinite;}
+  .rank-row.streak-fire::after, .rank-row.streak-ice::after{content:''; position:absolute; inset:0; z-index:0; pointer-events:none; border-radius:inherit; background-repeat:repeat; background-size:300% 100%; animation:streak-shimmer 3.6s linear infinite;}
   .rank-row.streak-fire::after{background-image:linear-gradient(100deg, transparent 42%, rgba(255,140,80,.2) 50%, transparent 58%);}
   .rank-row.streak-ice::after{background-image:linear-gradient(100deg, transparent 42%, rgba(125,211,252,.2) 50%, transparent 58%);}
   /* Igual que snow-fall/embers-rise: con background-size:300% el "tile"
@@ -135,7 +135,7 @@
      veía el "teleport" al reiniciar. timing linear = velocidad
      constante, sin el tramo rápido/lento de ease-in-out. */
   @keyframes streak-shimmer{0%{background-position:150% 0;} 100%{background-position:0% 0;}}
-  .rank-row.streak-fire::before, .rank-row.streak-ice::before{content:''; position:absolute; inset:0; z-index:0; pointer-events:none;}
+  .rank-row.streak-fire::before, .rank-row.streak-ice::before{content:''; position:absolute; inset:0; z-index:0; pointer-events:none; border-radius:inherit;}
   .rank-row.streak-ice::before{
     background-image:
       radial-gradient(circle, rgba(210,240,255,.95) 1px, transparent 1.6px),
@@ -219,7 +219,15 @@
   /* Historial Individual — últimas 5 partidas SoloQ del jugador
      seleccionado en el ranking (click en una fila). */
   .rank-row{cursor:pointer; transition:border-color .15s ease;}
-  .rank-row.active{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset;}
+  .rank-row.active{border-color:var(--accent);}
+  /* El aro de selección NO va como box-shadow de .rank-row: eso pinta
+     por DEBAJO de .row-content (que tiene z-index:1 para ir encima de
+     las partículas/shimmer de racha), así que la cabecita del campeón
+     lo tapaba en el tramo donde vive. Poniéndolo en un ::after de
+     .row-content (que pinta último, encima de todo su contenido,
+     incluida la cabecita) queda siempre visible, dé la vuelta completa
+     a la fila. */
+  .rank-row.active .row-content::after{content:''; position:absolute; inset:-12px -16px; z-index:5; pointer-events:none; border-radius:var(--radius); box-shadow:0 0 0 1px var(--accent) inset;}
   .history-panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px;}
   .history-hint{font-size:12px; color:var(--text-faint); margin:0 0 14px;}
   .matches{display:flex; flex-direction:column; gap:8px;}
