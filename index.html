@@ -1123,8 +1123,8 @@ setInterval(tickLiveIndicator, 1000);
 
 // ── Realtime — Supabase avisa al instante cuando cambia algo en
 // estas tablas; se agrupan avisos que lleguen muy seguidos (p.ej.
-// los 6 rangos actualizándose en la misma corrida) en un solo
-// redibujado, en vez de redibujar 6 veces en el mismo segundo.
+// varios rangos actualizándose en la misma corrida) en un solo
+// redibujado, en vez de redibujar varias veces en el mismo segundo.
 let rerenderTimer = null;
 function scheduleRerender() {
   clearTimeout(rerenderTimer);
@@ -1138,6 +1138,11 @@ supabase.channel('sharktracker-live')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'stream_status' }, scheduleRerender)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'weekly_badges' }, scheduleRerender)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, scheduleRerender)
+  // matches/match_participants: sin esto, el Historial Individual y la
+  // racha 🔥/❄️ solo se refrescaban "de rebote" cuando el mismo sync
+  // tocaba rank_snapshots también. Con esto quedan cubiertos aparte.
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, scheduleRerender)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'match_participants' }, scheduleRerender)
   .subscribe();
 </script>
 </body>
