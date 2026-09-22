@@ -188,9 +188,9 @@
   .avatar-circle{width:100%; height:100%; border-radius:50%; overflow:hidden; background:#0a1622; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px;}
   /* Ícono de Twitch — separado del nombre, siempre clickeable, y se
      pone rojo cuando está en vivo (filtro CSS, el asset es un PNG). */
-  .twitch-badge{position:absolute; bottom:-3px; right:-3px; width:18px; height:18px; border-radius:50%; background:var(--bg); box-shadow:0 0 0 1px var(--border); display:flex; align-items:center; justify-content:center; text-decoration:none; z-index:2;}
+  .twitch-badge{position:absolute; bottom:-3px; right:-3px; width:18px; height:18px; display:flex; align-items:center; justify-content:center; text-decoration:none; z-index:2; filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));}
   .twitch-badge img{width:100%; height:100%; display:block;}
-  .twitch-badge.live{box-shadow:0 0 0 1px var(--danger), 0 0 8px var(--danger-glow);}
+  .twitch-badge.live{border-radius:50%; box-shadow:0 0 0 1px var(--danger), 0 0 8px var(--danger-glow);}
   .twitch-badge.live img{filter:brightness(0) saturate(100%) invert(46%) sepia(89%) saturate(1657%) hue-rotate(325deg) brightness(103%) contrast(101%);}
   .streak-icon{font-size:13px; display:inline-block;}
   .rank-row.streak-fire .streak-icon{animation:fire-flicker 1.1s ease-in-out infinite; filter:drop-shadow(0 0 4px rgba(255,130,70,.8));}
