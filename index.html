@@ -192,7 +192,6 @@
   .role-pill{display:inline-block; background:rgba(0,229,199,.14); color:var(--accent); font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px;}
   .avatar-circle img{width:100%; height:100%; object-fit:cover;}
   .col-name{flex-grow:1; min-width:0; font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .col-name .duo{font-size:10px; font-weight:700; color:var(--accent);}
   /* Campeón representativo — en vivo si está jugando, si no su campeón
      elegido. Franja de alto completo de la fila (no una cajita), corte
      diagonal, difuminada — sutil, no ocupa todo el fondo de la fila
@@ -204,7 +203,11 @@
   .col-champ-outer::before{content:''; position:absolute; inset:0 -2px; background-image:var(--champbg); background-size:cover; background-position:center 18%; filter:saturate(1.05) brightness(.55);}
   .col-champ-outer::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(3,8,18,.1), rgba(3,8,18,.55) 55%, rgba(3,8,18,.82) 100%);}
   .col-champ-outer.live::after{background:linear-gradient(90deg, rgba(255,95,61,.14), rgba(3,8,18,.5) 55%, rgba(3,8,18,.78) 100%);}
-  .col-estado{width:96px; display:flex; align-items:center; gap:6px;}
+  .col-estado{width:96px; display:flex; flex-direction:column; align-items:flex-start; gap:3px;}
+  /* Dúo en vivo: dos+ del roster en la misma partida ahora mismo,
+     mismo equipo — chip pequeño bajo "En partida", igual que hacía el
+     sitio viejo con duo_con. */
+  .duo-tag{font-size:10px; font-weight:700; color:var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
   .champ-mini{width:20px; height:20px; border-radius:5px; overflow:hidden; flex-shrink:0; background:#0a1622; border:1px solid var(--border);}
   .champ-mini img{width:100%; height:100%; object-fit:cover;}
   .status-chip{font-size:10px; font-weight:800; padding:4px 8px; border-radius:6px; text-transform:uppercase; white-space:nowrap;}
@@ -594,6 +597,7 @@ function buildRow(p, idx) {
   const streakEmoji = streakType === 'fire' ? '🔥' : streakType === 'ice' ? '❄️' : '';
   const streakTitle = streakType === 'fire' ? 'Racha de victorias' : streakType === 'ice' ? 'Racha de derrotas' : '';
   const enPartida = p.live?.in_game;
+  const duoCon = p.live?.duo_con ?? [];
   const wr = p.rank && (p.rank.wins + p.rank.losses) > 0 ? Math.round(p.rank.wins / (p.rank.wins + p.rank.losses) * 100) : null;
 
   // Top 3 con corona/medalla (con glow) reemplazando el número — el
@@ -629,6 +633,7 @@ function buildRow(p, idx) {
       <div class="col-champ-outer ${enPartida ? 'live' : ''}" ${champBg ? `style="--champbg:url('${splashUrl(champBg, skinBg)}')"` : ''}></div>
       <div class="col-estado">
         <span class="status-chip ${enPartida ? 'in-game' : 'offline'}">${enPartida ? 'En partida' : 'Offline'}</span>
+        ${enPartida && duoCon.length ? `<span class="duo-tag" title="Dúo con ${duoCon.join(', ')}">🎮 con ${duoCon.join(', ')}</span>` : ''}
       </div>
       <div class="col-role">${p.primary_role ? `<span class="role-pill">${p.primary_role}</span>` : '—'}</div>
       <div class="col-rank">
@@ -642,7 +647,7 @@ function buildRow(p, idx) {
 
   row.dataset.signature = JSON.stringify([
     p.id === selectedPlayerId, streakType, posContent, champBg, skinBg,
-    avatarHtml, twitchLive, enPartida, p.primary_role, tierText, lpText, wr,
+    avatarHtml, twitchLive, enPartida, duoCon, p.primary_role, tierText, lpText, wr,
   ]);
 
   // Barrido — si el LP, el rango o el winrate cambiaron desde el último
@@ -731,6 +736,32 @@ async function render() {
   nameById = new Map((players ?? []).map(p => [p.id, p.riot_game_name]));
   playersById = new Map((players ?? []).map(p => [p.id, p]));
 
+  // Dúo en vivo: si dos o más del roster están AHORA MISMO en la misma
+  // partida (mismo game_id) y del mismo equipo, se muestran como dúo
+  // en el chip de estado (igual que hacía el sitio viejo con
+  // liveStatus.duo_con — acá se calcula solo, live_status no trae ese
+  // campo armado, pero sí trae game_id y team, que alcanza).
+  const liveDuoByPlayer = new Map();
+  {
+    const byGame = new Map();
+    for (const l of liveStatus ?? []) {
+      if (!l.in_game || !l.game_id) continue;
+      const list = byGame.get(l.game_id) ?? [];
+      list.push(l);
+      byGame.set(l.game_id, list);
+    }
+    for (const list of byGame.values()) {
+      if (list.length < 2) continue;
+      for (const l of list) {
+        const companions = list
+          .filter(o => o.player_id !== l.player_id && (o.team == null || l.team == null || o.team === l.team))
+          .map(o => nameById.get(o.player_id))
+          .filter(Boolean);
+        if (companions.length) liveDuoByPlayer.set(l.player_id, companions);
+      }
+    }
+  }
+
   const latestRankByPlayer = new Map();
   for (const row of rankSnaps ?? []) {
     if (!latestRankByPlayer.has(row.player_id)) latestRankByPlayer.set(row.player_id, row);
@@ -739,7 +770,7 @@ async function render() {
   roster = (players ?? []).map(p => ({
     ...p,
     profile: profileByPlayer.get(p.id) ?? {},
-    live: liveByPlayer.get(p.id) ?? { in_game: false },
+    live: { ...(liveByPlayer.get(p.id) ?? { in_game: false }), duo_con: liveDuoByPlayer.get(p.id) ?? [] },
     stream: streamByPlayer.get(p.id) ?? { is_live: false },
     rank: latestRankByPlayer.get(p.id) ?? null,
   })).sort((a, b) => (b.rank?.elo_score ?? -1) - (a.rank?.elo_score ?? -1));
