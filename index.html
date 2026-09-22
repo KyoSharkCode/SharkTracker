@@ -135,7 +135,7 @@
       radial-gradient(circle, rgba(210,240,255,.55) 1px, transparent 1.6px),
       radial-gradient(circle, rgba(210,240,255,.85) 1px, transparent 1.6px);
     background-size:42px 42px, 61px 61px, 51px 51px, 73px 73px;
-    background-position:8% 0%, 38% 0%, 68% 0%, 90% 0%;
+    background-position:8% 0px, 38% 0px, 68% 0px, 90% 0px;
     animation:snow-fall 4.5s linear infinite;
   }
   .rank-row.streak-fire::before{
@@ -145,11 +145,15 @@
       radial-gradient(circle, rgba(255,200,120,.6) 1px, transparent 1.6px),
       radial-gradient(circle, rgba(255,95,50,.9) 1px, transparent 1.6px);
     background-size:38px 38px, 56px 56px, 46px 46px, 66px 66px;
-    background-position:14% 100%, 44% 100%, 74% 100%, 92% 100%;
+    background-position:14% 0px, 44% 0px, 74% 0px, 92% 0px;
     animation:embers-rise 3.2s linear infinite;
   }
-  @keyframes snow-fall{from{background-position:8% 0%, 38% 0%, 68% 0%, 90% 0%;} to{background-position:8% 100%, 38% 100%, 68% 100%, 90% 100%;}}
-  @keyframes embers-rise{from{background-position:14% 100%, 44% 100%, 74% 100%, 92% 100%;} to{background-position:14% -20%, 44% -20%, 74% -20%, 92% -20%;}}
+  /* El truco para que el loop no "salte": cada capa se mueve exactamente
+     el alto de SU PROPIO patrón (en px, no en % del contenedor). Como el
+     fondo se repite (tiling), moverse un tile completo vuelve al mismo
+     punto visual exacto — el reinicio queda invisible, se ve continuo. */
+  @keyframes snow-fall{to{background-position:8% 42px, 38% 61px, 68% 51px, 90% 73px;}}
+  @keyframes embers-rise{to{background-position:14% -38px, 44% -56px, 74% -46px, 92% -66px;}}
   .row-content{position:relative; z-index:1; display:flex; align-items:center; gap:14px; width:100%;}
   .col-pos{width:24px; font-size:14px; font-weight:700; color:var(--text-faint); text-align:center;}
   .col-pos.pos-1{font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:800; color:var(--gold); text-shadow:0 0 10px rgba(250,204,21,.6);}
@@ -178,9 +182,12 @@
      diagonal, difuminada — sutil, no ocupa todo el fondo de la fila
      como hacía el splash viejo. */
   .col-champ-outer{align-self:stretch; width:64px; flex-shrink:0; margin:-12px 0; position:relative; overflow:hidden; clip-path:polygon(30% 0,100% 0,70% 100%,0 100%);}
-  .col-champ-outer::before{content:''; position:absolute; inset:-8px; background-image:var(--champbg); background-size:cover; background-position:center 18%; filter:blur(2.5px) saturate(1.15) brightness(.8);}
-  .col-champ-outer::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(0,229,199,.22), rgba(3,8,18,.55) 45%, rgba(3,8,18,.75) 100%);}
-  .col-champ-outer.live::after{background:linear-gradient(90deg, rgba(255,95,61,.28), rgba(3,8,18,.55) 45%, rgba(3,8,18,.75) 100%);}
+  /* Nítido, no borroso — se oscurece con brightness bajo + un degradé
+     encima, así el personaje se ve claro pero queda integrado a la
+     fila (parte del fondo) en vez de robarse la atención. */
+  .col-champ-outer::before{content:''; position:absolute; inset:-2px; background-image:var(--champbg); background-size:cover; background-position:center 18%; filter:saturate(1.05) brightness(.55);}
+  .col-champ-outer::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(3,8,18,.1), rgba(3,8,18,.55) 55%, rgba(3,8,18,.82) 100%);}
+  .col-champ-outer.live::after{background:linear-gradient(90deg, rgba(255,95,61,.14), rgba(3,8,18,.5) 55%, rgba(3,8,18,.78) 100%);}
   .col-estado{width:96px; display:flex; align-items:center; gap:6px;}
   .champ-mini{width:20px; height:20px; border-radius:5px; overflow:hidden; flex-shrink:0; background:#0a1622; border:1px solid var(--border);}
   .champ-mini img{width:100%; height:100%; object-fit:cover;}
