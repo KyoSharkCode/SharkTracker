@@ -97,6 +97,14 @@
   .spotlight-meta{display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:12px; color:var(--text-faint); font-weight:600; margin-top:2px;}
   .spotlight-meta .spells{display:flex; gap:3px;}
   .spotlight-meta .spells img{width:16px; height:16px; border-radius:4px; border:1px solid var(--border); background:#0a1622;}
+  /* Rey de la Temporada — mismo estilo de tarjeta que Primera Victoria,
+     pero la etiqueta va como label arriba del nombre (con la corona en
+     línea) en vez de listón en la esquina, y el ícono de invocador
+     lleva una corona chiquita superpuesta, como se veía en el sitio
+     viejo (SoloQReto). */
+  .rey-avatar-wrap{position:relative; flex-shrink:0;}
+  .rey-crown-badge{position:absolute; top:-6px; left:-6px; width:20px; height:20px; border-radius:50%; background:var(--bg); box-shadow:0 0 0 1px var(--gold); display:flex; align-items:center; justify-content:center; font-size:11px; line-height:1;}
+  .rey-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); display:flex; align-items:center; gap:5px;}
 
   /* Grids de tarjetas (badges recientes / destacados semana) */
   .cards-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
@@ -430,6 +438,7 @@ const timeAgo = (iso) => {
 // se cargan una sola vez y quedan cacheados para toda la sesión.
 let selectedPlayerId = null;
 let nameById = new Map();
+let playersById = new Map();
 const summonerSpellById = {};
 const runeIconById = {};
 let matchCatalogsPromise = null;
@@ -720,6 +729,7 @@ async function render() {
   const streamByPlayer = new Map((streamStatus ?? []).map(s => [s.player_id, s]));
   const badgeByCategory = new Map((weeklyBadges ?? []).map(b => [b.category, b]));
   nameById = new Map((players ?? []).map(p => [p.id, p.riot_game_name]));
+  playersById = new Map((players ?? []).map(p => [p.id, p]));
 
   const latestRankByPlayer = new Map();
   for (const row of rankSnaps ?? []) {
@@ -871,19 +881,30 @@ async function render() {
    'tortuga', 'asistente', 'pentakills', 'duo_dinamico', 'farmeador', 'defensor', 'ladron', 'destructor', 'stop']
     .forEach(c => renderBadgeCard(destacadosEl, c, badgeByCategory, nameById));
 
-  // Rey de la Temporada
+  // Rey de la Temporada — mismo formato que el sitio viejo: ícono real
+  // de invocador con coronita superpuesta, nombre completo (con tag) y
+  // el detalle de días acumulados en el Top 1.
   const reySection = document.getElementById('rey-temporada-section');
   const rey = badgeByCategory.get('rey_temporada');
   if (rey) {
     reySection.style.display = '';
+    const reyPlayer = playersById.get(rey.player_id);
+    const reyIconUrl = profileIconUrl(reyPlayer?.icon_id);
+    const reyAvatarHtml = reyIconUrl ? `<img src="${reyIconUrl}" alt="">` : initials(reyPlayer?.riot_game_name ?? nameById.get(rey.player_id) ?? '?');
+    const reyNombre = reyPlayer
+      ? `${reyPlayer.riot_game_name}${reyPlayer.riot_tag_line ? `#${reyPlayer.riot_tag_line}` : ''}`
+      : (nameById.get(rey.player_id) ?? '?');
     document.getElementById('rey-temporada').innerHTML = `
       <div class="spotlight-card">
-        <div style="font-size:26px;flex-shrink:0;">👑</div>
-        <div style="min-width:0;flex-grow:1;">
-          <div class="info-label">Rey de la Temporada</div>
-          <div style="font-size:14px;font-weight:800;margin-top:2px;">${nameById.get(rey.player_id) ?? '?'}</div>
+        <div class="rey-avatar-wrap">
+          <div class="spotlight-icon">${reyAvatarHtml}</div>
+          <div class="rey-crown-badge">👑</div>
         </div>
-        <div style="font-size:12px;color:var(--gold);font-weight:700;">${rey.detail ?? ''}</div>
+        <div style="min-width:0;flex-grow:1;">
+          <div class="rey-label"><span>👑</span>Rey de la Temporada</div>
+          <div style="font-size:15px;font-weight:800;margin-top:3px;">${reyNombre}</div>
+          <div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:2px;">${rey.detail ?? ''}</div>
+        </div>
       </div>`;
   } else {
     reySection.style.display = 'none';

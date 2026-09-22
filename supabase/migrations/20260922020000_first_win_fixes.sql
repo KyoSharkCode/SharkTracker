@@ -1,5 +1,6 @@
 -- ============================================================
 -- Fixes de "Primera Victoria del Día" (KNOWN_ISSUES.md, puntos 1 y 8)
+-- + el mismo bug de día atrasado aplicado también a "Sin Rendirse"
 -- ============================================================
 
 -- 1) Datos completos de la victoria (issue 8): hoy daily_first_win_state
@@ -16,12 +17,14 @@ alter table daily_first_win_state
   add column if not exists team text,
   add column if not exists duration_seconds integer;
 
--- 2) Bug del día atrasado (issue 1): compute_recent_badges() ya corre
---    cada 3 min y ya calcula el corte de 6AM Madrid (v_day_start) para
---    "Sin Rendirse" — se reutiliza ese mismo cálculo para resetear
---    daily_first_win_state cuando cambia el día y todavía nadie ganó
---    en la ventana nueva (antes nada la tocaba hasta la próxima
---    victoria, y se quedaba pegada mostrando la de ayer).
+-- 2) Bug del día atrasado (issue 1, y el mismo patrón para "Sin
+--    Rendirse"): compute_recent_badges() ya corre cada 3 min y ya
+--    calcula el corte de 6AM Madrid (v_day_start) para "Sin Rendirse"
+--    — se reutiliza ese mismo cálculo para resetear tanto
+--    daily_first_win_state como el badge "sin_rendirse" cuando cambia
+--    el día y todavía nadie jugó/ganó en la ventana nueva (antes nada
+--    los tocaba hasta la próxima partida/victoria, y se quedaban
+--    pegados mostrando el dato de ayer).
 create or replace function compute_recent_badges()
 returns void
 language plpgsql
@@ -82,6 +85,19 @@ begin
     group by mp.player_id
   ) x
   where valor > 0 order by valor desc limit 1;
+
+  -- "Sin Rendirse" tiene el mismo problema que tenía "Primera Victoria"
+  -- (issue 1): si hoy todavía nadie jugó ninguna partida de SoloQ, el
+  -- insert de arriba no mete ninguna fila para esta categoría, así que
+  -- el UPSERT del loop de abajo ni la toca — se quedaba pegada
+  -- mostrando al ganador de AYER como si fuera de hoy. Si no hay
+  -- resultado hoy Y lo que hay guardado es de antes del corte de hoy,
+  -- se borra para que la web muestre "sin datos todavía" en vez del
+  -- dato viejo.
+  if not exists (select 1 from _recent_badge_results where category = 'sin_rendirse') then
+    delete from weekly_badges
+    where category = 'sin_rendirse' and updated_at < v_day_start;
+  end if;
 
   for r in select * from _recent_badge_results loop
     select player_id into v_prev_player from weekly_badges where category = r.category;
