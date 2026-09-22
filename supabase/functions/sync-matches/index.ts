@@ -212,6 +212,10 @@ Deno.serve(async (req) => {
               const jugadorAnterior = mismoDia ? estado?.player_id ?? null : null;
               await supabase.from('daily_first_win_state').update({
                 day_start: diaInicio.toISOString(), player_id: playerId, won_at: endedAtIso,
+                champion: pp.championName, kills: pp.kills, deaths: pp.deaths, assists: pp.assists,
+                summoner_spells: [pp.summoner1Id, pp.summoner2Id],
+                team: pp.teamId === 100 ? 'blue' : 'red',
+                duration_seconds: info.gameDuration,
               }).eq('singleton', true);
               if (jugadorAnterior !== playerId) {
                 await supabase.from('events').insert({

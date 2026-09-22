@@ -42,14 +42,20 @@
 
   /* PODIO */
   .podium-grid{display:flex; align-items:flex-end; gap:18px; margin-bottom:24px;}
-  .podium-card{flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:22px 14px 20px; position:relative; overflow:hidden;}
+  .podium-card{flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:30px 14px 28px; min-height:250px; justify-content:center; position:relative; overflow:hidden;}
   .podium-card > *{position:relative; z-index:1;}
-  .podium-card.rank1{flex:1.4; padding:36px 14px 32px; border-color:var(--accent); background:linear-gradient(180deg, rgba(0,229,199,.16), var(--panel) 65%); box-shadow:0 0 40px var(--accent-glow), 0 0 90px rgba(0,229,199,.18);}
+  .podium-card.rank1{flex:1.4; padding:44px 14px 40px; min-height:300px; border-color:var(--accent); background:linear-gradient(180deg, rgba(0,229,199,.16), var(--panel) 65%); box-shadow:0 0 40px var(--accent-glow), 0 0 90px rgba(0,229,199,.18);}
   /* Fondo de la tarjeta = skin elegida (o campeón en vivo si está jugando) */
   .podium-splash{position:absolute; inset:0; z-index:0; background-size:cover; background-position:center 12%;}
   .podium-scrim{position:absolute; inset:0; z-index:0; background:linear-gradient(180deg, rgba(3,8,18,.2) 0%, rgba(3,8,18,.5) 45%, rgba(3,8,18,.94) 100%);}
   .podium-rank-chip{font-size:10px; font-weight:800; padding:4px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:.1em; background:var(--panel-2); color:var(--text-faint); border:1px solid var(--border); margin-bottom:10px;}
   .podium-card.rank1 .podium-rank-chip{background:var(--accent); color:#032018; border:none;}
+  /* Ícono grande de corona/medalla, con glow, además del chip de texto */
+  .podium-medal{font-size:34px; line-height:1; margin-bottom:8px; filter:drop-shadow(0 0 10px var(--medal-glow, rgba(250,204,21,.7)));}
+  .podium-card.rank1 .podium-medal{font-size:50px; margin-bottom:10px;}
+  .podium-medal.gold{--medal-glow:rgba(250,204,21,.85);}
+  .podium-medal.silver{--medal-glow:rgba(203,213,225,.8);}
+  .podium-medal.bronze{--medal-glow:rgba(240,168,104,.8);}
   .podium-avatar{width:56px; height:56px; border-radius:50%; background:#0a1622; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; color:var(--text-dim); margin-bottom:12px; overflow:hidden;}
   .podium-card.rank1 .podium-avatar{width:88px; height:88px; border:3px solid var(--accent); box-shadow:0 0 24px var(--accent-glow); font-size:22px; color:var(--accent);}
   .podium-avatar img{width:100%; height:100%; object-fit:cover;}
@@ -81,6 +87,11 @@
   .spotlight-badge{position:absolute; top:0; left:0; background:var(--gold); color:#000; font-size:10px; font-weight:800; padding:4px 12px; border-bottom-right-radius:8px; text-transform:uppercase; letter-spacing:.08em;}
   .spotlight-icon{width:52px; height:52px; border-radius:12px; background:rgba(250,204,21,.16); border:2px solid var(--gold); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; overflow:hidden;}
   .spotlight-icon img{width:100%; height:100%; object-fit:cover;}
+  .spotlight-champ{width:36px; height:36px; border-radius:8px; overflow:hidden; border:1px solid var(--gold); flex-shrink:0; background:#0a1622;}
+  .spotlight-champ img{width:100%; height:100%; object-fit:cover;}
+  .spotlight-meta{display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:12px; color:var(--text-faint); font-weight:600; margin-top:2px;}
+  .spotlight-meta .spells{display:flex; gap:3px;}
+  .spotlight-meta .spells img{width:16px; height:16px; border-radius:4px; border:1px solid var(--border); background:#0a1622;}
 
   /* Grids de tarjetas (badges recientes / destacados semana) */
   .cards-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
@@ -110,13 +121,29 @@
   .row-content{position:relative; z-index:1; display:flex; align-items:center; gap:14px; width:100%;}
   .col-pos{width:24px; font-size:14px; font-weight:700; color:var(--text-faint); text-align:center;}
   .col-pos.pos-1{font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:800; color:var(--gold); text-shadow:0 0 10px rgba(250,204,21,.6);}
-  .col-avatar{position:relative; width:44px; height:44px; border-radius:50%; overflow:hidden; background:#0a1622; border:2px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px;}
+  .col-pos.pos-2{font-size:17px; text-shadow:0 0 10px rgba(203,213,225,.65);}
+  .col-pos.pos-3{font-size:17px; text-shadow:0 0 10px rgba(240,168,104,.65);}
+  .col-avatar{position:relative; width:44px; height:44px; flex-shrink:0;}
+  .avatar-circle{width:100%; height:100%; border-radius:50%; overflow:hidden; background:#0a1622; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px;}
+  /* Ícono de Twitch — separado del nombre, siempre clickeable, y se
+     pone rojo cuando está en vivo (filtro CSS, el asset es un PNG). */
+  .twitch-badge{position:absolute; bottom:-3px; right:-3px; width:18px; height:18px; border-radius:50%; background:var(--bg); box-shadow:0 0 0 1px var(--border); display:flex; align-items:center; justify-content:center; text-decoration:none; z-index:2;}
+  .twitch-badge img{width:100%; height:100%; display:block;}
+  .twitch-badge.live{box-shadow:0 0 0 1px var(--danger), 0 0 8px var(--danger-glow);}
+  .twitch-badge.live img{filter:brightness(0) saturate(100%) invert(46%) sepia(89%) saturate(1657%) hue-rotate(325deg) brightness(103%) contrast(101%);}
+  .streak-icon{font-size:13px;}
   .col-role{width:70px;}
   .role-pill{display:inline-block; background:rgba(0,229,199,.14); color:var(--accent); font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px;}
-  .col-avatar img{width:100%; height:100%; object-fit:cover; position:absolute; inset:0;}
+  .avatar-circle img{width:100%; height:100%; object-fit:cover;}
   .col-name{flex-grow:1; min-width:0; font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .col-name .duo{font-size:10px; font-weight:700; color:var(--accent);}
-  .twitch-icon{width:16px; height:auto; flex-shrink:0;}
+  /* Columna de campeón representativo — en vivo si está jugando, si no
+     su campeón elegido (mismo dato que ya usa .row-splash). Corte
+     diagonal con la paleta del sitio, no líneas blancas planas. */
+  .col-champ-outer{width:38px; height:38px; flex-shrink:0; padding:2px; background:var(--accent); box-shadow:0 0 8px var(--accent-glow); clip-path:polygon(20% 0,100% 0,80% 100%,0 100%);}
+  .col-champ-outer.live{background:var(--danger); box-shadow:0 0 10px var(--danger-glow);}
+  .col-champ-inner{width:100%; height:100%; overflow:hidden; background:#0a1622; clip-path:polygon(20% 0,100% 0,80% 100%,0 100%);}
+  .col-champ-inner img{width:100%; height:100%; object-fit:cover;}
   .col-estado{width:96px; display:flex; align-items:center; gap:6px;}
   .champ-mini{width:20px; height:20px; border-radius:5px; overflow:hidden; flex-shrink:0; background:#0a1622; border:1px solid var(--border);}
   .champ-mini img{width:100%; height:100%; object-fit:cover;}
@@ -176,6 +203,27 @@
   .logro-detail{font-size:12px; color:var(--accent); font-weight:600; margin-top:2px;}
   .logro-time{font-size:11px; color:var(--text-faint); flex-shrink:0;}
   .empty{padding:24px; text-align:center; color:var(--text-faint); font-size:13px;}
+
+  /* Cuenta regresiva */
+  .countdown-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px;}
+  .countdown-card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px 18px; text-align:center;}
+  .countdown-label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); margin-bottom:14px;}
+  .countdown-digits{display:flex; justify-content:center; gap:14px;}
+  .cd-unit{display:flex; flex-direction:column; align-items:center; min-width:46px;}
+  .cd-value{font-family:'Rajdhani',sans-serif; font-size:28px; font-weight:800; color:var(--accent); line-height:1;}
+  .cd-caption{font-size:10px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em; margin-top:4px;}
+  .countdown-card.finished .cd-value{color:var(--gold);}
+  @media (max-width:600px){ .countdown-grid{grid-template-columns:1fr;} }
+
+  /* Barrido — cuando un dato en vivo cambia (LP, rango, winrate...) se
+     resalta con un brillo que cruza el elemento, sin reconstruir ni
+     parpadear el resto de la fila. */
+  .value-changed{position:relative; display:inline-block; animation:value-flash .9s ease;}
+  .value-changed::after{content:''; position:absolute; top:0; left:-60%; width:50%; height:100%; pointer-events:none;
+    background:linear-gradient(100deg, transparent, rgba(255,255,255,.75), transparent);
+    animation:sweep-shine .9s ease;}
+  @keyframes value-flash{ 0%{ filter:brightness(1);} 18%{ filter:brightness(1.6) drop-shadow(0 0 6px var(--accent-glow)); } 100%{ filter:brightness(1); } }
+  @keyframes sweep-shine{ from{ left:-60%; } to{ left:130%; } }
 
   footer{margin-top:60px; padding-top:32px; border-top:1px solid var(--border); text-align:center; color:var(--text-dim); font-size:13px;}
 </style>
@@ -245,6 +293,11 @@
   <section>
     <div class="section-title"><span class="bar"></span><h2>Historial de Logros</h2></div>
     <div class="logros-panel" id="logros"></div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="bar"></span><h2>Cuenta Regresiva</h2></div>
+    <div class="countdown-grid" id="countdown-grid"></div>
   </section>
 
   <footer>
@@ -337,41 +390,75 @@ function loadMatchCatalogs() {
 const spellIconUrl = (id) => summonerSpellById[id] ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/spell/${summonerSpellById[id]}` : null;
 const runeIconUrl = (perkId) => runeIconById[perkId] ? `https://ddragon.leagueoflegends.com/cdn/img/${runeIconById[perkId]}` : null;
 
-// Últimas 5 partidas de SoloQ del jugador seleccionado en el ranking.
-async function selectPlayer(id) {
-  selectedPlayerId = id;
-  renderRanking();
-  const panel = document.getElementById('history-panel');
-  panel.innerHTML = `<p class="empty">Cargando...</p>`;
-  await loadMatchCatalogs();
-  if (selectedPlayerId !== id) return;
+// ── Historial reciente de TODOS los jugadores — se trae una sola vez
+// por render() (no una consulta por click), y queda cacheado en memoria.
+// Así cambiar de jugador en "Historial Individual" es instantáneo, y
+// además alimenta el cálculo de racha 🔥/❄️ de la fila del ranking.
+let historyByPlayer = new Map();   // player_id -> hasta 10 partidas recientes de SoloQ, más nuevas primero
+let companionsByMatch = new Map(); // match_id -> [{team, player_id}, ...]
+
+async function loadAllHistories(playerIds) {
+  if (!playerIds.length) { historyByPlayer = new Map(); companionsByMatch = new Map(); return; }
 
   const { data: participaciones } = await supabase
     .from('match_participants')
     .select('*, matches!inner(match_id, duration_seconds, ended_at, queue_id)')
-    .eq('player_id', id)
+    .in('player_id', playerIds)
     .eq('matches.queue_id', 420)
     .order('ended_at', { foreignTable: 'matches', ascending: false })
-    .limit(5);
-  if (selectedPlayerId !== id) return;
+    .limit(300);
 
-  if (!participaciones || participaciones.length === 0) {
+  historyByPlayer = new Map();
+  (participaciones ?? []).forEach(m => {
+    const list = historyByPlayer.get(m.player_id) ?? [];
+    if (list.length < 10) list.push(m);
+    historyByPlayer.set(m.player_id, list);
+  });
+
+  const matchIds = [...new Set((participaciones ?? []).map(m => m.match_id))];
+  const { data: companeros } = matchIds.length
+    ? await supabase.from('match_participants').select('match_id, team, player_id').in('match_id', matchIds)
+    : { data: [] };
+  companionsByMatch = new Map();
+  (companeros ?? []).forEach(c => {
+    const list = companionsByMatch.get(c.match_id) ?? [];
+    list.push(c);
+    companionsByMatch.set(c.match_id, list);
+  });
+}
+
+// Racha de 3+ victorias o derrotas seguidas, contando desde la partida
+// más reciente hacia atrás — mismo criterio que usaba el sitio viejo.
+function getStreakType(id) {
+  const games = historyByPlayer.get(id) ?? [];
+  if (games.length < 3) return null;
+  const primero = games[0].win;
+  let racha = 0;
+  for (const g of games) { if (g.win === primero) racha++; else break; }
+  return racha >= 3 ? (primero ? 'fire' : 'ice') : null;
+}
+
+// Cambiar de jugador seleccionado ya no consulta la red — solo lee
+// del Map que ya está en memoria y redibuja al instante.
+function selectPlayer(id) {
+  selectedPlayerId = id;
+  renderRanking();
+  renderHistoryPanel(id);
+}
+
+function renderHistoryPanel(id) {
+  const panel = document.getElementById('history-panel');
+  const participaciones = (historyByPlayer.get(id) ?? []).slice(0, 5);
+
+  if (participaciones.length === 0) {
     const nombre = nameById.get(id) ?? 'Este jugador';
     panel.innerHTML = `<p class="empty">${nombre} todavía no tiene partidas de SoloQ registradas.</p>`;
     return;
   }
 
-  const matchIds = participaciones.map(m => m.match_id);
-  const { data: companeros } = await supabase
-    .from('match_participants')
-    .select('match_id, team, player_id')
-    .in('match_id', matchIds)
-    .neq('player_id', id);
-  if (selectedPlayerId !== id) return;
-
   const matchesHtml = participaciones.map(m => {
-    const duoNames = (companeros ?? [])
-      .filter(c => c.match_id === m.match_id && c.team === m.team && nameById.has(c.player_id))
+    const duoNames = (companionsByMatch.get(m.match_id) ?? [])
+      .filter(c => c.team === m.team && c.player_id !== id && nameById.has(c.player_id))
       .map(c => nameById.get(c.player_id));
 
     const spellsHtml = (m.summoner_spells ?? [])
@@ -413,7 +500,6 @@ async function selectPlayer(id) {
       </div>`;
   }).join('');
 
-  if (selectedPlayerId !== id) return;
   panel.innerHTML = `<div class="matches">${matchesHtml}</div>`;
 }
 
@@ -426,52 +512,114 @@ TIER_ORDER.slice().reverse().forEach(t => {
 });
 
 let roster = [];
+// Últimos valores mostrados por jugador — para saber si un dato cambió
+// y animarlo con el barrido, y para no redibujar filas que no cambiaron.
+let rowSweepFields = new Map();
+let podiumSweepFields = new Map();
+
+// Arma el HTML de una fila del ranking y calcula su "firma" (todo lo que
+// se ve). Si la firma es igual a la de la fila que ya está en el DOM, esa
+// fila ni se toca — así una fila cambiando no hace parpadear a las demás.
+function buildRow(p, idx) {
+  const streakType = getStreakType(p.id); // 'fire' | 'ice' | null
+  const streakEmoji = streakType === 'fire' ? '🔥' : streakType === 'ice' ? '❄️' : '';
+  const streakTitle = streakType === 'fire' ? 'Racha de victorias' : streakType === 'ice' ? 'Racha de derrotas' : '';
+  const enPartida = p.live?.in_game;
+  const wr = p.rank && (p.rank.wins + p.rank.losses) > 0 ? Math.round(p.rank.wins / (p.rank.wins + p.rank.losses) * 100) : null;
+
+  // Top 3 con corona/medalla (con glow) reemplazando el número — el
+  // resto de las posiciones muestra el número normal.
+  const posClass = idx === 0 ? 'pos-1' : idx === 1 ? 'pos-2' : idx === 2 ? 'pos-3' : '';
+  const posContent = idx === 0 ? '👑' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : (idx + 1);
+
+  // Campeón de fondo: en vivo si está jugando, si no su "representación"
+  // elegida (players.favorite_champion) — mismo patrón que ya usaba el
+  // podio del sitio viejo (splash + scrim), ahora en toda la fila.
+  const champBg = enPartida ? p.live.champion : p.favorite_champion;
+  const skinBg = enPartida ? 0 : (p.favorite_skin ?? 0);
+  const splashHtml = champBg
+    ? `<div class="row-splash" style="background-image:url('${splashUrl(champBg, skinBg)}')"></div><div class="row-scrim"></div>`
+    : '';
+
+  const iconUrl = profileIconUrl(p.icon_id);
+  const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="">` : initials(p.riot_game_name);
+  const twitchLive = !!p.stream?.is_live;
+  const twitchBadgeHtml = p.profile.twitch_username
+    ? `<a class="twitch-badge ${twitchLive ? 'live' : ''}" href="https://twitch.tv/${encodeURIComponent(p.profile.twitch_username)}" target="_blank" rel="noopener" title="Twitch${twitchLive ? ' en vivo' : ''}" onclick="event.stopPropagation()"><img src="assets/${twitchLive ? 'Online_Twitch' : 'Offline_Twitch'}.svg" alt="Twitch"></a>`
+    : '';
+  const tierText = p.rank ? (TIER_LABEL[p.rank.tier] ?? p.rank.tier) + ' ' + (p.rank.division ?? '') : 'Unranked';
+  const lpText = `${p.rank?.lp ?? 0} LP`;
+
+  const row = document.createElement('div');
+  row.dataset.playerId = p.id;
+  row.className = `rank-row ${p.id === selectedPlayerId ? 'active' : ''} ${streakType ? 'streak-' + streakType : ''}`;
+  row.addEventListener('click', () => selectPlayer(p.id));
+  row.innerHTML = `
+    ${splashHtml}
+    <div class="row-content">
+      <div class="col-pos ${posClass}">${posContent}</div>
+      <div class="col-avatar"><div class="avatar-circle">${avatarHtml}</div>${twitchBadgeHtml}</div>
+      <div class="col-name">${p.riot_game_name}${streakEmoji ? ` <span class="streak-icon" title="${streakTitle}">${streakEmoji}</span>` : ''}</div>
+      <div class="col-champ-outer ${enPartida ? 'live' : ''}">
+        <div class="col-champ-inner">${champBg ? `<img src="${champIconUrl(champBg)}" alt="${champBg}">` : ''}</div>
+      </div>
+      <div class="col-estado">
+        <span class="status-chip ${enPartida ? 'in-game' : 'offline'}">${enPartida ? 'En partida' : 'Offline'}</span>
+      </div>
+      <div class="col-role">${p.primary_role ? `<span class="role-pill">${p.primary_role}</span>` : '—'}</div>
+      <div class="col-rank">
+        <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="">
+        <div class="tier-lp"><div class="tier">${tierText}</div><div class="lp">${lpText}</div></div>
+      </div>
+      <div class="col-wr">
+        ${wr !== null ? `<div class="wr-pct">${wr}%</div><div class="wr-bar"><div class="wr-fill" style="width:${wr}%"></div></div>` : ''}
+      </div>
+    </div>`;
+
+  row.dataset.signature = JSON.stringify([
+    p.id === selectedPlayerId, streakType, posContent, champBg, skinBg,
+    avatarHtml, twitchLive, enPartida, p.primary_role, tierText, lpText, wr,
+  ]);
+
+  // Barrido — si el LP, el rango o el winrate cambiaron desde el último
+  // render de este jugador, se resalta solo ese dato puntual.
+  const prev = rowSweepFields.get(p.id);
+  if (prev) {
+    if (prev.lpText !== lpText) row.querySelector('.lp')?.classList.add('value-changed');
+    if (prev.tierText !== tierText) row.querySelector('.tier')?.classList.add('value-changed');
+    if (wr !== null && prev.wr !== wr) row.querySelector('.wr-pct')?.classList.add('value-changed');
+  }
+  rowSweepFields.set(p.id, { lpText, tierText, wr });
+
+  return row;
+}
 
 function renderRanking() {
   const filtro = filterSelect.value;
   const listEl = document.getElementById('ranking-list');
-  listEl.innerHTML = '';
-  roster.forEach((p, idx) => {
-    if (filtro !== 'ALL' && (p.rank?.tier ?? '').toUpperCase() !== filtro) return;
-    const row = document.createElement('div');
-    row.className = `rank-row ${p.id === selectedPlayerId ? 'active' : ''}`;
-    row.addEventListener('click', () => selectPlayer(p.id));
-    const enPartida = p.live?.in_game;
-    const wr = p.rank && (p.rank.wins + p.rank.losses) > 0 ? Math.round(p.rank.wins / (p.rank.wins + p.rank.losses) * 100) : null;
+  const visible = roster.filter(p => filtro === 'ALL' || (p.rank?.tier ?? '').toUpperCase() === filtro);
 
-    // Campeón de fondo: en vivo si está jugando, si no su "representación"
-    // elegida (players.favorite_champion) — mismo patrón que ya usaba el
-    // podio del sitio viejo (splash + scrim), ahora en toda la fila.
-    const champBg = enPartida ? p.live.champion : p.favorite_champion;
-    const skinBg = enPartida ? 0 : (p.favorite_skin ?? 0);
-    const splashHtml = champBg
-      ? `<div class="row-splash" style="background-image:url('${splashUrl(champBg, skinBg)}')"></div><div class="row-scrim"></div>`
-      : '';
+  const existingIds = Array.from(listEl.children).map(el => el.dataset.playerId);
+  const visibleIds = visible.map(p => p.id);
+  const sameSet = existingIds.length === visibleIds.length && existingIds.every((id, i) => id === visibleIds[i]);
 
-    const iconUrl = profileIconUrl(p.icon_id);
-    const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="">` : initials(p.riot_game_name);
+  if (!sameSet) {
+    // Cambió el filtro, o cambió el orden/quién está en el top — no hay
+    // forma barata de parchear eso, se reconstruye la lista completa.
+    listEl.innerHTML = '';
+    visible.forEach((p, idx) => listEl.appendChild(buildRow(p, idx)));
+    return;
+  }
 
-    row.innerHTML = `
-      ${splashHtml}
-      <div class="row-content">
-        <div class="col-pos ${idx === 0 ? 'pos-1' : ''}">${idx + 1}</div>
-        <div class="col-avatar">${avatarHtml}</div>
-        <div class="col-name">${p.riot_game_name}
-          ${p.profile.twitch_username ? `<img class="twitch-icon" src="assets/${p.stream?.is_live ? 'Online_Twitch' : 'Offline_Twitch'}.svg" title="Twitch${p.stream?.is_live ? ' en vivo' : ''}" alt="Twitch">` : ''}
-        </div>
-        <div class="col-estado">
-          <span class="status-chip ${enPartida ? 'in-game' : 'offline'}">${enPartida ? 'En partida' : 'Offline'}</span>
-        </div>
-        <div class="col-role">${p.primary_role ? `<span class="role-pill">${p.primary_role}</span>` : '—'}</div>
-        <div class="col-rank">
-          <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="">
-          <div class="tier-lp"><div class="tier">${p.rank ? (TIER_LABEL[p.rank.tier] ?? p.rank.tier) + ' ' + (p.rank.division ?? '') : 'Unranked'}</div><div class="lp">${p.rank?.lp ?? 0} LP</div></div>
-        </div>
-        <div class="col-wr">
-          ${wr !== null ? `<div class="wr-pct">${wr}%</div><div class="wr-bar"><div class="wr-fill" style="width:${wr}%"></div></div>` : ''}
-        </div>
-      </div>`;
-    listEl.appendChild(row);
+  // Mismo set y mismo orden que ya está en pantalla: cada fila se compara
+  // contra su versión anterior, y solo se reemplaza (y anima) la que
+  // realmente cambió — el resto ni se toca, cero parpadeo.
+  visible.forEach((p, idx) => {
+    const existing = listEl.children[idx];
+    const fresh = buildRow(p, idx);
+    if (existing.dataset.signature !== fresh.dataset.signature) {
+      existing.replaceWith(fresh);
+    }
   });
 }
 filterSelect.addEventListener('change', renderRanking);
@@ -531,6 +679,10 @@ async function render() {
     rank: latestRankByPlayer.get(p.id) ?? null,
   })).sort((a, b) => (b.rank?.elo_score ?? -1) - (a.rank?.elo_score ?? -1));
 
+  // Historial reciente de todos los jugadores (para el panel individual
+  // y para calcular la racha 🔥/❄️) — una sola vez acá, no por click.
+  await Promise.all([loadMatchCatalogs(), loadAllHistories(roster.map(p => p.id))]);
+
   // Header: sesión actual
   const { data: { session } } = await supabase.auth.getSession();
   const authSlot = document.getElementById('auth-slot');
@@ -560,14 +712,26 @@ async function render() {
     // Avatar = ícono de invocador REAL (players.icon_id), no el campeón.
     const iconUrl = profileIconUrl(p.icon_id);
     const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="">` : initials(p.riot_game_name);
+    const medalIcon = rankNum === 1 ? '👑' : rankNum === 2 ? '🥈' : '🥉';
+    const medalClass = rankNum === 1 ? 'gold' : rankNum === 2 ? 'silver' : 'bronze';
+    const tierText = p.rank ? (TIER_LABEL[p.rank.tier] ?? p.rank.tier) + ' ' + (p.rank.division ?? '') : 'Unranked';
+    const lpText = `${p.rank?.lp ?? 0} LP`;
+    // Barrido — si el LP/rango de este jugador cambió desde el último
+    // render, se resalta al insertar la tarjeta (el podio son solo 3
+    // tarjetas, reconstruirlas entero no es el problema de fondo).
+    const prevPodium = podiumSweepFields.get(p.id);
+    const lpChanged = prevPodium && prevPodium.lpText !== lpText;
+    const tierChanged = prevPodium && prevPodium.tierText !== tierText;
+    podiumSweepFields.set(p.id, { lpText, tierText });
     div.innerHTML = `
       ${splashHtml}
+      <div class="podium-medal ${medalClass}">${medalIcon}</div>
       <div class="podium-rank-chip">${rankNum === 1 ? '👑 #1' : '#' + rankNum}</div>
       <div class="podium-avatar">${avatarHtml}</div>
       <div class="podium-name">${p.riot_game_name}</div>
       <div class="podium-meta">${p.primary_role ?? 'Sin datos'}${p.top_recent_champions?.[0] ? ' — ' + p.top_recent_champions[0].campeon : ''}</div>
-      <div class="podium-lp">${p.rank?.lp ?? 0} LP</div>
-      <div class="podium-tier">${p.rank ? (TIER_LABEL[p.rank.tier] ?? p.rank.tier) + ' ' + (p.rank.division ?? '') : 'Unranked'}</div>`;
+      <div class="podium-lp ${lpChanged ? 'value-changed' : ''}">${lpText}</div>
+      <div class="podium-tier ${tierChanged ? 'value-changed' : ''}">${tierText}</div>`;
     podiumEl.appendChild(div);
   });
 
@@ -593,16 +757,38 @@ async function render() {
     twitchWrap.classList.remove('visible');
   }
 
-  // Primera Victoria del Día
+  // Primera Victoria del Día — foto real, campeón, KDA, hechizos, lado
+  // y duración (antes solo mostraba iniciales y nombre).
   const pvSection = document.getElementById('primera-victoria-section');
   const p = firstWin?.player_id ? roster.find(r => r.id === firstWin.player_id) : null;
   if (p) {
     pvSection.style.display = '';
+    const pvIconUrl = profileIconUrl(p.icon_id);
+    const pvAvatarHtml = pvIconUrl ? `<img src="${pvIconUrl}" alt="">` : initials(p.riot_game_name);
+    const pvChampHtml = firstWin.champion
+      ? `<div class="spotlight-champ"><img src="${champIconUrl(firstWin.champion)}" alt="${firstWin.champion}"></div>` : '';
+    const pvKda = firstWin.kills != null ? `${firstWin.kills}/${firstWin.deaths}/${firstWin.assists} KDA` : null;
+    const pvSpellsHtml = (firstWin.summoner_spells ?? [])
+      .map(sid => { const url = spellIconUrl(sid); return url ? `<img src="${url}" alt="">` : ''; }).join('');
+    const pvLado = firstWin.team === 'blue' ? 'Equipo Azul' : firstWin.team === 'red' ? 'Equipo Rojo' : null;
+    const pvDuracion = firstWin.duration_seconds
+      ? `${Math.floor(firstWin.duration_seconds / 60)}:${String(firstWin.duration_seconds % 60).padStart(2, '0')}` : null;
+
     document.getElementById('primera-victoria').innerHTML = `
       <div class="spotlight-card">
         <div class="spotlight-badge">Primera Victoria del Día</div>
-        <div class="spotlight-icon" style="margin-top:8px;">${initials(p.riot_game_name)}</div>
-        <div style="margin-top:8px;min-width:0;"><div style="font-size:17px;font-weight:800;">${p.riot_game_name}</div></div>
+        <div class="spotlight-icon" style="margin-top:8px;">${pvAvatarHtml}</div>
+        ${pvChampHtml}
+        <div style="margin-top:8px;min-width:0;">
+          <div style="font-size:17px;font-weight:800;">${p.riot_game_name}</div>
+          <div class="spotlight-meta">
+            ${firstWin.champion ? `<span>${firstWin.champion}</span>` : ''}
+            ${pvKda ? `<span>${pvKda}</span>` : ''}
+            ${pvSpellsHtml ? `<span class="spells">${pvSpellsHtml}</span>` : ''}
+            ${pvLado ? `<span>${pvLado}</span>` : ''}
+            ${pvDuracion ? `<span>${pvDuracion}</span>` : ''}
+          </div>
+        </div>
         <div style="margin-top:8px;margin-left:auto;font-size:12px;color:var(--gold);font-weight:800;">
           ${new Date(firstWin.won_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
         </div>
@@ -616,7 +802,7 @@ async function render() {
   const destacadosEl = document.getElementById('destacados-semana');
   badgesRecientesEl.innerHTML = '';
   destacadosEl.innerHTML = '';
-  ['top_asesino', 'top_observador', 'sin_rendirse'].forEach(c => renderBadgeCard(badgesRecientesEl, c, badgeByCategory, nameById));
+  ['top_asesino', 'sin_rendirse', 'top_observador'].forEach(c => renderBadgeCard(badgesRecientesEl, c, badgeByCategory, nameById));
   ['otp_del_torneo', 'escalador', 'horas_en_la_grieta', 'agresivo', 'kda_player', 'champion_pool',
    'tortuga', 'asistente', 'pentakills', 'duo_dinamico', 'farmeador', 'defensor', 'ladron', 'destructor', 'stop']
     .forEach(c => renderBadgeCard(destacadosEl, c, badgeByCategory, nameById));
@@ -639,13 +825,15 @@ async function render() {
     reySection.style.display = 'none';
   }
 
-  renderRanking();
-
   // Historial Individual — mantiene la selección si el jugador sigue
   // en el roster, si no elige al primero (mismo criterio que el sitio viejo).
+  // selectPlayer() ya se encarga de llamar a renderRanking().
   if (roster.length) {
     const sigueValido = roster.some(p => p.id === selectedPlayerId);
     selectPlayer(sigueValido ? selectedPlayerId : roster[0].id);
+  } else {
+    selectedPlayerId = null;
+    renderRanking();
   }
 
   // Historial de Logros
@@ -686,6 +874,59 @@ async function render() {
 }
 
 await render();
+
+// ── Cuenta regresiva — fija, no depende de datos de Supabase.
+// Convierte hora "de pared" en Madrid a UTC real (mismo patrón que
+// offsetMadridMinutos() en supabase/functions/sync-matches), así no
+// hay que adivinar a mano el offset CET/CEST.
+function madridWallToUTC(year, month, day, hour = 0, minute = 0) {
+  const approx = new Date(Date.UTC(year, month - 1, day, hour, minute));
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Madrid', timeZoneName: 'shortOffset' }).formatToParts(approx);
+  const offsetStr = parts.find(p => p.type === 'timeZoneName')?.value ?? 'GMT+1';
+  const offsetH = parseInt(offsetStr.replace('GMT', '')) || 1;
+  return new Date(Date.UTC(year, month - 1, day, hour - offsetH, minute));
+}
+
+// Fin del split: sin fecha oficial de Riot todavía — placeholder
+// acordado con KyoSumi, actualizar cuando Riot confirme la real.
+const COUNTDOWNS = [
+  { label: 'Fin del Split', target: madridWallToUTC(2027, 1, 1) },
+  { label: 'Final del SoloQReto', target: madridWallToUTC(2026, 10, 26) },
+];
+
+function buildCountdowns() {
+  const grid = document.getElementById('countdown-grid');
+  grid.innerHTML = COUNTDOWNS.map((c) => `
+    <div class="countdown-card" data-target-ms="${c.target.getTime()}">
+      <div class="countdown-label">${c.label}</div>
+      <div class="countdown-digits">
+        <div class="cd-unit"><span class="cd-value" data-unit="d">--</span><span class="cd-caption">días</span></div>
+        <div class="cd-unit"><span class="cd-value" data-unit="h">--</span><span class="cd-caption">hs</span></div>
+        <div class="cd-unit"><span class="cd-value" data-unit="m">--</span><span class="cd-caption">min</span></div>
+        <div class="cd-unit"><span class="cd-value" data-unit="s">--</span><span class="cd-caption">seg</span></div>
+      </div>
+    </div>`).join('');
+}
+
+function tickCountdowns() {
+  document.querySelectorAll('.countdown-card').forEach((card) => {
+    const targetMs = Number(card.dataset.targetMs);
+    const diff = Math.max(0, targetMs - Date.now());
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor(diff / 3600000) % 24;
+    const mins = Math.floor(diff / 60000) % 60;
+    const secs = Math.floor(diff / 1000) % 60;
+    card.querySelector('[data-unit="d"]').textContent = days;
+    card.querySelector('[data-unit="h"]').textContent = String(hours).padStart(2, '0');
+    card.querySelector('[data-unit="m"]').textContent = String(mins).padStart(2, '0');
+    card.querySelector('[data-unit="s"]').textContent = String(secs).padStart(2, '0');
+    card.classList.toggle('finished', diff === 0);
+  });
+}
+
+buildCountdowns();
+tickCountdowns();
+setInterval(tickCountdowns, 1000);
 
 // ── Realtime — Supabase avisa al instante cuando cambia algo en
 // estas tablas; se agrupan avisos que lleguen muy seguidos (p.ej.
