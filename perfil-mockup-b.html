@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfil — SharkTracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
+    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
+    --danger:#ff5f3d; --danger-glow:rgba(255,95,61,.45);
+    --gold:#facc15; --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
+    background:
+      radial-gradient(1000px 460px at 15% -6%, rgba(0,229,199,.14), transparent 60%),
+      radial-gradient(1000px 460px at 85% 6%, rgba(0,229,199,.10), transparent 60%),
+      var(--bg);
+  }
+  a{color:inherit;}
+  .wrap{max-width:1080px; margin:0 auto; padding:44px 20px 80px;}
+
+  header{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:14px; padding-bottom:24px; border-bottom:1px solid var(--border);}
+  .logo-slot{display:flex; align-items:center; gap:14px;}
+  .logo-slot img{height:40px; width:auto; display:block;}
+  .live-indicator{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dim); background:var(--panel); border:1px solid var(--border); padding:6px 12px; border-radius:999px;}
+  .pulse-dot{width:7px; height:7px; border-radius:50%; background:var(--accent); flex-shrink:0; animation:live-pulse 2.2s infinite;}
+  @keyframes live-pulse{0%{box-shadow:0 0 0 0 var(--accent-glow);} 70%{box-shadow:0 0 0 8px rgba(0,229,199,0);} 100%{box-shadow:0 0 0 0 rgba(0,229,199,0);}}
+  @media (max-width:700px){ .live-indicator{display:none !important;} }
+  h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(24px,4vw,34px); letter-spacing:.03em; text-transform:uppercase;
+     background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .auth-slot{grid-column:3; justify-self:end;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none;}
+  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+
+  .breadcrumb{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-faint); margin:18px 0 24px;}
+  .breadcrumb a{color:var(--accent); text-decoration:none; font-weight:700;}
+  .breadcrumb a:hover{text-decoration:underline;}
+
+  .section-title{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
+  .section-title h2{margin:0; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:.08em;}
+  section{margin-bottom:44px;}
+
+  #error-msg{text-align:center; padding:60px 20px; color:var(--danger); font-weight:700; display:none;}
+
+  /* ── HERO: banner horizontal ancho, todo superpuesto sobre el splash ── */
+  .hero-banner{position:relative; border-radius:18px; overflow:hidden; border:1px solid var(--accent); min-height:280px; margin-bottom:22px; box-shadow:0 0 34px var(--accent-glow), 0 0 70px rgba(0,229,199,.14); background:var(--panel);}
+  .hero-splash{position:absolute; inset:0; background-size:cover; background-position:center 20%;}
+  .hero-overlay{position:absolute; inset:0; background:linear-gradient(180deg, rgba(3,8,18,.1) 0%, rgba(3,8,18,.5) 50%, rgba(3,8,18,.95) 100%);}
+  .hero-position{position:absolute; top:16px; right:16px; z-index:2; font-size:11px; font-weight:800; padding:6px 14px; border-radius:99px; background:rgba(3,8,18,.75); border:1px solid var(--border); color:var(--text-dim); backdrop-filter:blur(6px);}
+  .hero-content{position:relative; z-index:2; display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:20px; padding:26px 28px; min-height:280px;}
+  .hero-identity{display:flex; align-items:center; gap:18px; min-width:0;}
+  .hero-avatar-wrap{position:relative; flex-shrink:0;}
+  .hero-avatar{width:84px; height:84px; border-radius:20px; border:3px solid var(--accent); object-fit:cover; box-shadow:0 0 20px var(--accent-glow); background:#0a1622; display:block;}
+  .hero-twitch{position:absolute; bottom:-5px; right:-5px; width:24px; height:24px; filter:drop-shadow(0 1px 3px rgba(0,0,0,.7));}
+  .hero-twitch img{width:100%; height:100%; display:block;}
+  .hero-twitch.live{border-radius:50%; box-shadow:0 0 0 2px var(--danger), 0 0 10px var(--danger-glow);}
+  .hero-twitch.live img{filter:brightness(0) saturate(100%) invert(46%) sepia(89%) saturate(1657%) hue-rotate(325deg) brightness(103%) contrast(101%);}
+  .hero-name-block{min-width:0;}
+  .hero-name-block h1.p-name{margin:0; font-size:clamp(22px,4vw,32px); font-weight:900; color:#fff; line-height:1.15; font-family:'Rajdhani',sans-serif; letter-spacing:.02em; display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .p-tag{font-size:13px; color:var(--text-faint); font-weight:600;}
+  .hero-name-block p{margin:4px 0 0; font-size:13px; color:var(--text-dim); font-weight:600;}
+  .trend-arrow{font-size:13px; font-weight:900;}
+  .trend-arrow.up{color:var(--accent);}
+  .trend-arrow.down{color:var(--danger);}
+  .streak-icon{font-size:15px;}
+  .hero-rank-block{display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;}
+  .hero-tier-row{display:flex; align-items:center; gap:8px;}
+  .hero-tier-row img{width:26px; height:26px; object-fit:contain;}
+  .hero-tier-row span{font-size:13px; color:var(--text-dim); font-weight:700; text-transform:uppercase; letter-spacing:.06em;}
+  .hero-lp{font-size:32px; font-weight:900; white-space:nowrap; background:linear-gradient(90deg, var(--gold), #fff3c4); -webkit-background-clip:text; background-clip:text; color:transparent;}
+
+  @media (max-width:700px){ .hero-content{align-items:flex-start; flex-direction:column;} .hero-rank-block{align-items:flex-start;} }
+
+  /* ── FRANJA DE BADGES — pills horizontales, distinto al card completo ── */
+  .badges-col{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:22px;}
+  .badges-col:empty{display:none;}
+  .badges-empty{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:14px 18px; font-size:12px; color:var(--text-faint); width:100%; text-align:center;}
+  /* .info-card reutiliza el mismo componente/JS que la variante A, pero
+     acá se ve como una píldora angosta en vez de una tarjeta completa. */
+  .info-card{display:flex; align-items:center; gap:9px; background:var(--panel); border:1px solid var(--border); border-radius:999px; padding:8px 16px 8px 8px; flex:0 1 auto;}
+  .info-card .ico{width:30px; height:30px; border-radius:50%; background:var(--panel-2); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;}
+  .info-label{font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); line-height:1.2;}
+  .info-player{font-size:12px; font-weight:800; margin:1px 0 0; line-height:1.2;}
+  .info-detail{font-size:10px; color:var(--accent); font-weight:700; display:flex; align-items:center; gap:4px; line-height:1.3;}
+  .badge-champ-icon{width:14px; height:14px; border-radius:4px; object-fit:cover; flex-shrink:0;}
+
+  /* ── CAJA EN VIVO — a todo el ancho acá ── */
+  .live-status-box{position:relative; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px 24px; min-height:76px; display:flex; align-items:center; justify-content:center; overflow-y:auto; margin-bottom:22px;}
+  .live-status-box.offline .live-offline-text{color:var(--text-dim); font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.1em; opacity:.65;}
+  .live-status-box.in-game{align-items:flex-start; justify-content:flex-start; border-color:var(--danger); box-shadow:0 0 26px rgba(255,95,61,.22), 0 0 0 1px rgba(255,95,61,.35) inset;}
+  .live-corner-badge{position:absolute; top:0; left:0; background:var(--danger); color:#fff; font-weight:800; font-size:11px; padding:5px 12px; border-top-left-radius:var(--radius); border-bottom-right-radius:10px; text-transform:uppercase; letter-spacing:.08em;}
+  .live-game-content{display:flex; flex-direction:column; width:100%; gap:14px; padding-top:8px;}
+  .live-game-top{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;}
+  .live-game-champ{display:flex; align-items:center; gap:10px;}
+  .live-game-champ img{width:46px; height:46px; border-radius:10px; border:2px solid var(--accent); object-fit:cover; background:#0a1622;}
+  .live-game-champ span{font-weight:800; font-size:16px; color:#fff;}
+  .live-game-top-right{display:flex; align-items:center; gap:10px;}
+  .live-game-spells{display:flex; gap:6px;}
+  .live-game-spells img{width:30px; height:30px; border-radius:7px; border:1px solid var(--border); background:#0a1622;}
+  .live-game-runes{display:flex; flex-direction:column; gap:4px;}
+  .live-game-runes img{width:22px; height:22px; border-radius:50%; border:1px solid var(--border); background:#0a0a0c; object-fit:contain; padding:1px;}
+  .live-game-meta{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .live-game-duration{font-weight:800; font-size:12px; font-variant-numeric:tabular-nums; color:var(--gold); background:rgba(250,204,21,.12); border:1px solid rgba(250,204,21,.3); padding:6px 12px; border-radius:8px;}
+  .live-game-mode{font-weight:700; font-size:11px; padding:6px 12px; border-radius:8px; background:rgba(0,229,199,.12); border:1px solid rgba(0,229,199,.3); color:var(--accent); text-transform:uppercase; letter-spacing:.04em;}
+  .live-game-side{font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:.06em; padding:6px 12px; border-radius:8px;}
+  .live-game-side.side-blue{color:#60a5fa; background:rgba(96,165,250,.12); border:1px solid rgba(96,165,250,.3);}
+  .live-game-side.side-red{color:#f87171; background:rgba(248,113,113,.12); border:1px solid rgba(248,113,113,.3);}
+  .live-game-duo-box{display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:rgba(0,229,199,.08); border:1px solid rgba(0,229,199,.3); border-radius:12px; padding:10px 14px;}
+  .live-game-duo-label{font-weight:800; font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); white-space:nowrap;}
+  .live-game-duo-player{display:flex; align-items:center; gap:8px; flex:1; min-width:180px;}
+  .live-game-duo-player img{width:32px; height:32px; border-radius:8px; border:2px solid var(--accent); object-fit:cover; background:#0a1622;}
+  .live-game-duo-info{display:flex; flex-direction:column; line-height:1.3;}
+  .live-game-duo-name{font-weight:800; font-size:13px; color:#fff;}
+  .live-game-duo-champ{font-weight:600; font-size:11px; color:var(--text-dim);}
+
+  /* ── STATS GRID ── */
+  .stats-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:20px; margin-bottom:40px;}
+  .stat-card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px;}
+  .stat-card h3{margin:0 0 16px 0; font-size:13px; text-transform:uppercase; color:var(--text-faint); font-weight:700; border-bottom:1px solid var(--border); padding-bottom:10px; display:flex; align-items:center; gap:10px; font-family:'Rajdhani',sans-serif; letter-spacing:.04em;}
+  .stat-card h3::before{content:''; width:4px; height:14px; border-radius:2px; flex-shrink:0; background:var(--accent); box-shadow:0 0 8px var(--accent-glow);}
+  .list-item{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+  .list-item:last-child{margin-bottom:0;}
+  .champ-img{width:38px; height:38px; border-radius:8px; object-fit:cover; background:#0a1622;}
+  .item-title{font-weight:700; font-size:13px;}
+  .item-sub{font-size:11px; color:var(--text-dim);}
+
+  /* ── HISTORIAL — mismas clases que index.html ── */
+  .history-panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px;}
+  .matches{display:flex; flex-direction:column; gap:8px;}
+  a.match, .match{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:14px; padding:10px 12px; border-radius:10px; background:var(--panel-2); border:1px solid var(--border); text-decoration:none; color:inherit;}
+  .match-icons{display:flex; align-items:center; gap:5px;}
+  .match .champ-icon{width:36px; height:36px; border-radius:8px; object-fit:cover; background:#0a1622; flex-shrink:0;}
+  .match-spells{display:flex; flex-direction:column; gap:3px;}
+  .match-spells img{width:16px; height:16px; border-radius:4px; border:1px solid var(--border); background:#0a1622;}
+  .match-runes{display:flex; flex-direction:column; gap:3px;}
+  .match-runes img{width:16px; height:16px; border-radius:50%; border:1px solid var(--border); background:#0a1622; object-fit:contain; padding:1px;}
+  .match-champ{font-size:13px; font-weight:800; color:#fff;}
+  .match-kda{font-size:12px; color:var(--text-faint);}
+  .match-duo{font-size:11px; font-weight:700; color:var(--accent); margin-top:2px;}
+  .match-result-block{display:flex; flex-direction:column; align-items:flex-end; gap:4px;}
+  .result-chip{font-size:11px; font-weight:700; padding:4px 10px; border-radius:99px; text-transform:uppercase; text-align:center;}
+  .result-chip.victoria{color:var(--accent); background:rgba(0,229,199,.14);}
+  .result-chip.derrota{color:var(--danger); background:rgba(255,95,61,.14);}
+  .result-chip.remake{color:var(--text-faint); background:rgba(161,161,170,.1);}
+  .lp-change{font-size:11px; font-weight:800;}
+  .lp-change.win{color:var(--accent);}
+  .lp-change.loss{color:var(--danger);}
+  .egida-tag{font-size:10px; font-weight:700; color:var(--text-dim); background:rgba(255,255,255,.08); border:1px dashed rgba(255,255,255,.35); border-radius:99px; padding:2px 8px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;}
+  .egida-tag img{width:12px; height:12px; object-fit:contain;}
+  .empty{padding:24px; text-align:center; color:var(--text-faint); font-size:13px;}
+
+  /* ── GRÁFICA LP ── */
+  .lp-chart-wrap{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px 20px 14px;}
+  .lp-chart-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+  .lp-chart-header .lp-label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint);}
+  .lp-chart-header .lp-delta{font-size:13px; font-weight:800;}
+  .lp-chart-header .lp-delta.up{color:var(--accent);}
+  .lp-chart-header .lp-delta.down{color:var(--danger);}
+  .lp-chart-header .lp-delta.flat{color:var(--text-faint);}
+  #lp-canvas{display:block; width:100%; height:90px;}
+  .lp-chart-footer{display:flex; justify-content:space-between; font-size:11px; color:var(--text-faint); margin-top:6px;}
+
+  footer{margin-top:60px; padding-top:32px; border-top:1px solid var(--border); text-align:center; color:var(--text-dim); font-size:13px; display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .footer-logo{height:34px; width:auto;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo-slot">
+      <img src="logo/FlaviIconLogo.png" alt="SharkTracker">
+      <div class="live-indicator" id="live-indicator">
+        <span class="pulse-dot"></span>
+        <span id="live-indicator-text">Cargando…</span>
+      </div>
+    </div>
+    <h1>SharkTracker</h1>
+    <div class="auth-slot" id="auth-slot"></div>
+  </header>
+
+  <div class="breadcrumb"><a href="index.html">← Volver al Ranking</a><span id="breadcrumb-name"></span></div>
+
+  <div id="error-msg"></div>
+
+  <div id="profile-content" style="display:none;">
+
+    <div class="hero-banner">
+      <span class="hero-position" id="p-position"></span>
+      <div class="hero-splash" id="p-splash"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-identity">
+          <div class="hero-avatar-wrap">
+            <img id="p-avatar" class="hero-avatar" src="" alt="Avatar">
+            <a class="hero-twitch" id="p-twitch" style="display:none;" target="_blank" rel="noopener"><img src="" alt="Twitch"></a>
+          </div>
+          <div class="hero-name-block">
+            <h1 class="p-name" id="p-name">Cargando…<span class="p-tag" id="p-tag"></span></h1>
+            <p id="p-winrate">Winrate</p>
+          </div>
+        </div>
+        <div class="hero-rank-block">
+          <div class="hero-tier-row">
+            <img id="p-emblem" src="" alt="Emblema de elo">
+            <span id="p-tier">Rango</span>
+          </div>
+          <div class="hero-lp" id="p-lp">0 LP</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="badges-col" id="badges-col"></div>
+
+    <div class="live-status-box offline" id="live-status-box"><span class="live-offline-text">Cargando…</span></div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><h3>Top 3 Maestrías</h3><div id="box-mastery"></div></div>
+      <div class="stat-card"><h3>Top Campeones (SoloQ)</h3><div id="box-champs"></div></div>
+      <div class="stat-card"><h3>Roles Más Jugados</h3><div id="box-roles"></div></div>
+    </div>
+
+    <section>
+      <div class="section-title"><span class="bar"></span><h2>Historial reciente (SoloQ)</h2></div>
+      <div class="history-panel"><div class="matches" id="box-history"></div></div>
+    </section>
+
+    <section id="lp-chart-section" style="display:none;">
+      <div class="section-title"><span class="bar"></span><h2>Progreso de LP — últimos 7 días</h2></div>
+      <div class="lp-chart-wrap">
+        <div class="lp-chart-header">
+          <span class="lp-label" id="lp-range-label">—</span>
+          <span class="lp-delta" id="lp-delta">—</span>
+        </div>
+        <canvas id="lp-canvas" height="90"></canvas>
+        <div class="lp-chart-footer">
+          <span id="lp-date-start">Hace 7 días</span>
+          <span id="lp-date-end">Hoy</span>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <img class="footer-logo" src="logo/HorizontalLogo.png" alt="SharkTracker">
+      <div>hecho por KyoSumiVT</div>
+    </footer>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const TIER_LABEL = {IRON:'Hierro',BRONZE:'Bronce',SILVER:'Plata',GOLD:'Oro',PLATINUM:'Platino',EMERALD:'Esmeralda',DIAMOND:'Diamante',MASTER:'Maestro',GRANDMASTER:'Gran Maestro',CHALLENGER:'Aspirante'};
+const MINI_CREST_BASE = 'https://raw.communitydragon.org/14.10/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/';
+const BADGE_META = {
+  top_asesino:{icono:'⚔️',label:'Top Asesino'}, top_observador:{icono:'👁️',label:'Top Observador'},
+  sin_rendirse:{icono:'🎮',label:'Sin Rendirse'}, otp_del_torneo:{icono:'🎯',label:'OTP del Torneo'},
+  escalador:{icono:'📈',label:'El Escalador'}, horas_en_la_grieta:{icono:'⏱️',label:'Horas en la Grieta'},
+  agresivo:{icono:'🩸',label:'Agresivo'}, kda_player:{icono:'📊',label:'KDA Player'},
+  pentakills:{icono:'💀',label:'Pentakills'}, tortuga:{icono:'🐢',label:'El Tortuga'},
+  asistente:{icono:'🤝',label:'El Asistente'}, duo_dinamico:{icono:'🎮',label:'Dúo Dinámico'},
+  farmeador:{icono:'🌾',label:'El Farmeador'}, defensor:{icono:'🛡️',label:'El Defensor'},
+  ladron:{icono:'🥷',label:'El Ladrón'}, destructor:{icono:'💥',label:'El Destructor'},
+  stop:{icono:'🛑',label:'Stop'}, champion_pool:{icono:'🎭',label:'Maestro del Champion Pool'},
+};
+
+let ddragonVersion = '15.19.1';
+try {
+  const versions = await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json());
+  ddragonVersion = versions[0];
+} catch (e) { console.warn('DDragon version fetch falló, usando fallback', e); }
+
+const CHAMPION_ID_OVERRIDES = { FiddleSticks: 'Fiddlesticks' };
+const champKey = (name) => { const clean = (name || '').trim(); return CHAMPION_ID_OVERRIDES[clean] || clean; };
+const champIconUrl = (champion) => `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${champKey(champion)}.png`;
+const splashUrl = (champion, skin) => `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champKey(champion)}_${skin ?? 0}.jpg`;
+const profileIconUrl = (iconId) => iconId ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${iconId}.png` : null;
+const emblemUrl = (tier) => `${MINI_CREST_BASE}${(tier || 'unranked').toLowerCase()}.png`;
+const initials = (name) => (name || '?').replace(/[^\p{L}\p{N}]/gu, '').slice(0, 2).toUpperCase();
+const formatDuration = (seconds) => seconds ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}` : null;
+const AVATAR_ONERROR = `this.onerror=null;this.src='${profileIconUrl(1)}';`;
+const HIDE_ONERROR = `this.style.visibility='hidden';`;
+
+const summonerSpellById = {};
+const runeIconById = {};
+let matchCatalogsPromise = null;
+function loadMatchCatalogs() {
+  if (matchCatalogsPromise) return matchCatalogsPromise;
+  matchCatalogsPromise = Promise.all([
+    fetch(`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/data/es_ES/summoner.json`).then(r => r.json()),
+    fetch(`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/data/es_ES/runesReforged.json`).then(r => r.json()),
+  ]).then(([summonerData, runesData]) => {
+    Object.values(summonerData.data ?? {}).forEach(s => { summonerSpellById[Number(s.key)] = s.image.full; });
+    (runesData ?? []).forEach(style => {
+      runeIconById[style.id] = style.icon;
+      (style.slots ?? []).forEach(slot => (slot.runes ?? []).forEach(r => { runeIconById[r.id] = r.icon; }));
+    });
+  }).catch(e => console.warn('catálogos de hechizos/runas fallaron', e));
+  return matchCatalogsPromise;
+}
+const spellIconUrl = (id) => summonerSpellById[id] ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/spell/${summonerSpellById[id]}` : null;
+const runeIconUrl = (perkId) => runeIconById[perkId] ? `https://ddragon.leagueoflegends.com/cdn/img/${runeIconById[perkId]}` : null;
+
+// ── Resolver jugador — acepta el UUID real (players.id, lo que usará
+// index.html cuando activemos el link de cada fila) O el nombre de
+// invocador tal cual (para poder probar este mockup a mano sin tener
+// que ir a buscar el UUID en la base). Ej: perfil.html?jugador=Galactic%20Shark
+const params = new URLSearchParams(location.search);
+const jugadorParam = params.get('jugador');
+
+let lastUpdate = null;
+function tickLiveIndicator() {
+  const el = document.getElementById('live-indicator-text');
+  if (!el) return;
+  if (!lastUpdate) { el.textContent = 'Cargando…'; return; }
+  const secs = Math.floor((Date.now() - lastUpdate) / 1000);
+  if (secs < 5) el.textContent = 'Actualizado ahora';
+  else if (secs < 60) el.textContent = `Actualizado hace ${secs}s`;
+  else el.textContent = `Actualizado hace ${Math.floor(secs / 60)}m`;
+}
+
+let liveGameStartTime = null;
+function tickLiveGameDuration() {
+  const el = document.getElementById('live-game-duration');
+  if (!el || !liveGameStartTime) return;
+  const secs = Math.max(0, Math.floor((Date.now() - liveGameStartTime) / 1000));
+  el.textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+}
+
+function showError(msg) {
+  const err = document.getElementById('error-msg');
+  err.textContent = msg;
+  err.style.display = 'block';
+  document.getElementById('profile-content').style.display = 'none';
+}
+
+if (!jugadorParam) {
+  showError('Falta el jugador — la URL necesita ?jugador=<nombre o id>.');
+} else {
+  init();
+}
+
+async function init() {
+  // Header: sesión actual (igual que index.html)
+  const { data: { session } } = await supabase.auth.getSession();
+  const authSlot = document.getElementById('auth-slot');
+  authSlot.innerHTML = session
+    ? `<a class="avatar" href="perfil.html">…</a>`
+    : `<a class="login-btn" href="login.html">Login</a>`;
+
+  await refreshAll();
+  setInterval(tickLiveIndicator, 1000);
+  setInterval(tickLiveGameDuration, 1000);
+
+  // Realtime — mismo criterio que index.html: nada de polling por
+  // tiempo, Supabase avisa solo cuando cambia algo relevante.
+  let refreshTimer = null;
+  const scheduleRefresh = () => { clearTimeout(refreshTimer); refreshTimer = setTimeout(refreshAll, 600); };
+  supabase.channel('perfil-live')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, scheduleRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'player_profiles' }, scheduleRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'rank_snapshots' }, scheduleRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'live_status' }, scheduleRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'stream_status' }, scheduleRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'weekly_badges' }, scheduleRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, scheduleRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'match_participants' }, scheduleRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'player_masteries' }, scheduleRefresh)
+    .subscribe();
+}
+
+async function refreshAll() {
+  await loadAll();
+  lastUpdate = Date.now();
+  tickLiveIndicator();
+}
+
+async function loadAll() {
+  const [{ data: players }, { data: profiles }, { data: rankSnaps }, { data: liveStatus },
+         { data: streamStatus }, { data: weeklyBadges }] = await Promise.all([
+    supabase.from('players').select('*'),
+    supabase.from('player_profiles').select('*'),
+    supabase.from('rank_snapshots').select('*').eq('queue_type', 'RANKED_SOLO_5x5').order('recorded_at', { ascending: false }),
+    supabase.from('live_status').select('*'),
+    supabase.from('stream_status').select('*'),
+    supabase.from('weekly_badges').select('*'),
+  ]);
+
+  const nameById = new Map((players ?? []).map(p => [p.id, p.riot_game_name]));
+  const player = (players ?? []).find(p => p.id === jugadorParam)
+    ?? (players ?? []).find(p => (p.riot_game_name || '').toLowerCase() === jugadorParam.toLowerCase());
+
+  if (!player) { showError('Jugador no encontrado.'); return; }
+
+  document.getElementById('profile-content').style.display = 'block';
+  document.getElementById('error-msg').style.display = 'none';
+  document.getElementById('breadcrumb-name').textContent = ` /  ${player.riot_game_name}`;
+
+  const profile = (profiles ?? []).find(pr => pr.player_id === player.id) ?? {};
+  const latestRankByPlayer = new Map();
+  for (const row of rankSnaps ?? []) { if (!latestRankByPlayer.has(row.player_id)) latestRankByPlayer.set(row.player_id, row); }
+  const rank = latestRankByPlayer.get(player.id) ?? null;
+  const live = (liveStatus ?? []).find(l => l.player_id === player.id) ?? { in_game: false };
+  const stream = (streamStatus ?? []).find(s => s.player_id === player.id) ?? { is_live: false };
+
+  // Posición en el ranking global (mismo orden que index.html: elo_score desc)
+  const sorted = (players ?? [])
+    .map(p => ({ id: p.id, score: latestRankByPlayer.get(p.id)?.elo_score ?? -1 }))
+    .sort((a, b) => b.score - a.score);
+  const position = sorted.findIndex(p => p.id === player.id) + 1;
+
+  const [{ data: masteries }, { data: participaciones }] = await Promise.all([
+    supabase.from('player_masteries').select('*').eq('player_id', player.id).order('rank'),
+    supabase.from('match_participants')
+      .select('*, matches!inner(match_id, duration_seconds, ended_at, queue_id)')
+      .eq('player_id', player.id).eq('matches.queue_id', 420)
+      .order('ended_at', { foreignTable: 'matches', ascending: false }).limit(20),
+  ]);
+
+  const matchIds = [...new Set((participaciones ?? []).map(m => m.match_id))];
+  const { data: companeros } = matchIds.length
+    ? await supabase.from('match_participants').select('match_id, team, player_id').in('match_id', matchIds)
+    : { data: [] };
+  const companionsByMatch = new Map();
+  (companeros ?? []).forEach(c => {
+    const list = companionsByMatch.get(c.match_id) ?? [];
+    list.push(c);
+    companionsByMatch.set(c.match_id, list);
+  });
+
+  await loadMatchCatalogs();
+
+  renderHero(player, profile, rank, live, stream, position, participaciones ?? []);
+  await renderLiveBox(live, liveStatus ?? [], nameById);
+  renderBadges(weeklyBadges ?? [], nameById, player.id);
+  renderMastery(masteries ?? []);
+  renderTopChamps(participaciones ?? []);
+  renderRoles(participaciones ?? []);
+  renderHistory(participaciones ?? [], companionsByMatch, nameById, player.id);
+  await renderLpChart(player.id);
+}
+
+function getTrendArrow(games) {
+  const last5 = games.slice(0, 5);
+  if (last5.length < 3) return null;
+  const wins = last5.filter(g => g.win).length;
+  const losses = last5.length - wins;
+  if (wins === losses) return null;
+  return wins > losses ? 'up' : 'down';
+}
+function getStreak(games) {
+  if (games.length < 3) return null;
+  const primero = games[0].win;
+  let racha = 0;
+  for (const g of games) { if (g.win === primero) racha++; else break; }
+  return racha >= 3 ? (primero ? 'fire' : 'ice') : null;
+}
+
+function renderHero(player, profile, rank, live, stream, position, participaciones) {
+  document.getElementById('p-position').textContent = position ? `#${position} en el Ranking` : '';
+
+  const iconUrl = profileIconUrl(player.icon_id);
+  const pAvatar = document.getElementById('p-avatar');
+  pAvatar.src = iconUrl ?? profileIconUrl(1);
+  pAvatar.onerror = () => { pAvatar.onerror = null; pAvatar.src = profileIconUrl(1); };
+
+  const twitchLive = !!stream?.is_live;
+  const twitchEl = document.getElementById('p-twitch');
+  if (profile.twitch_username) {
+    twitchEl.style.display = 'block';
+    twitchEl.className = `hero-twitch ${twitchLive ? 'live' : ''}`;
+    twitchEl.href = `https://twitch.tv/${encodeURIComponent(profile.twitch_username)}`;
+    twitchEl.title = `Twitch${twitchLive ? ' en vivo' : ''}`;
+    twitchEl.querySelector('img').src = `assets/${twitchLive ? 'Online_Twitch' : 'Offline_Twitch'}.svg`;
+  } else {
+    twitchEl.style.display = 'none';
+  }
+
+  const trend = getTrendArrow(participaciones);
+  const streak = getStreak(participaciones);
+  const trendHtml = trend ? `<span class="trend-arrow ${trend}" title="Balance de sus últimas 5 partidas de SoloQ">${trend === 'up' ? '▲' : '▼'}</span>` : '';
+  const streakHtml = streak ? `<span class="streak-icon" title="Racha de ${streak === 'fire' ? 'victorias' : 'derrotas'}">${streak === 'fire' ? '🔥' : '❄️'}</span>` : '';
+
+  document.getElementById('p-name').innerHTML = `${player.riot_game_name}<span class="p-tag">#${player.riot_tag_line}</span> ${trendHtml}${streakHtml}`;
+  document.getElementById('p-winrate').textContent = player.primary_role ? `Rol principal: ${player.primary_role}` : 'Sin rol registrado';
+
+  const tierText = rank ? `${TIER_LABEL[rank.tier] ?? rank.tier} ${rank.division ?? ''}`.trim() : 'Unranked';
+  document.getElementById('p-tier').textContent = tierText;
+  document.getElementById('p-lp').textContent = `${rank?.lp ?? 0} LP`;
+  document.getElementById('p-emblem').src = emblemUrl(rank?.tier);
+  document.getElementById('p-emblem').onerror = () => { document.getElementById('p-emblem').style.visibility = 'hidden'; };
+
+  const champBg = live.in_game ? live.champion : player.favorite_champion;
+  const skinBg = live.in_game ? 0 : (player.favorite_skin ?? 0);
+  const splashEl = document.getElementById('p-splash');
+  splashEl.style.backgroundImage = champBg ? `url('${splashUrl(champBg, skinBg)}')` : '';
+}
+
+async function renderLiveBox(live, allLiveStatus, nameById) {
+  const box = document.getElementById('live-status-box');
+  if (!live.in_game || !live.game_id) {
+    liveGameStartTime = null;
+    box.className = 'live-status-box offline';
+    box.innerHTML = `<span class="live-offline-text">Offline</span>`;
+    return;
+  }
+
+  const { data: game } = await supabase.from('live_games').select('*').eq('game_id', live.game_id).maybeSingle();
+  liveGameStartTime = game?.started_at ? new Date(game.started_at).getTime() : null;
+
+  const esAzul = live.team === 'blue';
+  const ladoTexto = esAzul ? 'Lado Azul' : 'Lado Rojo';
+  const ladoClase = esAzul ? 'side-blue' : 'side-red';
+  const modo = game?.queue_type ?? 'Partida';
+
+  const runas = live.runes ?? {};
+  const keystoneUrl = runeIconUrl(runas.principal);
+  const secundariaUrl = runeIconUrl(runas.secundario);
+  const runesHtml = (keystoneUrl || secundariaUrl) ? `
+    <span class="live-game-runes">
+      ${keystoneUrl ? `<img src="${keystoneUrl}" alt="" onerror="${HIDE_ONERROR}">` : ''}
+      ${secundariaUrl ? `<img src="${secundariaUrl}" alt="" onerror="${HIDE_ONERROR}">` : ''}
+    </span>` : '';
+
+  const spellsHtml = (live.summoner_spells ?? [])
+    .map(sid => { const url = spellIconUrl(sid); return url ? `<img src="${url}" alt="" onerror="${HIDE_ONERROR}">` : ''; }).join('');
+
+  // Dúo en vivo: otros del roster en la MISMA partida y equipo
+  const duo = allLiveStatus.filter(l => l.in_game && l.game_id === live.game_id && l.player_id !== live.player_id && (l.team == null || live.team == null || l.team === live.team));
+  const duoHtml = duo.length ? `
+    <div class="live-game-duo-box">
+      <span class="live-game-duo-label">🎮 Dúo con</span>
+      ${duo.map(d => `
+        <div class="live-game-duo-player">
+          <img src="${d.champion ? champIconUrl(d.champion) : ''}" alt="" onerror="${HIDE_ONERROR}">
+          <div class="live-game-duo-info">
+            <span class="live-game-duo-name">${nameById.get(d.player_id) ?? '?'}</span>
+            <span class="live-game-duo-champ">${d.champion ?? 'Desconocido'}</span>
+          </div>
+        </div>`).join('')}
+    </div>` : '';
+
+  box.className = 'live-status-box in-game';
+  box.innerHTML = `
+    <span class="live-corner-badge">En Partida</span>
+    <div class="live-game-content">
+      <div class="live-game-top">
+        <div class="live-game-champ">
+          <img src="${live.champion ? champIconUrl(live.champion) : ''}" alt="" onerror="${HIDE_ONERROR}">
+          <span>${live.champion ?? 'Desconocido'}</span>
+        </div>
+        <div class="live-game-top-right">
+          <div class="live-game-spells">${spellsHtml}</div>
+          ${runesHtml}
+        </div>
+      </div>
+      ${duoHtml}
+      <div class="live-game-meta">
+        <div class="live-game-duration" id="live-game-duration">--:--</div>
+        <div class="live-game-mode">${modo}</div>
+        <div class="live-game-side ${ladoClase}">${ladoTexto}</div>
+      </div>
+    </div>`;
+  tickLiveGameDuration();
+}
+
+function renderBadges(weeklyBadges, nameById, playerId) {
+  const col = document.getElementById('badges-col');
+  const mios = weeklyBadges.filter(b => (b.player_ids?.length ? b.player_ids : [b.player_id]).includes(playerId));
+  if (!mios.length) {
+    col.innerHTML = `<div class="badges-empty">Todavía no ganó ningún destacado esta semana.</div>`;
+    return;
+  }
+  col.innerHTML = mios.map(b => {
+    const meta = BADGE_META[b.category];
+    if (!meta) return '';
+    const ids = (b.player_ids?.length ? b.player_ids : [b.player_id]);
+    const nombres = ids.map(id => nameById.get(id) ?? '?').join(' & ');
+    const champHtml = b.champion ? `<img class="badge-champ-icon" src="${champIconUrl(b.champion)}" alt="" onerror="${HIDE_ONERROR}">` : '';
+    return `
+      <div class="info-card">
+        <div class="ico">${meta.icono}</div>
+        <div style="min-width:0;">
+          <div class="info-label">${meta.label}</div>
+          <div class="info-player">${nombres}</div>
+          <div class="info-detail">${champHtml}<span>${b.detail ?? ''}</span></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderMastery(masteries) {
+  const el = document.getElementById('box-mastery');
+  el.innerHTML = masteries.length ? masteries.map(m => `
+    <div class="list-item">
+      <img class="champ-img" src="${champIconUrl(m.champion)}" alt="" onerror="${HIDE_ONERROR}">
+      <div><div class="item-title">${m.champion}</div><div class="item-sub">Nivel ${m.level} • ${m.points.toLocaleString('es-ES')} pts</div></div>
+    </div>`).join('') : '<span class="item-sub">Sin datos.</span>';
+}
+
+function renderTopChamps(participaciones) {
+  const el = document.getElementById('box-champs');
+  const counts = new Map();
+  participaciones.forEach(m => counts.set(m.champion, (counts.get(m.champion) ?? 0) + 1));
+  const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  el.innerHTML = top.length ? top.map(([champ, n]) => `
+    <div class="list-item">
+      <img class="champ-img" src="${champIconUrl(champ)}" alt="" onerror="${HIDE_ONERROR}">
+      <div><div class="item-title">${champ}</div><div class="item-sub">${n} partida${n === 1 ? '' : 's'} recientes</div></div>
+    </div>`).join('') : '<span class="item-sub">No ha jugado recientemente.</span>';
+}
+
+function renderRoles(participaciones) {
+  const el = document.getElementById('box-roles');
+  const counts = new Map();
+  participaciones.forEach(m => { if (m.role) counts.set(m.role, (counts.get(m.role) ?? 0) + 1); });
+  const top = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  el.innerHTML = top.length ? top.map(([rol, n]) => `
+    <div class="list-item">
+      <div class="champ-img" style="display:flex;align-items:center;justify-content:center;background:rgba(0,229,199,.14);color:var(--accent);font-weight:bold;font-size:18px;">✦</div>
+      <div><div class="item-title">${rol}</div><div class="item-sub">${n} ve${n === 1 ? 'z' : 'ces'} jugado</div></div>
+    </div>`).join('') : '<span class="item-sub">Sin roles detectados.</span>';
+}
+
+function renderHistory(participaciones, companionsByMatch, nameById, playerId) {
+  const el = document.getElementById('box-history');
+  if (!participaciones.length) { el.innerHTML = '<p class="empty">Todavía no tiene partidas de SoloQ registradas.</p>'; return; }
+
+  el.innerHTML = participaciones.slice(0, 10).map(m => {
+    const duoNames = (companionsByMatch.get(m.match_id) ?? [])
+      .filter(c => c.team === m.team && c.player_id !== playerId && nameById.has(c.player_id))
+      .map(c => nameById.get(c.player_id));
+
+    const spellsHtml = (m.summoner_spells ?? [])
+      .map(sid => { const url = spellIconUrl(sid); return url ? `<img src="${url}" alt="" onerror="${HIDE_ONERROR}">` : ''; }).join('');
+
+    const keystoneUrl = runeIconUrl(m.keystone_perk);
+    const secundariaUrl = runeIconUrl(m.secondary_style);
+    const runesHtml = (keystoneUrl || secundariaUrl) ? `
+      <span class="match-runes">
+        ${keystoneUrl ? `<img src="${keystoneUrl}" alt="" onerror="${HIDE_ONERROR}">` : ''}
+        ${secundariaUrl ? `<img src="${secundariaUrl}" alt="" onerror="${HIDE_ONERROR}">` : ''}
+      </span>` : '';
+
+    const resultado = !m.win && m.matches.duration_seconds < 300 ? 'remake' : (m.win ? 'victoria' : 'derrota');
+    const kda = `${m.kills ?? 0}/${m.deaths ?? 0}/${m.assists ?? 0}`;
+    const egidaHtml = m.extra_stats?.posible_egida
+      ? `<span class="egida-tag" title="Ganaste bastante más LP de lo normal en esta partida — probablemente Égida de Valor (LP doble por autocompletado). Es una estimación, Riot no lo confirma directamente."><img src="assets/Aegis_of_Valor_icon.svg" alt="">Égida de Valor</span>`
+      : '';
+
+    return `
+      <div class="match">
+        <span class="match-icons">
+          <img class="champ-icon" src="${champIconUrl(m.champion)}" alt="" onerror="${HIDE_ONERROR}">
+          ${spellsHtml ? `<span class="match-spells">${spellsHtml}</span>` : ''}
+          ${runesHtml}
+        </span>
+        <span>
+          <div class="match-champ">${m.champion}</div>
+          <div class="match-kda">${kda} KDA</div>
+          ${duoNames.length ? `<div class="match-duo">🎮 Dúo con ${duoNames.join(', ')}</div>` : ''}
+        </span>
+        <span class="match-result-block">
+          <span class="result-chip ${resultado}">${resultado === 'victoria' ? 'Victoria' : resultado === 'remake' ? 'Remake' : 'Derrota'}</span>
+          ${(m.lp_change ?? null) !== null
+            ? `<span class="lp-change ${m.lp_change >= 0 ? 'win' : 'loss'}">${m.lp_change >= 0 ? '+' : ''}${m.lp_change} LP</span>`
+            : (formatDuration(m.matches.duration_seconds) ? `<span class="lp-change" style="color:var(--text-faint);font-weight:600;">${formatDuration(m.matches.duration_seconds)}</span>` : '')}
+          ${egidaHtml}
+        </span>
+      </div>`;
+  }).join('');
+}
+
+async function renderLpChart(playerId) {
+  const section = document.getElementById('lp-chart-section');
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: puntosRaw } = await supabase.from('rank_snapshots').select('*')
+    .eq('player_id', playerId).eq('queue_type', 'RANKED_SOLO_5x5')
+    .gte('recorded_at', sevenDaysAgo).order('recorded_at', { ascending: true });
+
+  const puntos = (puntosRaw ?? []).filter(p => p.elo_score != null);
+  if (puntos.length < 2) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+
+  const first = puntos[0].elo_score, last = puntos[puntos.length - 1].elo_score;
+  const delta = last - first;
+  const deltaEl = document.getElementById('lp-delta');
+  if (delta > 0) { deltaEl.textContent = `+${delta} LP`; deltaEl.className = 'lp-delta up'; }
+  else if (delta < 0) { deltaEl.textContent = `${delta} LP`; deltaEl.className = 'lp-delta down'; }
+  else { deltaEl.textContent = 'Sin cambio'; deltaEl.className = 'lp-delta flat'; }
+
+  const fmtDate = iso => { const d = new Date(iso); return `${d.getDate()}/${d.getMonth() + 1}`; };
+  document.getElementById('lp-date-start').textContent = fmtDate(puntos[0].recorded_at);
+  document.getElementById('lp-date-end').textContent = fmtDate(puntos[puntos.length - 1].recorded_at);
+  document.getElementById('lp-range-label').textContent =
+    `${TIER_LABEL[puntos[0].tier] ?? puntos[0].tier} ${puntos[0].division ?? ''} → ${TIER_LABEL[puntos.at(-1).tier] ?? puntos.at(-1).tier} ${puntos.at(-1).division ?? ''}`.trim();
+
+  const canvas = document.getElementById('lp-canvas');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth - 40, H = 90;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const scores = puntos.map(p => p.elo_score);
+  const minS = Math.min(...scores), maxS = Math.max(...scores), rangeS = (maxS - minS) || 1;
+  const PAD_X = 4, PAD_Y = 8;
+  const toX = i => PAD_X + (i / (puntos.length - 1)) * (W - PAD_X * 2);
+  const toY = s => PAD_Y + (1 - (s - minS) / rangeS) * (H - PAD_Y * 2);
+
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, 'rgba(0,229,199,0.25)');
+  grad.addColorStop(1, 'rgba(0,229,199,0)');
+  ctx.beginPath();
+  ctx.moveTo(toX(0), toY(scores[0]));
+  for (let i = 1; i < scores.length; i++) ctx.lineTo(toX(i), toY(scores[i]));
+  ctx.lineTo(toX(scores.length - 1), H); ctx.lineTo(toX(0), H); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(toX(0), toY(scores[0]));
+  for (let i = 1; i < scores.length; i++) ctx.lineTo(toX(i), toY(scores[i]));
+  ctx.strokeStyle = '#00e5c7'; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
+
+  const lastX = toX(scores.length - 1), lastY = toY(scores[scores.length - 1]);
+  ctx.beginPath(); ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+  ctx.fillStyle = '#facc15'; ctx.fill();
+  ctx.strokeStyle = '#030812'; ctx.lineWidth = 1.5; ctx.stroke();
+}
+</script>
+</body>
+</html>
