@@ -64,7 +64,8 @@
   .podium-meta{font-size:11px; font-weight:600; color:var(--text-faint); text-transform:uppercase; margin:3px 0 12px;}
   .podium-lp{font-size:17px; font-weight:900; color:var(--accent);}
   .podium-card.rank1 .podium-lp{font-size:30px; background:linear-gradient(90deg,var(--gold),#fff3c4); -webkit-background-clip:text; background-clip:text; color:transparent;}
-  .podium-tier{font-size:11px; color:var(--text-faint); font-weight:600; margin-top:4px;}
+  .podium-tier-row{display:flex; align-items:center; justify-content:center; gap:5px; margin-top:4px;}
+  .podium-tier{font-size:11px; color:var(--text-faint); font-weight:600;}
 
   /* TWITCH — oculto por defecto, se abre con animación cuando hay vivo */
   .twitch-wrap{display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows .5s ease, opacity .4s ease, margin .5s ease; margin-bottom:0;}
@@ -87,6 +88,10 @@
   .spotlight-badge{position:absolute; top:0; left:0; background:var(--gold); color:#000; font-size:10px; font-weight:800; padding:4px 12px; border-bottom-right-radius:8px; text-transform:uppercase; letter-spacing:.08em;}
   .spotlight-icon{width:52px; height:52px; border-radius:12px; background:rgba(250,204,21,.16); border:2px solid var(--gold); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; overflow:hidden;}
   .spotlight-icon img{width:100%; height:100%; object-fit:cover;}
+  /* Antes de que alguien gane hoy — misma tarjeta, atenuada. */
+  .spotlight-card.pending{border-color:var(--border); box-shadow:none; opacity:.8;}
+  .spotlight-card.pending .spotlight-badge{background:var(--panel-2); color:var(--text-faint);}
+  .spotlight-card.pending .spotlight-icon{background:var(--panel-2); border-color:var(--border); font-size:22px; color:var(--text-faint);}
   .spotlight-champ{width:36px; height:36px; border-radius:8px; overflow:hidden; border:1px solid var(--gold); flex-shrink:0; background:#0a1622;}
   .spotlight-champ img{width:100%; height:100%; object-fit:cover;}
   .spotlight-meta{display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:12px; color:var(--text-faint); font-weight:600; margin-top:2px;}
@@ -109,15 +114,42 @@
   .rank-head{padding:0 16px 8px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint);}
   .rank-list{display:flex; flex-direction:column; gap:6px;}
   .rank-row{min-height:68px; padding:12px 16px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); position:relative; overflow:hidden; display:flex; align-items:center;}
-  .rank-row.streak-fire{border-color:rgba(255,95,61,.5); box-shadow:inset 0 0 16px rgba(255,95,61,.18);}
-  .rank-row.streak-ice{border-color:rgba(125,211,252,.45); box-shadow:inset 0 0 16px rgba(125,211,252,.2);}
-  /* Campeón de fondo — en vivo si está jugando, si no su "representación"
-     elegida (players.favorite_champion). Solo ocupa la franja izquierda
-     (alto completo, ancho angosto) y se desvanece a transparente ANTES
-     de llegar a la columna de estado — no cubre toda la fila. */
-  .row-splash{position:absolute; top:0; left:0; bottom:0; width:360px; background-size:cover; background-position:center 15%; filter:blur(1px) saturate(1.1); opacity:.6;
-    -webkit-mask-image:linear-gradient(90deg, #000 0%, #000 40%, transparent 88%); mask-image:linear-gradient(90deg, #000 0%, #000 40%, transparent 88%);}
-  .row-scrim{position:absolute; top:0; left:0; bottom:0; width:360px; background:linear-gradient(90deg, rgba(3,8,18,.1) 0%, rgba(3,8,18,.65) 55%, rgba(3,8,18,.98) 85%);}
+  /* Racha — 3 capas, todas en CSS puro (sin imágenes ni JS de por medio,
+     así sigue animado aunque esa fila no se vuelva a tocar):
+     1) el borde/glow de la fila "respira" (pulso),
+     2) un brillo la recorre de a poco (shimmer),
+     3) partículas — nieve cayendo / brasas subiendo — con radial-gradient. */
+  .rank-row.streak-fire{border-color:rgba(255,95,61,.5); box-shadow:inset 0 0 16px rgba(255,95,61,.18); animation:fire-pulse 2.4s ease-in-out infinite;}
+  .rank-row.streak-ice{border-color:rgba(125,211,252,.45); box-shadow:inset 0 0 16px rgba(125,211,252,.2); animation:ice-pulse 2.8s ease-in-out infinite;}
+  @keyframes fire-pulse{0%,100%{box-shadow:inset 0 0 16px rgba(255,95,61,.18);} 50%{box-shadow:inset 0 0 26px rgba(255,95,61,.34);}}
+  @keyframes ice-pulse{0%,100%{box-shadow:inset 0 0 16px rgba(125,211,252,.2);} 50%{box-shadow:inset 0 0 24px rgba(125,211,252,.34);}}
+  .rank-row.streak-fire::after, .rank-row.streak-ice::after{content:''; position:absolute; inset:0; z-index:0; pointer-events:none; background-size:250% 100%; animation:streak-shimmer 3.6s ease-in-out infinite;}
+  .rank-row.streak-fire::after{background-image:linear-gradient(100deg, transparent 42%, rgba(255,140,80,.2) 50%, transparent 58%);}
+  .rank-row.streak-ice::after{background-image:linear-gradient(100deg, transparent 42%, rgba(125,211,252,.2) 50%, transparent 58%);}
+  @keyframes streak-shimmer{0%{background-position:200% 0;} 100%{background-position:-100% 0;}}
+  .rank-row.streak-fire::before, .rank-row.streak-ice::before{content:''; position:absolute; inset:0; z-index:0; pointer-events:none;}
+  .rank-row.streak-ice::before{
+    background-image:
+      radial-gradient(circle, rgba(210,240,255,.95) 1px, transparent 1.6px),
+      radial-gradient(circle, rgba(210,240,255,.7) 1px, transparent 1.6px),
+      radial-gradient(circle, rgba(210,240,255,.55) 1px, transparent 1.6px),
+      radial-gradient(circle, rgba(210,240,255,.85) 1px, transparent 1.6px);
+    background-size:42px 42px, 61px 61px, 51px 51px, 73px 73px;
+    background-position:8% 0%, 38% 0%, 68% 0%, 90% 0%;
+    animation:snow-fall 4.5s linear infinite;
+  }
+  .rank-row.streak-fire::before{
+    background-image:
+      radial-gradient(circle, rgba(255,170,100,.95) 1px, transparent 1.6px),
+      radial-gradient(circle, rgba(255,120,70,.75) 1px, transparent 1.6px),
+      radial-gradient(circle, rgba(255,200,120,.6) 1px, transparent 1.6px),
+      radial-gradient(circle, rgba(255,95,50,.9) 1px, transparent 1.6px);
+    background-size:38px 38px, 56px 56px, 46px 46px, 66px 66px;
+    background-position:14% 100%, 44% 100%, 74% 100%, 92% 100%;
+    animation:embers-rise 3.2s linear infinite;
+  }
+  @keyframes snow-fall{from{background-position:8% 0%, 38% 0%, 68% 0%, 90% 0%;} to{background-position:8% 100%, 38% 100%, 68% 100%, 90% 100%;}}
+  @keyframes embers-rise{from{background-position:14% 100%, 44% 100%, 74% 100%, 92% 100%;} to{background-position:14% -20%, 44% -20%, 74% -20%, 92% -20%;}}
   .row-content{position:relative; z-index:1; display:flex; align-items:center; gap:14px; width:100%;}
   .col-pos{width:24px; font-size:14px; font-weight:700; color:var(--text-faint); text-align:center;}
   .col-pos.pos-1{font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:800; color:var(--gold); text-shadow:0 0 10px rgba(250,204,21,.6);}
@@ -131,19 +163,24 @@
   .twitch-badge img{width:100%; height:100%; display:block;}
   .twitch-badge.live{box-shadow:0 0 0 1px var(--danger), 0 0 8px var(--danger-glow);}
   .twitch-badge.live img{filter:brightness(0) saturate(100%) invert(46%) sepia(89%) saturate(1657%) hue-rotate(325deg) brightness(103%) contrast(101%);}
-  .streak-icon{font-size:13px;}
+  .streak-icon{font-size:13px; display:inline-block;}
+  .rank-row.streak-fire .streak-icon{animation:fire-flicker 1.1s ease-in-out infinite; filter:drop-shadow(0 0 4px rgba(255,130,70,.8));}
+  .rank-row.streak-ice .streak-icon{animation:ice-float 2.4s ease-in-out infinite; filter:drop-shadow(0 0 4px rgba(125,211,252,.8));}
+  @keyframes fire-flicker{0%,100%{transform:scale(1) rotate(-4deg);} 50%{transform:scale(1.18) rotate(4deg);}}
+  @keyframes ice-float{0%,100%{transform:translateY(0) rotate(-6deg);} 50%{transform:translateY(-2px) rotate(8deg);}}
   .col-role{width:70px;}
   .role-pill{display:inline-block; background:rgba(0,229,199,.14); color:var(--accent); font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px;}
   .avatar-circle img{width:100%; height:100%; object-fit:cover;}
   .col-name{flex-grow:1; min-width:0; font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .col-name .duo{font-size:10px; font-weight:700; color:var(--accent);}
-  /* Columna de campeón representativo — en vivo si está jugando, si no
-     su campeón elegido (mismo dato que ya usa .row-splash). Corte
-     diagonal con la paleta del sitio, no líneas blancas planas. */
-  .col-champ-outer{width:38px; height:38px; flex-shrink:0; padding:2px; background:var(--accent); box-shadow:0 0 8px var(--accent-glow); clip-path:polygon(20% 0,100% 0,80% 100%,0 100%);}
-  .col-champ-outer.live{background:var(--danger); box-shadow:0 0 10px var(--danger-glow);}
-  .col-champ-inner{width:100%; height:100%; overflow:hidden; background:#0a1622; clip-path:polygon(20% 0,100% 0,80% 100%,0 100%);}
-  .col-champ-inner img{width:100%; height:100%; object-fit:cover;}
+  /* Campeón representativo — en vivo si está jugando, si no su campeón
+     elegido. Franja de alto completo de la fila (no una cajita), corte
+     diagonal, difuminada — sutil, no ocupa todo el fondo de la fila
+     como hacía el splash viejo. */
+  .col-champ-outer{align-self:stretch; width:64px; flex-shrink:0; margin:-12px 0; position:relative; overflow:hidden; clip-path:polygon(30% 0,100% 0,70% 100%,0 100%);}
+  .col-champ-outer::before{content:''; position:absolute; inset:-8px; background-image:var(--champbg); background-size:cover; background-position:center 18%; filter:blur(2.5px) saturate(1.15) brightness(.8);}
+  .col-champ-outer::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(0,229,199,.22), rgba(3,8,18,.55) 45%, rgba(3,8,18,.75) 100%);}
+  .col-champ-outer.live::after{background:linear-gradient(90deg, rgba(255,95,61,.28), rgba(3,8,18,.55) 45%, rgba(3,8,18,.75) 100%);}
   .col-estado{width:96px; display:flex; align-items:center; gap:6px;}
   .champ-mini{width:20px; height:20px; border-radius:5px; overflow:hidden; flex-shrink:0; background:#0a1622; border:1px solid var(--border);}
   .champ-mini img{width:100%; height:100%; object-fit:cover;}
@@ -247,7 +284,7 @@
     </div>
   </div>
 
-  <section id="primera-victoria-section" style="display:none;">
+  <section id="primera-victoria-section">
     <div id="primera-victoria"></div>
   </section>
 
@@ -532,14 +569,12 @@ function buildRow(p, idx) {
   const posClass = idx === 0 ? 'pos-1' : idx === 1 ? 'pos-2' : idx === 2 ? 'pos-3' : '';
   const posContent = idx === 0 ? '👑' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : (idx + 1);
 
-  // Campeón de fondo: en vivo si está jugando, si no su "representación"
-  // elegida (players.favorite_champion) — mismo patrón que ya usaba el
-  // podio del sitio viejo (splash + scrim), ahora en toda la fila.
+  // Campeón representativo: en vivo si está jugando, si no su
+  // "representación" elegida (players.favorite_champion). Ya no cubre
+  // toda la fila (eso se sacó) — es solo la franja angosta y difuminada
+  // de .col-champ-outer, entre el nombre y la columna de Estado.
   const champBg = enPartida ? p.live.champion : p.favorite_champion;
   const skinBg = enPartida ? 0 : (p.favorite_skin ?? 0);
-  const splashHtml = champBg
-    ? `<div class="row-splash" style="background-image:url('${splashUrl(champBg, skinBg)}')"></div><div class="row-scrim"></div>`
-    : '';
 
   const iconUrl = profileIconUrl(p.icon_id);
   const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="">` : initials(p.riot_game_name);
@@ -555,14 +590,11 @@ function buildRow(p, idx) {
   row.className = `rank-row ${p.id === selectedPlayerId ? 'active' : ''} ${streakType ? 'streak-' + streakType : ''}`;
   row.addEventListener('click', () => selectPlayer(p.id));
   row.innerHTML = `
-    ${splashHtml}
     <div class="row-content">
       <div class="col-pos ${posClass}">${posContent}</div>
       <div class="col-avatar"><div class="avatar-circle">${avatarHtml}</div>${twitchBadgeHtml}</div>
       <div class="col-name">${p.riot_game_name}${streakEmoji ? ` <span class="streak-icon" title="${streakTitle}">${streakEmoji}</span>` : ''}</div>
-      <div class="col-champ-outer ${enPartida ? 'live' : ''}">
-        <div class="col-champ-inner">${champBg ? `<img src="${champIconUrl(champBg)}" alt="${champBg}">` : ''}</div>
-      </div>
+      <div class="col-champ-outer ${enPartida ? 'live' : ''}" ${champBg ? `style="--champbg:url('${splashUrl(champBg, skinBg)}')"` : ''}></div>
       <div class="col-estado">
         <span class="status-chip ${enPartida ? 'in-game' : 'offline'}">${enPartida ? 'En partida' : 'Offline'}</span>
       </div>
@@ -729,9 +761,12 @@ async function render() {
       <div class="podium-rank-chip">${rankNum === 1 ? '👑 #1' : '#' + rankNum}</div>
       <div class="podium-avatar">${avatarHtml}</div>
       <div class="podium-name">${p.riot_game_name}</div>
-      <div class="podium-meta">${p.primary_role ?? 'Sin datos'}${p.top_recent_champions?.[0] ? ' — ' + p.top_recent_champions[0].campeon : ''}</div>
+      <div class="podium-meta">${p.primary_role ?? 'Sin datos'}</div>
       <div class="podium-lp ${lpChanged ? 'value-changed' : ''}">${lpText}</div>
-      <div class="podium-tier ${tierChanged ? 'value-changed' : ''}">${tierText}</div>`;
+      <div class="podium-tier-row">
+        <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="">
+        <div class="podium-tier ${tierChanged ? 'value-changed' : ''}">${tierText}</div>
+      </div>`;
     podiumEl.appendChild(div);
   });
 
@@ -758,11 +793,12 @@ async function render() {
   }
 
   // Primera Victoria del Día — foto real, campeón, KDA, hechizos, lado
-  // y duración (antes solo mostraba iniciales y nombre).
+  // y duración (antes solo mostraba iniciales y nombre). Ahora la
+  // sección siempre se muestra: si todavía nadie ganó hoy, se ve una
+  // versión atenuada en vez de ocultarse por completo.
   const pvSection = document.getElementById('primera-victoria-section');
   const p = firstWin?.player_id ? roster.find(r => r.id === firstWin.player_id) : null;
   if (p) {
-    pvSection.style.display = '';
     const pvIconUrl = profileIconUrl(p.icon_id);
     const pvAvatarHtml = pvIconUrl ? `<img src="${pvIconUrl}" alt="">` : initials(p.riot_game_name);
     const pvChampHtml = firstWin.champion
@@ -794,7 +830,12 @@ async function render() {
         </div>
       </div>`;
   } else {
-    pvSection.style.display = 'none';
+    document.getElementById('primera-victoria').innerHTML = `
+      <div class="spotlight-card pending">
+        <div class="spotlight-badge">Primera Victoria del Día</div>
+        <div class="spotlight-icon" style="margin-top:8px;">🌅</div>
+        <div style="margin-top:8px;font-size:13px;color:var(--text-faint);font-weight:600;">Nadie ha ganado hoy todavía.</div>
+      </div>`;
   }
 
   // Badges últimas 10 + destacados semana
