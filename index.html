@@ -26,7 +26,15 @@
   .wrap{max-width:1080px; margin:0 auto; padding:44px 20px 80px;}
 
   header{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:34px; padding-bottom:24px; border-bottom:1px solid var(--border);}
+  .logo-slot{display:flex; align-items:center; gap:14px;}
   .logo-slot img{height:40px; width:auto; display:block;}
+  /* Indicador de "en vivo" — igual que el sitio viejo: punto que
+     pulsa + "Actualizado hace Xs/Xm", para que quede claro en stream
+     que la página sigue actualizando y no se congeló. */
+  .live-indicator{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dim); background:var(--panel); border:1px solid var(--border); padding:6px 12px; border-radius:999px;}
+  .pulse-dot{width:7px; height:7px; border-radius:50%; background:var(--accent); flex-shrink:0; animation:live-pulse 2.2s infinite;}
+  @keyframes live-pulse{0%{box-shadow:0 0 0 0 var(--accent-glow);} 70%{box-shadow:0 0 0 8px rgba(0,229,199,0);} 100%{box-shadow:0 0 0 0 rgba(0,229,199,0);}}
+  @media (max-width:700px){ .live-indicator{display:none !important;} }
   footer{display:flex; flex-direction:column; align-items:center; gap:12px;}
   .footer-logo{height:34px; width:auto;}
   h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(28px,4vw,40px); letter-spacing:.03em; text-transform:uppercase;
@@ -112,7 +120,8 @@
   .info-card .ico{width:44px; height:44px; border-radius:12px; background:var(--panel-2); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;}
   .info-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint);}
   .info-player{font-size:14px; font-weight:800; margin:2px 0;}
-  .info-detail{font-size:12px; color:var(--accent); font-weight:700;}
+  .info-detail{font-size:12px; color:var(--accent); font-weight:700; display:flex; align-items:center; gap:5px;}
+  .badge-champ-icon{width:18px; height:18px; border-radius:4px; object-fit:cover; flex-shrink:0;}
   @media (max-width:700px){ .cards-grid{grid-template-columns:1fr 1fr;} }
 
   /* Ranking */
@@ -213,7 +222,10 @@
   .status-chip{font-size:10px; font-weight:800; padding:4px 8px; border-radius:6px; text-transform:uppercase; white-space:nowrap;}
   .status-chip.in-game{background:rgba(255,95,61,.15); color:var(--danger); border:1px solid rgba(255,95,61,.4);}
   .status-chip.offline{background:rgba(161,161,170,.1); color:#a1a1aa; border:1px solid rgba(161,161,170,.2);}
-  .col-role{width:70px; font-size:12px; color:var(--text-dim); font-weight:600;}
+  .col-role{width:70px; font-size:12px; color:var(--text-dim); font-weight:600; display:flex; align-items:center; gap:5px;}
+  .trend-arrow{font-size:11px; font-weight:900; line-height:1;}
+  .trend-arrow.up{color:var(--accent);}
+  .trend-arrow.down{color:var(--danger);}
   .col-rank{width:110px; display:flex; align-items:center; gap:6px;}
   .rank-emblem{width:18px; height:18px; flex-shrink:0;}
   .col-rank .tier-lp .tier{font-size:13px; color:#fff; font-weight:700; line-height:1.2;}
@@ -303,7 +315,13 @@
 <div class="wrap">
 
   <header>
-    <div class="logo-slot"><img src="logo/FlaviIconLogo.png" alt="SharkTracker"></div>
+    <div class="logo-slot">
+      <img src="logo/FlaviIconLogo.png" alt="SharkTracker">
+      <div class="live-indicator" id="live-indicator">
+        <span class="pulse-dot"></span>
+        <span id="live-indicator-text">Cargando…</span>
+      </div>
+    </div>
     <h1>SharkTracker</h1>
     <div class="auth-slot" id="auth-slot"></div>
   </header>
@@ -418,13 +436,27 @@ try {
   ddragonVersion = versions[0];
 } catch (e) { console.warn('DDragon version fetch falló, usando fallback', e); }
 
-const champIconUrl = (champion) => `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${champion}.png`;
+// Riot manda "FiddleSticks" (S mayúscula) en championName, pero el
+// archivo real en Data Dragon es "Fiddlesticks.png" (s minúscula) — el
+// sitio viejo ya tenía este fix (CHAMPION_ID_OVERRIDES/champKey), acá
+// faltaba y rompía el ícono en toda partida de Fiddlesticks.
+const CHAMPION_ID_OVERRIDES = { FiddleSticks: 'Fiddlesticks' };
+const champKey = (name) => { const clean = (name || '').trim(); return CHAMPION_ID_OVERRIDES[clean] || clean; };
+const champIconUrl = (champion) => `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${champKey(champion)}.png`;
 // Splash "loading screen" — mismo formato/URL que ya usaba el sitio viejo
 // (OLD/index.html: PODIUM_SPLASH), sin versión de parche en la ruta.
-const splashUrl = (champion, skin) => `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champion}_${skin ?? 0}.jpg`;
+const splashUrl = (champion, skin) => `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champKey(champion)}_${skin ?? 0}.jpg`;
 const profileIconUrl = (iconId) => iconId ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${iconId}.png` : null;
 const emblemUrl = (tier) => `${MINI_CREST_BASE}${(tier || 'unranked').toLowerCase()}.png`;
 const initials = (name) => (name || '?').replace(/[^\p{L}\p{N}]/gu, '').slice(0, 2).toUpperCase();
+const formatDuration = (seconds) => seconds ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}` : null;
+// Fallback de imágenes rotas — igual que hacía el sitio viejo
+// (AVATAR_ONERROR + onerror="this.style.visibility='hidden'"): si un
+// ícono de invocador todavía no existe en Data Dragon (recién salió),
+// cae a uno clásico; si un campeón/hechizo/runa/emblema no carga, se
+// oculta en vez de mostrar el ícono roto.
+const AVATAR_ONERROR = `this.onerror=null;this.src='${profileIconUrl(1)}';`;
+const HIDE_ONERROR = `this.style.visibility='hidden';`;
 // El orden real ya lo calcula el backend (rank_snapshots.elo_score), que sí
 // tiene en cuenta la división — no se recalcula acá para no repetir mal la
 // lógica (esto es justo lo que se rompió: comparar solo tier+LP ignoraba
@@ -442,6 +474,18 @@ const timeAgo = (iso) => {
 let selectedPlayerId = null;
 let nameById = new Map();
 let playersById = new Map();
+// Indicador de "en vivo" del header — se pisa cada vez que render()
+// termina de traer datos de Supabase, igual que hacía el sitio viejo.
+let lastUpdate = null;
+function tickLiveIndicator() {
+  const el = document.getElementById('live-indicator-text');
+  if (!el) return;
+  if (!lastUpdate) { el.textContent = 'Cargando…'; return; }
+  const secs = Math.floor((Date.now() - lastUpdate) / 1000);
+  if (secs < 5) el.textContent = 'Actualizado ahora';
+  else if (secs < 60) el.textContent = `Actualizado hace ${secs}s`;
+  else el.textContent = `Actualizado hace ${Math.floor(secs / 60)}m`;
+}
 const summonerSpellById = {};
 const runeIconById = {};
 let matchCatalogsPromise = null;
@@ -501,6 +545,20 @@ async function loadAllHistories(playerIds) {
 
 // Racha de 3+ victorias o derrotas seguidas, contando desde la partida
 // más reciente hacia atrás — mismo criterio que usaba el sitio viejo.
+// Flecha de tendencia junto al rol — YA NO es "ganaste/perdiste la
+// última partida" (así era en el sitio viejo), Alex pidió cambiarlo a
+// balance de victorias/derrotas en las últimas 5 de SoloQ: más
+// victorias que derrotas → arriba, más derrotas que victorias → abajo.
+// Con 3 partidas o menos jugadas, o empate 2-2, no hay flecha.
+function getTrendArrow(id) {
+  const games = (historyByPlayer.get(id) ?? []).slice(0, 5);
+  if (games.length < 3) return null;
+  const wins = games.filter(g => g.win).length;
+  const losses = games.length - wins;
+  if (wins === losses) return null;
+  return wins > losses ? 'up' : 'down';
+}
+
 function getStreakType(id) {
   const games = historyByPlayer.get(id) ?? [];
   if (games.length < 3) return null;
@@ -534,15 +592,15 @@ function renderHistoryPanel(id) {
       .map(c => nameById.get(c.player_id));
 
     const spellsHtml = (m.summoner_spells ?? [])
-      .map(sid => { const url = spellIconUrl(sid); return url ? `<img src="${url}" alt="">` : ''; })
+      .map(sid => { const url = spellIconUrl(sid); return url ? `<img src="${url}" alt="" onerror="${HIDE_ONERROR}">` : ''; })
       .join('');
 
     const keystoneUrl = runeIconUrl(m.keystone_perk);
     const secundariaUrl = runeIconUrl(m.secondary_style);
     const runesHtml = (keystoneUrl || secundariaUrl) ? `
       <span class="match-runes">
-        ${keystoneUrl ? `<img src="${keystoneUrl}" alt="">` : ''}
-        ${secundariaUrl ? `<img src="${secundariaUrl}" alt="">` : ''}
+        ${keystoneUrl ? `<img src="${keystoneUrl}" alt="" onerror="${HIDE_ONERROR}">` : ''}
+        ${secundariaUrl ? `<img src="${secundariaUrl}" alt="" onerror="${HIDE_ONERROR}">` : ''}
       </span>` : '';
 
     // Remake = partida terminada en menos de 5 minutos (misma convención que el sitio viejo).
@@ -555,7 +613,7 @@ function renderHistoryPanel(id) {
     return `
       <div class="match">
         <span class="match-icons">
-          <img class="champ-icon" src="${champIconUrl(m.champion)}" alt="">
+          <img class="champ-icon" src="${champIconUrl(m.champion)}" alt="" onerror="${HIDE_ONERROR}">
           ${spellsHtml ? `<span class="match-spells">${spellsHtml}</span>` : ''}
           ${runesHtml}
         </span>
@@ -566,7 +624,9 @@ function renderHistoryPanel(id) {
         </span>
         <span class="match-result-block">
           <span class="result-chip ${resultado}">${resultado === 'victoria' ? 'Victoria' : resultado === 'remake' ? 'Remake' : 'Derrota'}</span>
-          ${(m.lp_change ?? null) !== null ? `<span class="lp-change ${m.lp_change >= 0 ? 'win' : 'loss'}">${m.lp_change >= 0 ? '+' : ''}${m.lp_change} LP</span>` : ''}
+          ${(m.lp_change ?? null) !== null
+            ? `<span class="lp-change ${m.lp_change >= 0 ? 'win' : 'loss'}">${m.lp_change >= 0 ? '+' : ''}${m.lp_change} LP</span>`
+            : (formatDuration(m.matches.duration_seconds) ? `<span class="lp-change" style="color:var(--text-faint);font-weight:600;">${formatDuration(m.matches.duration_seconds)}</span>` : '')}
           ${egidaHtml}
         </span>
       </div>`;
@@ -599,6 +659,9 @@ function buildRow(p, idx) {
   const enPartida = p.live?.in_game;
   const duoCon = p.live?.duo_con ?? [];
   const wr = p.rank && (p.rank.wins + p.rank.losses) > 0 ? Math.round(p.rank.wins / (p.rank.wins + p.rank.losses) * 100) : null;
+  const trend = getTrendArrow(p.id);
+  const trendHtml = trend
+    ? `<span class="trend-arrow ${trend}" title="${trend === 'up' ? 'Más victorias que derrotas en sus últimas 5' : 'Más derrotas que victorias en sus últimas 5'}">${trend === 'up' ? '▲' : '▼'}</span>` : '';
 
   // Top 3 con corona/medalla (con glow) reemplazando el número — el
   // resto de las posiciones muestra el número normal.
@@ -613,7 +676,7 @@ function buildRow(p, idx) {
   const skinBg = enPartida ? 0 : (p.favorite_skin ?? 0);
 
   const iconUrl = profileIconUrl(p.icon_id);
-  const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="">` : initials(p.riot_game_name);
+  const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(p.riot_game_name);
   const twitchLive = !!p.stream?.is_live;
   const twitchBadgeHtml = p.profile.twitch_username
     ? `<a class="twitch-badge ${twitchLive ? 'live' : ''}" href="https://twitch.tv/${encodeURIComponent(p.profile.twitch_username)}" target="_blank" rel="noopener" title="Twitch${twitchLive ? ' en vivo' : ''}" onclick="event.stopPropagation()"><img src="assets/${twitchLive ? 'Online_Twitch' : 'Offline_Twitch'}.svg" alt="Twitch"></a>`
@@ -635,9 +698,9 @@ function buildRow(p, idx) {
         <span class="status-chip ${enPartida ? 'in-game' : 'offline'}">${enPartida ? 'En partida' : 'Offline'}</span>
         ${enPartida && duoCon.length ? `<span class="duo-tag" title="Dúo con ${duoCon.join(', ')}">🎮 con ${duoCon.join(', ')}</span>` : ''}
       </div>
-      <div class="col-role">${p.primary_role ? `<span class="role-pill">${p.primary_role}</span>` : '—'}</div>
+      <div class="col-role">${trendHtml}${p.primary_role ? `<span class="role-pill">${p.primary_role}</span>` : '—'}</div>
       <div class="col-rank">
-        <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="">
+        <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="" onerror="${HIDE_ONERROR}">
         <div class="tier-lp"><div class="tier">${tierText}</div><div class="lp">${lpText}</div></div>
       </div>
       <div class="col-wr">
@@ -647,7 +710,7 @@ function buildRow(p, idx) {
 
   row.dataset.signature = JSON.stringify([
     p.id === selectedPlayerId, streakType, posContent, champBg, skinBg,
-    avatarHtml, twitchLive, enPartida, duoCon, p.primary_role, tierText, lpText, wr,
+    avatarHtml, twitchLive, enPartida, duoCon, trend, p.primary_role, tierText, lpText, wr,
   ]);
 
   // Barrido — si el LP, el rango o el winrate cambiaron desde el último
@@ -699,18 +762,29 @@ function renderBadgeCard(container, categoria, badgeByCategory, nameById) {
   const b = badgeByCategory.get(categoria);
   const div = document.createElement('div');
   div.className = 'info-card';
-  div.innerHTML = b
-    ? `<div class="ico">${meta.icono}</div>
+  if (b) {
+    // Empate inclusivo (issue 4 de KNOWN_ISSUES2.md): si varios
+    // jugadores llegaron al mismo máximo, se listan todos los nombres
+    // unidos con " & " — igual que namesJoined() del sitio viejo.
+    const ids = (b.player_ids && b.player_ids.length) ? b.player_ids : [b.player_id];
+    const nombres = ids.map(id => nameById.get(id) ?? '?').join(' & ');
+    const champHtml = b.champion
+      ? `<img class="badge-champ-icon" src="${champIconUrl(b.champion)}" alt="${b.champion}" onerror="${HIDE_ONERROR}">` : '';
+    div.innerHTML = `
+      <div class="ico">${meta.icono}</div>
       <div style="min-width:0;">
         <div class="info-label">${meta.label}</div>
-        <div class="info-player">${nameById.get(b.player_id) ?? '?'}</div>
-        <div class="info-detail">${b.detail ?? ''}</div>
-      </div>`
-    : `<div class="ico">${meta.icono}</div>
+        <div class="info-player">${nombres}</div>
+        <div class="info-detail">${champHtml}<span>${b.detail ?? ''}</span></div>
+      </div>`;
+  } else {
+    div.innerHTML = `
+      <div class="ico">${meta.icono}</div>
       <div style="min-width:0;">
         <div class="info-label">${meta.label}</div>
         <div class="info-detail" style="color:var(--text-faint);font-weight:600;">${meta.empty ?? 'Sin datos todavía.'}</div>
       </div>`;
+  }
   container.appendChild(div);
 }
 
@@ -807,7 +881,7 @@ async function render() {
       : '';
     // Avatar = ícono de invocador REAL (players.icon_id), no el campeón.
     const iconUrl = profileIconUrl(p.icon_id);
-    const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="">` : initials(p.riot_game_name);
+    const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(p.riot_game_name);
     const medalIcon = rankNum === 1 ? '👑' : rankNum === 2 ? '🥈' : '🥉';
     const medalClass = rankNum === 1 ? 'gold' : rankNum === 2 ? 'silver' : 'bronze';
     const tierText = p.rank ? (TIER_LABEL[p.rank.tier] ?? p.rank.tier) + ' ' + (p.rank.division ?? '') : 'Unranked';
@@ -828,7 +902,7 @@ async function render() {
       <div class="podium-meta">${p.primary_role ?? 'Sin datos'}</div>
       <div class="podium-lp ${lpChanged ? 'value-changed' : ''}">${lpText}</div>
       <div class="podium-tier-row">
-        <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="">
+        <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="" onerror="${HIDE_ONERROR}">
         <div class="podium-tier ${tierChanged ? 'value-changed' : ''}">${tierText}</div>
       </div>`;
     podiumEl.appendChild(div);
@@ -864,15 +938,14 @@ async function render() {
   const p = firstWin?.player_id ? roster.find(r => r.id === firstWin.player_id) : null;
   if (p) {
     const pvIconUrl = profileIconUrl(p.icon_id);
-    const pvAvatarHtml = pvIconUrl ? `<img src="${pvIconUrl}" alt="">` : initials(p.riot_game_name);
+    const pvAvatarHtml = pvIconUrl ? `<img src="${pvIconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(p.riot_game_name);
     const pvChampHtml = firstWin.champion
-      ? `<div class="spotlight-champ"><img src="${champIconUrl(firstWin.champion)}" alt="${firstWin.champion}"></div>` : '';
+      ? `<div class="spotlight-champ"><img src="${champIconUrl(firstWin.champion)}" alt="${firstWin.champion}" onerror="${HIDE_ONERROR}"></div>` : '';
     const pvKda = firstWin.kills != null ? `${firstWin.kills}/${firstWin.deaths}/${firstWin.assists} KDA` : null;
     const pvSpellsHtml = (firstWin.summoner_spells ?? [])
-      .map(sid => { const url = spellIconUrl(sid); return url ? `<img src="${url}" alt="">` : ''; }).join('');
+      .map(sid => { const url = spellIconUrl(sid); return url ? `<img src="${url}" alt="" onerror="${HIDE_ONERROR}">` : ''; }).join('');
     const pvLado = firstWin.team === 'blue' ? 'Equipo Azul' : firstWin.team === 'red' ? 'Equipo Rojo' : null;
-    const pvDuracion = firstWin.duration_seconds
-      ? `${Math.floor(firstWin.duration_seconds / 60)}:${String(firstWin.duration_seconds % 60).padStart(2, '0')}` : null;
+    const pvDuracion = formatDuration(firstWin.duration_seconds);
 
     document.getElementById('primera-victoria').innerHTML = `
       <div class="spotlight-card">
@@ -921,7 +994,7 @@ async function render() {
     reySection.style.display = '';
     const reyPlayer = playersById.get(rey.player_id);
     const reyIconUrl = profileIconUrl(reyPlayer?.icon_id);
-    const reyAvatarHtml = reyIconUrl ? `<img src="${reyIconUrl}" alt="">` : initials(reyPlayer?.riot_game_name ?? nameById.get(rey.player_id) ?? '?');
+    const reyAvatarHtml = reyIconUrl ? `<img src="${reyIconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(reyPlayer?.riot_game_name ?? nameById.get(rey.player_id) ?? '?');
     const reyNombre = reyPlayer
       ? `${reyPlayer.riot_game_name}${reyPlayer.riot_tag_line ? `#${reyPlayer.riot_tag_line}` : ''}`
       : (nameById.get(rey.player_id) ?? '?');
@@ -976,7 +1049,7 @@ async function render() {
 
       const item = document.createElement('div');
       item.className = 'logro-item';
-      const iconoHtml = icono.endsWith('.svg') ? `<img src="${icono}" alt="">` : icono;
+      const iconoHtml = icono.endsWith('.svg') ? `<img src="${icono}" alt="" onerror="${HIDE_ONERROR}">` : icono;
       item.innerHTML = `
         <div class="logro-icon">${iconoHtml}</div>
         <div style="flex:1;min-width:0;">
@@ -987,6 +1060,9 @@ async function render() {
       logrosEl.appendChild(item);
     });
   }
+
+  lastUpdate = Date.now();
+  tickLiveIndicator();
 }
 
 await render();
@@ -1043,6 +1119,7 @@ function tickCountdowns() {
 buildCountdowns();
 tickCountdowns();
 setInterval(tickCountdowns, 1000);
+setInterval(tickLiveIndicator, 1000);
 
 // ── Realtime — Supabase avisa al instante cuando cambia algo en
 // estas tablas; se agrupan avisos que lleguen muy seguidos (p.ej.
