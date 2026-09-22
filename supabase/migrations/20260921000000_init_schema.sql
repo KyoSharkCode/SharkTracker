@@ -521,6 +521,19 @@ begin
   from (select player_id, sum(tiempo_cc) as valor from _weekly_stats group by player_id) x
   where valor > 0 order by valor desc limit 1;
 
+  -- El Tortuga — menos partidas jugadas esta semana (mínimo 1 para aparecer)
+  insert into _badge_results
+  select 'tortuga', player_id, valor,
+    valor || ' partida' || (case when valor <> 1 then 's' else '' end) || ' esta semana'
+  from (select player_id, count(*) as valor from _weekly_stats group by player_id) x
+  where valor > 0 order by valor asc limit 1;
+
+  -- El Asistente — más asistencias esta semana
+  insert into _badge_results
+  select 'asistente', player_id, valor, valor || ' asistencias esta semana'
+  from (select player_id, sum(assists) as valor from _weekly_stats group by player_id) x
+  where valor > 0 order by valor desc limit 1;
+
   for r in select * from _badge_results loop
     select player_id into v_prev_player from weekly_badges where category = r.category;
     if v_prev_player is distinct from r.player_id then
