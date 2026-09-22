@@ -113,7 +113,7 @@
   .rank-head, .rank-row{display:flex; align-items:center; gap:14px;}
   .rank-head{padding:0 16px 8px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint);}
   .rank-list{display:flex; flex-direction:column; gap:6px;}
-  .rank-row{min-height:68px; padding:12px 16px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); position:relative; overflow:hidden; display:flex; align-items:center;}
+  .rank-row{min-height:68px; padding:12px 16px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); position:relative; overflow:hidden; contain:paint; display:flex; align-items:center;}
   /* Racha — 3 capas, todas en CSS puro (sin imágenes ni JS de por medio,
      así sigue animado aunque esa fila no se vuelva a tocar):
      1) el borde/glow de la fila "respira" (pulso),
@@ -123,10 +123,18 @@
   .rank-row.streak-ice{border-color:rgba(125,211,252,.45); box-shadow:inset 0 0 16px rgba(125,211,252,.2); animation:ice-pulse 2.8s ease-in-out infinite;}
   @keyframes fire-pulse{0%,100%{box-shadow:inset 0 0 16px rgba(255,95,61,.18);} 50%{box-shadow:inset 0 0 26px rgba(255,95,61,.34);}}
   @keyframes ice-pulse{0%,100%{box-shadow:inset 0 0 16px rgba(125,211,252,.2);} 50%{box-shadow:inset 0 0 24px rgba(125,211,252,.34);}}
-  .rank-row.streak-fire::after, .rank-row.streak-ice::after{content:''; position:absolute; inset:0; z-index:0; pointer-events:none; background-size:250% 100%; animation:streak-shimmer 3.6s ease-in-out infinite;}
+  .rank-row.streak-fire::after, .rank-row.streak-ice::after{content:''; position:absolute; inset:0; z-index:0; pointer-events:none; background-repeat:repeat; background-size:300% 100%; animation:streak-shimmer 3.6s linear infinite;}
   .rank-row.streak-fire::after{background-image:linear-gradient(100deg, transparent 42%, rgba(255,140,80,.2) 50%, transparent 58%);}
   .rank-row.streak-ice::after{background-image:linear-gradient(100deg, transparent 42%, rgba(125,211,252,.2) 50%, transparent 58%);}
-  @keyframes streak-shimmer{0%{background-position:200% 0;} 100%{background-position:-100% 0;}}
+  /* Igual que snow-fall/embers-rise: con background-size:300% el "tile"
+     mide 3x el ancho de la fila, y ese ancho equivale a exactamente
+     150% de desplazamiento en las unidades de background-position (no
+     100%, esa es la trampa). Moverse entre 150% y 0% es un salto de
+     una vuelta COMPLETA del patrón, así que el loop no se nota — antes
+     el recorrido (200% a -100%) no calzaba con el tile y por eso se
+     veía el "teleport" al reiniciar. timing linear = velocidad
+     constante, sin el tramo rápido/lento de ease-in-out. */
+  @keyframes streak-shimmer{0%{background-position:150% 0;} 100%{background-position:0% 0;}}
   .rank-row.streak-fire::before, .rank-row.streak-ice::before{content:''; position:absolute; inset:0; z-index:0; pointer-events:none;}
   .rank-row.streak-ice::before{
     background-image:
@@ -185,7 +193,7 @@
   /* Nítido, no borroso — se oscurece con brightness bajo + un degradé
      encima, así el personaje se ve claro pero queda integrado a la
      fila (parte del fondo) en vez de robarse la atención. */
-  .col-champ-outer::before{content:''; position:absolute; inset:-2px; background-image:var(--champbg); background-size:cover; background-position:center 18%; filter:saturate(1.05) brightness(.55);}
+  .col-champ-outer::before{content:''; position:absolute; inset:0 -2px; background-image:var(--champbg); background-size:cover; background-position:center 18%; filter:saturate(1.05) brightness(.55);}
   .col-champ-outer::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(3,8,18,.1), rgba(3,8,18,.55) 55%, rgba(3,8,18,.82) 100%);}
   .col-champ-outer.live::after{background:linear-gradient(90deg, rgba(255,95,61,.14), rgba(3,8,18,.5) 55%, rgba(3,8,18,.78) 100%);}
   .col-estado{width:96px; display:flex; align-items:center; gap:6px;}
