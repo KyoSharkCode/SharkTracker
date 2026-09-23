@@ -268,6 +268,8 @@
   .history-hint{font-size:12px; color:var(--text-faint); margin:0 0 14px;}
   .matches{display:flex; flex-direction:column; gap:8px;}
   a.match, .match{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:14px; padding:10px 12px; border-radius:10px; background:var(--panel-2); border:1px solid var(--border); text-decoration:none; color:inherit;}
+  a.match{text-decoration:none; color:inherit; transition:border-color .15s, background .15s;}
+  a.match:hover{border-color:var(--accent); background:rgba(0,229,199,.05);}
   .match-icons{display:flex; align-items:center; gap:5px;}
   .match .champ-icon{width:36px; height:36px; border-radius:8px; object-fit:cover; background:#0a1622; flex-shrink:0;}
   .match-spells{display:flex; flex-direction:column; gap:3px;}
@@ -650,7 +652,7 @@ function renderHistoryPanel(id) {
       : '';
 
     return `
-      <div class="match">
+      <a class="match" href="partidas.html?id=${encodeURIComponent(m.match_id)}&jugador=${encodeURIComponent(id)}" title="Ver la partida completa">
         <span class="match-icons">
           <img class="champ-icon" src="${champIconUrl(m.champion)}" alt="" onerror="${HIDE_ONERROR}">
           ${spellsHtml ? `<span class="match-spells">${spellsHtml}</span>` : ''}
@@ -669,7 +671,7 @@ function renderHistoryPanel(id) {
           ${autofillHtml}
           ${egidaHtml}
         </span>
-      </div>`;
+      </a>`;
   }).join('');
 
   panel.innerHTML = `<div class="matches">${matchesHtml}</div>`;

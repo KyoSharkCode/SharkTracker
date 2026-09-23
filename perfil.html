@@ -240,6 +240,8 @@
   .history-panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px;}
   .matches{display:flex; flex-direction:column; gap:8px;}
   .match{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:14px; padding:10px 12px; border-radius:10px; background:var(--panel-2); border:1px solid var(--border); text-decoration:none; color:inherit;}
+  a.match{text-decoration:none; color:inherit; transition:border-color .15s, background .15s;}
+  a.match:hover{border-color:var(--accent); background:rgba(0,229,199,.05);}
   .match-icons{display:flex; align-items:center; gap:5px;}
   .match .champ-icon{width:36px; height:36px; border-radius:8px; object-fit:cover; background:#0a1622; flex-shrink:0;}
   .match-spells{display:flex; flex-direction:column; gap:3px;}
@@ -1060,7 +1062,7 @@ function renderHistory() {
       : (dur ? `<span class="lp-change dur">${dur}</span>` : '');
 
     return `
-      <div class="match">
+      <a class="match" href="partidas.html?id=${encodeURIComponent(m.match_id)}&jugador=${encodeURIComponent(viewState.player?.id ?? '')}" title="Ver la partida completa">
         <span class="match-icons">
           <img class="champ-icon" src="${champIconUrl(m.champion)}" alt="" onerror="${HIDE_ONERROR}">
           ${spellsHtml ? `<span class="match-spells">${spellsHtml}</span>` : ''}
@@ -1077,7 +1079,7 @@ function renderHistory() {
           ${autofillHtml}
           ${egidaHtml}
         </span>
-      </div>`;
+      </a>`;
   }).join('');
 }
 
@@ -1332,13 +1334,28 @@ function renderAiAdvice(advice, generatedAt, aviso) {
 // ── GRÁFICA DE LP ──
 async function renderLpChart(playerId) {
   const section = document.getElementById('lp-chart-section');
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const { data: puntosRaw } = await supabase.from('rank_snapshots').select('*')
-    .eq('player_id', playerId).eq('queue_type', 'RANKED_SOLO_5x5')
-    .gte('recorded_at', sevenDaysAgo).order('recorded_at', { ascending: true });
+  // El rango solo se guarda cuando CAMBIA. Por eso, además de los cambios
+  // de la semana, se toma el último rango de ANTES de la semana como punto
+  // de partida (fijado al inicio de los 7 días) y la línea se estira hasta
+  // ahora. Así la gráfica sale aunque haya jugado poco (o nada) esta semana.
+  const nowMs = Date.now();
+  const startMs = nowMs - 7 * 24 * 60 * 60 * 1000;
+  const sevenDaysAgo = new Date(startMs).toISOString();
+  const [{ data: puntosRaw }, { data: previo }] = await Promise.all([
+    supabase.from('rank_snapshots').select('*')
+      .eq('player_id', playerId).eq('queue_type', 'RANKED_SOLO_5x5')
+      .gte('recorded_at', sevenDaysAgo).order('recorded_at', { ascending: true }),
+    supabase.from('rank_snapshots').select('*')
+      .eq('player_id', playerId).eq('queue_type', 'RANKED_SOLO_5x5')
+      .lt('recorded_at', sevenDaysAgo).order('recorded_at', { ascending: false }).limit(1).maybeSingle(),
+  ]);
 
   const puntos = (puntosRaw ?? []).filter(p => p.elo_score != null);
-  if (puntos.length < 2) { section.style.display = 'none'; return; }
+  if (previo?.elo_score != null) puntos.unshift({ ...previo, recorded_at: sevenDaysAgo });
+  if (!puntos.length) { section.style.display = 'none'; return; }
+  if (puntos.length === 1 || new Date(puntos.at(-1).recorded_at).getTime() < nowMs - 60000) {
+    puntos.push({ ...puntos.at(-1), recorded_at: new Date(nowMs).toISOString() });
+  }
   section.style.display = 'block';
 
   const first = puntos[0].elo_score, last = puntos[puntos.length - 1].elo_score;
@@ -1366,7 +1383,10 @@ async function renderLpChart(playerId) {
   const scores = puntos.map(p => p.elo_score);
   const minS = Math.min(...scores), maxS = Math.max(...scores), rangeS = (maxS - minS) || 1;
   const PAD_X = 4, PAD_Y = 8;
-  const toX = i => PAD_X + (i / (puntos.length - 1)) * (W - PAD_X * 2);
+  // Eje X por fecha real (no por número de punto): un día sin jugar se ve como tramo plano.
+  const t0 = new Date(puntos[0].recorded_at).getTime();
+  const tSpan = (new Date(puntos.at(-1).recorded_at).getTime() - t0) || 1;
+  const toX = i => PAD_X + ((new Date(puntos[i].recorded_at).getTime() - t0) / tSpan) * (W - PAD_X * 2);
   const toY = s => PAD_Y + (1 - (s - minS) / rangeS) * (H - PAD_Y * 2);
 
   const grad = ctx.createLinearGradient(0, 0, 0, H);

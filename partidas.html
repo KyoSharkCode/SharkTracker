@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partida · SharkTracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
+    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
+    --danger:#ff5f3d; --gold:#facc15; --radius:16px;
+    --blue:#4c9dff; --blue-bg:rgba(76,157,255,.08); --red:#ff5f6d; --red-bg:rgba(255,95,109,.08);
+  }
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  body{margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
+    background:radial-gradient(1000px 460px at 15% -6%, rgba(0,229,199,.14), transparent 60%), radial-gradient(1000px 460px at 85% 6%, rgba(0,229,199,.10), transparent 60%), var(--bg);}
+  a{color:inherit;}
+  button{font-family:inherit; cursor:pointer;}
+  .wrap{max-width:1120px; margin:0 auto; padding:44px 20px 80px;}
+
+  header{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:22px; padding-bottom:24px; border-bottom:1px solid var(--border);}
+  .logo-slot{display:flex; align-items:center; gap:14px;}
+  .logo-slot img{height:40px; width:auto; display:block;}
+  .back{font-size:13px; font-weight:700; color:var(--text-dim); text-decoration:none;}
+  .back:hover{color:#fff;}
+  h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
+     background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .auth-slot{grid-column:3; justify-self:end;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
+  .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .avatar.pending{border-color:var(--gold); color:var(--gold);}
+  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+
+  .crumbs{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px; color:var(--text-faint); margin-bottom:18px;}
+  .crumbs a{color:var(--accent); font-weight:700; text-decoration:none;}
+  .msg{padding:70px 20px; text-align:center; color:var(--text-dim); font-size:15px; line-height:1.6;}
+  .msg b{display:block; color:#fff; font-family:'Rajdhani',sans-serif; font-size:24px; letter-spacing:.04em; text-transform:uppercase; margin-bottom:6px;}
+  .spinner{width:34px; height:34px; border-radius:50%; border:3px solid var(--border); border-top-color:var(--accent); margin:0 auto 14px; animation:spin .9s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .section-title{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
+  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
+  .section-title .aside{margin-left:auto; font-family:'Inter',system-ui,sans-serif; font-size:12px; font-weight:600; letter-spacing:0; text-transform:none; color:var(--text-faint);}
+  section{margin-bottom:34px;}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);}
+
+  /* ── Resumen ── */
+  .summary{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:18px; padding:22px 26px; margin-bottom:28px; position:relative; overflow:hidden;}
+  .summary.win{border-color:rgba(0,229,199,.5);}
+  .summary.loss{border-color:rgba(255,95,61,.45);}
+  .result{font-family:'Rajdhani',sans-serif; font-size:34px; font-weight:800; letter-spacing:.03em; line-height:1; text-transform:uppercase;}
+  .result.win{color:var(--accent);} .result.loss{color:var(--danger);} .result.neutral{color:var(--text-dim);}
+  .meta{display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:8px; font-size:12.5px; color:var(--text-dim); font-weight:600;}
+  .chip{font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; padding:3px 10px; border-radius:99px; background:rgba(0,229,199,.12); color:var(--accent);}
+  .score{display:flex; align-items:center; gap:16px; font-family:'Rajdhani',sans-serif; font-weight:800;}
+  .score .n{font-size:46px; line-height:1;}
+  .score .b{color:var(--blue);} .score .r{color:var(--red);}
+  .score .vs{font-size:14px; color:var(--text-faint); letter-spacing:.1em;}
+  .score-sub{text-align:center; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin-top:4px;}
+  .objs{display:flex; flex-direction:column; gap:6px; justify-self:end;}
+  .obj-row{display:flex; align-items:center; gap:10px; justify-content:flex-end; font-size:12.5px; font-weight:700;}
+  .obj-row .lbl{width:52px; text-align:right; font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;}
+  .obj-row.b .lbl{color:var(--blue);} .obj-row.r .lbl{color:var(--red);}
+  .obj{display:inline-flex; align-items:center; gap:3px; color:var(--text-dim); min-width:34px;}
+
+  /* ── Gráfica de oro ── */
+  .gold-card{padding:18px 18px 12px;}
+  .gold-legend{display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--text-dim); font-weight:600; margin-bottom:10px;}
+  .gold-legend b{font-weight:800;}
+  .gold-legend .b{color:var(--blue);} .gold-legend .r{color:var(--red);}
+  .gold-svg{width:100%; height:auto; display:block; overflow:visible;}
+  .gold-svg text{font-family:Inter,system-ui,sans-serif; font-size:10px; fill:var(--text-faint);}
+  .gold-tip{position:absolute; pointer-events:none; background:rgba(3,8,18,.95); border:1px solid var(--border); border-radius:10px; padding:8px 11px; font-size:12px; line-height:1.5; white-space:nowrap; transform:translate(-50%,-110%); z-index:5;}
+  .gold-tip b{font-family:'Rajdhani',sans-serif; font-size:15px;}
+  .gold-wrap{position:relative;}
+
+  /* ── Equipos ── */
+  .team{margin-bottom:16px; overflow:hidden;}
+  .team.blue{border-color:rgba(76,157,255,.35);} .team.red{border-color:rgba(255,95,109,.35);}
+  .team-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:12px 16px; border-bottom:1px solid var(--border);}
+  .team.blue .team-head{background:var(--blue-bg);} .team.red .team-head{background:var(--red-bg);}
+  .team-name{font-family:'Rajdhani',sans-serif; font-size:17px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;}
+  .team.blue .team-name{color:var(--blue);} .team.red .team-name{color:var(--red);}
+  .team-res{font-size:11px; font-weight:800; padding:2px 9px; border-radius:99px; text-transform:uppercase; letter-spacing:.06em;}
+  .team-res.win{background:rgba(0,229,199,.14); color:var(--accent);} .team-res.loss{background:rgba(255,95,61,.12); color:var(--danger);}
+  .team-stats{font-size:12px; color:var(--text-dim); font-weight:700;}
+  .bans{margin-left:auto; display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-faint); font-weight:700;}
+  .bans img{width:24px; height:24px; border-radius:6px; filter:grayscale(1) brightness(.7); border:1px solid var(--border);}
+  table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  th{font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); padding:8px 8px; text-align:left; white-space:nowrap;}
+  td{padding:7px 8px; border-top:1px solid rgba(22,50,74,.6); vertical-align:middle;}
+  tr.me td{background:rgba(250,204,21,.06);}
+  tr.me td:first-child{box-shadow:inset 3px 0 0 var(--gold);}
+  .c{text-align:center;} .r{text-align:right;}
+  .loadout{display:flex; align-items:center; gap:4px;}
+  .champ{position:relative; width:38px; height:38px; flex-shrink:0;}
+  .champ img{width:38px; height:38px; border-radius:9px; object-fit:cover; background:#0a1622; display:block;}
+  .champ .lvl{position:absolute; right:-4px; bottom:-4px; background:#030812; border:1px solid var(--border); border-radius:6px; font-size:10px; font-weight:800; padding:0 4px; line-height:15px;}
+  .stack{display:flex; flex-direction:column; gap:2px;}
+  .stack img{width:18px; height:18px; border-radius:4px; background:#0a1622; display:block;}
+  .stack img.rune{border-radius:50%;}
+  .who{min-width:0; max-width:170px;}
+  .who a, .who span.nm{display:block; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-decoration:none;}
+  .who a{color:var(--accent);}
+  .who a:hover{text-decoration:underline;}
+  .who small{display:block; color:var(--text-faint); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .kda b{font-weight:800;} .kda small{display:block; font-size:11px; color:var(--text-faint);}
+  .kda .good{color:var(--accent);} .kda .great{color:var(--gold);}
+  .dmg{min-width:90px;}
+  .dmg .v{font-weight:700;}
+  .bar{height:5px; border-radius:3px; background:rgba(255,255,255,.07); margin-top:3px; overflow:hidden;}
+  .bar i{display:block; height:100%; border-radius:3px;}
+  .team.blue .bar i{background:var(--blue);} .team.red .bar i{background:var(--red);}
+  .sub{display:block; font-size:11px; color:var(--text-faint);}
+  .items{display:flex; gap:2px;}
+  .items span{width:24px; height:24px; border-radius:5px; background:rgba(255,255,255,.04); border:1px solid rgba(22,50,74,.7); overflow:hidden; flex-shrink:0;}
+  .items span.trinket{border-radius:50%; margin-left:3px;}
+  .items img{width:100%; height:100%; display:block;}
+  .arena-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px;}
+  .arena-grid .team-head{background:var(--panel-2);}
+  .place{font-family:'Rajdhani',sans-serif; font-size:22px; font-weight:800; color:var(--text-dim);}
+  .place.top{color:var(--gold);}
+
+  /* ── Detalle del jugador ── */
+  .pov{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+  .pov button{display:inline-flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--border); border-radius:99px; padding:4px 14px 4px 4px; color:var(--text-dim); font-weight:700; font-size:13px;}
+  .pov button img{width:28px; height:28px; border-radius:50%;}
+  .pov button.on{border-color:var(--gold); color:#fff; background:rgba(250,204,21,.08);}
+  .detail{display:grid; grid-template-columns:1.4fr 1fr; gap:16px;}
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:16px;}
+  .stat{background:var(--panel-2); border:1px solid var(--border); border-radius:12px; padding:10px 12px;}
+  .stat b{display:block; font-family:'Rajdhani',sans-serif; font-size:22px; line-height:1.1;}
+  .stat small{display:block; font-size:10px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint); margin-top:2px;}
+  .runes-card{padding:16px;}
+  .rune-tree{display:flex; gap:10px; align-items:center; margin-bottom:12px;}
+  .rune-tree .style{width:26px; height:26px;}
+  .rune-tree .keystone{width:46px; height:46px; border-radius:50%; background:#0a1622; border:2px solid var(--gold);}
+  .rune-tree .minor{width:30px; height:30px; border-radius:50%; background:#0a1622; border:1px solid var(--border); padding:2px;}
+  .rune-name{font-size:12.5px; font-weight:700; color:var(--text-dim);}
+  .rune-name b{color:#fff; display:block; font-size:14px;}
+  .shards{display:flex; gap:6px; flex-wrap:wrap;}
+  .shard{font-size:11px; font-weight:700; color:var(--text-dim); background:var(--panel-2); border:1px solid var(--border); border-radius:99px; padding:3px 9px;}
+  .spells-row{display:flex; gap:8px; align-items:center; margin-top:12px; font-size:12.5px; color:var(--text-dim); font-weight:700;}
+  .spells-row img{width:28px; height:28px; border-radius:6px;}
+
+  /* ── IA ── */
+  .ai-card{padding:20px; margin-top:16px; border-color:rgba(0,229,199,.35);}
+  .ai-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .ai-head h3{margin:0; font-family:'Rajdhani',sans-serif; font-size:20px; letter-spacing:.04em; text-transform:uppercase;}
+  .ai-btn{margin-left:auto; border:none; border-radius:11px; padding:10px 16px; font-weight:800; font-size:13.5px; color:#032018; background:linear-gradient(90deg,var(--accent),#7cf5e4); box-shadow:0 6px 20px rgba(0,229,199,.25);}
+  .ai-btn:disabled{opacity:.6; cursor:wait;}
+  .ai-note{font-size:12.5px; color:var(--text-faint); margin:8px 0 0;}
+  .ai-body{margin-top:16px; display:grid; grid-template-columns:auto 1fr; gap:18px;}
+  .nota{width:78px; height:78px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; border:3px solid var(--accent); font-family:'Rajdhani',sans-serif;}
+  .nota b{font-size:30px; line-height:1;} .nota small{font-size:10px; font-weight:800; letter-spacing:.08em; color:var(--text-faint);}
+  .ai-resumen{font-size:14.5px; line-height:1.6; color:#e6f1f7;}
+  .ai-cols{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px;}
+  .ai-box{background:var(--panel-2); border:1px solid var(--border); border-radius:12px; padding:12px 14px;}
+  .ai-box h4{margin:0 0 8px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;}
+  .ai-box.ok h4{color:var(--accent);} .ai-box.ko h4{color:var(--danger);} .ai-box.tip h4{color:var(--gold);} .ai-box.mo h4{color:var(--blue);}
+  .ai-box ul{margin:0; padding-left:18px; font-size:13.5px; line-height:1.55; color:var(--text-dim);}
+  .ai-box li{margin-bottom:4px;}
+  .ai-box .mm{font-family:'Rajdhani',sans-serif; font-weight:800; color:#fff; margin-right:6px;}
+  .ai-err{color:var(--danger); font-size:13px; font-weight:600; margin-top:10px;}
+  .ai-foot{margin-top:12px; font-size:11.5px; color:var(--text-faint);}
+
+  @media (max-width:900px){
+    .detail{grid-template-columns:1fr;}
+    .stats{grid-template-columns:repeat(3,1fr);}
+    .hide-md{display:none;}
+  }
+  @media (max-width:700px){
+    header{grid-template-columns:auto 1fr auto;} h1{font-size:24px;} .back{display:none;}
+    .summary{grid-template-columns:1fr; text-align:center;} .meta{justify-content:center;} .score{justify-content:center;} .objs{justify-self:center;}
+    .hide-sm{display:none;}
+    td, th{padding:6px 4px;}
+    .who{max-width:96px;}
+    .items span{width:20px; height:20px;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .ai-body{grid-template-columns:1fr;} .ai-cols{grid-template-columns:1fr;}
+    .arena-grid{grid-template-columns:1fr;}
+    .bans{margin-left:0;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo-slot">
+      <a href="index.html"><img src="logo/FlaviIconLogo.png" alt="SharkTracker"></a>
+      <a class="back" href="index.html">← Ranking</a>
+    </div>
+    <h1>Partida</h1>
+    <div class="auth-slot" id="auth-slot"></div>
+  </header>
+
+  <div class="crumbs" id="crumbs"></div>
+  <div id="loading" class="msg"><div class="spinner"></div><span id="loading-text">Cargando partida…</span></div>
+  <div id="error" class="msg" hidden><b>No se pudo abrir la partida</b><span id="error-text"></span><br><a href="index.html">Volver al ranking</a></div>
+
+  <main id="main" hidden>
+    <div class="card summary" id="summary"></div>
+    <section id="gold-sec" hidden>
+      <h2 class="section-title"><span class="bar"></span>Ventaja de oro <span class="aside">Pasa el cursor por la gráfica</span></h2>
+      <div class="card gold-card">
+        <div class="gold-legend" id="gold-legend"></div>
+        <div class="gold-wrap" id="gold-wrap"></div>
+      </div>
+    </section>
+    <section>
+      <h2 class="section-title"><span class="bar"></span>Equipos</h2>
+      <div id="teams"></div>
+    </section>
+    <section id="pov-sec" hidden>
+      <h2 class="section-title"><span class="bar"></span>Detalle del jugador</h2>
+      <div class="pov" id="pov"></div>
+      <div class="detail">
+        <div class="card"><div class="stats" id="stats"></div></div>
+        <div class="card runes-card" id="runes"></div>
+      </div>
+      <div class="card ai-card" id="ai"></div>
+    </section>
+  </main>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createAuthMenu } from './assets/auth-menu.js';
+
+const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let V = '15.19.1';
+try { V = (await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json()))[0]; } catch {}
+const DD = 'https://ddragon.leagueoflegends.com/cdn';
+const CHAMPION_ID_OVERRIDES = { FiddleSticks: 'Fiddlesticks' };
+const champImg = (name) => `${DD}/${V}/img/champion/${CHAMPION_ID_OVERRIDES[name] || name}.png`;
+const itemImg = (id) => `${DD}/${V}/img/item/${id}.png`;
+const profileIconUrl = (id) => id ? `${DD}/${V}/img/profileicon/${id}.png` : null;
+const HIDE = `this.style.visibility='hidden'`;
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = (id) => document.getElementById(id);
+const fmtTime = (s) => `${Math.floor(s / 60)}:${String(Math.round(s) % 60).padStart(2, '0')}`;
+const k = (n) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n ?? 0);
+const ROLE = { TOP: 'TOP', JUNGLE: 'JUNGLE', MIDDLE: 'MID', MID: 'MID', BOTTOM: 'ADC', ADC: 'ADC', UTILITY: 'SUPPORT', SUPPORT: 'SUPPORT' };
+const ROLE_ORDER = ['TOP', 'JUNGLE', 'MIDDLE', 'BOTTOM', 'UTILITY'];
+const SHARDS = { 5008: 'Fuerza adaptable', 5005: 'Vel. de ataque', 5007: 'Aceleración de habilidades', 5010: 'Vel. de movimiento',
+  5001: 'Vida escalable', 5011: 'Vida', 5013: 'Tenacidad y resistencia', 5002: 'Armadura', 5003: 'Resist. mágica' };
+
+const params = new URL(location.href).searchParams;
+const matchId = (params.get('id') || '').trim();
+let povId = params.get('jugador');
+
+// Catálogos de Data Dragon (en español)
+const catalogs = { spells: {}, runes: {}, champByKey: {} };
+async function loadCatalogs() {
+  const [sum, runes, champs] = await Promise.all([
+    fetch(`${DD}/${V}/data/es_ES/summoner.json`).then(r => r.json()).catch(() => ({})),
+    fetch(`${DD}/${V}/data/es_ES/runesReforged.json`).then(r => r.json()).catch(() => []),
+    fetch(`${DD}/${V}/data/es_ES/champion.json`).then(r => r.json()).catch(() => ({})),
+  ]);
+  Object.values(sum.data ?? {}).forEach(s => { catalogs.spells[Number(s.key)] = { img: `${DD}/${V}/img/spell/${s.image.full}`, name: s.name }; });
+  (runes ?? []).forEach(st => {
+    catalogs.runes[st.id] = { img: `${DD}/img/${st.icon}`, name: st.name };
+    st.slots.forEach(sl => sl.runes.forEach(r => { catalogs.runes[r.id] = { img: `${DD}/img/${r.icon}`, name: r.name }; }));
+  });
+  Object.values(champs.data ?? {}).forEach(c => { catalogs.champByKey[Number(c.key)] = { id: c.id, name: c.name }; });
+}
+
+const authMenu = createAuthMenu({ supabase, profileIconUrl });
+const state = { d: null, tl: null, roster: new Map(), ai: new Map() };
+
+async function init() {
+  const { data: { session } } = await supabase.auth.getSession();
+  const [{ data: players }, { data: profiles }] = await Promise.all([
+    supabase.from('players').select('*'), supabase.from('player_profiles').select('*'),
+  ]);
+  authMenu.render(session, players ?? [], profiles ?? []);
+  const nick = new Map((profiles ?? []).map(p => [p.player_id, p.display_name]));
+  (players ?? []).filter(p => p.puuid).forEach(p => state.roster.set(p.puuid, { ...p, nick: nick.get(p.id) }));
+
+  if (!/^[A-Z0-9]{2,5}_\d{5,15}$/.test(matchId)) return fail('El enlace de la partida no es válido.');
+  const catalogsP = loadCatalogs();
+
+  // 1) Guardada ya → directo de la base. 2) Si no, la Edge Function la trae de Riot (una sola vez).
+  let { data: row } = await supabase.from('match_details').select('data, timeline').eq('match_id', matchId).maybeSingle();
+  if (!row) {
+    $('loading-text').textContent = 'Trayendo la partida desde Riot (solo la primera vez)…';
+    const { data, error } = await supabase.functions.invoke('partida', { body: { action: 'detalle', match_id: matchId } });
+    if (error || data?.error) {
+      let msg = data?.error ?? error?.message ?? 'Error desconocido';
+      try { const b = await error?.context?.json?.(); if (b?.error) msg = b.error; } catch {}
+      return fail(msg);
+    }
+    row = { data: data.data, timeline: data.timeline };
+  }
+  state.d = row.data; state.tl = row.timeline;
+  const { data: ais } = await supabase.from('match_ai').select('player_id, analysis').eq('match_id', matchId);
+  (ais ?? []).forEach(a => state.ai.set(a.player_id, a.analysis));
+  await catalogsP;
+
+  // Perspectiva: el jugador del link; si no, el primero del roster que jugó.
+  const rosterHere = state.d.participants.filter(p => state.roster.has(p.puuid));
+  if (!rosterHere.some(p => state.roster.get(p.puuid).id === povId)) povId = rosterHere[0] ? state.roster.get(rosterHere[0].puuid).id : null;
+
+  $('loading').hidden = true; $('main').hidden = false;
+  document.title = `${state.d.queueName} · ${fmtTime(state.d.duration)} · SharkTracker`;
+  drawAll();
+}
+function fail(msg) { $('loading').hidden = true; $('error').hidden = false; $('error-text').textContent = msg; }
+
+const isArena = () => state.d.participants.some(p => p.subteamId);
+const povP = () => state.d.participants.find(p => state.roster.get(p.puuid)?.id === povId) ?? null;
+const nameOf = (p) => { const r = state.roster.get(p.puuid); return r ? (r.nick && r.nick !== r.riot_game_name ? r.nick : r.riot_game_name) : p.riotIdGameName; };
+
+function drawAll() {
+  drawCrumbs(); drawSummary(); drawGold(); drawTeams(); drawPov();
+}
+
+function drawCrumbs() {
+  const me = povP();
+  const r = me ? state.roster.get(me.puuid) : null;
+  $('crumbs').innerHTML = r
+    ? `<a href="perfil.html?jugador=${encodeURIComponent(r.id)}">← Perfil de ${esc(nameOf(me))}</a><span>·</span><span>${esc(matchId)}</span>`
+    : `<a href="index.html">← Ranking</a><span>·</span><span>${esc(matchId)}</span>`;
+}
+
+function drawSummary() {
+  const d = state.d, me = povP();
+  const remake = d.participants.some(p => p.remake);
+  const fecha = new Date(d.endedAt).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  let res = 'Partida', cls = 'neutral';
+  if (remake) { res = 'Remake'; }
+  else if (me && isArena()) { res = `Puesto ${me.placement}`; cls = me.placement <= 4 ? 'win' : 'loss'; }
+  else if (me) { res = me.win ? 'Victoria' : 'Derrota'; cls = me.win ? 'win' : 'loss'; }
+  const tb = d.teams.find(t => t.teamId === 100), tr = d.teams.find(t => t.teamId === 200);
+  const goldT = (id) => d.participants.filter(p => p.teamId === id).reduce((s, p) => s + p.gold, 0);
+  const objRow = (t, c, label) => t ? `<div class="obj-row ${c}"><span class="lbl">${label}</span>
+      <span class="obj" title="Torres">🏰 ${t.objectives.tower}</span><span class="obj" title="Dragones">🐉 ${t.objectives.dragon}</span>
+      <span class="obj" title="Barones">👹 ${t.objectives.baron}</span><span class="obj" title="Heraldos">🦀 ${t.objectives.riftHerald}</span>
+      <span class="obj" title="Larvas del Vacío">🪲 ${t.objectives.horde}</span>${t.objectives.atakhan ? `<span class="obj" title="Atakhan">🔥 ${t.objectives.atakhan}</span>` : ''}</div>` : '';
+  const twoTeams = !isArena() && tb && tr;
+  $('summary').className = `card summary ${cls}`;
+  $('summary').innerHTML = `
+    <div>
+      <div class="result ${cls}">${res}</div>
+      <div class="meta"><span class="chip">${esc(d.queueName)}</span><span>⏱ ${fmtTime(d.duration)}</span><span>${fecha}</span><span>Parche ${esc(d.patch)}</span></div>
+      ${remake ? `<div class="meta">La partida se canceló antes de tiempo.</div>` : ''}
+    </div>
+    ${twoTeams ? `<div><div class="score"><span class="n b">${tb.objectives.champion}</span><span class="vs">VS</span><span class="n r">${tr.objectives.champion}</span></div>
+      <div class="score-sub">Kills · oro ${k(goldT(100))} vs ${k(goldT(200))}</div></div>` : '<div></div>'}
+    ${twoTeams && d.mapId === 11 ? `<div class="objs">${objRow(tb, 'b', 'Azul')}${objRow(tr, 'r', 'Rojo')}</div>` : '<div></div>'}`;
+}
+
+// ── Gráfica de oro al estilo Porofessor: diferencia de oro azul − rojo por minuto ──
+function drawGold() {
+  const tl = state.tl, d = state.d;
+  if (!tl?.frames?.length || tl.frames.length < 3 || isArena() || d.participants.some(p => p.remake)) { $('gold-sec').hidden = true; return; }
+  $('gold-sec').hidden = false;
+  const ids = (team) => d.participants.filter(p => p.teamId === team).map(p => String(p.participantId));
+  const blue = ids(100), red = ids(200);
+  const pts = tl.frames.map(f => {
+    const b = blue.reduce((s, id) => s + (f.gold[id] ?? 0), 0), r = red.reduce((s, id) => s + (f.gold[id] ?? 0), 0);
+    return { t: f.t, b, r, diff: b - r };
+  });
+  const me = povP();
+  const myTeam = me?.teamId ?? 100;
+  const W = 1000, H = 260, PL = 44, PR = 12, PT = 14, PB = 44;
+  const maxAbs = Math.max(1000, ...pts.map(p => Math.abs(p.diff)));
+  const step = maxAbs > 12000 ? 5000 : maxAbs > 6000 ? 3000 : maxAbs > 3000 ? 2000 : 1000;
+  const lim = Math.ceil(maxAbs / step) * step;
+  const tMax = pts.at(-1).t || 1;
+  const x = (t) => PL + (t / tMax) * (W - PL - PR);
+  const y = (v) => PT + (1 - (v + lim) / (2 * lim)) * (H - PT - PB);
+  const y0 = y(0);
+  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.t).toFixed(1)},${y(p.diff).toFixed(1)}`).join(' ');
+  const area = `${line} L${x(pts.at(-1).t).toFixed(1)},${y0} L${x(0)},${y0} Z`;
+  let grid = '';
+  for (let v = -lim; v <= lim; v += step) {
+    grid += `<line x1="${PL}" x2="${W - PR}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 0 ? '#2c4a66' : '#12283b'}" stroke-width="${v === 0 ? 1.5 : 1}"/>
+      <text x="${PL - 6}" y="${y(v) + 3}" text-anchor="end">${v === 0 ? '0' : (v > 0 ? '+' : '−') + Math.abs(v / 1000) + 'k'}</text>`;
+  }
+  const minStep = tMax > 1800 ? 5 : tMax > 900 ? 5 : 2;
+  for (let m = 0; m * 60 <= tMax; m += minStep) grid += `<text x="${x(m * 60)}" y="${H - PB + 14}" text-anchor="middle">${m}'</text>`;
+  // Objetivos: marcas abajo, del color del equipo que lo tomó.
+  const ICON = { DRAGON: '🐉', ELDER_DRAGON: '🐲', BARON_NASHOR: '👹', RIFTHERALD: '🦀', HORDE: '🪲', ATAKHAN: '🔥', TOWER: '🏰', INHIBITOR: '💠' };
+  const NAME = { DRAGON: 'Dragón', ELDER_DRAGON: 'Dragón Ancestral', BARON_NASHOR: 'Barón', RIFTHERALD: 'Heraldo', HORDE: 'Larvas', ATAKHAN: 'Atakhan', TOWER: 'Torre', INHIBITOR: 'Inhibidor' };
+  const marks = (tl.events ?? []).filter(e => ICON[e.type] && e.type !== 'TOWER');
+  const markSvg = marks.map(e => `<g><title>${fmtTime(e.t)} · ${NAME[e.type]} — equipo ${e.team === 100 ? 'azul' : 'rojo'}</title>
+      <line x1="${x(e.t)}" x2="${x(e.t)}" y1="${PT}" y2="${H - PB}" stroke="${e.team === 100 ? '#4c9dff' : '#ff5f6d'}" stroke-opacity=".25" stroke-dasharray="3 3"/>
+      <text x="${x(e.t)}" y="${H - PB + (e.team === 100 ? 28 : 40)}" text-anchor="middle" style="font-size:12px">${ICON[e.type]}</text></g>`).join('');
+  const towerTicks = (tl.events ?? []).filter(e => e.type === 'TOWER').map(e =>
+    `<circle cx="${x(e.t)}" cy="${e.team === 100 ? PT + 3 : H - PB - 3}" r="2.5" fill="${e.team === 100 ? '#4c9dff' : '#ff5f6d'}"><title>${fmtTime(e.t)} · Torre para el equipo ${e.team === 100 ? 'azul' : 'rojo'}</title></circle>`).join('');
+  $('gold-wrap').innerHTML = `
+    <svg class="gold-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Diferencia de oro por minuto">
+      <defs>
+        <clipPath id="cAbove"><rect x="0" y="0" width="${W}" height="${y0}"/></clipPath>
+        <clipPath id="cBelow"><rect x="0" y="${y0}" width="${W}" height="${H - y0}"/></clipPath>
+        <linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4c9dff" stop-opacity=".55"/><stop offset="1" stop-color="#4c9dff" stop-opacity=".05"/></linearGradient>
+        <linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff5f6d" stop-opacity=".05"/><stop offset="1" stop-color="#ff5f6d" stop-opacity=".55"/></linearGradient>
+      </defs>
+      ${grid}
+      <text x="${PL + 6}" y="${PT + 12}" style="fill:#4c9dff;font-weight:800">AZUL ADELANTE</text>
+      <text x="${PL + 6}" y="${H - PB - 6}" style="fill:#ff5f6d;font-weight:800">ROJO ADELANTE</text>
+      <path d="${area}" fill="url(#gB)" clip-path="url(#cAbove)"/>
+      <path d="${area}" fill="url(#gR)" clip-path="url(#cBelow)"/>
+      <path d="${line}" fill="none" stroke="#4c9dff" stroke-width="2.2" clip-path="url(#cAbove)" stroke-linejoin="round"/>
+      <path d="${line}" fill="none" stroke="#ff5f6d" stroke-width="2.2" clip-path="url(#cBelow)" stroke-linejoin="round"/>
+      ${markSvg}${towerTicks}
+      <line id="g-cursor" x1="0" x2="0" y1="${PT}" y2="${H - PB}" stroke="#fff" stroke-opacity=".35" visibility="hidden"/>
+      <circle id="g-dot" r="4.5" fill="#facc15" stroke="#030812" stroke-width="1.5" visibility="hidden"/>
+      <rect id="g-hit" x="${PL}" y="${PT}" width="${W - PL - PR}" height="${H - PT - PB}" fill="transparent"/>
+    </svg>
+    <div class="gold-tip" id="g-tip" hidden></div>`;
+  const last = pts.at(-1), maxB = pts.reduce((a, p) => p.diff > a.diff ? p : a), maxR = pts.reduce((a, p) => p.diff < a.diff ? p : a);
+  $('gold-legend').innerHTML = `
+    <span>Oro final: <b class="b">${k(last.b)}</b> vs <b class="r">${k(last.r)}</b></span>
+    ${maxB.diff > 0 ? `<span>Máx. ventaja azul: <b class="b">+${k(maxB.diff)}</b> (${Math.round(maxB.t / 60)}')</span>` : ''}
+    ${maxR.diff < 0 ? `<span>Máx. ventaja roja: <b class="r">+${k(-maxR.diff)}</b> (${Math.round(maxR.t / 60)}')</span>` : ''}
+    ${me ? `<span>Tu equipo: <b class="${myTeam === 100 ? 'b' : 'r'}">${myTeam === 100 ? 'Azul' : 'Rojo'}</b></span>` : ''}`;
+  const svg = $('gold-wrap').querySelector('svg'), tip = $('g-tip');
+  const show = (ev) => {
+    const r = svg.getBoundingClientRect();
+    const sx = (ev.clientX - r.left) / r.width * W;
+    const t = Math.max(0, Math.min(tMax, (sx - PL) / (W - PL - PR) * tMax));
+    const p = pts.reduce((a, q) => Math.abs(q.t - t) < Math.abs(a.t - t) ? q : a);
+    $('g-cursor').setAttribute('x1', x(p.t)); $('g-cursor').setAttribute('x2', x(p.t)); $('g-cursor').setAttribute('visibility', 'visible');
+    $('g-dot').setAttribute('cx', x(p.t)); $('g-dot').setAttribute('cy', y(p.diff)); $('g-dot').setAttribute('visibility', 'visible');
+    tip.hidden = false;
+    tip.style.left = `${x(p.t) / W * r.width}px`; tip.style.top = `${y(p.diff) / H * r.height}px`;
+    const lado = p.diff === 0 ? 'Igualados' : `${p.diff > 0 ? '<span style="color:var(--blue)">Azul</span>' : '<span style="color:var(--red)">Rojo</span>'} +${k(Math.abs(p.diff))}`;
+    tip.innerHTML = `<b>Min ${Math.round(p.t / 60)}</b> · ${lado}<br><span style="color:var(--blue)">${k(p.b)}</span> vs <span style="color:var(--red)">${k(p.r)}</span>`;
+  };
+  const hide = () => { tip.hidden = true; $('g-cursor').setAttribute('visibility', 'hidden'); $('g-dot').setAttribute('visibility', 'hidden'); };
+  $('g-hit').addEventListener('mousemove', show);
+  $('g-hit').addEventListener('touchstart', (e) => show(e.touches[0]), { passive: true });
+  $('g-hit').addEventListener('touchmove', (e) => show(e.touches[0]), { passive: true });
+  $('g-hit').addEventListener('mouseleave', hide);
+}
+
+// ── Equipos ──
+function playerRow(p, maxDmg, teamKills) {
+  const mins = Math.max(1, state.d.duration / 60);
+  const r = state.roster.get(p.puuid);
+  const me = r && r.id === povId;
+  const ratio = p.deaths ? (p.kills + p.assists) / p.deaths : null;
+  const ratioCls = ratio == null || ratio >= 5 ? 'great' : ratio >= 3 ? 'good' : '';
+  const kp = teamKills ? Math.round(100 * (p.kills + p.assists) / teamKills) : null;
+  const sp = p.spells.map(id => catalogs.spells[id]).map(s => s ? `<img src="${s.img}" alt="" title="${esc(s.name)}" onerror="${HIDE}">` : '<img alt="">').join('');
+  const key = catalogs.runes[p.runes.primary?.[0]], sub = catalogs.runes[p.runes.subStyle];
+  const runes = `${key ? `<img class="rune" src="${key.img}" alt="" title="${esc(key.name)}" onerror="${HIDE}">` : ''}${sub ? `<img class="rune" src="${sub.img}" alt="" title="${esc(sub.name)}" style="padding:2px" onerror="${HIDE}">` : ''}`;
+  const items = p.items.map((id, i) => `<span class="${i === 6 ? 'trinket' : ''}">${id ? `<img src="${itemImg(id)}" alt="" loading="lazy" onerror="${HIDE}">` : ''}</span>`).join('');
+  const name = r
+    ? `<a href="perfil.html?jugador=${encodeURIComponent(r.id)}" title="Ver perfil">${esc(nameOf(p))}</a>`
+    : `<span class="nm">${esc(p.riotIdGameName)}</span>`;
+  return `<tr class="${me ? 'me' : ''}">
+    <td><div class="loadout">
+      <div class="champ"><img src="${champImg(p.championName)}" alt="${esc(p.championName)}" title="${esc(p.championName)}" onerror="${HIDE}"><span class="lvl">${p.champLevel}</span></div>
+      <div class="stack">${sp}</div><div class="stack hide-sm">${runes}</div></div></td>
+    <td class="who">${name}<small>${esc(p.championName)}${p.teamPosition && ROLE[p.teamPosition] ? ' · ' + ROLE[p.teamPosition] : ''}</small></td>
+    <td class="kda c"><b>${p.kills}/<span style="color:var(--danger)">${p.deaths}</span>/${p.assists}</b><small><span class="${ratioCls}">${ratio == null ? 'Perfecto' : ratio.toFixed(2)}</span>${kp != null ? ` · ${kp}%` : ''}</small></td>
+    <td class="dmg hide-sm"><span class="v">${k(p.damage)}</span><div class="bar"><i style="width:${Math.round(100 * p.damage / maxDmg)}%"></i></div></td>
+    <td class="c hide-md">${k(p.gold)}</td>
+    <td class="c hide-sm">${p.cs}<span class="sub">${(p.cs / mins).toFixed(1)}/m</span></td>
+    <td class="c hide-md">${p.vision}<span class="sub">${p.controlWards} 👁</span></td>
+    <td><div class="items">${items}</div></td>
+  </tr>`;
+}
+function teamTable(list, maxDmg) {
+  const teamKills = list.reduce((s, p) => s + p.kills, 0);
+  return `<div style="overflow-x:auto"><table>
+    <thead><tr><th></th><th>Jugador</th><th class="c">KDA</th><th class="hide-sm">Daño</th><th class="c hide-md">Oro</th><th class="c hide-sm">CS</th><th class="c hide-md">Visión</th><th>Objetos</th></tr></thead>
+    <tbody>${list.map(p => playerRow(p, maxDmg, teamKills)).join('')}</tbody></table></div>`;
+}
+function drawTeams() {
+  const d = state.d;
+  const maxDmg = Math.max(1, ...d.participants.map(p => p.damage));
+  const banHtml = (t) => t?.bans?.length ? `<span class="bans">Baneos ${t.bans.map(id => {
+    const c = catalogs.champByKey[id]; return c ? `<img src="${champImg(c.id)}" alt="" title="${esc(c.name)}" onerror="${HIDE}">` : ''; }).join('')}</span>` : '';
+  if (isArena()) {
+    const groups = new Map();
+    d.participants.forEach(p => groups.set(p.subteamId, [...(groups.get(p.subteamId) ?? []), p]));
+    const sorted = [...groups.values()].sort((a, b) => (a[0].placement ?? 9) - (b[0].placement ?? 9));
+    $('teams').innerHTML = `<div class="arena-grid">${sorted.map(list => `
+      <div class="card team"><div class="team-head"><span class="place ${list[0].placement <= 4 ? 'top' : ''}">#${list[0].placement ?? '?'}</span>
+        <span class="team-stats">${list.reduce((s, p) => s + p.kills, 0)} kills · ${k(list.reduce((s, p) => s + p.damage, 0))} daño</span></div>
+        ${teamTable(list, maxDmg)}</div>`).join('')}</div>`;
+    return;
+  }
+  const order = (a, b) => (ROLE_ORDER.indexOf(a.teamPosition) + 1 || 9) - (ROLE_ORDER.indexOf(b.teamPosition) + 1 || 9);
+  // Tu equipo primero.
+  const me = povP();
+  const teamIds = [100, 200].sort((a, b) => (me && a === me.teamId ? -1 : me && b === me.teamId ? 1 : 0));
+  $('teams').innerHTML = teamIds.map(id => {
+    const list = d.participants.filter(p => p.teamId === id).sort(order);
+    if (!list.length) return '';
+    const t = d.teams.find(tt => tt.teamId === id);
+    const win = list[0].win;
+    return `<div class="card team ${id === 100 ? 'blue' : 'red'}">
+      <div class="team-head"><span class="team-name">Equipo ${id === 100 ? 'azul' : 'rojo'}</span>
+        <span class="team-res ${win ? 'win' : 'loss'}">${win ? 'Victoria' : 'Derrota'}</span>
+        <span class="team-stats">${list.reduce((s, p) => s + p.kills, 0)} / ${list.reduce((s, p) => s + p.deaths, 0)} / ${list.reduce((s, p) => s + p.assists, 0)} · ${k(list.reduce((s, p) => s + p.gold, 0))} oro</span>
+        ${banHtml(t)}</div>
+      ${teamTable(list, maxDmg)}</div>`;
+  }).join('');
+}
+
+// ── Detalle + IA del jugador del roster elegido ──
+function drawPov() {
+  const d = state.d;
+  const rosterHere = d.participants.filter(p => state.roster.has(p.puuid));
+  if (!rosterHere.length) { $('pov-sec').hidden = true; return; }
+  $('pov-sec').hidden = false;
+  $('pov').innerHTML = rosterHere.length > 1 ? rosterHere.map(p => {
+    const r = state.roster.get(p.puuid);
+    return `<button type="button" class="${r.id === povId ? 'on' : ''}" data-pov="${r.id}"><img src="${champImg(p.championName)}" alt="" onerror="${HIDE}">${esc(nameOf(p))}</button>`;
+  }).join('') : '';
+  const p = povP();
+  const mins = Math.max(1, d.duration / 60);
+  const mate = d.participants.filter(q => (isArena() ? q.subteamId === p.subteamId : q.teamId === p.teamId));
+  const teamKills = mate.reduce((s, q) => s + q.kills, 0);
+  const kp = p.killParticipation != null ? Math.round(p.killParticipation * 100) : teamKills ? Math.round(100 * (p.kills + p.assists) / teamKills) : 0;
+  const dmgShare = Math.round(100 * p.damage / Math.max(1, mate.reduce((s, q) => s + q.damage, 0)));
+  const stat = (v, l) => `<div class="stat"><b>${v}</b><small>${l}</small></div>`;
+  $('stats').innerHTML = [
+    stat(`${p.kills}/${p.deaths}/${p.assists}`, 'KDA'),
+    stat(p.deaths ? ((p.kills + p.assists) / p.deaths).toFixed(2) : 'Perfecto', 'Ratio KDA'),
+    stat(`${kp}%`, 'Part. en kills'),
+    stat(`${dmgShare}%`, 'Daño del equipo'),
+    stat(k(p.damage), `Daño · ${Math.round(p.damage / mins)}/min`),
+    stat(k(p.gold), `Oro · ${Math.round(p.gold / mins)}/min`),
+    stat(p.cs, `CS · ${(p.cs / mins).toFixed(1)}/min`),
+    stat(p.csAt10 ?? '—', 'CS a los 10 min'),
+    stat(p.vision, `Visión · ${(p.vision / mins).toFixed(2)}/min`),
+    stat(`${p.wardsPlaced}/${p.wardsKilled}/${p.controlWards}`, 'Wards puestas/rotas/control'),
+    stat(k(p.damageTaken), `Daño recibido · ${k(p.mitigated)} mitigado`),
+    stat(k(p.heal + (p.shield ?? 0)), 'Curación + escudos'),
+    stat(`${p.ccTime}s`, 'Control de masas'),
+    stat(k(p.damageToObjectives), 'Daño a objetivos'),
+    stat(p.soloKills ?? '—', 'Kills en solitario'),
+    stat(p.pentas ? '🖐 Penta' : p.quadras ? 'Quadra' : p.triples ? 'Triple' : p.doubles ? 'Doble' : '—', 'Mejor multikill'),
+  ].join('');
+
+  const R = (id) => catalogs.runes[id];
+  const key = R(p.runes.primary[0]), pst = R(p.runes.primaryStyle), sst = R(p.runes.subStyle);
+  const img = (x, cls) => x ? `<img class="${cls}" src="${x.img}" alt="" title="${esc(x.name)}" onerror="${HIDE}">` : '';
+  $('runes').innerHTML = `
+    <h2 class="section-title" style="font-size:15px;margin-bottom:12px;"><span class="bar"></span>Runas y hechizos</h2>
+    ${p.runes.primary.length ? `
+    <div class="rune-tree">${img(key, 'keystone')}<div class="rune-name"><b>${esc(key?.name ?? '')}</b>${esc(pst?.name ?? '')}</div></div>
+    <div class="rune-tree">${img(pst, 'style')}${p.runes.primary.slice(1).map(id => img(R(id), 'minor')).join('')}</div>
+    <div class="rune-tree">${img(sst, 'style')}${p.runes.secondary.map(id => img(R(id), 'minor')).join('')}<span class="rune-name">${esc(sst?.name ?? '')}</span></div>
+    <div class="shards">${p.runes.shards.map(s => `<span class="shard">${SHARDS[s] ?? s}</span>`).join('')}</div>` : '<div class="rune-name">Este modo no usa runas.</div>'}
+    <div class="spells-row">${p.spells.map(id => catalogs.spells[id]).filter(Boolean).map(s => `<img src="${s.img}" alt="" onerror="${HIDE}">${esc(s.name)}`).join(' ')}</div>`;
+  drawAi();
+}
+$('pov').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-pov]'); if (!b) return;
+  povId = b.dataset.pov;
+  const u = new URL(location.href); u.searchParams.set('jugador', povId); history.replaceState(null, '', u);
+  drawAll();
+});
+
+function drawAi(errorMsg) {
+  const p = povP();
+  const a = state.ai.get(povId);
+  const nombre = esc(nameOf(p));
+  if (p.remake) { $('ai').innerHTML = `<div class="ai-head"><h3>✨ Análisis de IA</h3></div><p class="ai-note">Fue un remake: no hay nada que analizar.</p>`; return; }
+  if (!a) {
+    $('ai').innerHTML = `<div class="ai-head"><h3>✨ Análisis de IA</h3>
+        <button class="ai-btn" id="ai-go" type="button">Analizar la partida de ${nombre}</button></div>
+      <p class="ai-note">Se genera una sola vez y queda guardado: la próxima vez que alguien abra esta partida, ya estará aquí.</p>
+      ${errorMsg ? `<div class="ai-err">${esc(errorMsg)}</div>` : ''}`;
+    $('ai-go').addEventListener('click', runAi);
+    return;
+  }
+  const nota = Number(a.nota);
+  const color = nota >= 8 ? 'var(--gold)' : nota >= 6 ? 'var(--accent)' : nota >= 4 ? 'var(--blue)' : 'var(--danger)';
+  const list = (arr) => (arr ?? []).map(x => `<li>${esc(x)}</li>`).join('');
+  $('ai').innerHTML = `<div class="ai-head"><h3>✨ Análisis de IA · ${nombre}</h3></div>
+    <div class="ai-body">
+      ${Number.isFinite(nota) ? `<div class="nota" style="border-color:${color}"><b style="color:${color}">${nota}</b><small>/ 10</small></div>` : ''}
+      <div class="ai-resumen">${esc(a.resumen)}</div>
+    </div>
+    <div class="ai-cols">
+      <div class="ai-box ok"><h4>Lo que salió bien</h4><ul>${list(a.bien)}</ul></div>
+      <div class="ai-box ko"><h4>A mejorar</h4><ul>${list(a.mejorar)}</ul></div>
+      ${a.momentos?.length ? `<div class="ai-box mo"><h4>Momentos clave</h4><ul>${a.momentos.map(m => `<li><span class="mm">${esc(m.minuto)}</span>${esc(m.texto)}</li>`).join('')}</ul></div>` : ''}
+      <div class="ai-box tip"><h4>Para la próxima</h4><ul>${list(a.consejos)}</ul></div>
+    </div>
+    <div class="ai-foot">Es una estimación basada en números, no en ver la partida.</div>`;
+}
+async function runAi() {
+  const btn = $('ai-go'); btn.disabled = true; btn.textContent = 'Analizando… (unos segundos)';
+  const pid = povId;
+  const { data, error } = await supabase.functions.invoke('partida', { body: { action: 'analisis', match_id: matchId, player_id: pid } });
+  if (error || data?.error || !data?.analysis) {
+    let msg = data?.error ?? error?.message ?? 'No se pudo generar el análisis.';
+    try { const b = await error?.context?.json?.(); if (b?.error) msg = b.error; } catch {}
+    if (pid === povId) drawAi(msg);
+    return;
+  }
+  state.ai.set(pid, data.analysis);
+  if (pid === povId) drawAi();
+}
+
+init();
+</script>
+</body>
+</html>
