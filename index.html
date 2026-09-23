@@ -408,6 +408,7 @@
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createAuthMenu } from './assets/auth-menu.js';
 
 const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
@@ -467,25 +468,9 @@ const formatDuration = (seconds) => seconds ? `${Math.floor(seconds / 60)}:${Str
 // cae a uno clásico; si un campeón/hechizo/runa/emblema no carga, se
 // oculta en vez de mostrar el ícono roto.
 
-// ── Header: con sesión, el botón de perfil muestra tu ícono de invocador ──
-// Vinculado → tu ícono, lleva a tu perfil. Solo Discord (sin cuenta de LoL
-// vinculada) → borde dorado, lleva a login.html a terminar el paso 2.
-function renderAuthSlot(session, players) {
-  const slot = document.getElementById('auth-slot');
-  if (!session) {
-    slot.innerHTML = `<a class="login-btn" href="login.html">Login</a>`;
-    return;
-  }
-  const mine = (players ?? []).find(p => p.user_id === session.user.id);
-  if (mine) {
-    const icon = profileIconUrl(mine.icon_id) ?? profileIconUrl(1);
-    const nombre = String(mine.riot_game_name ?? '').replace(/"/g, '&quot;');
-    slot.innerHTML = `<a class="avatar" href="perfil.html?jugador=${encodeURIComponent(mine.id)}" title="Mi perfil — ${nombre}"><img src="${icon}" alt="Mi perfil" onerror="this.onerror=null;this.src='${profileIconUrl(1)}';"></a>`;
-    return;
-  }
-  const dcAvatar = session.user.user_metadata?.avatar_url;
-  slot.innerHTML = `<a class="avatar pending" href="login.html" title="Termina de vincular tu cuenta de LoL">${dcAvatar ? `<img src="${String(dcAvatar).replace(/"/g, '&quot;')}" alt="">` : '?'}</a>`;
-}
+// ── Header: menú del ícono de perfil (assets/auth-menu.js) ──
+// Ir a perfil · Editar perfil · Mi Twitch · Admin Dashboard (admins) · Cerrar sesión
+const authMenu = createAuthMenu({ supabase, profileIconUrl });
 const AVATAR_ONERROR = `this.onerror=null;this.src='${profileIconUrl(1)}';`;
 const HIDE_ONERROR = `this.style.visibility='hidden';`;
 // El orden real ya lo calcula el backend (rank_snapshots.elo_score), que sí
@@ -719,8 +704,11 @@ function buildRow(p, idx) {
   // "representación" elegida (players.favorite_champion). Ya no cubre
   // toda la fila (eso se sacó) — es solo la franja angosta y difuminada
   // de .col-champ-outer, entre el nombre y la columna de Estado.
-  const champBg = enPartida ? p.live.champion : p.favorite_champion;
-  const skinBg = enPartida ? 0 : (p.favorite_skin ?? 0);
+  // Campeón/skin elegidos en su perfil, o los que venían cargados por defecto.
+  const favChamp = p.profile?.favorite_champion || p.favorite_champion;
+  const favSkin = p.profile?.favorite_champion ? (p.profile.favorite_skin ?? 0) : (p.favorite_skin ?? 0);
+  const champBg = enPartida ? p.live.champion : favChamp;
+  const skinBg = enPartida ? 0 : favSkin;
 
   const iconUrl = profileIconUrl(p.icon_id);
   const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(p.riot_game_name);
@@ -902,7 +890,7 @@ async function render() {
 
   // Header: sesión actual
   const { data: { session } } = await supabase.auth.getSession();
-  renderAuthSlot(session, roster);
+  authMenu.render(session, players ?? [], profiles ?? []);
 
   // Podio (top 3)
   const podiumEl = document.getElementById('podium');
@@ -915,8 +903,8 @@ async function render() {
     div.className = `podium-card ${rankNum === 1 ? 'rank1' : ''}`;
     // Fondo del podio = SIEMPRE la skin elegida (favorite_champion/skin).
     // El swap a campeón en vivo solo pasa en la fila del ranking, no aquí.
-    const champBg = p.favorite_champion;
-    const skinBg = p.favorite_skin ?? 0;
+    const champBg = p.profile?.favorite_champion || p.favorite_champion;
+    const skinBg = p.profile?.favorite_champion ? (p.profile.favorite_skin ?? 0) : (p.favorite_skin ?? 0);
     const splashHtml = champBg
       ? `<div class="podium-splash" style="background-image:url('${splashUrl(champBg, skinBg)}')"></div><div class="podium-scrim"></div>`
       : '';
@@ -1174,6 +1162,7 @@ function scheduleRerender() {
 
 supabase.channel('sharktracker-live')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, scheduleRerender)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'player_profiles' }, scheduleRerender)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'rank_snapshots' }, scheduleRerender)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'live_status' }, scheduleRerender)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'stream_status' }, scheduleRerender)

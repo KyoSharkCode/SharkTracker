@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · SharkTracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
+    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
+    --danger:#ff5f3d; --danger-glow:rgba(255,95,61,.45);
+    --gold:#facc15; --twitch:#9146ff; --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  body{
+    margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
+    background:
+      radial-gradient(1000px 460px at 15% -6%, rgba(0,229,199,.14), transparent 60%),
+      radial-gradient(1000px 460px at 85% 6%, rgba(0,229,199,.10), transparent 60%),
+      var(--bg);
+  }
+  a{color:inherit;}
+  button{font-family:inherit; cursor:pointer;}
+  button:disabled{opacity:.55; cursor:not-allowed;}
+  .wrap{max-width:1080px; margin:0 auto; padding:44px 20px 80px;}
+
+  header{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:34px; padding-bottom:24px; border-bottom:1px solid var(--border);}
+  .logo-slot{display:flex; align-items:center; gap:14px;}
+  .logo-slot img{height:40px; width:auto; display:block;}
+  .back{font-size:13px; font-weight:700; color:var(--text-dim); text-decoration:none;}
+  .back:hover{color:#fff;}
+  h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
+     background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .auth-slot{grid-column:3; justify-self:end;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden; transition:transform .15s, box-shadow .15s;}
+  .avatar:hover{transform:scale(1.06); box-shadow:0 0 16px var(--accent-glow);}
+  .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .avatar.pending{border-color:var(--gold); box-shadow:0 0 10px rgba(250,204,21,.4); color:var(--gold);}
+  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+
+  .section-title{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
+  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
+  .section-title .count{font-family:'Inter'; font-size:11px; font-weight:800; color:#032018; background:var(--gold); border-radius:99px; padding:2px 9px; letter-spacing:0;}
+  .section-title .count.zero{background:var(--border); color:var(--text-dim);}
+  section{margin-bottom:40px;}
+
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+  .empty{padding:22px; text-align:center; color:var(--text-faint); font-size:13.5px;}
+  .msg{padding:60px 20px; text-align:center; color:var(--text-dim); font-size:15px; line-height:1.6;}
+  .msg b{display:block; color:#fff; font-family:'Rajdhani',sans-serif; font-size:24px; letter-spacing:.04em; text-transform:uppercase; margin-bottom:6px;}
+  .err{margin:10px 0 0; font-size:12.5px; font-weight:600; color:var(--danger);}
+  .err:empty{display:none;}
+
+  /* Solicitudes */
+  .req{display:flex; align-items:center; gap:14px; padding:14px 16px; border-bottom:1px solid var(--border);}
+  .req:last-child{border-bottom:none;}
+  .req .ic{width:42px; height:42px; border-radius:50%; overflow:hidden; border:2px solid var(--gold); background:#0a1622; flex-shrink:0;}
+  .req .ic img{width:100%; height:100%; object-fit:cover; display:block;}
+  .req .who{flex:1; min-width:0; font-size:14px; line-height:1.45; color:var(--text-dim);}
+  .req .who b{color:#fff;}
+  .req .who small{display:block; color:var(--text-faint); font-size:11.5px;}
+  .btn{border:none; border-radius:9px; padding:8px 14px; font-weight:800; font-size:12.5px;}
+  .btn.ok{background:var(--accent); color:#032018;}
+  .btn.ok:hover{box-shadow:0 0 14px var(--accent-glow);}
+  .btn.no{background:transparent; border:1px solid var(--border); color:var(--text-dim);}
+  .btn.no:hover{border-color:var(--danger); color:var(--danger);}
+  .btn.danger{background:var(--danger); color:#fff;}
+  .btn.ghost{background:transparent; border:1px solid var(--border); color:var(--text-dim);}
+  .btn.ghost:hover{border-color:var(--accent); color:#fff;}
+
+  /* Jugadores */
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  th{text-align:left; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); padding:12px 16px; border-bottom:1px solid var(--border);}
+  td{padding:11px 16px; border-bottom:1px solid var(--border); vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  .pl{display:flex; align-items:center; gap:10px; min-width:0;}
+  .pl img{width:32px; height:32px; border-radius:50%; object-fit:cover; border:2px solid var(--border); background:#0a1622; flex-shrink:0;}
+  .pl a{color:#fff; font-weight:700; text-decoration:none;}
+  .pl a:hover{color:var(--accent);}
+  .pl small{color:var(--text-faint); font-weight:600;}
+  .dc{color:var(--text-dim);}
+  .none{color:var(--text-faint); font-style:italic;}
+  .tw{display:inline-flex; align-items:center; gap:6px; color:#d4bbff; font-weight:700;}
+  .badge{font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:99px; white-space:nowrap;}
+  .badge.ok{background:rgba(145,70,255,.22); color:#d4bbff;}
+  .badge.warn{background:rgba(250,204,21,.14); color:var(--gold);}
+  .actions{display:flex; gap:6px; justify-content:flex-end;}
+  td:last-child{width:1%; white-space:nowrap;}
+  .tw-edit{display:flex; gap:6px; align-items:center;}
+  .tw-edit input{width:150px; background:#06111c; border:1px solid var(--twitch); border-radius:8px; padding:7px 10px; color:#fff; font:600 13px Inter,sans-serif; outline:none;}
+  .confirm{background:rgba(255,95,61,.07); border:1px solid rgba(255,95,61,.35); border-radius:10px; padding:10px 12px; font-size:12.5px; line-height:1.5; color:var(--text-dim); margin-top:8px;}
+  .confirm b{color:#fff;}
+  .confirm .actions{justify-content:flex-start; margin-top:8px;}
+
+  @media (max-width:760px){
+    header{grid-template-columns:auto 1fr auto;}
+    h1{font-size:24px;}
+    thead{display:none;}
+    table, tbody, tr, td{display:block; width:100%;}
+    tr{border-bottom:1px solid var(--border); padding:8px 0;}
+    tr:last-child{border-bottom:none;}
+    td{border:none; padding:6px 16px;}
+    td[data-label]::before{content:attr(data-label); display:block; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:2px;}
+    .actions{justify-content:flex-start; flex-wrap:wrap;}
+    td:last-child{width:100%;}
+    .req{flex-wrap:wrap;}
+    .req .who{flex-basis:calc(100% - 56px);}
+    .req .btn{flex:1;}
+    .back{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo-slot">
+      <a href="index.html"><img src="logo/FlaviIconLogo.png" alt="SharkTracker"></a>
+      <a class="back" href="index.html">← Ranking</a>
+    </div>
+    <h1>Admin Dashboard</h1>
+    <div class="auth-slot" id="auth-slot"></div>
+  </header>
+
+  <div id="loading" class="msg">Cargando…</div>
+  <div id="no-access" class="msg" hidden><b>Sin acceso</b>Esta página es solo para administradoras.<br><a href="index.html">Volver al ranking</a></div>
+
+  <main id="dash" hidden>
+    <section>
+      <h2 class="section-title"><span class="bar"></span>Solicitudes para vincular <span class="count zero" id="req-count">0</span></h2>
+      <div class="card" id="req-list"></div>
+      <p class="err" id="req-err"></p>
+    </section>
+
+    <section>
+      <h2 class="section-title"><span class="bar"></span>Jugadores</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Cuenta de LoL</th><th>Discord</th><th>Twitch</th><th></th></tr></thead>
+          <tbody id="pl-list"></tbody>
+        </table>
+      </div>
+      <p class="err" id="pl-err"></p>
+    </section>
+  </main>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createAuthMenu } from './assets/auth-menu.js';
+
+const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let ddragonVersion = '15.19.1';
+try {
+  const versions = await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json());
+  ddragonVersion = versions[0];
+} catch {}
+const profileIconUrl = (iconId) => iconId ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${iconId}.png` : null;
+const ICON_ONERROR = `this.onerror=null;this.src='${profileIconUrl(1)}';`;
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = (id) => document.getElementById(id);
+const fecha = (iso) => new Date(iso).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+const authMenu = createAuthMenu({ supabase, profileIconUrl });
+
+// Qué fila de jugador está en modo "editar Twitch" o "confirmar desvincular"
+// (se conserva al redibujar por Realtime).
+const ui = { editTw: null, confirmUnlink: null };
+let playersCache = [];
+
+async function init() {
+  const { data: { session } } = await supabase.auth.getSession();
+  const [{ data: players }, { data: profiles }] = await Promise.all([
+    supabase.from('players').select('*'),
+    supabase.from('player_profiles').select('*'),
+  ]);
+  authMenu.render(session, players ?? [], profiles ?? []);
+
+  const { data: soyAdmin } = session
+    ? await supabase.from('admins').select('user_id').eq('user_id', session.user.id).maybeSingle()
+    : { data: null };
+  $('loading').hidden = true;
+  if (!soyAdmin) { $('no-access').hidden = false; return; }
+  $('dash').hidden = false;
+
+  await Promise.all([loadRequests(), loadPlayers()]);
+
+  let t1 = null, t2 = null;
+  supabase.channel('admin-dash')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'claim_requests' }, () => { clearTimeout(t1); t1 = setTimeout(() => { loadRequests(); loadPlayers(); }, 300); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => { clearTimeout(t2); t2 = setTimeout(loadPlayers, 500); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'player_profiles' }, () => { clearTimeout(t2); t2 = setTimeout(loadPlayers, 500); })
+    .subscribe();
+}
+
+// ── Solicitudes pendientes ──
+async function loadRequests() {
+  const { data: reqs, error } = await supabase.from('claim_requests')
+    .select('*, players(id, riot_game_name, riot_tag_line, icon_id)')
+    .eq('status', 'pending').order('created_at', { ascending: true });
+  if (error) { $('req-err').textContent = 'No se pudieron cargar las solicitudes.'; return; }
+  const n = (reqs ?? []).length;
+  $('req-count').textContent = n;
+  $('req-count').classList.toggle('zero', n === 0);
+  if (!n) { $('req-list').innerHTML = `<div class="empty">No hay solicitudes pendientes. ✨</div>`; return; }
+  $('req-list').innerHTML = reqs.map(r => `
+    <div class="req">
+      <span class="ic"><img src="${profileIconUrl(r.players?.icon_id) ?? profileIconUrl(1)}" alt="" onerror="${ICON_ONERROR}"></span>
+      <div class="who"><b>${esc(r.discord_name ?? 'Alguien')}</b> quiere vincular <b>${esc(r.players?.riot_game_name ?? '?')}#${esc(r.players?.riot_tag_line ?? '')}</b>
+        <small>${fecha(r.created_at)}</small></div>
+      <button class="btn ok" data-ok="${r.id}" type="button">Aprobar</button>
+      <button class="btn no" data-no="${r.id}" type="button">Rechazar</button>
+    </div>`).join('');
+}
+$('req-list').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-ok], button[data-no]');
+  if (!btn) return;
+  $('req-err').textContent = '';
+  const aprobar = btn.dataset.ok != null;
+  const id = Number(btn.dataset.ok ?? btn.dataset.no);
+  btn.parentElement.querySelectorAll('button').forEach(b => b.disabled = true);
+  const { error } = await supabase.rpc(aprobar ? 'approve_claim' : 'reject_claim', { p_request_id: id });
+  if (error) {
+    $('req-err').textContent = error.message;
+    btn.parentElement.querySelectorAll('button').forEach(b => b.disabled = false);
+    return;
+  }
+  authMenu.toast(aprobar ? '✅ Solicitud aprobada' : 'Solicitud rechazada');
+  await Promise.all([loadRequests(), aprobar ? loadPlayers() : null, authMenu.refreshPendingCount()]);
+});
+
+// ── Jugadores del roster ──
+async function loadPlayers() {
+  const { data, error } = await supabase.rpc('admin_list_players');
+  if (error) { $('pl-err').textContent = `No se pudo cargar la lista: ${error.message}`; return; }
+  $('pl-err').textContent = '';
+  playersCache = data ?? [];
+  drawPlayers();
+}
+
+function drawPlayers() {
+  if (!playersCache.length) { $('pl-list').innerHTML = `<tr><td colspan="4" class="empty">El roster está vacío.</td></tr>`; return; }
+  $('pl-list').innerHTML = playersCache.map(p => {
+    const linked = !!p.user_id;
+    const editing = ui.editTw === p.player_id;
+    const confirming = ui.confirmUnlink === p.player_id;
+    const twCell = editing
+      ? `<div class="tw-edit"><input id="tw-input" maxlength="25" placeholder="usuario de twitch" value="${esc(p.twitch_username ?? '')}">
+           <button class="btn ok" data-act="tw-save" data-id="${p.player_id}" type="button">Guardar</button>
+           <button class="btn ghost" data-act="tw-cancel" type="button">✕</button></div>`
+      : p.twitch_username
+        ? `<span class="tw">📺 ${esc(p.twitch_username)}</span> <span class="badge ${p.twitch_verified ? 'ok' : 'warn'}">${p.twitch_verified ? 'Verificado' : 'A mano'}</span>`
+        : `<span class="none">—</span>`;
+    const actions = linked ? `
+        ${editing ? '' : `<button class="btn ghost" data-act="tw-edit" data-id="${p.player_id}" type="button">Twitch</button>`}
+        ${confirming ? '' : `<button class="btn no" data-act="unlink" data-id="${p.player_id}" type="button">Desvincular</button>`}` : '';
+    const confirmBox = confirming ? `
+      <div class="confirm">¿Desvincular <b>${esc(p.riot_game_name)}</b> de <b>${esc(p.discord_name ?? 'ese Discord')}</b>?
+        Se borran su apodo, bio, campeón/skin elegidos y su Twitch. La cuenta queda libre para una nueva solicitud.
+        <div class="actions"><button class="btn danger" data-act="unlink-yes" data-id="${p.player_id}" type="button">Sí, desvincular</button>
+        <button class="btn ghost" data-act="unlink-no" type="button">Cancelar</button></div></div>` : '';
+    return `<tr>
+      <td data-label="Cuenta de LoL"><div class="pl"><img src="${profileIconUrl(p.icon_id) ?? profileIconUrl(1)}" alt="" onerror="${ICON_ONERROR}">
+        <div><a href="perfil.html?jugador=${encodeURIComponent(p.player_id)}">${esc(p.riot_game_name)}</a> <small>#${esc(p.riot_tag_line)}</small></div></div>${confirmBox}</td>
+      <td data-label="Discord" class="dc">${linked ? esc(p.discord_name ?? 'Vinculado') : '<span class="none">Sin vincular</span>'}</td>
+      <td data-label="Twitch">${twCell}</td>
+      <td><div class="actions">${actions}</div></td>
+    </tr>`;
+  }).join('');
+  if (ui.editTw) { const inp = $('tw-input'); inp?.focus(); inp?.setSelectionRange(inp.value.length, inp.value.length); }
+}
+
+$('pl-list').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-act]');
+  if (!btn) return;
+  const { act, id } = btn.dataset;
+  $('pl-err').textContent = '';
+  if (act === 'tw-edit') { ui.editTw = id; ui.confirmUnlink = null; drawPlayers(); return; }
+  if (act === 'tw-cancel') { ui.editTw = null; drawPlayers(); return; }
+  if (act === 'unlink') { ui.confirmUnlink = id; ui.editTw = null; drawPlayers(); return; }
+  if (act === 'unlink-no') { ui.confirmUnlink = null; drawPlayers(); return; }
+  if (act === 'tw-save') {
+    btn.disabled = true;
+    const { error } = await supabase.rpc('admin_set_twitch', { p_player_id: id, p_username: $('tw-input').value });
+    if (error) { $('pl-err').textContent = error.message; btn.disabled = false; return; }
+    ui.editTw = null;
+    authMenu.toast('Twitch actualizado');
+    await loadPlayers();
+    return;
+  }
+  if (act === 'unlink-yes') {
+    btn.disabled = true;
+    const { error } = await supabase.rpc('admin_unlink_player', { p_player_id: id });
+    if (error) { $('pl-err').textContent = error.message; btn.disabled = false; return; }
+    ui.confirmUnlink = null;
+    authMenu.toast('Cuenta desvinculada');
+    await loadPlayers();
+  }
+});
+$('pl-list').addEventListener('keydown', (e) => {
+  if (e.target.id !== 'tw-input') return;
+  if (e.key === 'Enter') $('pl-list').querySelector('[data-act="tw-save"]')?.click();
+  if (e.key === 'Escape') { ui.editTw = null; drawPlayers(); }
+});
+
+init();
+</script>
+</body>
+</html>

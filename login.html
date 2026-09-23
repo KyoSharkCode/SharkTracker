@@ -104,6 +104,18 @@
 
   [hidden]{display:none !important;}
 
+  /* Solicitud pendiente */
+  .pending-card{display:flex; gap:14px; align-items:flex-start; background:rgba(250,204,21,.07); border:1px solid rgba(250,204,21,.35); border-radius:12px; padding:14px 16px; margin-bottom:22px;}
+  .pending-card .ico{font-size:22px; line-height:1;}
+  .pending-card b{display:block; color:#fff; font-size:14px; margin-bottom:4px;}
+  .pending-card span{font-size:12.5px; line-height:1.5; color:var(--text-dim);}
+  .notice{font-size:12.5px; font-weight:600; line-height:1.5; color:var(--gold); background:rgba(250,204,21,.07); border:1px solid rgba(250,204,21,.3); border-radius:10px; padding:10px 12px; margin-bottom:18px;}
+  .btn-ghost{width:100%; padding:13px 18px; border:1px solid var(--border); border-radius:12px; background:transparent; color:var(--text-dim); font-weight:700; font-size:14px;}
+  .btn-ghost:hover{border-color:var(--accent); color:#fff;}
+  #btn-admin{display:block; text-align:center; text-decoration:none; margin-top:18px;}
+  #btn-admin[hidden]{display:none;}
+
+
   /* ── Celular: se esconde la columna de marca, queda el logo arriba del formulario ── */
   @media (max-width:860px){
     body{grid-template-columns:1fr;}
@@ -169,6 +181,7 @@
       <div id="step-2" hidden>
         <div class="kicker">Paso 2 de 2</div>
         <h1>Vincula tu cuenta de LoL</h1>
+        <div class="notice" id="rejected-notice" hidden>Tu última solicitud no fue aprobada. Revisa que sea tu cuenta, o habla con KyoSumi.</div>
         <div class="connected"><span class="av" id="dc-av"></span>Sesión de Discord: <b id="dc-name">—</b><span class="ok">Discord ✓</span></div>
         <form id="claim-form" autocomplete="off">
           <div class="row2">
@@ -177,11 +190,23 @@
           </div>
           <div class="match" id="match"></div>
           <div class="spacer" id="match-spacer"></div>
-          <button class="btn-main" id="btn-claim" type="submit" disabled>Vincular y ver mi perfil</button>
+          <button class="btn-main" id="btn-claim" type="submit" disabled>Enviar solicitud</button>
         </form>
         <div class="error-box" id="err-2"></div>
-        <p class="hint">¿Tu cuenta no aparece? Tiene que estar en el roster del reto: pídele a KyoSumi que te agregue.</p>
+        <p class="hint">KyoSumi revisa cada solicitud a mano antes de vincularla, para que nadie pueda quedarse con el perfil de otro. ¿Tu cuenta no aparece? Tiene que estar en el roster del reto: pídele que te agregue.</p>
         <button class="link-btn" id="btn-logout" type="button">No soy yo — cerrar sesión</button>
+      </div>
+
+      <!-- Solicitud enviada, esperando aprobación -->
+      <div id="step-pending" hidden>
+        <div class="kicker">Paso 2 de 2</div>
+        <h1>Solicitud enviada</h1>
+        <div class="pending-card">
+          <span class="ico">⏳</span>
+          <div><b id="pending-account">—</b><span>KyoSumi tiene que aprobar el vínculo. Cuando lo haga, vuelve a esta página y ya vas a tener tu perfil listo.</span></div>
+        </div>
+        <button class="btn-ghost" id="btn-change" type="button">Me equivoqué de cuenta</button>
+        <button class="link-btn" id="btn-logout-3" type="button">Cerrar sesión</button>
       </div>
 
       <!-- Ya vinculado -->
@@ -191,6 +216,9 @@
         <p class="sub" id="done-text"></p>
         <a class="btn-main" id="btn-profile" href="#" style="display:block; text-align:center; text-decoration:none;">Ir a mi perfil</a>
         <button class="link-btn" id="btn-logout-2" type="button">Cerrar sesión</button>
+
+        <!-- Solo admins -->
+        <a class="btn-ghost" id="btn-admin" href="admin.html" hidden>🛡️ Admin Dashboard</a>
       </div>
     </div>
   </section>
@@ -215,8 +243,8 @@ const profileIconUrl = (iconId) => iconId ? `https://ddragon.leagueoflegends.com
 const profileUrl = (playerId) => `perfil.html?jugador=${encodeURIComponent(playerId)}`;
 
 function showStep(step) {
-  ['step-loading', 'step-1', 'step-2', 'step-done'].forEach(id => { $(id).hidden = id !== step; });
-  $('bar-2').classList.toggle('on', step === 'step-2' || step === 'step-done');
+  ['step-loading', 'step-1', 'step-2', 'step-pending', 'step-done'].forEach(id => { $(id).hidden = id !== step; });
+  $('bar-2').classList.toggle('on', step !== 'step-1' && step !== 'step-loading');
 }
 function showError(boxId, msg) {
   const el = $(boxId);
@@ -240,10 +268,28 @@ async function refresh() {
     $('btn-profile').href = profileUrl(mine.id);
     showStep('step-done');
     fillPreview(mine);
+    const { data: soyAdmin } = await supabase.from('admins').select('user_id').eq('user_id', session.user.id).maybeSingle();
+    $('btn-admin').hidden = !soyAdmin;
     return;
   }
+
+  // ¿Tiene una solicitud pendiente, o la última fue rechazada?
+  const { data: ultima } = await supabase.from('claim_requests')
+    .select('*, players(id, riot_game_name, riot_tag_line, icon_id, primary_role)')
+    .eq('user_id', session.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
+  if (ultima?.status === 'pending' && ultima.players) {
+    showPending(ultima.players);
+    return;
+  }
+  $('rejected-notice').hidden = ultima?.status !== 'rejected';
   showStep('step-2');
   $('in-name').focus();
+}
+
+function showPending(player) {
+  $('pending-account').textContent = `${player.riot_game_name}#${player.riot_tag_line}`;
+  showStep('step-pending');
+  fillPreview(player);
 }
 
 // ── Vista previa de la izquierda: con datos reales cuando se encuentra la cuenta ──
@@ -357,7 +403,7 @@ $('claim-form').addEventListener('submit', async (e) => {
   if (!found) return;
   $('btn-claim').disabled = true;
   showError('err-2', null);
-  const { data, error } = await supabase.rpc('claim_player', {
+  const { error } = await supabase.rpc('request_claim', {
     p_game_name: found.riot_game_name,
     p_tag_line: found.riot_tag_line,
   });
@@ -366,7 +412,7 @@ $('claim-form').addEventListener('submit', async (e) => {
     $('btn-claim').disabled = false;
     return;
   }
-  window.location.href = profileUrl(data.id);
+  showPending(found);
 });
 
 async function logout() {
@@ -380,6 +426,17 @@ async function logout() {
 }
 $('btn-logout').addEventListener('click', logout);
 $('btn-logout-2').addEventListener('click', logout);
+$('btn-logout-3').addEventListener('click', logout);
+$('btn-change').addEventListener('click', () => {
+  found = null;
+  $('in-name').value = '';
+  $('in-tag').value = '';
+  setMatch(null);
+  fillPreview(null);
+  $('rejected-notice').hidden = true;
+  showStep('step-2');
+  $('in-name').focus();
+});
 
 // Al volver de Discord, Supabase procesa la sesión y avisa por acá.
 supabase.auth.onAuthStateChange((event) => {
