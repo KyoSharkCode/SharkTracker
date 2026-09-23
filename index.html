@@ -429,6 +429,7 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
+import { createMissionsWidget } from './assets/missions-widget.js';
 createNavMenu({ current: 'ranking' });
 
 const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
@@ -461,6 +462,7 @@ const BADGE_META = {
 const EVENT_META = {
   badge_semanal:'🏅', badge_reciente:'🏅', record_lp:'📈', adelantamiento:'🔥', rey_temporada:'👑',
   primera_victoria_dia:'🌅', reto_ganado:'🏆', posible_egida:'assets/Aegis_of_Valor_icon.svg', logro_partida:'⚔️',
+  mision_completada:'🎯', mision_grupal:'👥', reroll_ganado:'🎲',
 };
 
 let ddragonVersion = '15.19.1';
@@ -492,6 +494,7 @@ const formatDuration = (seconds) => seconds ? `${Math.floor(seconds / 60)}:${Str
 // ── Header: menú del ícono de perfil (assets/auth-menu.js) ──
 // Ir a perfil · Editar perfil · Mi Twitch · Admin Dashboard (admins) · Cerrar sesión
 const authMenu = createAuthMenu({ supabase, profileIconUrl });
+createMissionsWidget({ supabase, profileIconUrl });
 const AVATAR_ONERROR = `this.onerror=null;this.src='${profileIconUrl(1)}';`;
 const HIDE_ONERROR = `this.style.visibility='hidden';`;
 // El orden real ya lo calcula el backend (rank_snapshots.elo_score), que sí
@@ -1093,6 +1096,9 @@ async function render() {
       else if (ev.type === 'rey_temporada') texto = `<b>${nombreNuevo}</b> es el nuevo Rey de la Temporada` + (nombreAnterior ? ` (se lo quitó a <b>${nombreAnterior}</b>)` : '');
       else if (ev.type === 'primera_victoria_dia') texto = `<b>${nombreNuevo}</b> consiguió la primera victoria del día`;
       else if (ev.type === 'reto_ganado') texto = `<b>${nombreNuevo}</b> ganó el reto`;
+      else if (ev.type === 'mision_completada') texto = `<b>${nombreNuevo}</b> completó una misión ${({ easy: 'fácil', medium: 'media', hard: 'difícil' })[ev.category] ?? ''}`;
+      else if (ev.type === 'mision_grupal') texto = `El grupo completó la misión grupal`;
+      else if (ev.type === 'reroll_ganado') texto = `<b>${nombreNuevo}</b> ganó un reroll 🎲`;
       else if (ev.type === 'posible_egida') texto = `<b>${nombreNuevo}</b> posible Égida de Valor`;
       else if (ev.category?.startsWith('perfecta:')) texto = `<b>${nombreNuevo}</b> logró Partida Perfecta`;
       else if (ev.category?.startsWith('ace:')) texto = `<b>${nombreNuevo}</b> logró Ace Perfecto`;
@@ -1106,7 +1112,7 @@ async function render() {
         <div class="logro-icon">${iconoHtml}</div>
         <div style="flex:1;min-width:0;">
           <div class="logro-text">${texto}</div>
-          ${ev.detail ? `<div class="logro-detail">${ev.type === 'reto_ganado' ? String(ev.detail).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`) : ev.detail}</div>` : ''}
+          ${ev.detail ? `<div class="logro-detail">${['reto_ganado', 'mision_completada', 'mision_grupal', 'reroll_ganado'].includes(ev.type) ? String(ev.detail).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`) : ev.detail}</div>` : ''}
         </div>
         <div class="logro-time">${timeAgo(ev.occurred_at)}</div>`;
       logrosEl.appendChild(item);

@@ -206,6 +206,7 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
+import { createMissionsWidget } from './assets/missions-widget.js';
 createNavMenu({ current: location.hash === '#fame-sec' ? 'fama' : 'reto' });
 
 const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
@@ -235,6 +236,7 @@ const kda = (r) => r.reto_games ? ((r.reto_kills + r.reto_assists) / Math.max(1,
 const MIN_PARTIDAS_PREMIO = 5;
 
 const authMenu = createAuthMenu({ supabase, profileIconUrl });
+createMissionsWidget({ supabase, profileIconUrl });
 const idParam = Number(new URL(location.href).searchParams.get('id')) || null;
 let countdownTarget = null;
 

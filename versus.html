@@ -184,6 +184,7 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
+import { createMissionsWidget } from './assets/missions-widget.js';
 import { loadCatalogs, fetchParticipations, aggregate, groupBy, QUEUES, ROLES, roleLabel, rankText, emblemUrl,
          champImg, champName, splashUrl, profileIconUrl, iconOr1, ICON_ONERROR, HIDE, esc, pct, fix, kfmt } from './assets/lol-data.js';
 createNavMenu({ current: 'versus' });
@@ -193,6 +194,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (id) => document.getElementById(id);
 const authMenu = createAuthMenu({ supabase, profileIconUrl });
+createMissionsWidget({ supabase, profileIconUrl });
 
 const st = { players: [], profiles: new Map(), ranks: new Map(), masteries: new Map(), parts: [], queue: 'soloq', a: null, b: null };
 const nick = (p) => { const pr = st.profiles.get(p.id); return pr?.display_name && pr.display_name !== p.riot_game_name ? pr.display_name : p.riot_game_name; };

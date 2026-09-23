@@ -234,6 +234,7 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
+import { createMissionsWidget } from './assets/missions-widget.js';
 createNavMenu({ current: null });
 import { lolIcon, lolIconSvg, RIOT_EVENT_ICON } from './assets/lol-icons.js';
 
@@ -279,6 +280,7 @@ async function loadCatalogs() {
 }
 
 const authMenu = createAuthMenu({ supabase, profileIconUrl });
+createMissionsWidget({ supabase, profileIconUrl });
 const state = { d: null, tl: null, roster: new Map(), ai: new Map() };
 
 async function init() {

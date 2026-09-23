@@ -193,6 +193,7 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
+import { createMissionsWidget } from './assets/missions-widget.js';
 import { loadCatalogs, fetchParticipations, aggregate, groupBy, QUEUES, ROLES, roleLabel,
          champImg, champName, profileIconUrl, iconOr1, ICON_ONERROR, HIDE, esc, pct, fix, kfmt } from './assets/lol-data.js';
 createNavMenu({ current: 'stats' });
@@ -202,6 +203,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (id) => document.getElementById(id);
 const authMenu = createAuthMenu({ supabase, profileIconUrl });
+createMissionsWidget({ supabase, profileIconUrl });
 
 const st = { players: new Map(), profiles: new Map(), all: [], queue: 'soloq', days: 30, sort: {}, champAll: false };
 const nick = (id) => { const p = st.players.get(id); if (!p) return '?'; const pr = st.profiles.get(id); return pr?.display_name && pr.display_name !== p.riot_game_name ? pr.display_name : p.riot_game_name; };

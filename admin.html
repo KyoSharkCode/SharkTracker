@@ -136,7 +136,29 @@
   .add-row .in{max-width:260px;}
   .add-row small{color:var(--text-faint); font-size:12px;}
 
+  /* Misiones */
+  .ms-status{display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 20px; margin-bottom:12px;}
+  .ms-status.on{border-color:var(--accent); box-shadow:0 0 24px rgba(0,229,199,.12);}
+  .ms-status .txt{flex:1; min-width:220px; font-size:13px; color:var(--text-dim); line-height:1.5;}
+  .ms-status .txt b{color:#fff;}
+  .chip.off{background:rgba(157,179,196,.12); color:var(--text-dim);}
+  .ms-group{padding:12px 16px; border-bottom:1px solid var(--border); font-size:13px; color:var(--text-dim);}
+  .ms-group b{color:#fff;}
+  .ms-row{display:grid; grid-template-columns:170px 1fr; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); align-items:start;}
+  .ms-row:last-child{border-bottom:none;}
+  .ms-row .rr{display:block; color:var(--text-faint); font-size:11.5px; font-weight:600; margin-top:3px;}
+  .ms-list{display:flex; flex-direction:column; gap:6px; min-width:0;}
+  .ms-m{display:flex; align-items:center; gap:9px; font-size:13px; min-width:0;}
+  .ms-m .dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+  .ms-m .t{flex:1; min-width:0; color:var(--text-dim);}
+  .ms-m.done .t{color:#fff;}
+  .ms-m .pr{font-weight:800; font-size:12px; color:var(--text-faint); white-space:nowrap;}
+  .ms-m.done .pr{color:var(--accent);}
+  .ms-m .dice{background:none; border:1px solid var(--border); border-radius:8px; padding:3px 8px; font-size:13px; color:var(--text-dim);}
+  .ms-m .dice:hover{border-color:var(--accent); color:#fff;}
+
   @media (max-width:760px){
+    .ms-row{grid-template-columns:1fr; gap:8px;}
     header{grid-template-columns:auto 1fr auto;}
     h1{font-size:24px;}
     thead{display:none;}
@@ -199,6 +221,13 @@
     </section>
 
     <section>
+      <h2 class="section-title"><span class="bar"></span>Misiones semanales</h2>
+      <div id="ms-status"></div>
+      <div class="card" id="ms-list" hidden></div>
+      <p class="err" id="ms-err"></p>
+    </section>
+
+    <section>
       <h2 class="section-title"><span class="bar"></span>Jugadores <button class="btn ghost title-btn" id="btn-add-pl" type="button">+ Agregar cuenta</button></h2>
       <div class="card">
         <form class="add-row" id="add-form" hidden>
@@ -242,7 +271,7 @@ const authMenu = createAuthMenu({ supabase, profileIconUrl });
 
 // Qué fila de jugador está en modo "editar Twitch" o "confirmar desvincular"
 // (se conserva al redibujar por Realtime).
-const ui = { editTw: null, confirmUnlink: null, confirmRemove: null, chConfirm: null };
+const ui = { editTw: null, confirmUnlink: null, confirmRemove: null, chConfirm: null, msConfirm: null };
 let playersCache = [];
 
 async function init() {
@@ -260,15 +289,17 @@ async function init() {
   if (!soyAdmin) { $('no-access').hidden = false; return; }
   $('dash').hidden = false;
 
-  await Promise.all([loadRequests(), loadPlayers(), loadChallenges()]);
+  await Promise.all([loadRequests(), loadPlayers(), loadChallenges(), loadMissions()]);
   setInterval(tickCountdowns, 30000);
 
-  let t1 = null, t2 = null, t3 = null;
+  let t1 = null, t2 = null, t3 = null, t4 = null;
   supabase.channel('admin-dash')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'claim_requests' }, () => { clearTimeout(t1); t1 = setTimeout(() => { loadRequests(); loadPlayers(); }, 300); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => { clearTimeout(t2); t2 = setTimeout(loadPlayers, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'player_profiles' }, () => { clearTimeout(t2); t2 = setTimeout(loadPlayers, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'challenges' }, () => { clearTimeout(t3); t3 = setTimeout(loadChallenges, 400); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'mission_settings' }, () => { clearTimeout(t4); t4 = setTimeout(loadMissions, 400); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'player_missions' }, () => { clearTimeout(t4); t4 = setTimeout(loadMissions, 600); })
     .subscribe();
 }
 
@@ -316,6 +347,7 @@ async function loadPlayers() {
   playersCache = data ?? [];
   drawPlayers();
   if (challengesCache.length) drawChallenges();
+  if (missionsCache) drawMissions();
 }
 
 function drawPlayers() {
@@ -557,6 +589,95 @@ $('ch-form').addEventListener('submit', async (e) => {
   $('ch-form').hidden = true;
   authMenu.toast('✅ Reto creado');
   await loadChallenges();
+});
+
+
+// ── Misiones semanales ──
+const MS_TIERS = { easy: ['Fácil', '#22c55e'], medium: ['Media', '#facc15'], hard: ['Difícil', '#ff5f3d'] };
+let missionsCache = null;
+async function loadMissions() {
+  const [{ data: st, error }, { data: week }, { data: cat }] = await Promise.all([
+    supabase.from('mission_settings').select('*').maybeSingle(),
+    supabase.from('mission_weeks').select('*').order('week_start', { ascending: false }).limit(1).maybeSingle(),
+    supabase.from('mission_catalog').select('code, title, target'),
+  ]);
+  if (error) { $('ms-err').textContent = `No se pudieron cargar las misiones: ${error.message}`; return; }
+  $('ms-err').textContent = '';
+  let missions = [], rerolls = [];
+  if (week) {
+    const [{ data: m }, { data: r }] = await Promise.all([
+      supabase.from('player_missions').select('*').eq('week_start', week.week_start),
+      supabase.from('player_rerolls').select('*'),
+    ]);
+    missions = m ?? []; rerolls = r ?? [];
+  }
+  missionsCache = { st: st ?? { enabled: false }, week, cat: new Map((cat ?? []).map(c => [c.code, c])), missions, rerolls: new Map(rerolls.map(r => [r.player_id, r.available])) };
+  drawMissions();
+}
+
+function drawMissions() {
+  const { st, week, cat, missions, rerolls } = missionsCache;
+  const on = !!st.enabled;
+  const conf = ui.msConfirm;
+  $('ms-status').innerHTML = `<div class="ms-status ${on ? 'on' : ''}">
+    <span class="chip ${on ? 'live' : 'off'}">${on ? 'Activas' : 'Pausadas'}</span>
+    <div class="txt">${on
+      ? `Cada lunes a las 6:00 (Madrid) se reparten misiones nuevas. Activas desde <b>${st.enabled_at ? fecha(st.enabled_at) : '—'}</b>.`
+      : 'Nadie ve la pestañita y no se cuenta ninguna partida. Actívalas el día del lanzamiento: las partidas cuentan desde ese momento.'}</div>
+    ${conf === 'reset' ? '' : `<button class="btn ${on ? 'no' : 'ok'}" id="ms-toggle" type="button">${on ? 'Pausar' : 'Activar'}</button>
+      <button class="btn no" id="ms-reset" type="button">Reiniciar misiones</button>`}
+  </div>
+  ${conf === 'reset' ? `<div class="confirm">¿Reiniciar las misiones? Se borran todas las semanas, el progreso, los rerolls y sus avisos en el Historial de Logros, y quedan <b>pausadas</b>. No se puede deshacer.
+    <div class="actions"><button class="btn danger" id="ms-reset-yes" type="button">Sí, reiniciar</button>
+    <button class="btn ghost" id="ms-reset-no" type="button">Cancelar</button></div></div>` : ''}`;
+
+  const list = $('ms-list');
+  if (!on || !week) { list.hidden = true; list.innerHTML = ''; return; }
+  list.hidden = false;
+  const g = cat.get(week.group_code);
+  const byPlayer = new Map();
+  for (const m of missions) byPlayer.set(m.player_id, [...(byPlayer.get(m.player_id) ?? []), m]);
+  const rows = playersCache.filter(p => byPlayer.has(p.player_id)).map(p => {
+    const ms = byPlayer.get(p.player_id).sort((a, b) => Object.keys(MS_TIERS).indexOf(a.tier) - Object.keys(MS_TIERS).indexOf(b.tier));
+    return `<div class="ms-row">
+      <div class="pl"><img src="${profileIconUrl(p.icon_id) ?? profileIconUrl(1)}" alt="" onerror="${ICON_ONERROR}"><span><a href="perfil.html?id=${p.player_id}">${esc(p.riot_game_name)}</a><span class="rr">🎲 ${rerolls.get(p.player_id) ?? 1} reroll(s)</span></span></div>
+      <div class="ms-list">${ms.map(m => {
+        const c = cat.get(m.code) ?? { title: m.code, target: 1 };
+        const done = !!m.completed_at;
+        return `<div class="ms-m ${done ? 'done' : ''}"><span class="dot" style="background:${MS_TIERS[m.tier][1]}" title="${MS_TIERS[m.tier][0]}"></span>
+          <span class="t">${esc(c.title)}</span><span class="pr">${done ? '✓' : `${Math.min(m.progress, c.target)}/${c.target}`}</span>
+          ${done ? '' : `<button class="dice" data-reroll="${m.id}" type="button" title="Cambiar por otra del mismo nivel (gratis para admin)">🎲</button>`}</div>`;
+      }).join('')}</div></div>`;
+  }).join('');
+  list.innerHTML = `<div class="ms-group">👥 Grupal: <b>${esc(g?.title ?? week.group_code ?? '—')}</b> · ${week.group_completed_at ? '<b style="color:var(--accent)">✓ completada</b>' : `${Math.min(week.group_progress, g?.target ?? 0)}/${g?.target ?? '?'}`}</div>`
+    + (rows || '<div class="empty">Todavía no se repartieron misiones (se generan en unos minutos).</div>');
+}
+
+$('ms-status').addEventListener('click', async (e) => {
+  const id = e.target.closest('button')?.id;
+  if (!id) return;
+  $('ms-err').textContent = '';
+  if (id === 'ms-reset') { ui.msConfirm = 'reset'; drawMissions(); return; }
+  if (id === 'ms-reset-no') { ui.msConfirm = null; drawMissions(); return; }
+  const wasOn = !!missionsCache.st.enabled;
+  e.target.disabled = true;
+  const { error } = id === 'ms-toggle'
+    ? await supabase.rpc('admin_set_missions_enabled', { p_enabled: !wasOn })
+    : await supabase.rpc('admin_reset_missions');
+  if (error) { $('ms-err').textContent = error.message; e.target.disabled = false; return; }
+  ui.msConfirm = null;
+  authMenu.toast(id === 'ms-toggle' ? (wasOn ? 'Misiones pausadas' : '🎯 Misiones activadas') : 'Misiones reiniciadas');
+  await loadMissions();
+});
+$('ms-list').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-reroll]');
+  if (!btn) return;
+  $('ms-err').textContent = '';
+  btn.disabled = true;
+  const { error } = await supabase.rpc('reroll_mission', { p_mission_id: Number(btn.dataset.reroll) });
+  if (error) { $('ms-err').textContent = error.message; btn.disabled = false; return; }
+  authMenu.toast('🎲 Misión cambiada');
+  await loadMissions();
 });
 
 init();

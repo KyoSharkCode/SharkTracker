@@ -453,6 +453,7 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
+import { createMissionsWidget } from './assets/missions-widget.js';
 createNavMenu({ current: null });
 
 const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
@@ -530,6 +531,7 @@ const authMenu = createAuthMenu({
     return false;
   },
 });
+createMissionsWidget({ supabase, profileIconUrl });
 
 const summonerSpellById = {};
 const runeIconById = {};
