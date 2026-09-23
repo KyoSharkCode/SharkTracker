@@ -15,9 +15,9 @@ const ITEMS = [
     icon: 'M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V17h3v4H8v-4h3v-2.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zM6 7v1a2 2 0 0 0 1.2 1.8A5 5 0 0 1 7 8.5V7zM18 7h-1v1.5c0 .5 0 .9-.2 1.3A2 2 0 0 0 18 8z' },
   { key: 'fama', label: 'Salón de la fama', href: 'reto.html#fame-sec', desc: 'Ganadores de retos anteriores',
     icon: 'M12 2l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 16.9 6.1 20l1.2-6.5L2.5 8.9 9.1 8z' },
-  { key: 'versus', label: 'Versus', href: null, desc: 'Compara a dos jugadores', soon: true,
+  { key: 'versus', label: 'Versus', href: 'versus.html', desc: 'Compara a dos jugadores',
     icon: 'M3 4h4.5L12 13l4.5-9H21l-7 14h-4zM2 20h20v2H2z' },
-  { key: 'stats', label: 'Estadísticas', href: null, desc: 'Campeones, roles, dúos y récords', soon: true,
+  { key: 'stats', label: 'Estadísticas', href: 'estadisticas.html', desc: 'Campeones, roles, dúos y récords',
     icon: 'M3 3h2v16h16v2H3zM7 13l4-4 3 3 5-6 1.5 1.3-6.4 7.6-3.1-3.1L8.4 14.4z' },
 ];
 

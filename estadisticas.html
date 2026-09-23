@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estadísticas · SharkTracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
+    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
+    --danger:#ff5f3d; --gold:#facc15; --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  body{margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
+    background:radial-gradient(1000px 460px at 15% -6%, rgba(0,229,199,.14), transparent 60%), radial-gradient(1000px 460px at 85% 6%, rgba(0,229,199,.10), transparent 60%), var(--bg);}
+  a{color:inherit;}
+  button, input{font-family:inherit;}
+  .wrap{max-width:1120px; margin:0 auto; padding:44px 20px 80px;}
+  header{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:22px; padding-bottom:24px; border-bottom:1px solid var(--border);}
+  .logo-slot{display:flex; align-items:center; gap:14px;}
+  .logo-slot img{height:40px; width:auto; display:block;}
+  h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
+     background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .auth-slot{grid-column:3; justify-self:end;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
+  .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .avatar.pending{border-color:var(--gold); color:var(--gold);}
+  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+  .msg{padding:60px 20px; text-align:center; color:var(--text-dim); font-size:15px;}
+  .section-title{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; scroll-margin-top:70px;}
+  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
+  .section-title .aside{margin-left:auto; font-family:'Inter',system-ui,sans-serif; font-size:12px; font-weight:600; letter-spacing:0; text-transform:none; color:var(--text-faint);}
+  section{margin-bottom:36px;}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);}
+  .empty{color:var(--text-faint); font-size:13px; padding:18px; text-align:center;}
+
+  /* Barra de filtros + atajos (fija arriba al hacer scroll) */
+  .toolbar{position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; padding:10px 0; margin-bottom:22px; background:linear-gradient(180deg, rgba(3,8,18,.97) 70%, rgba(3,8,18,0));}
+  .grp{display:flex; gap:6px; flex-wrap:wrap;}
+  .chipbtn{border:1px solid var(--border); background:var(--panel); color:var(--text-dim); border-radius:99px; padding:6px 13px; font-size:12.5px; font-weight:700; cursor:pointer;}
+  .chipbtn.on{border-color:var(--accent); color:#fff; background:rgba(0,229,199,.1);}
+  .jump{margin-left:auto; display:flex; gap:4px; flex-wrap:wrap;}
+  .jump a{font-size:12px; font-weight:700; color:var(--text-faint); text-decoration:none; padding:5px 9px; border-radius:8px;}
+  .jump a:hover{color:#fff; background:rgba(255,255,255,.05);}
+
+  /* Resumen */
+  .tiles{display:grid; grid-template-columns:repeat(6,1fr); gap:12px;}
+  .tile{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:14px 16px;}
+  .tile b{display:block; font-family:'Rajdhani',sans-serif; font-size:28px; line-height:1.05;}
+  .tile small{display:block; font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint); margin-top:3px;}
+  .tile .with-img{display:flex; align-items:center; gap:8px;} .tile .with-img img{width:30px; height:30px; border-radius:7px;}
+  .tile .with-img b{font-size:18px;}
+
+  /* Tablas */
+  .tbl-wrap{overflow-x:auto;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th{font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint); padding:11px 12px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--border); user-select:none;}
+  th[data-k]{cursor:pointer;} th[data-k]:hover{color:#fff;}
+  th.on{color:var(--accent);} th.on::after{content:' ▼'; font-size:9px;} th.on.asc::after{content:' ▲';}
+  th:first-child, td:first-child{text-align:left;}
+  td{padding:9px 12px; border-top:1px solid rgba(22,50,74,.55); text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  .who{display:flex; align-items:center; gap:10px; min-width:0;}
+  .who img{width:30px; height:30px; border-radius:50%; object-fit:cover; background:#0a1622; flex-shrink:0;}
+  .who img.sq{border-radius:7px;}
+  .who a{font-weight:700; text-decoration:none;} .who a:hover{color:var(--accent);}
+  .who b{font-weight:700;}
+  .good{color:var(--accent); font-weight:700;} .bad{color:var(--danger); font-weight:700;}
+  .mini{display:flex; gap:3px; justify-content:flex-end;}
+  .mini img{width:22px; height:22px; border-radius:50%; border:1px solid var(--border);}
+  .best{display:inline-flex; align-items:center; gap:6px; font-weight:700;}
+  .best img{width:22px; height:22px; border-radius:50%;}
+  .search{background:#06111c; border:1px solid var(--border); border-radius:10px; padding:7px 11px; color:#fff; font-size:13px; font-weight:600; outline:none; width:200px;}
+  .search:focus{border-color:var(--accent);}
+  .more{display:block; width:100%; background:none; border:none; border-top:1px solid var(--border); color:var(--accent); font-weight:700; font-size:13px; padding:10px; cursor:pointer;}
+
+  /* Roles */
+  .roles{display:grid; grid-template-columns:repeat(5,1fr); gap:12px;}
+  .rolecard{padding:14px;}
+  .rolecard h3{margin:0 0 8px; font-family:'Rajdhani',sans-serif; font-size:20px; letter-spacing:.06em;}
+  .rolecard .n{font-size:12.5px; color:var(--text-dim); font-weight:600;}
+  .rolecard .lbl{font-size:10px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint); margin-top:10px;}
+  .rolecard .p{display:flex; align-items:center; gap:7px; margin-top:4px; font-size:13px; font-weight:700;}
+  .rolecard .p img{width:24px; height:24px; border-radius:50%;}
+  .rolecard .p small{margin-left:auto; color:var(--text-faint); font-weight:600; font-size:11.5px;}
+
+  /* Dúos */
+  .duo-pair{display:inline-flex; align-items:center; gap:6px;}
+  .duo-pair img{width:26px; height:26px; border-radius:50%;}
+  .duo-pair .plus{color:var(--text-faint); font-weight:800;}
+
+  /* Récords */
+  .records{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;}
+  .rec{display:flex; flex-direction:column; gap:8px; padding:14px; text-decoration:none; transition:border-color .15s;}
+  a.rec:hover{border-color:var(--accent);}
+  .rec .t{font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint);}
+  .rec .v{font-family:'Rajdhani',sans-serif; font-size:30px; font-weight:800; line-height:1; color:var(--gold);}
+  .rec .p{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700;}
+  .rec .p img{width:28px; height:28px; border-radius:7px;}
+  .rec .p small{display:block; color:var(--text-faint); font-weight:600; font-size:11.5px;}
+  .rec.none .v{color:var(--text-faint);}
+
+  /* Horarios */
+  .heat{padding:16px; overflow-x:auto;}
+  .hgrid{display:grid; grid-template-columns:38px repeat(24, minmax(20px,1fr)); gap:3px; min-width:620px;}
+  .hgrid .dl{font-size:11px; font-weight:700; color:var(--text-faint); display:flex; align-items:center;}
+  .hgrid .hl{font-size:9.5px; color:var(--text-faint); text-align:center;}
+  .hgrid .c{aspect-ratio:1; border-radius:4px; background:rgba(255,255,255,.04);}
+  .heat-foot{display:flex; flex-wrap:wrap; gap:10px 22px; margin-top:14px; font-size:12.5px; color:var(--text-dim);}
+  .heat-foot b{color:#fff;}
+  .slots{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:14px;}
+  .slot{background:var(--panel-2); border:1px solid var(--border); border-radius:12px; padding:10px 12px;}
+  .slot small{display:block; font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint);}
+  .slot b{font-family:'Rajdhani',sans-serif; font-size:22px;}
+  .slot span{font-size:12px; color:var(--text-dim);}
+
+  @media (max-width:900px){ .tiles{grid-template-columns:repeat(3,1fr);} .roles{grid-template-columns:repeat(2,1fr);} .records{grid-template-columns:repeat(2,1fr);} .jump{display:none;} }
+  @media (max-width:560px){
+    header{grid-template-columns:auto 1fr auto;} h1{font-size:22px;}
+    .tiles{grid-template-columns:repeat(2,1fr);} .roles{grid-template-columns:1fr;} .records{grid-template-columns:1fr;}
+    .slots{grid-template-columns:repeat(2,1fr);}
+    .hide-sm{display:none;}
+    td, th{padding:8px 7px;}
+    .search{width:100%;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo-slot"><a href="index.html"><img src="logo/FlaviIconLogo.png" alt="SharkTracker"></a></div>
+    <h1>Estadísticas</h1>
+    <div class="auth-slot" id="auth-slot"></div>
+  </header>
+
+  <div class="toolbar">
+    <div class="grp" id="f-queue">
+      <button class="chipbtn on" data-q="soloq" type="button">SoloQ</button>
+      <button class="chipbtn" data-q="flex" type="button">Flex</button>
+      <button class="chipbtn" data-q="ranked" type="button">Ranked</button>
+      <button class="chipbtn" data-q="todas" type="button">Todas</button>
+    </div>
+    <div class="grp" id="f-days">
+      <button class="chipbtn" data-d="7" type="button">7 días</button>
+      <button class="chipbtn on" data-d="30" type="button">30 días</button>
+    </div>
+    <nav class="jump" aria-label="Ir a sección">
+      <a href="#s-jug">Jugadores</a><a href="#s-champ">Campeones</a><a href="#s-roles">Roles</a><a href="#s-duos">Dúos</a><a href="#s-rec">Récords</a><a href="#s-hor">Horarios</a>
+    </nav>
+  </div>
+
+  <div id="loading" class="msg">Calculando…</div>
+  <main id="main" hidden>
+    <section><div class="tiles" id="tiles"></div></section>
+
+    <section>
+      <h2 class="section-title" id="s-jug"><span class="bar"></span>Jugadores <span class="aside">Toca una columna para ordenar</span></h2>
+      <div class="card tbl-wrap"><table id="t-players"></table></div>
+    </section>
+
+    <section>
+      <h2 class="section-title" id="s-champ"><span class="bar"></span>Campeones <span class="aside"><input class="search" id="champ-q" placeholder="Buscar campeón…" autocomplete="off"></span></h2>
+      <div class="card"><div class="tbl-wrap"><table id="t-champs"></table></div><button class="more" id="champ-more" type="button" hidden>Ver todos</button></div>
+    </section>
+
+    <section>
+      <h2 class="section-title" id="s-roles"><span class="bar"></span>Roles</h2>
+      <div class="roles" id="roles"></div>
+    </section>
+
+    <section>
+      <h2 class="section-title" id="s-duos"><span class="bar"></span>Dúos del grupo <span class="aside">Cuando dos del roster cayeron en el mismo equipo</span></h2>
+      <div class="card tbl-wrap"><table id="t-duos"></table></div>
+    </section>
+
+    <section>
+      <h2 class="section-title" id="s-rec"><span class="bar"></span>Récords <span class="aside">Toca uno para ver la partida</span></h2>
+      <div class="records" id="records"></div>
+    </section>
+
+    <section>
+      <h2 class="section-title" id="s-hor"><span class="bar"></span>¿Cuándo juega el grupo? <span class="aside">En tu hora local</span></h2>
+      <div class="card heat" id="heat"></div>
+    </section>
+  </main>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createAuthMenu } from './assets/auth-menu.js';
+import { createNavMenu } from './assets/nav-menu.js';
+import { loadCatalogs, fetchParticipations, aggregate, groupBy, QUEUES, ROLES, roleLabel,
+         champImg, champName, profileIconUrl, iconOr1, ICON_ONERROR, HIDE, esc, pct, fix, kfmt } from './assets/lol-data.js';
+createNavMenu({ current: 'stats' });
+
+const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = (id) => document.getElementById(id);
+const authMenu = createAuthMenu({ supabase, profileIconUrl });
+
+const st = { players: new Map(), profiles: new Map(), all: [], queue: 'soloq', days: 30, sort: {}, champAll: false };
+const nick = (id) => { const p = st.players.get(id); if (!p) return '?'; const pr = st.profiles.get(id); return pr?.display_name && pr.display_name !== p.riot_game_name ? pr.display_name : p.riot_game_name; };
+const icon = (id) => `<img src="${iconOr1(st.players.get(id)?.icon_id)}" alt="" onerror="${ICON_ONERROR()}">`;
+const pLink = (id) => `<a href="perfil.html?jugador=${encodeURIComponent(id)}">${esc(nick(id))}</a>`;
+const MIN_CHAMP = 2, MIN_ROLE = 3, MIN_DUO = 2;
+
+async function init() {
+  const params = new URL(location.href).searchParams;
+  if (QUEUES[params.get('cola')]) st.queue = params.get('cola');
+  if (params.get('dias') === '7') st.days = 7;
+  const [{ data: { session } }, { data: players }, { data: profiles }] = await Promise.all([
+    supabase.auth.getSession(), supabase.from('players').select('*'), supabase.from('player_profiles').select('*'), loadCatalogs(),
+  ]);
+  authMenu.render(session, players ?? [], profiles ?? []);
+  (players ?? []).forEach(p => st.players.set(p.id, p));
+  (profiles ?? []).forEach(p => st.profiles.set(p.player_id, p));
+  $('f-queue').addEventListener('click', (e) => { const b = e.target.closest('[data-q]'); if (b) { st.queue = b.dataset.q; load(); } });
+  $('f-days').addEventListener('click', (e) => { const b = e.target.closest('[data-d]'); if (b) { st.days = Number(b.dataset.d); load(); } });
+  $('champ-q').addEventListener('input', drawChamps);
+  $('champ-more').addEventListener('click', () => { st.champAll = true; drawChamps(); });
+  document.addEventListener('click', (e) => {
+    const th = e.target.closest('th[data-k]'); if (!th) return;
+    const t = th.closest('table').id, k = th.dataset.k;
+    const cur = st.sort[t];
+    st.sort[t] = { k, asc: cur?.k === k ? !cur.asc : false };
+    ({ 't-players': drawPlayers, 't-champs': drawChamps, 't-duos': drawDuos })[t]?.();
+  });
+  await load();
+}
+
+async function load() {
+  document.querySelectorAll('#f-queue [data-q]').forEach(b => b.classList.toggle('on', b.dataset.q === st.queue));
+  document.querySelectorAll('#f-days [data-d]').forEach(b => b.classList.toggle('on', Number(b.dataset.d) === st.days));
+  const u = new URL(location.href);
+  if (st.queue === 'soloq') u.searchParams.delete('cola'); else u.searchParams.set('cola', st.queue);
+  if (st.days === 30) u.searchParams.delete('dias'); else u.searchParams.set('dias', st.days);
+  history.replaceState(null, '', u);
+  $('loading').hidden = false; $('main').hidden = true;
+  const since = new Date(Date.now() - st.days * 86400000).toISOString();
+  try {
+    st.all = (await fetchParticipations(supabase, { queueIds: QUEUES[st.queue].ids, sinceIso: since })).filter(m => st.players.has(m.player_id));
+  } catch (e) { $('loading').textContent = `No se pudieron cargar las partidas: ${e.message}`; return; }
+  st.champAll = false;
+  $('loading').hidden = true; $('main').hidden = false;
+  drawTiles(); drawPlayers(); drawChamps(); drawRoles(); drawDuos(); drawRecords(); drawHeat();
+}
+
+// Ordena filas según la columna elegida en esa tabla.
+function sorted(tableId, rows, defKey) {
+  const s = st.sort[tableId] ?? { k: defKey, asc: false };
+  st.sort[tableId] = s;
+  return [...rows].sort((x, y) => {
+    const a = x[s.k], b = y[s.k];
+    if (typeof a === 'string') return s.asc ? a.localeCompare(b) : b.localeCompare(a);
+    return s.asc ? (a ?? -1e9) - (b ?? -1e9) : (b ?? -1e9) - (a ?? -1e9);
+  });
+}
+const head = (tableId, cols) => `<thead><tr>${cols.map(([k, l, cls]) => {
+  const s = st.sort[tableId];
+  return `<th ${k ? `data-k="${k}"` : ''} class="${cls ?? ''} ${s?.k === k ? 'on' + (s.asc ? ' asc' : '') : ''}">${l}</th>`;
+}).join('')}</tr></thead>`;
+const wrCls = (wr, n) => n >= 3 ? (wr >= .55 ? 'good' : wr < .45 ? 'bad' : '') : '';
+
+function drawTiles() {
+  const g = aggregate(st.all);
+  const matches = new Set(st.all.map(m => m.match_id)).size;
+  const champs = groupBy(st.all, m => m.champion);
+  const top = [...champs.entries()].sort((a, b) => b[1].length - a[1].length)[0];
+  $('tiles').innerHTML = [
+    `<div class="tile"><b>${matches}</b><small>Partidas del grupo</small></div>`,
+    `<div class="tile"><b>${pct(g.wr)}</b><small>Winrate del grupo</small></div>`,
+    `<div class="tile"><b>${Math.round(g.hours)} h</b><small>Horas jugadas</small></div>`,
+    `<div class="tile"><b>${champs.size}</b><small>Campeones distintos</small></div>`,
+    `<div class="tile"><b>${g.pentas}</b><small>Pentakills</small></div>`,
+    top ? `<div class="tile"><div class="with-img"><img src="${champImg(top[0])}" alt="" onerror="${HIDE}"><b>${esc(champName(top[0]))}</b></div><small>Más jugado · ${top[1].length}</small></div>`
+        : `<div class="tile"><b>—</b><small>Campeón más jugado</small></div>`,
+  ].join('');
+}
+
+function drawPlayers() {
+  const rows = [...groupBy(st.all, m => m.player_id).entries()].map(([id, ms]) => {
+    const g = aggregate(ms);
+    const roles = groupBy(ms, m => roleLabel(m.role));
+    const mainRole = [...roles.entries()].sort((a, b) => b[1].length - a[1].length)[0]?.[0] ?? '—';
+    return { id, name: nick(id).toLowerCase(), games: g.games, wr: g.wr, kda: g.kda, k: g.kAvg, d: g.dAvg, a: g.aAvg, cs: g.csMin, dmg: g.dmgMin, gold: g.goldMin, vis: g.visMin, hours: g.hours, lp: g.lpGames ? g.lp : null, mainRole };
+  });
+  const tid = 't-players';
+  if (!rows.length) { $(tid).innerHTML = `<tr><td class="empty">Nadie jugó en este período.</td></tr>`; return; }
+  const list = sorted(tid, rows, 'games');
+  $(tid).innerHTML = head(tid, [['name', 'Jugador'], ['games', 'Partidas'], ['wr', 'WR'], ['kda', 'KDA'], [null, 'K / D / A', 'hide-sm'], ['cs', 'CS/min', 'hide-sm'], ['dmg', 'Daño/min', 'hide-sm'], ['gold', 'Oro/min', 'hide-sm'], ['vis', 'Visión/min', 'hide-sm'], ['lp', 'LP neto', 'hide-sm'], ['hours', 'Horas', 'hide-sm']])
+    + `<tbody>${list.map(r => `<tr>
+      <td><div class="who">${icon(r.id)}<div>${pLink(r.id)}<br><small style="color:var(--text-faint)">${r.mainRole}</small></div></div></td>
+      <td>${r.games}</td><td class="${wrCls(r.wr, r.games)}">${pct(r.wr)}</td><td>${fix(r.kda, 2)}</td>
+      <td class="hide-sm">${fix(r.k)} / ${fix(r.d)} / ${fix(r.a)}</td><td class="hide-sm">${fix(r.cs)}</td><td class="hide-sm">${r.dmg == null ? '—' : Math.round(r.dmg)}</td>
+      <td class="hide-sm">${r.gold == null ? '—' : Math.round(r.gold)}</td><td class="hide-sm">${fix(r.vis, 2)}</td>
+      <td class="hide-sm ${r.lp > 0 ? 'good' : r.lp < 0 ? 'bad' : ''}">${r.lp == null ? '—' : (r.lp > 0 ? '+' : '') + r.lp}</td><td class="hide-sm">${fix(r.hours)}</td></tr>`).join('')}</tbody>`;
+}
+
+function drawChamps() {
+  const q = $('champ-q').value.trim().toLowerCase();
+  let rows = [...groupBy(st.all, m => m.champion).entries()].map(([c, ms]) => {
+    const g = aggregate(ms);
+    const byP = [...groupBy(ms, m => m.player_id).entries()].map(([id, pm]) => ({ id, ...aggregate(pm) }));
+    // Mejor del grupo con ese campeón: mínimo 2 partidas; winrate y después KDA.
+    const elig = byP.filter(x => x.games >= MIN_CHAMP).sort((a, b) => b.wr - a.wr || b.kda - a.kda);
+    return { c, name: champName(c).toLowerCase(), games: g.games, wr: g.wr, kda: g.kda, players: byP.sort((a, b) => b.games - a.games), nPlayers: byP.length, best: elig[0] ?? null };
+  });
+  if (q) rows = rows.filter(r => r.name.includes(q) || r.c.toLowerCase().includes(q));
+  const tid = 't-champs';
+  const list = sorted(tid, rows, 'games');
+  const shown = st.champAll || q ? list : list.slice(0, 15);
+  $('champ-more').hidden = st.champAll || q || list.length <= 15;
+  $('champ-more').textContent = `Ver los ${list.length} campeones`;
+  if (!list.length) { $(tid).innerHTML = `<tr><td class="empty">${q ? 'Ningún campeón coincide.' : 'Sin partidas en este período.'}</td></tr>`; return; }
+  $(tid).innerHTML = head(tid, [['name', 'Campeón'], ['games', 'Partidas'], ['wr', 'WR'], ['kda', 'KDA', 'hide-sm'], ['nPlayers', 'Quién lo jugó'], [null, `El mejor (mín. ${MIN_CHAMP})`]])
+    + `<tbody>${shown.map(r => `<tr>
+      <td><div class="who"><img class="sq" src="${champImg(r.c)}" alt="" onerror="${HIDE}"><b>${esc(champName(r.c))}</b></div></td>
+      <td>${r.games}</td><td class="${wrCls(r.wr, r.games)}">${pct(r.wr)}</td><td class="hide-sm">${fix(r.kda, 2)}</td>
+      <td><div class="mini">${r.players.slice(0, 5).map(p => `<img src="${iconOr1(st.players.get(p.id)?.icon_id)}" title="${esc(nick(p.id))}: ${p.games} p · ${pct(p.wr)}" alt="" onerror="${ICON_ONERROR()}">`).join('')}</div></td>
+      <td>${r.best ? `<span class="best">${icon(r.best.id)}${esc(nick(r.best.id))} <small style="color:var(--text-faint)">${pct(r.best.wr)} · ${r.best.games}p</small></span>` : '<span style="color:var(--text-faint)">—</span>'}</td></tr>`).join('')}</tbody>`;
+}
+
+function drawRoles() {
+  const byRole = groupBy(st.all, m => roleLabel(m.role));
+  $('roles').innerHTML = ROLES.map(r => {
+    const ms = byRole.get(r) ?? [];
+    if (!ms.length) return `<div class="card rolecard"><h3>${r}</h3><div class="n">Nadie jugó este rol.</div></div>`;
+    const g = aggregate(ms);
+    const byP = [...groupBy(ms, m => m.player_id).entries()].map(([id, pm]) => ({ id, ...aggregate(pm) }));
+    const most = [...byP].sort((a, b) => b.games - a.games)[0];
+    const best = byP.filter(x => x.games >= MIN_ROLE).sort((a, b) => b.wr - a.wr || b.kda - a.kda)[0];
+    return `<div class="card rolecard"><h3>${r}</h3><div class="n">${g.games} partidas · <span class="${wrCls(g.wr, g.games)}">${pct(g.wr)}</span> WR</div>
+      <div class="lbl">Quien más lo juega</div><div class="p">${icon(most.id)}${esc(nick(most.id))}<small>${most.games} p</small></div>
+      <div class="lbl">El mejor (mín. ${MIN_ROLE})</div>${best ? `<div class="p">${icon(best.id)}${esc(nick(best.id))}<small>${pct(best.wr)} · ${fix(best.kda, 1)} KDA</small></div>` : '<div class="p" style="color:var(--text-faint)">—</div>'}</div>`;
+  }).join('');
+}
+
+function drawDuos() {
+  const byMatch = groupBy(st.all, m => m.match_id);
+  const pairs = new Map();
+  for (const ms of byMatch.values()) {
+    for (let i = 0; i < ms.length; i++) for (let j = i + 1; j < ms.length; j++) {
+      if (ms[i].team !== ms[j].team) continue;
+      const [x, y] = [ms[i].player_id, ms[j].player_id].sort();
+      const k = `${x}|${y}`;
+      const p = pairs.get(k) ?? { x, y, games: 0, wins: 0 };
+      p.games++; if (ms[i].win) p.wins++;
+      pairs.set(k, p);
+    }
+  }
+  const rows = [...pairs.values()].map(p => ({ ...p, wr: p.wins / p.games, name: (nick(p.x) + nick(p.y)).toLowerCase() }));
+  const tid = 't-duos';
+  if (!rows.length) { $(tid).innerHTML = `<tr><td class="empty">Nadie del grupo jugó junto en este período.</td></tr>`; return; }
+  const elig = rows.filter(r => r.games >= MIN_DUO);
+  const bestK = elig.length ? elig.reduce((a, b) => b.wr > a.wr ? b : a) : null;
+  const worstK = elig.length > 1 ? elig.reduce((a, b) => b.wr < a.wr ? b : a) : null;
+  const list = sorted(tid, rows, 'games');
+  $(tid).innerHTML = head(tid, [['name', 'Dúo'], ['games', 'Partidas'], ['wins', 'Victorias'], ['wr', 'WR']])
+    + `<tbody>${list.map(r => `<tr>
+      <td><span class="duo-pair">${icon(r.x)}<span class="plus">+</span>${icon(r.y)} <b>${esc(nick(r.x))} & ${esc(nick(r.y))}</b>
+        ${r === bestK ? ' 🔥' : r === worstK && worstK !== bestK ? ' 🧊' : ''}</span></td>
+      <td>${r.games}</td><td>${r.wins}V · ${r.games - r.wins}D</td><td class="${wrCls(r.wr, r.games)}">${pct(r.wr)}</td></tr>`).join('')}</tbody>`;
+}
+
+function drawRecords() {
+  const all = st.all;
+  const maxBy = (fn, filter = () => true) => all.filter(filter).reduce((best, m) => (best == null || fn(m) > fn(best) ? m : best), null);
+  const minBy = (fn, filter = () => true) => all.filter(filter).reduce((best, m) => (best == null || fn(m) < fn(best) ? m : best), null);
+  const kdaOf = (m) => (m.kills + m.assists) / Math.max(1, m.deaths);
+  const fmtT = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  const REC = [
+    ['Más kills', maxBy(m => m.kills ?? 0), m => m.kills],
+    ['Más asistencias', maxBy(m => m.assists ?? 0), m => m.assists],
+    ['Más muertes', maxBy(m => m.deaths ?? 0), m => m.deaths],
+    ['Mejor KDA', maxBy(kdaOf, m => (m.kills + m.assists) >= 5), m => fix(kdaOf(m), 1)],
+    ['Más daño', maxBy(m => m.damage_to_champions ?? 0), m => kfmt(m.damage_to_champions)],
+    ['Más oro', maxBy(m => m.gold ?? 0), m => kfmt(m.gold)],
+    ['Más CS', maxBy(m => m.cs ?? 0), m => m.cs],
+    ['Más visión', maxBy(m => m.vision_score ?? 0), m => m.vision_score],
+    ['Partida más larga', maxBy(m => m.matches.duration_seconds), m => fmtT(m.matches.duration_seconds)],
+    ['Victoria más rápida', minBy(m => m.matches.duration_seconds, m => m.win), m => fmtT(m.matches.duration_seconds)],
+    ['Más daño recibido', maxBy(m => m.damage_taken ?? 0), m => kfmt(m.damage_taken)],
+    ['Más LP en una partida', maxBy(m => m.lp_change ?? -1e9, m => m.lp_change != null), m => '+' + m.lp_change],
+  ];
+  $('records').innerHTML = REC.map(([t, m, f]) => m ? `
+    <a class="card rec" href="partidas.html?id=${encodeURIComponent(m.match_id)}&jugador=${encodeURIComponent(m.player_id)}">
+      <span class="t">${t}</span><span class="v">${esc(f(m))}</span>
+      <span class="p"><img src="${champImg(m.champion)}" alt="" onerror="${HIDE}"><span>${esc(nick(m.player_id))}<small>${esc(champName(m.champion))} · ${m.kills}/${m.deaths}/${m.assists} · ${m.win ? 'Victoria' : 'Derrota'}</small></span></span></a>`
+    : `<div class="card rec none"><span class="t">${t}</span><span class="v">—</span></div>`).join('');
+}
+
+function drawHeat() {
+  const DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  const grid = Array.from({ length: 7 }, () => Array(24).fill(0));
+  // Partidas únicas del grupo (si jugaron juntos, cuenta una vez), por hora de inicio.
+  const seen = new Map();
+  st.all.forEach(m => { if (!seen.has(m.match_id)) seen.set(m.match_id, m); });
+  const slots = { 'Madrugada': [0, 6], 'Mañana': [6, 12], 'Tarde': [12, 19], 'Noche': [19, 24] };
+  const slotAgg = Object.fromEntries(Object.keys(slots).map(k => [k, []]));
+  for (const m of seen.values()) {
+    const start = new Date(new Date(m.matches.ended_at).getTime() - (m.matches.duration_seconds ?? 0) * 1000);
+    const d = (start.getDay() + 6) % 7, h = start.getHours();
+    grid[d][h]++;
+  }
+  for (const m of st.all) {
+    const h = new Date(new Date(m.matches.ended_at).getTime() - (m.matches.duration_seconds ?? 0) * 1000).getHours();
+    for (const [k, [a, b]] of Object.entries(slots)) if (h >= a && h < b) slotAgg[k].push(m);
+  }
+  const max = Math.max(1, ...grid.flat());
+  if (!seen.size) { $('heat').innerHTML = '<div class="empty">Sin partidas en este período.</div>'; return; }
+  let html = '<div class="hgrid"><span></span>' + Array.from({ length: 24 }, (_, h) => `<span class="hl">${h % 3 === 0 ? h : ''}</span>`).join('');
+  grid.forEach((row, d) => {
+    html += `<span class="dl">${DAYS[d]}</span>` + row.map((n, h) => `<span class="c" title="${DAYS[d]} ${h}:00 · ${n} partida${n === 1 ? '' : 's'}" style="${n ? `background:rgba(0,229,199,${(0.15 + 0.85 * n / max).toFixed(2)})` : ''}"></span>`).join('');
+  });
+  html += '</div>';
+  let bestD = 0, bestH = 0;
+  grid.forEach((row, d) => row.forEach((n, h) => { if (n > grid[bestD][bestH]) { bestD = d; bestH = h; } }));
+  const byDay = grid.map(r => r.reduce((a, b) => a + b, 0));
+  const topDay = byDay.indexOf(Math.max(...byDay));
+  html += `<div class="heat-foot"><span>Hora pico: <b>${DAYS[bestD]} a las ${bestH}:00</b></span><span>Día con más partidas: <b>${['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'][topDay]}</b></span></div>`;
+  html += `<div class="slots">${Object.entries(slotAgg).map(([k, ms]) => { const g = aggregate(ms);
+    return `<div class="slot"><small>${k}</small><b class="${wrCls(g.wr, g.games)}">${pct(g.wr)}</b> <span>${g.games} partidas</span></div>`; }).join('')}</div>`;
+  $('heat').innerHTML = html;
+}
+
+init();
+</script>
+</body>
+</html>

@@ -48,6 +48,9 @@
   .breadcrumb{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-faint); margin:18px 0 24px;}
   .breadcrumb a{color:var(--accent); text-decoration:none; font-weight:700;}
   .breadcrumb a:hover{text-decoration:underline;}
+  .breadcrumb .compare-link{margin-left:auto; border:1px solid var(--border); border-radius:99px; padding:5px 12px; font-size:12.5px;}
+  .breadcrumb .compare-link:hover{border-color:var(--accent); text-decoration:none;}
+  .breadcrumb [hidden]{display:none;}
 
   .section-title{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
   .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
@@ -323,7 +326,7 @@
     <div class="auth-slot" id="auth-slot"></div>
   </header>
 
-  <div class="breadcrumb"><a href="index.html">← Volver al Ranking</a><span id="breadcrumb-name"></span></div>
+  <div class="breadcrumb"><a href="index.html">← Volver al Ranking</a><span id="breadcrumb-name"></span><a class="compare-link" id="compare-link" href="versus.html" hidden>⚔ Comparar</a></div>
 
   <div id="error-msg"></div>
 
@@ -659,6 +662,8 @@ async function loadAll() {
   document.getElementById('profile-content').style.display = 'block';
   document.getElementById('error-msg').style.display = 'none';
   document.getElementById('breadcrumb-name').textContent = ` /  ${player.riot_game_name}`;
+  const cmp = document.getElementById('compare-link');
+  cmp.href = `versus.html?a=${encodeURIComponent(player.id)}`; cmp.hidden = false;
   document.title = `${player.riot_game_name} — SharkTracker`;
 
   const profile = (profiles ?? []).find(pr => pr.player_id === player.id) ?? {};
