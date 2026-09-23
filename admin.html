@@ -157,7 +157,17 @@
   .ms-m .dice{background:none; border:1px solid var(--border); border-radius:8px; padding:3px 8px; font-size:13px; color:var(--text-dim);}
   .ms-m .dice:hover{border-color:var(--accent); color:#fff;}
 
+  /* Splits */
+  .sp-row{display:grid; grid-template-columns:minmax(0,1.3fr) 1fr 1fr auto; gap:10px; align-items:end; padding:12px 16px; border-bottom:1px solid var(--border);}
+  .sp-row:last-child{border-bottom:none;}
+  .sp-row label{display:block; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:4px;}
+  .sp-row .actions{padding-bottom:1px;}
+  .sp-row.now{background:linear-gradient(90deg, rgba(0,229,199,.06), transparent 70%);}
+  .sp-row .confirm{grid-column:1 / -1; margin-top:0;}
+  .sp-note{font-size:12px; color:var(--text-faint); margin:8px 2px 0; line-height:1.5;}
+
   @media (max-width:760px){
+    .sp-row{grid-template-columns:1fr;}
     .ms-row{grid-template-columns:1fr; gap:8px;}
     header{grid-template-columns:auto 1fr auto;}
     h1{font-size:24px;}
@@ -228,6 +238,13 @@
     </section>
 
     <section>
+      <h2 class="section-title"><span class="bar"></span>Splits (historial de rangos) <button class="btn ghost title-btn" id="btn-new-sp" type="button">+ Nuevo split</button></h2>
+      <div class="card" id="sp-list"></div>
+      <p class="sp-note">Las fechas vienen con el calendario de Riot de 2026; si Riot las cambia, ajústalas aquí. Al guardar se recalcula el pico y el rango final de todos. Deja "Termina" vacío si todavía no se sabe.</p>
+      <p class="err" id="sp-err"></p>
+    </section>
+
+    <section>
       <h2 class="section-title"><span class="bar"></span>Jugadores <button class="btn ghost title-btn" id="btn-add-pl" type="button">+ Agregar cuenta</button></h2>
       <div class="card">
         <form class="add-row" id="add-form" hidden>
@@ -289,7 +306,7 @@ async function init() {
   if (!soyAdmin) { $('no-access').hidden = false; return; }
   $('dash').hidden = false;
 
-  await Promise.all([loadRequests(), loadPlayers(), loadChallenges(), loadMissions()]);
+  await Promise.all([loadRequests(), loadPlayers(), loadChallenges(), loadMissions(), loadSplits()]);
   setInterval(tickCountdowns, 30000);
 
   let t1 = null, t2 = null, t3 = null, t4 = null;
@@ -678,6 +695,61 @@ $('ms-list').addEventListener('click', async (e) => {
   if (error) { $('ms-err').textContent = error.message; btn.disabled = false; return; }
   authMenu.toast('🎲 Misión cambiada');
   await loadMissions();
+});
+
+// ── Splits ──
+let splitsCache = [], spNew = false;
+const isoToInput = (iso) => iso ? toLocalInput(new Date(iso)) : '';
+async function loadSplits() {
+  const { data, error } = await supabase.from('splits').select('*').order('starts_at', { ascending: false });
+  if (error) { $('sp-err').textContent = `No se pudieron cargar los splits: ${error.message}`; return; }
+  splitsCache = data ?? [];
+  drawSplits();
+}
+function spRow(sp) {
+  const id = sp?.id ?? 'new';
+  const now = sp && new Date(sp.starts_at) <= new Date() && (!sp.ends_at || new Date(sp.ends_at) > new Date());
+  return `<div class="sp-row ${now ? 'now' : ''}" data-sp="${id}">
+    <div><label>Nombre${now ? ' · <span style="color:var(--accent)">en curso</span>' : ''}</label><input class="in" data-f="name" maxlength="60" value="${esc(sp?.name ?? '')}" placeholder="2027 · Temporada 1"></div>
+    <div><label>Empieza</label><input class="in" data-f="start" type="datetime-local" value="${isoToInput(sp?.starts_at)}"></div>
+    <div><label>Termina</label><input class="in" data-f="end" type="datetime-local" value="${isoToInput(sp?.ends_at)}"></div>
+    <div class="actions"><button class="btn ok" data-sp-act="save" type="button">Guardar</button>
+      <button class="btn no" data-sp-act="${sp ? 'del' : 'cancel'}" type="button">${sp ? 'Borrar' : 'Cancelar'}</button></div>
+    ${ui.spConfirm === id ? `<div class="confirm">¿Borrar <b>${esc(sp.name)}</b>? Su historial de rangos deja de mostrarse (los picos mensuales siguen guardados).
+      <div class="actions"><button class="btn danger" data-sp-act="del-yes" type="button">Sí, borrar</button>
+      <button class="btn ghost" data-sp-act="del-no" type="button">Cancelar</button></div></div>` : ''}
+  </div>`;
+}
+function drawSplits() {
+  $('sp-list').innerHTML = (spNew ? spRow(null) : '') + (splitsCache.map(spRow).join('')
+    || (spNew ? '' : '<div class="empty">No hay splits. Crea uno con “+ Nuevo split”.</div>'));
+}
+$('btn-new-sp').addEventListener('click', () => { spNew = true; drawSplits(); $('sp-list').querySelector('[data-sp="new"] input')?.focus(); });
+$('sp-list').addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-sp-act]');
+  if (!btn) return;
+  const row = btn.closest('[data-sp]'), id = row.dataset.sp, act = btn.dataset.spAct;
+  $('sp-err').textContent = '';
+  if (act === 'cancel') { spNew = false; drawSplits(); return; }
+  if (act === 'del') { ui.spConfirm = Number(id); drawSplits(); return; }
+  if (act === 'del-no') { ui.spConfirm = null; drawSplits(); return; }
+  btn.disabled = true;
+  let error;
+  if (act === 'del-yes') {
+    ({ error } = await supabase.rpc('admin_delete_split', { p_id: Number(id) }));
+  } else {
+    const v = (f) => row.querySelector(`[data-f="${f}"]`).value;
+    if (!v('start')) { $('sp-err').textContent = 'Falta la fecha de inicio.'; btn.disabled = false; return; }
+    ({ error } = await supabase.rpc('admin_save_split', {
+      p_id: id === 'new' ? null : Number(id), p_name: v('name'),
+      p_starts_at: new Date(v('start')).toISOString(), p_ends_at: v('end') ? new Date(v('end')).toISOString() : null,
+    }));
+  }
+  if (error) { $('sp-err').textContent = error.message; btn.disabled = false; return; }
+  if (id === 'new') spNew = false;
+  ui.spConfirm = null;
+  authMenu.toast(act === 'del-yes' ? 'Split borrado' : '✅ Split guardado · historial recalculado');
+  await loadSplits();
 });
 
 init();

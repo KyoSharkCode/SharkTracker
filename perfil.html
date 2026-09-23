@@ -58,6 +58,8 @@
   .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
   .section-title h2{margin:0; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:.08em;}
   section{margin-bottom:40px;}
+  .f5-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start;}
+  @media (max-width:900px){ .f5-grid{grid-template-columns:1fr;} }
 
   #error-msg{text-align:center; padding:60px 20px; color:var(--danger); font-weight:700; display:none;}
 
@@ -427,6 +429,12 @@
       </div>
     </section>
 
+    <!-- Fase 5: mejor partida del mes + historial de rangos por split -->
+    <section class="f5-grid">
+      <div id="best-match"></div>
+      <div id="rank-history"></div>
+    </section>
+
     <footer>
       <img class="footer-logo" src="logo/HorizontalLogo.png" alt="SharkTracker">
       <div>hecho por KyoSumiVT</div>
@@ -457,6 +465,7 @@ import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
 import { openOverlayGenerator } from './assets/overlay-generator.js';
+import { renderBestMatch, renderRankHistory } from './assets/rank-history.js';
 createNavMenu({ current: null });
 
 const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
@@ -592,6 +601,7 @@ let currentTab = 'soloq';
 let lastStreamChannel = null;
 let aiState = { playerId: null, latestMatchId: null, loading: false };
 let viewState = { player: null, profile: {}, live: { in_game: false }, isMine: false };
+let f5 = { playerId: null, parts: [] };   // mejor partida + historial de rangos (se crean una vez por jugador)
 let editState = { active: false, pendingRefresh: false, champion: null, skin: 0, champs: null, skinsCache: new Map() };
 // Debe coincidir con ADVICE_VERSION de la Edge Function: si cambia el prompt,
 // los consejos viejos se regeneran solos en vez de esperar una partida nueva.
@@ -674,6 +684,14 @@ async function loadAll() {
   const esMio = !!session && player.user_id === session.user.id;
   obs.onclick = esMio ? () => openOverlayGenerator({ id: player.id, name: player.riot_game_name }) : null;
   obs.hidden = !esMio;
+  if (f5.playerId !== player.id) {
+    f5 = { playerId: player.id, parts: [
+      renderBestMatch(document.getElementById('best-match'), { supabase, playerId: player.id }),
+      renderRankHistory(document.getElementById('rank-history'), { supabase, playerId: player.id }),
+    ] };
+  } else {
+    f5.parts.forEach(x => x.reload());
+  }
   document.title = `${player.riot_game_name} — SharkTracker`;
 
   const profile = (profiles ?? []).find(pr => pr.player_id === player.id) ?? {};

@@ -378,6 +378,10 @@
     <div id="primera-victoria"></div>
   </section>
 
+  <section id="partida-mes-section">
+    <div id="partida-mes"></div>
+  </section>
+
   <section>
     <div class="section-title"><span class="bar"></span><h2>Últimas 10 Partidas</h2></div>
     <div class="cards-grid" id="badges-recientes"></div>
@@ -438,6 +442,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
+import { renderMatchOfMonth } from './assets/rank-history.js';
 createNavMenu({ current: 'ranking' });
 
 const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
@@ -1237,6 +1242,10 @@ setInterval(tickLiveIndicator, 1000);
 // varios rangos actualizándose en la misma corrida) en un solo
 // redibujado, en vez de redibujar varias veces en el mismo segundo.
 let rerenderTimer = null;
+// Partida del mes (la mejor de SoloQ del grupo en el mes, Fase 5).
+const partidaMes = renderMatchOfMonth(document.getElementById('partida-mes'), { supabase });
+let pmTimer = null;
+
 function scheduleRerender() {
   clearTimeout(rerenderTimer);
   rerenderTimer = setTimeout(render, 600);
@@ -1256,6 +1265,7 @@ supabase.channel('sharktracker-live')
   // tocaba rank_snapshots también. Con esto quedan cubiertos aparte.
   .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, scheduleRerender)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'match_participants' }, scheduleRerender)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'best_matches' }, () => { clearTimeout(pmTimer); pmTimer = setTimeout(partidaMes.reload, 800); })
   .subscribe();
 </script>
 </body>

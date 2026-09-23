@@ -117,9 +117,15 @@ Deno.serve(async (req) => {
         // ("El Defensor"). Y qué jugadores del grupo cayeron en el mismo
         // equipo en esta partida — para "Dúo Dinámico".
         const teamDamageTotals: Record<number, number> = {};
+        // Kills y daño a campeones de cada equipo — para la participación en
+        // kills y el % de daño (puntuación de "Mejor partida del mes").
+        const teamKills: Record<number, number> = {};
+        const teamChampDamage: Record<number, number> = {};
         const trackedByTeam: Record<number, { playerId: string; name: string }[]> = {};
         for (const p of info.participants ?? []) {
           teamDamageTotals[p.teamId] = (teamDamageTotals[p.teamId] ?? 0) + (p.totalDamageTaken ?? 0);
+          teamKills[p.teamId] = (teamKills[p.teamId] ?? 0) + (p.kills ?? 0);
+          teamChampDamage[p.teamId] = (teamChampDamage[p.teamId] ?? 0) + (p.totalDamageDealtToChampions ?? 0);
           const pid = puuidToPlayerId.get(p.puuid);
           if (pid) {
             (trackedByTeam[p.teamId] ??= []).push({ playerId: pid, name: playerIdToName.get(pid) ?? '' });
@@ -256,6 +262,13 @@ Deno.serve(async (req) => {
               primera_sangre: !!pp.firstBloodKill,
               pentakills: pp.pentaKills ?? 0,
               damage_taken_pct: damageTakenPct,
+              // Participación en kills (0–1) y % del daño del equipo a campeones.
+              kp: (teamKills[pp.teamId] ?? 0) > 0
+                ? Math.round(((pp.kills ?? 0) + (pp.assists ?? 0)) / teamKills[pp.teamId] * 1000) / 1000
+                : 0,
+              dmg_share: (teamChampDamage[pp.teamId] ?? 0) > 0
+                ? Math.round((pp.totalDamageDealtToChampions ?? 0) / teamChampDamage[pp.teamId] * 1000) / 10
+                : 0,
               duo_con: duoCon,
             },
           });
