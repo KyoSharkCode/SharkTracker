@@ -69,6 +69,10 @@
   .podium-avatar img{width:100%; height:100%; object-fit:cover;}
   .podium-name{font-size:14px; font-weight:800;}
   .podium-card.rank1 .podium-name{font-size:19px;}
+  /* Nombre de invocador → link a su perfil (solo el nombre; el resto de la fila
+     sigue abriendo el Historial Individual como antes) */
+  .profile-link{color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis; transition:color .15s;}
+  .profile-link:hover{color:var(--accent); text-decoration:underline; text-underline-offset:3px;}
   .podium-meta{font-size:11px; font-weight:600; color:var(--text-faint); text-transform:uppercase; margin:3px 0 12px;}
   .podium-lp{font-size:17px; font-weight:900; color:var(--accent);}
   .podium-card.rank1 .podium-lp{font-size:30px; background:linear-gradient(90deg,var(--gold),#fff3c4); -webkit-background-clip:text; background-clip:text; color:transparent;}
@@ -709,7 +713,7 @@ function buildRow(p, idx) {
     <div class="row-content">
       <div class="col-pos ${posClass}">${posContent}</div>
       <div class="col-avatar"><div class="avatar-circle">${avatarHtml}</div>${twitchBadgeHtml}</div>
-      <div class="col-name">${p.riot_game_name}${streakEmoji ? ` <span class="streak-icon" title="${streakTitle}">${streakEmoji}</span>` : ''}</div>
+      <div class="col-name"><a class="profile-link" href="perfil.html?jugador=${encodeURIComponent(p.id)}" title="Ver perfil de ${p.riot_game_name}" onclick="event.stopPropagation()">${p.riot_game_name}</a>${streakEmoji ? ` <span class="streak-icon" title="${streakTitle}">${streakEmoji}</span>` : ''}</div>
       <div class="col-champ-outer ${enPartida ? 'live' : ''}" ${champBg ? `style="--champbg:url('${splashUrl(champBg, skinBg)}')"` : ''}></div>
       <div class="col-estado">
         <span class="status-chip ${enPartida ? 'in-game' : 'offline'}">${enPartida ? 'En partida' : 'Offline'}</span>
@@ -915,7 +919,7 @@ async function render() {
       <div class="podium-medal ${medalClass}">${medalIcon}</div>
       <div class="podium-rank-chip">${rankNum === 1 ? '👑 #1' : '#' + rankNum}</div>
       <div class="podium-avatar">${avatarHtml}</div>
-      <div class="podium-name">${p.riot_game_name}</div>
+      <div class="podium-name"><a class="profile-link" href="perfil.html?jugador=${encodeURIComponent(p.id)}" title="Ver perfil de ${p.riot_game_name}">${p.riot_game_name}</a></div>
       <div class="podium-meta">${roleLabel(p.primary_role) ?? 'Sin datos'}</div>
       <div class="podium-lp ${lpChanged ? 'value-changed' : ''}">${lpText}</div>
       <div class="podium-tier-row">

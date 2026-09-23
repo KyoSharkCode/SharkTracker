@@ -387,17 +387,20 @@ const QUEUE_TABS = [
 const queueGroup = (queueId) => queueId === 420 ? 'soloq' : queueId === 440 ? 'flex' : queueId === 400 ? 'reclutamiento' : 'otros';
 const HISTORY_PER_TAB = 10;
 
-// Riot guarda el rol como TOP/JUNGLE/MIDDLE/BOTTOM/UTILITY — se muestra con
-// los mismos nombres que usa players.primary_role (sync-matches).
-const ROLE_LABEL = { TOP: 'Top', JUNGLE: 'Jungla', MIDDLE: 'Mid', BOTTOM: 'ADC', UTILITY: 'Support' };
-const roleLabel = (r) => ROLE_LABEL[r] ?? r;
+// Nombres de rol oficiales del sitio: TOP / JUNGLE / MID / ADC / SUPPORT.
+// Acepta tanto los códigos de Riot (MIDDLE, BOTTOM, UTILITY) como los
+// nombres viejos guardados en players.primary_role (Jungla, Support…).
+const ROLE_NORMALIZE = {
+  TOP: 'TOP', JUNGLE: 'JUNGLE', JUNGLA: 'JUNGLE', MIDDLE: 'MID', MID: 'MID',
+  BOTTOM: 'ADC', ADC: 'ADC', UTILITY: 'SUPPORT', SUPPORT: 'SUPPORT',
+};
+const roleLabel = (r) => r ? (ROLE_NORMALIZE[String(r).trim().toUpperCase()] ?? String(r).toUpperCase()) : null;
 
 // ¿Autofill? — Riot no dice si una partida fue autofill. Se marca como
 // posible cuando, en SoloQ, jugó un rol distinto a su rol principal.
 function esPosibleAutofill(m, primaryRole) {
   if (m.matches?.queue_id !== 420 || !m.role || !primaryRole) return false;
-  const label = ROLE_LABEL[m.role];
-  return !!label && label !== primaryRole;
+  return roleLabel(m.role) !== roleLabel(primaryRole);
 }
 
 let ddragonVersion = '15.19.1';
@@ -473,7 +476,7 @@ let lastStreamChannel = null;
 let aiState = { playerId: null, latestMatchId: null, loading: false };
 // Debe coincidir con ADVICE_VERSION de la Edge Function: si cambia el prompt,
 // los consejos viejos se regeneran solos en vez de esperar una partida nueva.
-const AI_ADVICE_VERSION = 2;
+const AI_ADVICE_VERSION = 3;
 
 if (!jugadorParam) {
   showError('Falta el jugador — la URL necesita ?jugador=<nombre o id>.');
@@ -650,7 +653,7 @@ function renderHero(player, profile, rank, live, stream, position, soloq) {
     ? `<span class="streak-icon" title="Racha de ${streak.n} ${streak.tipo === 'fire' ? 'victorias' : 'derrotas'}">${streak.tipo === 'fire' ? '🔥' : '❄️'}</span>` : '';
   const tag = player.riot_tag_line ? `<span class="p-tag">#${esc(player.riot_tag_line)}</span>` : '';
   document.getElementById('p-name').innerHTML = `${esc(player.riot_game_name)}${tag}${trendHtml}${streakHtml}`;
-  document.getElementById('p-role').textContent = player.primary_role ? `Rol principal: ${player.primary_role}` : 'Sin rol registrado';
+  document.getElementById('p-role').textContent = player.primary_role ? `Rol principal: ${roleLabel(player.primary_role)}` : 'Sin rol registrado';
 
   const tierText = rank ? `${TIER_LABEL[rank.tier] ?? rank.tier} ${rank.division ?? ''}`.trim() : 'Unranked';
   document.getElementById('p-tier').textContent = tierText;
@@ -850,12 +853,12 @@ function renderTopChamps(soloq) {
 
 function renderRoles(soloq) {
   const counts = new Map();
-  soloq.forEach(m => { if (m.role) counts.set(m.role, (counts.get(m.role) ?? 0) + 1); });
+  soloq.forEach(m => { const r = roleLabel(m.role); if (r) counts.set(r, (counts.get(r) ?? 0) + 1); });
   const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
   document.getElementById('box-roles').innerHTML = top.length ? top.map(([rol, n]) => `
     <div class="list-item">
       <div class="champ-img role-ico">✦</div>
-      <div><div class="item-title">${esc(roleLabel(rol))}</div><div class="item-sub">${n} ve${n === 1 ? 'z' : 'ces'} jugado</div></div>
+      <div><div class="item-title">${esc(rol)}</div><div class="item-sub">${n} ve${n === 1 ? 'z' : 'ces'} jugado</div></div>
     </div>`).join('') : '<span class="item-sub">Sin roles detectados.</span>';
 }
 
@@ -904,7 +907,7 @@ function renderHistory() {
       ? `<span class="egida-tag" title="Ganaste bastante más LP de lo normal en esta partida — probablemente Égida de Valor (LP doble por autocompletado). Es una estimación, Riot no lo confirma directamente."><img src="assets/Aegis_of_Valor_icon.svg" alt="">Égida de Valor</span>`
       : '';
     const autofillHtml = resultado !== 'remake' && esPosibleAutofill(m, primaryRole)
-      ? `<span class="autofill-tag" title="Jugó ${esc(roleLabel(m.role))} y su rol principal es ${esc(primaryRole)}. Pudo haber sido autofill — es una estimación, Riot no lo confirma.">¿Autofill?</span>`
+      ? `<span class="autofill-tag" title="Jugó ${esc(roleLabel(m.role))} y su rol principal es ${esc(roleLabel(primaryRole))}. Pudo haber sido autofill — es una estimación, Riot no lo confirma.">¿Autofill?</span>`
       : '';
     const dur = formatDuration(m.matches.duration_seconds);
     const lpHtml = (m.lp_change ?? null) !== null
