@@ -166,7 +166,21 @@
   .sp-row .confirm{grid-column:1 / -1; margin-top:0;}
   .sp-note{font-size:12px; color:var(--text-faint); margin:8px 2px 0; line-height:1.5;}
 
+  /* Recompensas */
+  .rw-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px; padding:14px 16px;}
+  .rw-grid label{display:block; font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint); margin-bottom:4px;}
+  .rw-sub{font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin:18px 0 8px;}
+  .rw-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 16px; border-bottom:1px solid var(--border); font-size:13px;}
+  .rw-row:last-child{border-bottom:none;}
+  .rw-row .nm{flex:1; min-width:160px;} .rw-row .nm b{display:block;} .rw-row .nm small{color:var(--text-faint);}
+  .rw-row .in{width:auto;} .rw-row .in.num{width:90px;} .rw-row .in.txt{width:190px;}
+  .rw-bal{font-weight:800; color:var(--gold); min-width:70px;}
+  .rw-kind{font-size:10.5px; font-weight:800; text-transform:uppercase; color:var(--text-faint); border:1px solid var(--border); border-radius:99px; padding:1px 8px;}
+  .rw-ic{width:34px; height:34px;} .rw-ic svg{width:100%; height:100%;}
+  .rw-check{display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--text-dim);}
+
   @media (max-width:760px){
+    .rw-row .in.txt{width:100%;}
     .sp-row{grid-template-columns:1fr;}
     .ms-row{grid-template-columns:1fr; gap:8px;}
     header{grid-template-columns:auto 1fr auto;}
@@ -245,6 +259,22 @@
     </section>
 
     <section>
+      <h2 class="section-title"><span class="bar"></span>Recompensas y tienda 🦷</h2>
+      <div id="rw-status"></div>
+      <div class="rw-sub">Premios por entregar <span class="count zero" id="rw-claims-n" style="font-size:11px">0</span></div>
+      <div class="card" id="rw-claims"></div>
+      <div class="rw-sub">Dientes por jugador</div>
+      <div class="card" id="rw-players"></div>
+      <div class="rw-sub">Premios reales <button class="btn ghost" id="rw-new" type="button" style="margin-left:8px;padding:4px 10px">+ Nuevo premio</button></div>
+      <div class="card" id="rw-prizes"></div>
+      <div class="rw-sub">Precios de la tienda</div>
+      <div class="card" id="rw-items"></div>
+      <div class="rw-sub">Cuántos 🦷 da cada cosa</div>
+      <div class="card"><div class="rw-grid" id="rw-amounts"></div><div style="padding:0 16px 14px"><button class="btn ok" id="rw-save-amounts" type="button">Guardar cantidades</button></div></div>
+      <p class="err" id="rw-err"></p>
+    </section>
+
+    <section>
       <h2 class="section-title"><span class="bar"></span>Jugadores <button class="btn ghost title-btn" id="btn-add-pl" type="button">+ Agregar cuenta</button></h2>
       <div class="card">
         <form class="add-row" id="add-form" hidden>
@@ -267,6 +297,8 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
+import { prizeIconSvg, PRIZE_ICONS, injectCosmeticsCss } from './assets/cosmetics.js';
+injectCosmeticsCss();
 createNavMenu({ current: null });
 
 const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
@@ -306,15 +338,17 @@ async function init() {
   if (!soyAdmin) { $('no-access').hidden = false; return; }
   $('dash').hidden = false;
 
-  await Promise.all([loadRequests(), loadPlayers(), loadChallenges(), loadMissions(), loadSplits()]);
+  await Promise.all([loadRequests(), loadPlayers(), loadChallenges(), loadMissions(), loadSplits(), loadRewards()]);
   setInterval(tickCountdowns, 30000);
 
-  let t1 = null, t2 = null, t3 = null, t4 = null;
+  let t1 = null, t2 = null, t3 = null, t4 = null, t5 = null;
   supabase.channel('admin-dash')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'claim_requests' }, () => { clearTimeout(t1); t1 = setTimeout(() => { loadRequests(); loadPlayers(); }, 300); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => { clearTimeout(t2); t2 = setTimeout(loadPlayers, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'player_profiles' }, () => { clearTimeout(t2); t2 = setTimeout(loadPlayers, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'challenges' }, () => { clearTimeout(t3); t3 = setTimeout(loadChallenges, 400); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'prize_claims' }, () => { clearTimeout(t5); t5 = setTimeout(loadRewards, 500); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'reward_settings' }, () => { clearTimeout(t5); t5 = setTimeout(loadRewards, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'mission_settings' }, () => { clearTimeout(t4); t4 = setTimeout(loadMissions, 400); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'player_missions' }, () => { clearTimeout(t4); t4 = setTimeout(loadMissions, 600); })
     .subscribe();
@@ -365,6 +399,7 @@ async function loadPlayers() {
   drawPlayers();
   if (challengesCache.length) drawChallenges();
   if (missionsCache) drawMissions();
+  if (rw) drawRewards();
 }
 
 function drawPlayers() {
@@ -750,6 +785,121 @@ $('sp-list').addEventListener('click', async (e) => {
   ui.spConfirm = null;
   authMenu.toast(act === 'del-yes' ? 'Split borrado' : '✅ Split guardado · historial recalculado');
   await loadSplits();
+});
+
+// ── Recompensas y tienda ──
+const AMOUNT_LABELS = { mision_facil: 'Misión fácil', mision_media: 'Misión media', mision_dificil: 'Misión difícil', grupal_top: 'Grupal: el que más aportó',
+  grupal_resto: 'Grupal: a repartir entre el resto', top1: 'Top 1 semanal', top2: 'Top 2 semanal', top3: 'Top 3 semanal', victoria: 'Cada victoria',
+  primera_victoria: 'Primera victoria del día', perfecta: 'Partida perfecta', pentakill: 'Pentakill', partida_mes: 'Partida del mes', reto1: 'Reto 1º', reto2: 'Reto 2º', reto3: 'Reto 3º' };
+const KIND_ES = { marco: 'Marco', fila: 'Fila', banner: 'Banner', nombre: 'Nombre', emoji: 'Emoji', premio: 'Premio' };
+let rw = null;
+const fmtN = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+async function loadRewards() {
+  const [{ data: set, error }, { data: items }, { data: claims }, { data: bals }] = await Promise.all([
+    supabase.from('reward_settings').select('*').maybeSingle(),
+    supabase.from('shop_items').select('*').order('sort'),
+    supabase.from('prize_claims').select('*').order('created_at', { ascending: false }).limit(60),
+    supabase.from('wallet_balances').select('*'),
+  ]);
+  if (error) { $('rw-err').textContent = `No se pudieron cargar las recompensas: ${error.message}`; return; }
+  rw = { set: set ?? { enabled: false, amounts: {} }, items: items ?? [], claims: claims ?? [], bals: new Map((bals ?? []).map(b => [b.player_id, b.balance])), ...(rw ? { newPrize: rw.newPrize } : {}) };
+  drawRewards();
+}
+function drawRewards() {
+  if (!rw) return;
+  const on = !!rw.set.enabled, conf = ui.rwConfirm;
+  const byId = new Map(playersCache.map(p => [p.player_id, p]));
+  $('rw-status').innerHTML = `<div class="ms-status ${on ? 'on' : ''}">
+    <span class="chip ${on ? 'live' : 'off'}">${on ? 'Abierta' : 'Cerrada'}</span>
+    <div class="txt">${on ? `Los 🦷 se reparten solos cada 5 minutos. Abierta desde <b>${rw.set.enabled_at ? fecha(rw.set.enabled_at) : '—'}</b>.`
+      : 'La tienda se ve pero no se reparten 🦷 ni se puede comprar. Ábrela el día del lanzamiento: cuenta todo lo que pase desde ese momento.'}</div>
+    ${conf === 'reset' ? '' : `<button class="btn ${on ? 'no' : 'ok'}" id="rw-toggle" type="button">${on ? 'Cerrar' : 'Abrir tienda'}</button><button class="btn no" id="rw-reset" type="button">Reiniciar todo</button>`}
+  </div>${conf === 'reset' ? `<div class="confirm">¿Reiniciar las recompensas? Se borran <b>todos los 🦷, compras, cosméticos puestos, insignias y canjes</b>, y la tienda queda cerrada. No se puede deshacer.
+    <div class="actions"><button class="btn danger" id="rw-reset-yes" type="button">Sí, reiniciar</button><button class="btn ghost" id="rw-reset-no" type="button">Cancelar</button></div></div>` : ''}`;
+
+  const pend = rw.claims.filter(c => c.status === 'pendiente');
+  $('rw-claims-n').textContent = pend.length; $('rw-claims-n').classList.toggle('zero', !pend.length);
+  $('rw-claims').innerHTML = rw.claims.length ? rw.claims.slice(0, 20).map(c => { const p = byId.get(c.player_id);
+    return `<div class="rw-row"><div class="nm"><b>${esc(c.item_name)}</b><small>${esc(p?.riot_game_name ?? '?')} · 🦷 ${fmtN(c.price)} · ${fecha(c.created_at)}${c.note ? ' · ' + esc(c.note) : ''}</small></div>
+      ${c.status === 'pendiente' ? `<input class="in txt" data-claim-note="${c.id}" placeholder="Nota (opcional, la ve el jugador)" maxlength="120">
+        <button class="btn ok" data-claim="${c.id}" data-st="entregado" type="button">✓ Entregado</button><button class="btn no" data-claim="${c.id}" data-st="rechazado" type="button">Rechazar y devolver</button>`
+      : `<span class="badge ${c.status === 'entregado' ? 'ok' : 'warn'}">${c.status === 'entregado' ? 'Entregado' : 'Rechazado'}</span>`}</div>`; }).join('')
+    : '<div class="empty">Nadie ha canjeado premios todavía.</div>';
+
+  $('rw-players').innerHTML = playersCache.map(p => `<div class="rw-row"><div class="nm pl"><img src="${profileIconUrl(p.icon_id) ?? profileIconUrl(1)}" alt="" onerror="${ICON_ONERROR}"><b>${esc(p.riot_game_name)}</b></div>
+    <span class="rw-bal">🦷 ${fmtN(rw.bals.get(p.player_id) ?? 0)}</span>
+    <input class="in num" type="number" step="1" data-adj-amt="${p.player_id}" placeholder="+50 / -20"><input class="in txt" data-adj-why="${p.player_id}" placeholder="Motivo (lo ve el jugador)" maxlength="80">
+    <button class="btn ghost" data-adj="${p.player_id}" type="button">Aplicar</button></div>`).join('') || '<div class="empty">No hay jugadores.</div>';
+
+  const prizes = rw.items.filter(i => i.kind === 'premio');
+  const iconSel = (v, attr) => `<select class="in" ${attr}>${Object.entries(PRIZE_ICONS).map(([k, x]) => `<option value="${k}" ${k === v ? 'selected' : ''}>${x.name}</option>`).join('')}</select>`;
+  const prizeRow = (it) => `<div class="rw-row" data-prize="${it?.id ?? 'new'}"><span class="rw-ic">${prizeIconSvg(it?.icon ?? 'moneda')}</span>
+    <input class="in txt" data-f="name" value="${esc(it?.name ?? '')}" placeholder="Nombre (ej. 650 RP)" maxlength="60">
+    <input class="in txt" data-f="desc" value="${esc(it?.description ?? '')}" placeholder="Descripción (ej. regalo en tu cuenta)" maxlength="120">
+    ${iconSel(it?.icon ?? 'moneda', 'data-f="icon"')}
+    <input class="in num" type="number" min="0" data-f="price" value="${it?.price ?? 1800}" title="Precio en 🦷">
+    <input class="in num" type="number" min="0" data-f="stock" value="${it?.stock ?? ''}" placeholder="Stock ∞" title="Unidades (vacío = sin límite)">
+    ${it ? `<label class="rw-check"><input type="checkbox" data-f="active" ${it.active ? 'checked' : ''}> Visible</label>` : ''}
+    <button class="btn ok" data-save-prize type="button">${it ? 'Guardar' : 'Crear'}</button>${it ? '' : '<button class="btn ghost" data-cancel-prize type="button">Cancelar</button>'}</div>`;
+  $('rw-prizes').innerHTML = (rw.newPrize ? prizeRow(null) : '') + (prizes.map(prizeRow).join('') || (rw.newPrize ? '' : '<div class="empty">No hay premios reales. Crea uno con “+ Nuevo premio”.</div>'));
+
+  $('rw-items').innerHTML = rw.items.filter(i => i.kind !== 'premio').map(it => `<div class="rw-row" data-item="${it.id}"><span class="rw-kind">${KIND_ES[it.kind]}</span>
+    <div class="nm"><b>${esc(it.name)}</b><small>${esc(it.collection ?? '')}</small></div>
+    <input class="in num" type="number" min="0" data-f="price" value="${it.price}" title="Precio en 🦷">
+    <label class="rw-check"><input type="checkbox" data-f="active" ${it.active ? 'checked' : ''}> A la venta</label>
+    <button class="btn ghost" data-save-item type="button">Guardar</button></div>`).join('');
+
+  const a = rw.set.amounts ?? {};
+  $('rw-amounts').innerHTML = Object.keys(AMOUNT_LABELS).map(k => `<div><label for="amt-${k}">${AMOUNT_LABELS[k]}</label><input class="in" id="amt-${k}" type="number" min="0" data-amt="${k}" value="${a[k] ?? 0}"></div>`).join('');
+}
+
+document.getElementById('rw-new').addEventListener('click', () => { rw.newPrize = true; drawRewards(); });
+document.querySelector('#rw-status').closest('section').addEventListener('click', async (e) => {
+  const b = e.target.closest('button'); if (!b || !rw) return;
+  $('rw-err').textContent = '';
+  const run = async (fn, args, ok) => {
+    b.disabled = true;
+    const { error } = await supabase.rpc(fn, args);
+    if (error) { $('rw-err').textContent = error.message; b.disabled = false; return false; }
+    if (ok) authMenu.toast(ok);
+    await loadRewards(); return true;
+  };
+  if (b.id === 'rw-reset') { ui.rwConfirm = 'reset'; return drawRewards(); }
+  if (b.id === 'rw-reset-no') { ui.rwConfirm = null; return drawRewards(); }
+  if (b.id === 'rw-reset-yes') { ui.rwConfirm = null; return run('admin_reset_rewards', {}, 'Recompensas reiniciadas'); }
+  if (b.id === 'rw-toggle') { const was = !!rw.set.enabled; return run('admin_set_rewards_enabled', { p_enabled: !was }, was ? 'Tienda cerrada' : '🦷 ¡Tienda abierta!'); }
+  if (b.dataset.claim) {
+    const note = document.querySelector(`[data-claim-note="${b.dataset.claim}"]`)?.value ?? '';
+    return run('admin_resolve_claim', { p_id: Number(b.dataset.claim), p_status: b.dataset.st, p_note: note }, b.dataset.st === 'entregado' ? '🎁 Marcado como entregado' : 'Rechazado: dientes devueltos');
+  }
+  if (b.dataset.adj) {
+    const amt = parseInt(document.querySelector(`[data-adj-amt="${b.dataset.adj}"]`).value, 10);
+    if (!amt) { $('rw-err').textContent = 'Pon una cantidad (positiva para dar, negativa para quitar).'; return; }
+    return run('admin_adjust_teeth', { p_player: b.dataset.adj, p_amount: amt, p_detail: document.querySelector(`[data-adj-why="${b.dataset.adj}"]`).value }, `${amt > 0 ? '+' : ''}${amt} 🦷 aplicados`);
+  }
+  if (b.hasAttribute('data-cancel-prize')) { rw.newPrize = false; return drawRewards(); }
+  if (b.hasAttribute('data-save-prize')) {
+    const row = b.closest('[data-prize]'), v = (f) => row.querySelector(`[data-f="${f}"]`);
+    const stock = v('stock').value === '' ? null : parseInt(v('stock').value, 10);
+    const isNew = row.dataset.prize === 'new';
+    const okk = await run('admin_save_item', { p_id: isNew ? null : row.dataset.prize, p_name: v('name').value, p_description: v('desc').value, p_price: parseInt(v('price').value, 10),
+      p_active: isNew ? true : v('active').checked, p_stock: stock, p_icon: v('icon').value }, isNew ? '🎁 Premio creado' : 'Premio guardado');
+    if (okk && isNew) { rw.newPrize = false; drawRewards(); }
+    return;
+  }
+  if (b.hasAttribute('data-save-item')) {
+    const row = b.closest('[data-item]'), it = rw.items.find(i => i.id === row.dataset.item);
+    return run('admin_save_item', { p_id: it.id, p_name: it.name, p_description: it.description, p_price: parseInt(row.querySelector('[data-f="price"]').value, 10),
+      p_active: row.querySelector('[data-f="active"]').checked, p_stock: null, p_icon: null }, 'Artículo guardado');
+  }
+  if (b.id === 'rw-save-amounts') {
+    const obj = {}; document.querySelectorAll('[data-amt]').forEach(i => { obj[i.dataset.amt] = Math.max(0, parseInt(i.value, 10) || 0); });
+    return run('admin_set_reward_amounts', { p_amounts: obj }, 'Cantidades guardadas');
+  }
+});
+// Al cambiar el icono de un premio, se actualiza la vista previa
+document.getElementById('rw-prizes').addEventListener('change', (e) => {
+  if (e.target.matches('[data-f="icon"]')) e.target.closest('[data-prize]').querySelector('.rw-ic').innerHTML = prizeIconSvg(e.target.value);
 });
 
 init();

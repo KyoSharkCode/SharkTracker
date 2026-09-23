@@ -17,6 +17,8 @@ const ITEMS = [
     icon: 'M12 2l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 16.9 6.1 20l1.2-6.5L2.5 8.9 9.1 8z' },
   { key: 'versus', label: 'Versus', href: 'versus.html', desc: 'Compara a dos jugadores',
     icon: 'M3 4h4.5L12 13l4.5-9H21l-7 14h-4zM2 20h20v2H2z' },
+  { key: 'tienda', label: 'Tienda', href: 'tienda.html', desc: 'Gasta tus 🦷 en marcos, efectos y premios',
+    icon: 'M6 7V6a6 6 0 0 1 12 0v1h3l-1.5 14h-15L3 7zm2 0h8V6a4 4 0 0 0-8 0zM9 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2m6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2' },
   { key: 'stats', label: 'Estadísticas', href: 'estadisticas.html', desc: 'Campeones, roles, dúos y récords',
     icon: 'M3 3h2v16h16v2H3zM7 13l4-4 3 3 5-6 1.5 1.3-6.4 7.6-3.1-3.1L8.4 14.4z' },
 ];

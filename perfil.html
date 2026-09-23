@@ -76,6 +76,7 @@
 
   .hero-identity{display:flex; align-items:center; gap:14px; min-width:0; background:rgba(3,8,18,.72); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:10px 18px 10px 10px; backdrop-filter:blur(6px);}
   .hero-avatar-wrap{position:relative; flex-shrink:0;}
+  .hero-avatar.framed{border-radius:50%;}
   .hero-avatar{width:64px; height:64px; border-radius:14px; border:2px solid var(--accent); object-fit:cover; display:block; box-shadow:0 0 14px var(--accent-glow); background:#0a1622;}
   /* Mismo criterio que index.html: sin círculo de fondo, solo el anillo rojo cuando está en vivo */
   .hero-twitch{position:absolute; bottom:-4px; right:-4px; width:20px; height:20px; filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));}
@@ -466,6 +467,8 @@ import { createNavMenu } from './assets/nav-menu.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
 import { openOverlayGenerator } from './assets/overlay-generator.js';
 import { renderBestMatch, renderRankHistory } from './assets/rank-history.js';
+import { injectCosmeticsCss, decorateAvatar, applyBanner, nameHtml } from './assets/cosmetics.js';
+injectCosmeticsCss();
 createNavMenu({ current: null });
 
 const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
@@ -601,6 +604,7 @@ let currentTab = 'soloq';
 let lastStreamChannel = null;
 let aiState = { playerId: null, latestMatchId: null, loading: false };
 let viewState = { player: null, profile: {}, live: { in_game: false }, isMine: false };
+let profileCos = { playerId: null, data: null, sig: '' };   // cosméticos de la tienda del jugador que se está viendo
 let f5 = { playerId: null, parts: [] };   // mejor partida + historial de rangos (se crean una vez por jugador)
 let editState = { active: false, pendingRefresh: false, champion: null, skin: 0, champs: null, skinsCache: new Map() };
 // Debe coincidir con ADVICE_VERSION de la Edge Function: si cambia el prompt,
@@ -638,7 +642,7 @@ async function init() {
     clearTimeout(refreshTimer); refreshTimer = setTimeout(refreshAll, 600);
   };
   const channel = supabase.channel('perfil-live');
-  ['players', 'player_profiles', 'rank_snapshots', 'live_status', 'stream_status', 'weekly_badges',
+  ['players', 'player_profiles', 'player_cosmetics', 'rank_snapshots', 'live_status', 'stream_status', 'weekly_badges',
    'matches', 'match_participants', 'player_masteries', 'daily_first_win_state']
     .forEach(table => channel.on('postgres_changes', { event: '*', schema: 'public', table }, scheduleRefresh));
   channel.subscribe();
@@ -792,6 +796,23 @@ function getStreak(soloq) {
   return racha >= 3 ? { tipo: primero ? 'fire' : 'ice', n: racha } : null;
 }
 
+// Cosméticos de la tienda: marco en el avatar, borde del banner y nombre.
+async function refreshProfileCosmetics(player, redraw) {
+  const [{ data: cos }, { data: imgs }] = await Promise.all([
+    supabase.from('player_cosmetics').select('*').eq('player_id', player.id).maybeSingle(),
+    supabase.from('shop_items').select('id, image_url, image_anim').not('image_url', 'is', null),
+  ]);
+  const data = cos ? { ...cos, marcoItem: (imgs ?? []).find(i => i.id === cos.marco) ?? null } : null;
+  const sig = JSON.stringify([player.id, data?.marco, data?.banner, data?.nombre, data?.nombre_valor, data?.emoji]);
+  const changed = sig !== profileCos.sig;
+  profileCos = { playerId: player.id, data, sig };
+  const av = document.getElementById('p-avatar');
+  av.classList.toggle('framed', !!data?.marco);
+  decorateAvatar(av, data?.marco, 64, data?.marcoItem);
+  applyBanner(document.querySelector('.hero-banner'), data?.banner);
+  if (changed && (data?.nombre || data?.emoji || !data)) redraw();
+}
+
 function renderHero(player, profile, rank, live, stream, position, soloq) {
   document.getElementById('p-position').textContent = position ? `#${position} en el Ranking` : '';
 
@@ -818,7 +839,9 @@ function renderHero(player, profile, rank, live, stream, position, soloq) {
   const streakHtml = streak
     ? `<span class="streak-icon" title="Racha de ${streak.n} ${streak.tipo === 'fire' ? 'victorias' : 'derrotas'}">${streak.tipo === 'fire' ? '🔥' : '❄️'}</span>` : '';
   const tag = player.riot_tag_line ? `<span class="p-tag">#${esc(player.riot_tag_line)}</span>` : '';
-  document.getElementById('p-name').innerHTML = `${esc(player.riot_game_name)}${tag}${trendHtml}${streakHtml}`;
+  const cosNow = profileCos.playerId === player.id ? profileCos.data : null;
+  document.getElementById('p-name').innerHTML = `${nameHtml(player.riot_game_name, cosNow)}${tag}${trendHtml}${streakHtml}`;
+  refreshProfileCosmetics(player, () => renderHero(player, profile, rank, live, stream, position, soloq));
   document.getElementById('p-role').textContent = player.primary_role ? `Rol principal: ${roleLabel(player.primary_role)}` : 'Sin rol registrado';
 
   // Apodo: solo si lo eligió y es distinto a su nombre de invocador

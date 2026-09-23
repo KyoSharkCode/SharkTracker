@@ -443,6 +443,9 @@ import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
 import { renderMatchOfMonth } from './assets/rank-history.js';
+import { injectCosmeticsCss, decorateAvatar, applyRowEffect, nameHtml, loadEquipped } from './assets/cosmetics.js';
+injectCosmeticsCss();
+let equippedMap = new Map();   // cosméticos de la tienda que lleva puestos cada jugador
 createNavMenu({ current: 'ranking' });
 
 const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
@@ -475,7 +478,7 @@ const BADGE_META = {
 const EVENT_META = {
   badge_semanal:'🏅', badge_reciente:'🏅', record_lp:'📈', adelantamiento:'🔥', rey_temporada:'👑',
   primera_victoria_dia:'🌅', reto_ganado:'🏆', posible_egida:'assets/Aegis_of_Valor_icon.svg', logro_partida:'⚔️',
-  mision_completada:'🎯', mision_grupal:'👥', reroll_ganado:'🎲',
+  mision_completada:'🎯', mision_grupal:'👥', reroll_ganado:'🎲', compra:'🛍️', canje:'🎁', insignia:'🏅',
 };
 
 let ddragonVersion = '15.19.1';
@@ -756,6 +759,7 @@ function buildRow(p, idx) {
   const tierText = p.rank ? (TIER_LABEL[p.rank.tier] ?? p.rank.tier) + ' ' + (p.rank.division ?? '') : 'Unranked';
   const lpText = `${p.rank?.lp ?? 0} LP`;
 
+  const cos = equippedMap.get(p.id) ?? null;
   const row = document.createElement('div');
   row.dataset.playerId = p.id;
   row.className = `rank-row ${p.id === selectedPlayerId ? 'active' : ''} ${streakType ? 'streak-' + streakType : ''}`;
@@ -764,7 +768,7 @@ function buildRow(p, idx) {
     <div class="row-content">
       <div class="col-pos ${posClass}">${posContent}</div>
       <div class="col-avatar"><div class="avatar-circle">${avatarHtml}</div>${twitchBadgeHtml}</div>
-      <div class="col-name"><a class="profile-link" href="perfil.html?jugador=${encodeURIComponent(p.id)}" title="Ver perfil de ${p.riot_game_name}" onclick="event.stopPropagation()">${p.riot_game_name}</a>${streakEmoji ? ` <span class="streak-icon" title="${streakTitle}">${streakEmoji}</span>` : ''}</div>
+      <div class="col-name"><a class="profile-link" href="perfil.html?jugador=${encodeURIComponent(p.id)}" title="Ver perfil de ${p.riot_game_name}" onclick="event.stopPropagation()">${nameHtml(p.riot_game_name, cos)}</a>${streakEmoji ? ` <span class="streak-icon" title="${streakTitle}">${streakEmoji}</span>` : ''}</div>
       <div class="col-champ-outer ${enPartida ? 'live' : ''}" ${champBg ? `style="--champbg:url('${splashUrl(champBg, skinBg)}')"` : ''}></div>
       <div class="col-estado">
         <span class="status-chip ${enPartida ? 'in-game' : 'offline'}">${enPartida ? 'En partida' : 'Offline'}</span>
@@ -783,7 +787,11 @@ function buildRow(p, idx) {
   row.dataset.signature = JSON.stringify([
     p.id === selectedPlayerId, streakType, posContent, champBg, skinBg,
     avatarHtml, twitchLive, enPartida, duoCon, trend, roleLabel(p.primary_role), tierText, lpText, wr,
+    cos?.marco, cos?.fila, cos?.nombre, cos?.nombre_valor, cos?.emoji,
   ]);
+  // Cosméticos de la tienda: efecto de fila + marco alrededor del avatar
+  applyRowEffect(row, cos?.fila);
+  decorateAvatar(row.querySelector('.avatar-circle'), cos?.marco, 44, cos?.marcoItem);
 
   // Barrido — si el LP, el rango o el winrate cambiaron desde el último
   // render de este jugador, se resalta solo ese dato puntual.
@@ -875,6 +883,7 @@ async function render() {
     supabase.from('daily_first_win_state').select('*').maybeSingle(),
   ]);
   loadRetoCountdown();
+  try { equippedMap = await loadEquipped(supabase); } catch { equippedMap = new Map(); }
 
   const profileByPlayer = new Map((profiles ?? []).map(p => [p.player_id, p]));
   const liveByPlayer = new Map((liveStatus ?? []).map(l => [l.player_id, l]));
@@ -1125,6 +1134,9 @@ async function render() {
       else if (ev.type === 'mision_completada') texto = `<b>${nombreNuevo}</b> completó una misión ${({ easy: 'fácil', medium: 'media', hard: 'difícil' })[ev.category] ?? ''}`;
       else if (ev.type === 'mision_grupal') texto = `El grupo completó la misión grupal`;
       else if (ev.type === 'reroll_ganado') texto = `<b>${nombreNuevo}</b> ganó un reroll 🎲`;
+      else if (ev.type === 'compra') texto = `<b>${nombreNuevo}</b> se compró algo en la tienda 🛍️`;
+      else if (ev.type === 'canje') texto = `<b>${nombreNuevo}</b> canjeó un premio 🎁`;
+      else if (ev.type === 'insignia') texto = `<b>${nombreNuevo}</b> consiguió una insignia`;
       else if (ev.type === 'posible_egida') texto = `<b>${nombreNuevo}</b> posible Égida de Valor`;
       else if (ev.category?.startsWith('perfecta:')) texto = `<b>${nombreNuevo}</b> logró Partida Perfecta`;
       else if (ev.category?.startsWith('ace:')) texto = `<b>${nombreNuevo}</b> logró Ace Perfecto`;
@@ -1138,7 +1150,7 @@ async function render() {
         <div class="logro-icon">${iconoHtml}</div>
         <div style="flex:1;min-width:0;">
           <div class="logro-text">${texto}</div>
-          ${ev.detail ? `<div class="logro-detail">${['reto_ganado', 'mision_completada', 'mision_grupal', 'reroll_ganado'].includes(ev.type) ? String(ev.detail).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`) : ev.detail}</div>` : ''}
+          ${ev.detail ? `<div class="logro-detail">${['reto_ganado', 'mision_completada', 'mision_grupal', 'reroll_ganado', 'compra', 'canje', 'insignia'].includes(ev.type) ? String(ev.detail).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`) : ev.detail}</div>` : ''}
         </div>
         <div class="logro-time">${timeAgo(ev.occurred_at)}</div>`;
       logrosEl.appendChild(item);
@@ -1265,6 +1277,7 @@ supabase.channel('sharktracker-live')
   // tocaba rank_snapshots también. Con esto quedan cubiertos aparte.
   .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, scheduleRerender)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'match_participants' }, scheduleRerender)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'player_cosmetics' }, scheduleRerender)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'best_matches' }, () => { clearTimeout(pmTimer); pmTimer = setTimeout(partidaMes.reload, 800); })
   .subscribe();
 </script>

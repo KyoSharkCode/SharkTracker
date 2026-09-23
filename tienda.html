@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tienda · SharkTracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
+    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
+    --danger:#ff5f3d; --gold:#facc15; --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  body{margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
+    background:radial-gradient(1000px 460px at 15% -6%, rgba(0,229,199,.14), transparent 60%), radial-gradient(1000px 460px at 85% 6%, rgba(250,204,21,.08), transparent 60%), var(--bg);}
+  a{color:inherit;}
+  button{font-family:inherit; cursor:pointer;}
+  button:disabled{cursor:not-allowed;}
+  .wrap{max-width:1120px; margin:0 auto; padding:44px 20px 80px;}
+  header{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:26px; padding-bottom:24px; border-bottom:1px solid var(--border);}
+  .logo-slot{display:flex; align-items:center; gap:14px;}
+  .logo-slot img{height:40px; width:auto; display:block;}
+  h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
+     background:linear-gradient(90deg,#fff 0%,var(--gold) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .auth-slot{grid-column:3; justify-self:end;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
+  .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .avatar.pending{border-color:var(--gold); color:var(--gold);}
+  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+  .msg{padding:60px 20px; text-align:center; color:var(--text-dim); font-size:15px;}
+  .section-title{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
+  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
+  .section-title .aside{margin-left:auto; font-family:'Inter',system-ui,sans-serif; font-size:12px; font-weight:600; letter-spacing:0; text-transform:none; color:var(--text-faint);}
+  section{margin-bottom:32px;}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);}
+  .toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%); z-index:99; background:#06111c; border:1px solid var(--accent); color:#fff; font-weight:700; font-size:13.5px; padding:10px 18px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.5);}
+
+  /* Barra de saldo */
+  .wallet{display:flex; align-items:center; gap:18px; flex-wrap:wrap; padding:18px 22px; margin-bottom:18px; background:linear-gradient(120deg, rgba(250,204,21,.08), rgba(10,22,34,.7) 45%); border-color:rgba(250,204,21,.35);}
+  .wallet .tooth{font-size:40px; line-height:1; filter:drop-shadow(0 0 10px rgba(250,204,21,.45));}
+  .wallet .bal b{display:block; font-family:'Rajdhani',sans-serif; font-size:38px; line-height:1; color:var(--gold);}
+  .wallet .bal small{font-size:12px; color:var(--text-dim); font-weight:600;}
+  .wallet .reset{margin-left:auto; text-align:right; font-size:12.5px; color:var(--text-dim); line-height:1.5;}
+  .wallet .reset b{color:#fff;} .wallet .reset.warn{color:var(--gold);} .wallet .reset.warn b{color:var(--gold);}
+  .notice{padding:14px 18px; margin-bottom:18px; font-size:13.5px; line-height:1.55; color:var(--text-dim); border-color:rgba(0,229,199,.35);}
+  .notice b{color:#fff;}
+
+  /* Pestañas */
+  .tabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px;}
+  .tab{border:1px solid var(--border); background:var(--panel); color:var(--text-dim); border-radius:99px; padding:8px 15px; font-size:13px; font-weight:800;}
+  .tab.on{border-color:var(--accent); color:#fff; background:rgba(0,229,199,.12);}
+  .filters{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;}
+  .chipbtn{border:1px solid var(--border); background:transparent; color:var(--text-dim); border-radius:99px; padding:5px 12px; font-size:12px; font-weight:700;}
+  .chipbtn.on{border-color:var(--gold); color:#fff; background:rgba(250,204,21,.1);}
+
+  /* Tarjetas de artículo */
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px;}
+  .item{display:flex; flex-direction:column; overflow:hidden;}
+  .item .pv{position:relative; height:170px; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 50% 40%, rgba(22,50,74,.55), rgba(6,17,28,.9)); border-bottom:1px solid var(--border); overflow:hidden;}
+  .item .body{padding:13px 14px 14px; display:flex; flex-direction:column; gap:6px; flex:1;}
+  .item .top{display:flex; align-items:center; gap:8px;}
+  .item h3{margin:0; font-size:15px;}
+  .coll{margin-left:auto; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint); border:1px solid var(--border); border-radius:99px; padding:2px 8px; white-space:nowrap;}
+  .item p{margin:0; font-size:12.5px; color:var(--text-dim); line-height:1.45; flex:1;}
+  .buy{display:flex; align-items:center; gap:8px; margin-top:6px;}
+  .price{font-size:13px; font-weight:800; color:var(--gold); background:rgba(250,204,21,.1); border:1px solid rgba(250,204,21,.3); border-radius:99px; padding:3px 11px; white-space:nowrap;}
+  .btn{border:none; border-radius:9px; padding:8px 13px; font-weight:800; font-size:12.5px; margin-left:auto;}
+  .btn.ok{background:var(--gold); color:#1a1300;} .btn.ok:hover{box-shadow:0 0 14px rgba(250,204,21,.45);}
+  .btn.ghost{background:transparent; border:1px solid var(--border); color:var(--text-dim);} .btn.ghost:hover{border-color:var(--accent); color:#fff;}
+  .btn.eq{background:var(--accent); color:#032018;}
+  .btn:disabled{opacity:.5;}
+  .owned{margin-left:auto; font-size:12px; font-weight:800; color:var(--accent);}
+  .confirm{margin-top:8px; padding:10px 12px; border-radius:10px; background:rgba(250,204,21,.07); border:1px solid rgba(250,204,21,.3); font-size:12.5px; color:var(--text-dim); line-height:1.5;}
+  .confirm b{color:#fff;} .confirm .row{display:flex; gap:6px; margin-top:8px;} .confirm .btn{margin-left:0;}
+  .err{color:var(--danger); font-size:12.5px; font-weight:700; margin-top:6px;} .err:empty{display:none;}
+
+  /* Vistas previas de fila y banner */
+  .pv-row{position:relative; overflow:hidden; width:92%; height:58px; border-radius:12px; background:rgba(13,26,38,.9); border:1px solid var(--border); display:flex; align-items:center; gap:10px; padding:0 12px;}
+  .pv-row > .c{position:relative; z-index:2; display:flex; align-items:center; gap:10px; min-width:0; flex:1;}
+  .pv-row .pos{font-weight:800; color:var(--text-faint); width:14px;} .pv-row .ava{width:32px; height:32px; border-radius:50%; overflow:hidden; background:#0a1622; border:2px solid var(--border); flex-shrink:0;}
+  .pv-row .ava img{width:100%; height:100%; object-fit:cover;} .pv-row .nm{font-weight:800; font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .pv-row .lp{margin-left:auto; font-size:11.5px; font-weight:800; color:var(--text-dim); white-space:nowrap;}
+  .pv-banner{position:relative; overflow:hidden; width:92%; height:120px; border-radius:14px; background:linear-gradient(120deg,#1a2f4a,#0b1624 55%,#2a1b3d); border:1px solid var(--border); display:flex; align-items:flex-end; padding:12px 14px;}
+  .pv-banner .splash{position:absolute; inset:0; background-size:cover; background-position:center 20%; opacity:.45;}
+  .pv-banner > span{position:relative; z-index:2; font-family:'Rajdhani',sans-serif; font-weight:800; font-size:20px;}
+  .pv-name{font-weight:800; font-size:21px; text-align:center; line-height:1.5;}
+  .swatches{display:flex; gap:7px; flex-wrap:wrap; justify-content:center; margin-top:8px;}
+  .sw{width:22px; height:22px; border-radius:50%; border:2px solid rgba(255,255,255,.18); padding:0;}
+  .sw.on{border-color:#fff; box-shadow:0 0 0 2px var(--accent);}
+  .emojis{display:flex; gap:4px; flex-wrap:wrap; justify-content:center; max-width:220px; margin-top:6px;}
+  .em{font-size:20px; background:transparent; border:1px solid transparent; border-radius:8px; padding:2px 4px; line-height:1.2;}
+  .em.on{border-color:var(--accent); background:rgba(0,229,199,.12);}
+  .pv .prize-ic{width:84px; height:84px;} .pv .prize-ic svg{width:100%; height:100%;}
+  .stock{font-size:11.5px; font-weight:700; color:var(--text-faint);}
+
+  /* Inventario: cómo te ven */
+  .me{display:grid; grid-template-columns:auto 1fr; gap:22px; align-items:center; padding:20px; margin-bottom:22px;}
+  .me .who{display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .me .who .n{font-weight:800; font-size:18px;}
+  .me .right{display:flex; flex-direction:column; gap:12px; min-width:0;}
+  .me .right .pv-row, .me .right .pv-banner{width:100%;}
+  .slot-title{font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin:18px 0 8px;}
+  .inv-empty{font-size:13px; color:var(--text-faint); padding:10px 0;}
+
+  /* Cómo ganar */
+  .earn{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:10px;}
+  .earn .e{display:flex; align-items:center; gap:12px; padding:12px 14px;}
+  .earn .e .ic{font-size:24px; width:36px; text-align:center; flex-shrink:0;}
+  .earn .e b{display:block; font-size:13.5px;} .earn .e small{display:block; font-size:12px; color:var(--text-faint); margin-top:1px; line-height:1.4;}
+  .earn .e .amt{margin-left:auto; font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:800; color:var(--gold); white-space:nowrap;}
+  .rules{padding:16px 18px; font-size:13px; color:var(--text-dim); line-height:1.65;}
+  .rules b{color:#fff;} .rules ul{margin:6px 0 0; padding-left:18px;}
+
+  /* Insignias */
+  .badges{display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px;}
+  .badge{padding:16px 12px; text-align:center; opacity:.42; filter:grayscale(1);}
+  .badge.got{opacity:1; filter:none; border-color:rgba(250,204,21,.45); box-shadow:0 0 18px rgba(250,204,21,.08);}
+  .badge .i{font-size:34px;} .badge b{display:block; font-size:13.5px; margin-top:6px;} .badge small{display:block; font-size:11.5px; color:var(--text-faint); margin-top:3px; line-height:1.4;}
+  .badge .when{color:var(--gold); font-weight:700;}
+
+  /* Movimientos */
+  .tx{display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--border); font-size:13px;}
+  .tx:last-child{border-bottom:none;}
+  .tx .ic{width:26px; text-align:center; font-size:16px;} .tx .d{flex:1; min-width:0;} .tx .d b{display:block;} .tx .d small{color:var(--text-faint);}
+  .tx .a{font-weight:800; font-family:'Rajdhani',sans-serif; font-size:17px;} .tx .a.p{color:#4ade80;} .tx .a.n{color:#ff8a6b;}
+  .claim-st{font-size:11px; font-weight:800; border-radius:99px; padding:2px 9px;}
+  .claim-st.pendiente{background:rgba(250,204,21,.14); color:var(--gold);} .claim-st.entregado{background:rgba(34,197,94,.14); color:#4ade80;} .claim-st.rechazado{background:rgba(255,95,61,.14); color:#ff8a6b;}
+
+  @media (max-width:700px){
+    .wallet .reset{margin-left:0; text-align:left;}
+    .me{grid-template-columns:1fr;}
+    .grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo-slot"><a href="index.html"><img src="logo/FlaviIconLogo.png" alt="SharkTracker"></a></div>
+    <h1>Tienda</h1>
+    <div class="auth-slot" id="auth-slot"></div>
+  </header>
+
+  <div id="loading" class="msg">Cargando…</div>
+  <main id="main" hidden>
+    <div class="card notice" id="closed" hidden>🔒 <b>La tienda abre pronto.</b> Ya puedes ver todo lo que habrá, pero los 🦷 todavía no se reparten: se empiezan a contar el día del lanzamiento.</div>
+    <div class="card wallet" id="wallet"></div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-tab="shop" type="button">🛍️ Tienda</button>
+      <button class="tab" data-tab="inv" type="button">🎒 Mi inventario</button>
+      <button class="tab" data-tab="earn" type="button">🦷 Cómo ganar</button>
+      <button class="tab" data-tab="badges" type="button">🏅 Insignias</button>
+      <button class="tab" data-tab="tx" type="button">📜 Movimientos</button>
+    </div>
+
+    <div data-pane="shop">
+      <div class="filters" id="kinds"></div>
+      <div id="shop"></div>
+    </div>
+    <div data-pane="inv" hidden><div id="inv"></div></div>
+    <div data-pane="earn" hidden><div id="earn"></div></div>
+    <div data-pane="badges" hidden><div id="badges"></div></div>
+    <div data-pane="tx" hidden><div id="tx"></div></div>
+  </main>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createAuthMenu } from './assets/auth-menu.js';
+import { createNavMenu } from './assets/nav-menu.js';
+import { createMissionsWidget } from './assets/missions-widget.js';
+import { loadCatalogs, splashUrl, profileIconUrl, iconOr1, esc } from './assets/lol-data.js';
+import { injectCosmeticsCss, frameHtml, applyRowEffect, applyBanner, nameHtml, prizeIconSvg, NAME_COLORS, EMOJIS } from './assets/cosmetics.js';
+createNavMenu({ current: 'tienda' });
+injectCosmeticsCss();
+
+const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = (id) => document.getElementById(id);
+const authMenu = createAuthMenu({ supabase, profileIconUrl });
+createMissionsWidget({ supabase, profileIconUrl });
+
+const KINDS = [['all', 'Todo'], ['marco', 'Marcos'], ['fila', 'Filas del ranking'], ['banner', 'Bordes de banner'], ['nombre', 'Nombre y emoji'], ['premio', '🎁 Premios reales']];
+const SLOT_OF = { marco: 'marco', fila: 'fila', banner: 'banner', nombre: 'nombre', emoji: 'emoji' };
+const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+const st = { tab: 'shop', kind: 'all', confirm: null, errors: {}, busy: false,
+             settings: null, items: [], splits: [], me: null, profile: null, balance: 0, inv: new Set(), cos: {}, badges: [], myBadges: new Map(), tx: [], claims: [] };
+
+function toast(t) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2600); }
+
+async function load() {
+  const { data: { session } } = await supabase.auth.getSession();
+  const [{ data: players }, { data: profiles }, { data: settings }, { data: items }, { data: splits }, { data: badges }] = await Promise.all([
+    supabase.from('players').select('*'), supabase.from('player_profiles').select('*'),
+    supabase.from('reward_settings').select('*').maybeSingle(),
+    supabase.from('shop_items').select('*').order('sort'),
+    supabase.from('splits').select('*').order('starts_at'),
+    supabase.from('badges').select('*').order('sort'),
+  ]);
+  authMenu.render(session, players ?? [], profiles ?? []);
+  st.settings = settings ?? { enabled: false, amounts: {} };
+  st.items = items ?? []; st.splits = splits ?? []; st.badges = badges ?? [];
+  st.me = session ? (players ?? []).find(p => p.user_id === session.user.id) ?? null : null;
+  st.loggedIn = !!session;
+  st.profile = st.me ? (profiles ?? []).find(p => p.player_id === st.me.id) ?? null : null;
+  if (st.me) {
+    const split = currentSplit();
+    const [{ data: bal }, { data: inv }, { data: cos }, { data: pb }, { data: tx }, { data: claims }] = await Promise.all([
+      supabase.from('wallet_balances').select('*').eq('player_id', st.me.id).maybeSingle(),
+      supabase.from('inventory').select('*').eq('player_id', st.me.id),
+      supabase.from('player_cosmetics').select('*').eq('player_id', st.me.id).maybeSingle(),
+      supabase.from('player_badges').select('*').eq('player_id', st.me.id),
+      supabase.from('wallet_tx').select('*').eq('player_id', st.me.id).order('created_at', { ascending: false }).limit(150),
+      supabase.from('prize_claims').select('*').eq('player_id', st.me.id).order('created_at', { ascending: false }),
+    ]);
+    st.balance = bal?.balance ?? 0;
+    st.inv = new Set((inv ?? []).map(i => i.item_id));
+    st.cos = cos ?? {};
+    st.myBadges = new Map((pb ?? []).map(b => [b.badge, b]));
+    st.tx = (tx ?? []).filter(t => !split || t.split_id === split.id);
+    st.claims = claims ?? [];
+  }
+  $('loading').hidden = true; $('main').hidden = false;
+  draw();
+}
+
+function currentSplit() {
+  const now = Date.now();
+  return st.splits.find(s => new Date(s.starts_at) <= now && (!s.ends_at || new Date(s.ends_at) > now))
+    ?? [...st.splits].reverse().find(s => new Date(s.starts_at) <= now) ?? null;
+}
+const myName = () => st.profile?.display_name || st.me?.riot_game_name || 'Tu nombre';
+const myIcon = () => iconOr1(st.me?.icon_id);
+const myChamp = () => st.profile?.favorite_champion || st.me?.favorite_champion;
+const canBuy = () => st.settings?.enabled && !!st.me;
+
+// ── Dibujo ──
+function draw() {
+  $('closed').hidden = !!st.settings?.enabled;
+  drawWallet();
+  document.querySelectorAll('[data-pane]').forEach(p => { p.hidden = p.dataset.pane !== st.tab; });
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === st.tab));
+  if (st.tab === 'shop') drawShop();
+  if (st.tab === 'inv') drawInv();
+  if (st.tab === 'earn') drawEarn();
+  if (st.tab === 'badges') drawBadges();
+  if (st.tab === 'tx') drawTx();
+}
+
+function drawWallet() {
+  const sp = currentSplit();
+  const left = sp?.ends_at ? Math.ceil((new Date(sp.ends_at) - Date.now()) / 86400000) : null;
+  const warn = left != null && left <= 7;
+  const who = !st.loggedIn ? '<a href="login.html" style="color:var(--accent);font-weight:700">Inicia sesión</a> para ver tus dientes y comprar.'
+            : !st.me ? 'Vincula tu cuenta de LoL (en tu perfil) para ganar y gastar dientes.' : 'Tus dientes de este split';
+  $('wallet').innerHTML = `<span class="tooth">🦷</span>
+    <div class="bal"><b>${st.me ? fmt(st.balance) : '—'}</b><small>${who}</small></div>
+    <div class="reset ${warn ? 'warn' : ''}">${sp ? `${warn ? '⚠️ ¡Gástalos antes del reinicio! ' : ''}Se reinician en <b>${left != null ? `${left} día${left === 1 ? '' : 's'}` : '—'}</b><br>al terminar <b>${esc(sp.name)}</b>` : ''}
+      <br><span style="color:var(--text-faint)">Lo que compras es tuyo para siempre.</span></div>`;
+}
+
+function preview(it) {
+  const box = document.createElement('div');
+  box.className = 'pv';
+  if (it.kind === 'marco') {
+    box.appendChild(frameHtml(it.id, 84, myIcon(), it));
+  } else if (it.kind === 'fila') {
+    box.innerHTML = `<div class="pv-row"><div class="c"><span class="pos">3</span><span class="ava"><img src="${myIcon()}" alt=""></span><span class="nm">${esc(myName())}</span><span class="lp">Oro I · 88 LP</span></div></div>`;
+    applyRowEffect(box.querySelector('.pv-row'), it.id);
+  } else if (it.kind === 'banner') {
+    const ch = myChamp();
+    box.innerHTML = `<div class="pv-banner">${ch ? `<div class="splash" style="background-image:url('${splashUrl(ch, 0)}')"></div>` : ''}<span>${esc(myName())}</span></div>`;
+    applyBanner(box.querySelector('.pv-banner'), it.id);
+  } else if (it.kind === 'nombre') {
+    const cos = { nombre: it.id, nombre_valor: st.cos?.nombre === 'nombre-color' ? st.cos.nombre_valor : NAME_COLORS[0] };
+    box.innerHTML = `<div><div class="pv-name">${nameHtml(myName(), cos)}</div>${it.id === 'nombre-color' ? `<div class="swatches">${NAME_COLORS.map(c => `<span class="sw" style="background:${c}"></span>`).join('')}</div>` : ''}</div>`;
+  } else if (it.kind === 'emoji') {
+    box.innerHTML = `<div><div class="pv-name">${nameHtml(myName(), { emoji: st.cos?.emoji || '🦈' })}</div><div class="emojis">${EMOJIS.map(e => `<span class="em">${e}</span>`).join('')}</div></div>`;
+  } else if (it.kind === 'premio') {
+    box.innerHTML = `<span class="prize-ic">${prizeIconSvg(it.icon)}</span>`;
+  }
+  return box;
+}
+
+function buyArea(it) {
+  const owned = it.kind !== 'premio' && st.inv.has(it.id);
+  const soldOut = it.kind === 'premio' && it.stock != null && it.stock <= 0;
+  const missing = Math.max(0, it.price - st.balance);
+  const err = st.errors[it.id] ? `<div class="err">${esc(st.errors[it.id])}</div>` : '';
+  if (st.confirm === it.id) {
+    return `<div class="confirm">¿${it.kind === 'premio' ? 'Canjear' : 'Comprar'} <b>${esc(it.name)}</b> por <b>🦷 ${fmt(it.price)}</b>? Te quedarán ${fmt(st.balance - it.price)}.
+      ${it.kind === 'premio' ? '<br>La admin te lo entregará a mano; si no se puede, te devuelve los dientes.' : ''}
+      <div class="row"><button class="btn ok" data-yes="${it.id}" type="button" ${st.busy ? 'disabled' : ''}>Sí, ${it.kind === 'premio' ? 'canjear' : 'comprar'}</button><button class="btn ghost" data-no type="button">Cancelar</button></div>${err}</div>`;
+  }
+  let action;
+  if (owned) action = `<span class="owned">✓ Ya es tuyo</span>`;
+  else if (soldOut) action = `<button class="btn ghost" disabled type="button">Agotado</button>`;
+  else if (!canBuy()) action = `<button class="btn ghost" disabled type="button">${!st.settings?.enabled ? 'Pronto' : 'Inicia sesión'}</button>`;
+  else if (missing > 0) action = `<button class="btn ghost" disabled type="button" title="Te faltan ${fmt(missing)} 🦷">Te faltan ${fmt(missing)}</button>`;
+  else action = `<button class="btn ok" data-buy="${it.id}" type="button">${it.kind === 'premio' ? 'Canjear' : 'Comprar'}</button>`;
+  return `<div class="buy"><span class="price">🦷 ${fmt(it.price)}</span>${it.kind === 'premio' && it.stock != null ? `<span class="stock">${it.stock > 0 ? `Quedan ${it.stock}` : ''}</span>` : ''}${action}</div>${err}`;
+}
+
+function itemCard(it) {
+  const c = document.createElement('div');
+  c.className = 'card item';
+  c.appendChild(preview(it));
+  const body = document.createElement('div');
+  body.className = 'body';
+  body.innerHTML = `<div class="top"><h3>${esc(it.name)}</h3>${it.collection ? `<span class="coll">${esc(it.collection)}</span>` : ''}</div>
+    <p>${esc(it.description ?? '')}</p>${buyArea(it)}`;
+  c.appendChild(body);
+  return c;
+}
+
+function drawShop() {
+  $('kinds').innerHTML = KINDS.map(([k, l]) => `<button class="chipbtn ${st.kind === k ? 'on' : ''}" data-kind="${k}" type="button">${l}</button>`).join('');
+  const list = st.items.filter(i => i.active && (st.kind === 'all' || i.kind === st.kind || (st.kind === 'nombre' && i.kind === 'emoji')));
+  const shop = $('shop');
+  shop.innerHTML = '';
+  const groups = st.kind === 'all'
+    ? [['Premios reales', list.filter(i => i.kind === 'premio')], ['Marcos de avatar', list.filter(i => i.kind === 'marco')], ['Efectos de fila del ranking', list.filter(i => i.kind === 'fila')],
+       ['Bordes del banner', list.filter(i => i.kind === 'banner')], ['Nombre y emoji', list.filter(i => i.kind === 'nombre' || i.kind === 'emoji')]]
+    : [[null, list]];
+  for (const [title, items] of groups) {
+    if (!items.length) continue;
+    const sec = document.createElement('section');
+    if (title) sec.innerHTML = `<h2 class="section-title"><span class="bar"></span>${title}<span class="aside">${items.length}</span></h2>`;
+    const grid = document.createElement('div'); grid.className = 'grid';
+    items.forEach(it => grid.appendChild(itemCard(it)));
+    sec.appendChild(grid); shop.appendChild(sec);
+  }
+  if (!shop.children.length) shop.innerHTML = '<div class="card msg">No hay artículos aquí todavía.</div>';
+}
+
+function drawInv() {
+  const el = $('inv');
+  if (!st.me) { el.innerHTML = `<div class="card msg">${st.loggedIn ? 'Vincula tu cuenta de LoL para tener inventario.' : '<a href="login.html">Inicia sesión</a> para ver tu inventario.'}</div>`; return; }
+  const mine = st.items.filter(i => st.inv.has(i.id));
+  const ch = myChamp();
+  el.innerHTML = `<div class="card me"><div class="who" id="me-frame"></div>
+      <div class="right"><div class="slot-title" style="margin:0">Así te ven en el ranking</div><div class="pv-row" id="me-row"><div class="c"><span class="pos">3</span><span class="ava"><img src="${myIcon()}" alt=""></span><span class="nm">${nameHtml(myName(), st.cos)}</span><span class="lp">Oro I · 88 LP</span></div></div>
+        <div class="slot-title" style="margin:0">Y en tu perfil</div><div class="pv-banner" id="me-banner">${ch ? `<div class="splash" style="background-image:url('${splashUrl(ch, 0)}')"></div>` : ''}<span>${nameHtml(myName(), st.cos)}</span></div></div></div>`;
+  const fr = frameHtml(st.cos?.marco, 96, myIcon(), st.items.find(i => i.id === st.cos?.marco));
+  $('me-frame').append(fr); $('me-frame').insertAdjacentHTML('beforeend', `<span class="n">${nameHtml(myName(), st.cos)}</span>`);
+  applyRowEffect($('me-row'), st.cos?.fila); applyBanner($('me-banner'), st.cos?.banner);
+
+  const slots = [['marco', 'Marcos de avatar'], ['fila', 'Efectos de fila'], ['banner', 'Bordes de banner'], ['nombre', 'Nombre'], ['emoji', 'Emoji']];
+  for (const [kind, title] of slots) {
+    const its = mine.filter(i => i.kind === kind);
+    el.insertAdjacentHTML('beforeend', `<div class="slot-title">${title}</div>`);
+    if (!its.length) { el.insertAdjacentHTML('beforeend', `<div class="inv-empty">Nada todavía — míralos en la tienda.</div>`); continue; }
+    const grid = document.createElement('div'); grid.className = 'grid';
+    for (const it of its) {
+      const on = st.cos?.[SLOT_OF[kind]] === it.id || (kind === 'emoji' && !!st.cos?.emoji);
+      const c = document.createElement('div'); c.className = 'card item';
+      c.appendChild(preview(it));
+      let extra = '';
+      if (it.id === 'nombre-color') extra = `<div class="swatches">${NAME_COLORS.map(col => `<button class="sw ${st.cos?.nombre === 'nombre-color' && st.cos?.nombre_valor === col ? 'on' : ''}" style="background:${col}" data-color="${col}" type="button" aria-label="Color ${col}"></button>`).join('')}</div>`;
+      if (kind === 'emoji') extra = `<div class="emojis" style="max-width:none">${EMOJIS.map(e => `<button class="em ${st.cos?.emoji === e ? 'on' : ''}" data-emoji="${e}" type="button">${e}</button>`).join('')}</div>`;
+      const body = document.createElement('div'); body.className = 'body';
+      body.innerHTML = `<div class="top"><h3>${esc(it.name)}</h3>${on ? '<span class="coll" style="color:var(--accent);border-color:var(--accent)">Puesto</span>' : ''}</div>${extra}
+        <div class="buy">${on ? `<button class="btn ghost" data-unequip="${kind}" type="button">Quitar</button>`
+          : (it.id === 'nombre-color' || kind === 'emoji') ? '<span class="stock">Elige arriba para ponértelo</span>'
+          : `<button class="btn eq" data-equip="${it.id}" data-kind="${kind}" type="button">Ponérmelo</button>`}</div>${st.errors[it.id] ? `<div class="err">${esc(st.errors[it.id])}</div>` : ''}`;
+      c.appendChild(body); grid.appendChild(c);
+    }
+    el.appendChild(grid);
+  }
+  if (st.claims.length) {
+    el.insertAdjacentHTML('beforeend', `<div class="slot-title">Premios canjeados</div><div class="card">${st.claims.map(c => `
+      <div class="tx"><span class="ic">🎁</span><div class="d"><b>${esc(c.item_name)}</b><small>${new Date(c.created_at).toLocaleDateString('es-ES')}${c.note ? ' · ' + esc(c.note) : ''}</small></div>
+        <span class="claim-st ${c.status}">${c.status === 'pendiente' ? 'Pendiente' : c.status === 'entregado' ? 'Entregado' : 'Rechazado (devuelto)'}</span></div>`).join('')}</div>`);
+  }
+}
+
+const EARN = [
+  ['🎯', 'Misión fácil / media / difícil', 'Tus 3 misiones semanales.', (a) => `${a.mision_facil} / ${a.mision_media} / ${a.mision_dificil}`],
+  ['👥', 'Misión grupal', `El que más aportó se lleva el premio entero; otro premio se reparte entre los demás según lo que aportó cada uno.`, (a) => `${a.grupal_top} + ${a.grupal_resto}`],
+  ['🏆', 'Top 1 / 2 / 3 de la semana', 'Por puntos de misiones, al cerrar la semana (lunes 6:00).', (a) => `${a.top1} / ${a.top2} / ${a.top3}`],
+  ['✅', 'Cada victoria', 'Cualquier cola (no cuentan los remakes).', (a) => `${a.victoria}`],
+  ['🌅', 'Tu primera victoria del día', 'El día empieza a las 6:00 (hora de Madrid).', (a) => `${a.primera_victoria}`],
+  ['✨', 'Partida Perfecta', 'Cuando consigues el logro de partida perfecta.', (a) => `${a.perfecta}`],
+  ['🖐️', 'Pentakill', 'Por cada partida con pentakill.', (a) => `${a.pentakill}`],
+  ['⭐', 'Partida del mes', 'La mejor partida de SoloQ del grupo, al cerrar el mes.', (a) => `${a.partida_mes}`],
+  ['🏅', 'Reto: 1º / 2º / 3º', 'Al terminar cada reto.', (a) => `${a.reto1} / ${a.reto2} / ${a.reto3}`],
+];
+function drawEarn() {
+  const a = st.settings?.amounts ?? {};
+  $('earn').innerHTML = `<section><h2 class="section-title"><span class="bar"></span>Así se ganan los 🦷</h2>
+    <div class="earn">${EARN.map(([ic, t, d, v]) => `<div class="card e"><span class="ic">${ic}</span><div><b>${t}</b><small>${d}</small></div><span class="amt">${v(a)}</span></div>`).join('')}</div></section>
+    <section><h2 class="section-title"><span class="bar"></span>Reglas</h2><div class="card rules">
+      <ul>
+        <li><b>Los 🦷 se reinician a 0 al terminar cada split.</b> Lo que compras (marcos, efectos, banners…) y las insignias son tuyos para siempre.</li>
+        <li>Los dientes se suman solos cada pocos minutos; no tienes que hacer nada.</li>
+        <li>Cuentan todas las colas; los remakes no cuentan.</li>
+        <li>Los <b>premios reales</b> los entrega la admin a mano. Si no se puede entregar, te devuelve los dientes.</li>
+      </ul>
+      <div style="margin-top:10px">Para hacerte una idea, en un split de unas 15 semanas: jugando <b>1 partida al día</b> juntas unos <b>850–1.200 🦷</b>; jugando <b>3 al día</b>, unos <b>2.900 🦷</b>.</div>
+    </div></section>`;
+}
+
+function drawBadges() {
+  const got = st.badges.filter(b => st.myBadges.has(b.code)).length;
+  $('badges').innerHTML = `<section><h2 class="section-title"><span class="bar"></span>Insignias<span class="aside">${st.me ? `${got} de ${st.badges.length}` : ''}</span></h2>
+    <p style="color:var(--text-dim);font-size:13px;margin:-4px 0 14px">No se compran: se consiguen jugando y se quedan para siempre en tu perfil.</p>
+    <div class="badges">${st.badges.map(b => { const m = st.myBadges.get(b.code);
+      return `<div class="card badge ${m ? 'got' : ''}"><div class="i">${b.icon}</div><b>${esc(b.name)}</b><small>${esc(b.description)}</small>
+        ${m ? `<small class="when">✓ ${new Date(m.earned_at).toLocaleDateString('es-ES')}</small>` : ''}</div>`; }).join('')}</div></section>`;
+}
+
+const TX_ICON = { mision: '🎯', grupal: '👥', top: '🏆', victoria: '✅', primera_victoria: '🌅', perfecta: '✨', pentakill: '🖐️', partida_mes: '⭐', reto: '🏅', compra: '🛍️', canje: '🎁', reembolso: '↩️', admin: '🛠️' };
+const TX_NAME = { mision: 'Misión completada', grupal: 'Misión grupal', top: 'Tabla semanal', victoria: 'Victoria', primera_victoria: 'Primera victoria del día', perfecta: 'Partida perfecta', pentakill: 'Pentakill', partida_mes: 'Partida del mes', reto: 'Reto', compra: 'Compra', canje: 'Premio canjeado', reembolso: 'Devolución', admin: 'Ajuste de la admin' };
+function drawTx() {
+  const el = $('tx');
+  if (!st.me) { el.innerHTML = `<div class="card msg">${st.loggedIn ? 'Vincula tu cuenta de LoL para ver tus movimientos.' : '<a href="login.html">Inicia sesión</a> para ver tus movimientos.'}</div>`; return; }
+  el.innerHTML = `<section><h2 class="section-title"><span class="bar"></span>Movimientos de este split<span class="aside">${st.tx.length}</span></h2>
+    <div class="card">${st.tx.length ? st.tx.map(t => `<div class="tx"><span class="ic">${TX_ICON[t.reason] ?? '🦷'}</span>
+      <div class="d"><b>${TX_NAME[t.reason] ?? t.reason}</b><small>${esc(t.detail ?? '')} · ${new Date(t.created_at).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</small></div>
+      <span class="a ${t.amount >= 0 ? 'p' : 'n'}">${t.amount >= 0 ? '+' : ''}${fmt(t.amount)}</span></div>`).join('') : '<div class="msg" style="padding:26px">Todavía no hay movimientos en este split.</div>'}</div></section>`;
+}
+
+// ── Acciones ──
+document.addEventListener('click', async (e) => {
+  const t = e.target.closest('button');
+  if (!t) return;
+  if (t.dataset.tab) { st.tab = t.dataset.tab; st.confirm = null; draw(); return; }
+  if (t.dataset.kind && t.classList.contains('chipbtn')) { st.kind = t.dataset.kind; draw(); return; }
+  if (t.dataset.buy) { st.confirm = t.dataset.buy; st.errors = {}; draw(); return; }
+  if (t.hasAttribute('data-no')) { st.confirm = null; st.errors = {}; draw(); return; }
+  if (t.dataset.yes) {
+    const id = t.dataset.yes, it = st.items.find(i => i.id === id);
+    st.busy = true; draw();
+    const { error } = await supabase.rpc('buy_item', { p_item: id });
+    st.busy = false;
+    if (error) { st.errors = { [id]: error.message }; draw(); return; }
+    st.confirm = null; st.errors = {};
+    toast(it.kind === 'premio' ? '🎁 ¡Canjeado! La admin te lo entregará pronto' : `🛍️ ¡${it.name} es tuyo! Póntelo en tu inventario`);
+    await load(); return;
+  }
+  const equip = async (kind, item, value) => {
+    const { error } = await supabase.rpc('equip_item', { p_kind: kind, p_item: item, p_value: value ?? null });
+    if (error) { st.errors = { [item ?? kind]: error.message }; draw(); return; }
+    st.errors = {}; await load();
+  };
+  if (t.dataset.equip) return equip(t.dataset.kind, t.dataset.equip);
+  if (t.dataset.unequip) return equip(t.dataset.unequip, null);
+  if (t.dataset.color) return equip('nombre', 'nombre-color', t.dataset.color);
+  if (t.dataset.emoji) return equip('emoji', 'emoji', t.dataset.emoji);
+});
+
+// Pestaña desde la URL (tienda.html#ganar, #inventario…)
+const HASH = { '#ganar': 'earn', '#inventario': 'inv', '#insignias': 'badges', '#movimientos': 'tx' };
+if (HASH[location.hash]) st.tab = HASH[location.hash];
+
+await loadCatalogs();
+await load();
+let tm = null;
+const reload = () => { clearTimeout(tm); tm = setTimeout(load, 600); };
+const ch = supabase.channel('tienda');
+['reward_settings', 'shop_items', 'wallet_tx', 'inventory', 'player_cosmetics', 'prize_claims', 'player_badges'].forEach(table =>
+  ch.on('postgres_changes', { event: '*', schema: 'public', table }, reload));
+ch.subscribe();
+setInterval(drawWallet, 60000);
+</script>
+</body>
+</html>
