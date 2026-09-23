@@ -32,6 +32,19 @@ const json = (body: unknown, status = 200) =>
 
 const MIN_PARTIDAS = 3;
 
+// Si cambia el prompt o el formato, subir este número: los consejos
+// guardados con otra versión se regeneran solos (perfil.html usa el mismo).
+const ADVICE_VERSION = 3;
+
+// Nombres de rol oficiales del sitio: TOP / JUNGLE / MID / ADC / SUPPORT.
+// Acepta códigos de Riot y los nombres viejos de players.primary_role.
+const ROLE_NORMALIZE: Record<string, string> = {
+  TOP: 'TOP', JUNGLE: 'JUNGLE', JUNGLA: 'JUNGLE', MIDDLE: 'MID', MID: 'MID',
+  BOTTOM: 'ADC', ADC: 'ADC', UTILITY: 'SUPPORT', SUPPORT: 'SUPPORT',
+};
+const roleLabel = (r: string | null | undefined) =>
+  r ? (ROLE_NORMALIZE[String(r).trim().toUpperCase()] ?? String(r).toUpperCase()) : null;
+
 const BADGE_LABEL: Record<string, string> = {
   top_asesino: 'Top Asesino', top_observador: 'Top Observador', sin_rendirse: 'Sin Rendirse',
   otp_del_torneo: 'OTP del Torneo', escalador: 'El Escalador', horas_en_la_grieta: 'Horas en la Grieta',
@@ -75,7 +88,7 @@ Deno.serve(async (req) => {
     // ── ¿Ya hay consejo para esta misma última partida? → se devuelve tal cual.
     const { data: cached } = await supabase
       .from('profile_ai_advice').select('*').eq('player_id', playerId).maybeSingle();
-    if (cached && cached.last_match_id === lastMatchId) {
+    if (cached && cached.last_match_id === lastMatchId && cached.advice?.v === ADVICE_VERSION) {
       return json({ status: 'ok', cached: true, advice: cached.advice, generated_at: cached.generated_at, last_match_id: lastMatchId });
     }
 
@@ -94,10 +107,11 @@ Deno.serve(async (req) => {
       const c = porCampeon.get(m.champion) ?? { n: 0, w: 0, k: 0, d: 0, a: 0 };
       c.n++; if (m.win) c.w++; c.k += m.kills ?? 0; c.d += m.deaths ?? 0; c.a += m.assists ?? 0;
       porCampeon.set(m.champion, c);
-      if (m.role) {
-        const r = porRol.get(m.role) ?? { n: 0, w: 0 };
+      const rolNombre = roleLabel(m.role);
+      if (rolNombre) {
+        const r = porRol.get(rolNombre) ?? { n: 0, w: 0 };
         r.n++; if (m.win) r.w++;
-        porRol.set(m.role, r);
+        porRol.set(rolNombre, r);
       }
       totalMin += (m.matches.duration_seconds ?? 0) / 60;
       totalCs += m.cs ?? 0;
@@ -117,8 +131,13 @@ Deno.serve(async (req) => {
       .sort((a, b) => b[1].n - a[1].n)
       .map(([rol, s]) => `- ${rol}: ${s.n} partida(s), ${s.w}V/${s.n - s.w}D`)
       .join('\n') || '- (sin datos de rol)';
+    // ¿Autofill? — mismo criterio que perfil.html/index.html: rol distinto al principal.
+    const rolPrincipal: string | null = roleLabel(player.primary_role);
+    const esAutofill = (m: any) => !!rolPrincipal && !!roleLabel(m.role) && roleLabel(m.role) !== rolPrincipal;
+    const nAutofill = (partidas as any[]).filter(esAutofill).length;
     const partidasTxt = (partidas as any[]).map((m, i) =>
-      `${i + 1}. ${m.win ? 'Victoria' : 'Derrota'} con ${m.champion} (${m.role || 'rol N/A'}) — ` +
+      `${i + 1}. ${m.win ? 'Victoria' : 'Derrota'} con ${m.champion} (${roleLabel(m.role) ?? 'rol N/A'})` +
+      `${esAutofill(m) ? ' [POSIBLE AUTOFILL]' : ''}${m.extra_stats?.posible_egida ? ' [posible Égida de Valor]' : ''} — ` +
       `KDA ${m.kills}/${m.deaths}/${m.assists}, ${(m.cs / Math.max((m.matches.duration_seconds ?? 60) / 60, 1)).toFixed(1)} CS/min, ` +
       `visión ${m.vision_score ?? 0}, daño a campeones ${m.damage_to_champions ?? 0}`
     ).join('\n');
@@ -134,7 +153,8 @@ Deno.serve(async (req) => {
 Analiza el PERFIL de este jugador a partir de sus últimas ${partidas.length} partidas de SoloQ y sus insignias. Escribe en español, tono cercano y motivador, sin tecnicismos exagerados. No puedes ver las partidas (ni video ni replay), solo estos números: no inventes jugadas ni datos que no te doy. Sé honesto pero nunca cruel.
 
 Jugador: ${player.riot_game_name}
-Rol principal registrado: ${player.primary_role ?? 'desconocido'}
+Rol principal (el que más juega): ${rolPrincipal ?? 'desconocido'}
+Partidas marcadas como posible autofill: ${nAutofill}
 Winrate en estas partidas: ${winrate}% (${wins}V / ${partidas.length - wins}D)
 Promedios: ${(totalCs / Math.max(totalMin, 1)).toFixed(1)} CS/min, ${(totalVision / partidas.length).toFixed(1)} de visión por partida
 
@@ -149,6 +169,11 @@ ${misBadges.length ? misBadges.join('\n') : '- (ninguna)'}
 
 Partidas (más reciente primero):
 ${partidasTxt}
+
+Reglas importantes:
+- Los roles se llaman TOP, JUNGLE, MID, ADC y SUPPORT, escritos exactamente así. Usa SOLO esos nombres (nunca "UTILITY", "BOTTOM", "MIDDLE", "Jungla" ni "Support").
+- En SoloQ a veces el juego asigna un rol que el jugador no eligió (autofill). Las partidas marcadas [POSIBLE AUTOFILL] fueron en un rol distinto a su principal: probablemente no lo eligió. No le recomiendes cambiar a ese rol ni evitarlo solo por esas partidas, y tenlas en cuenta al juzgar malos resultados (pueden explicarse por el autofill). Una [posible Égida de Valor] también indica autofill.
+- El "mejor_rol" debe basarse sobre todo en su rol principal y en resultados reales, no en partidas de autofill sueltas.
 
 Responde SOLO con un objeto JSON con esta forma exacta:
 {
@@ -186,6 +211,7 @@ Responde SOLO con un objeto JSON con esta forma exacta:
     }
     // Se guardan también los datos base, para mostrarlos al lado del texto.
     advice.base = { partidas: partidas.length, wins, winrate };
+    advice.v = ADVICE_VERSION;
 
     const generatedAt = new Date().toISOString();
     await supabase.from('profile_ai_advice').upsert({

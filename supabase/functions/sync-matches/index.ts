@@ -90,7 +90,8 @@ Deno.serve(async (req) => {
   const matchCache = new Map<string, any>();
   const log: string[] = [];
   const diaInicio = inicioDiaMadridUTC(new Date());
-  const mapaRoles: Record<string, string> = { TOP: 'Top', JUNGLE: 'Jungla', MIDDLE: 'Mid', BOTTOM: 'ADC', UTILITY: 'Support' };
+  // Nombres de rol oficiales del sitio: TOP / JUNGLE / MID / ADC / SUPPORT.
+  const mapaRoles: Record<string, string> = { TOP: 'TOP', JUNGLE: 'JUNGLE', MIDDLE: 'MID', BOTTOM: 'ADC', UTILITY: 'SUPPORT' };
 
   for (const player of players ?? []) {
     try {

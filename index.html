@@ -274,6 +274,7 @@
   .lp-change.loss{color:var(--danger);}
   .egida-tag{font-size:10px; font-weight:700; color:var(--text-dim); background:rgba(255,255,255,.08); border:1px dashed rgba(255,255,255,.35); border-radius:99px; padding:2px 8px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;}
   .egida-tag img{width:12px; height:12px; object-fit:contain;}
+  .autofill-tag{font-size:10px; font-weight:700; color:var(--gold); background:rgba(250,204,21,.08); border:1px dashed rgba(250,204,21,.45); border-radius:99px; padding:2px 8px; white-space:nowrap; cursor:help;}
 
   /* Historial de logros */
   .logros-panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
@@ -576,6 +577,15 @@ function selectPlayer(id) {
   renderHistoryPanel(id);
 }
 
+// Nombres de rol oficiales del sitio: TOP / JUNGLE / MID / ADC / SUPPORT.
+// Acepta tanto los códigos de Riot (MIDDLE, BOTTOM, UTILITY) como los
+// nombres viejos guardados en players.primary_role (Jungla, Support…).
+const ROLE_NORMALIZE = {
+  TOP: 'TOP', JUNGLE: 'JUNGLE', JUNGLA: 'JUNGLE', MIDDLE: 'MID', MID: 'MID',
+  BOTTOM: 'ADC', ADC: 'ADC', UTILITY: 'SUPPORT', SUPPORT: 'SUPPORT',
+};
+const roleLabel = (r) => r ? (ROLE_NORMALIZE[String(r).trim().toUpperCase()] ?? String(r).toUpperCase()) : null;
+
 function renderHistoryPanel(id) {
   const panel = document.getElementById('history-panel');
   const participaciones = (historyByPlayer.get(id) ?? []).slice(0, 5);
@@ -609,6 +619,12 @@ function renderHistoryPanel(id) {
     const egidaHtml = m.extra_stats?.posible_egida
       ? `<span class="egida-tag" title="Ganaste bastante más LP de lo normal en esta partida — probablemente Égida de Valor (LP doble por autocompletado). Es una estimación, Riot no lo confirma directamente."><img src="assets/Aegis_of_Valor_icon.svg" alt="">Égida de Valor</span>`
       : '';
+    // ¿Autofill? — jugó un rol distinto a su rol principal (Riot no lo confirma).
+    const rolPrincipal = roleLabel(playersById.get(id)?.primary_role);
+    const rolPartida = roleLabel(m.role);
+    const autofillHtml = resultado !== 'remake' && rolPartida && rolPrincipal && rolPartida !== rolPrincipal
+      ? `<span class="autofill-tag" title="Jugó ${rolPartida} y su rol principal es ${rolPrincipal}. Pudo haber sido autofill — es una estimación, Riot no lo confirma.">¿Autofill?</span>`
+      : '';
 
     return `
       <div class="match">
@@ -627,6 +643,7 @@ function renderHistoryPanel(id) {
           ${(m.lp_change ?? null) !== null
             ? `<span class="lp-change ${m.lp_change >= 0 ? 'win' : 'loss'}">${m.lp_change >= 0 ? '+' : ''}${m.lp_change} LP</span>`
             : (formatDuration(m.matches.duration_seconds) ? `<span class="lp-change" style="color:var(--text-faint);font-weight:600;">${formatDuration(m.matches.duration_seconds)}</span>` : '')}
+          ${autofillHtml}
           ${egidaHtml}
         </span>
       </div>`;
@@ -698,7 +715,7 @@ function buildRow(p, idx) {
         <span class="status-chip ${enPartida ? 'in-game' : 'offline'}">${enPartida ? 'En partida' : 'Offline'}</span>
         ${enPartida && duoCon.length ? `<span class="duo-tag" title="Dúo con ${duoCon.join(', ')}">🎮 con ${duoCon.join(', ')}</span>` : ''}
       </div>
-      <div class="col-role">${trendHtml}${p.primary_role ? `<span class="role-pill">${p.primary_role}</span>` : '—'}</div>
+      <div class="col-role">${trendHtml}${p.primary_role ? `<span class="role-pill">${roleLabel(p.primary_role)}</span>` : '—'}</div>
       <div class="col-rank">
         <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="" onerror="${HIDE_ONERROR}">
         <div class="tier-lp"><div class="tier">${tierText}</div><div class="lp">${lpText}</div></div>
@@ -710,7 +727,7 @@ function buildRow(p, idx) {
 
   row.dataset.signature = JSON.stringify([
     p.id === selectedPlayerId, streakType, posContent, champBg, skinBg,
-    avatarHtml, twitchLive, enPartida, duoCon, trend, p.primary_role, tierText, lpText, wr,
+    avatarHtml, twitchLive, enPartida, duoCon, trend, roleLabel(p.primary_role), tierText, lpText, wr,
   ]);
 
   // Barrido — si el LP, el rango o el winrate cambiaron desde el último
@@ -899,7 +916,7 @@ async function render() {
       <div class="podium-rank-chip">${rankNum === 1 ? '👑 #1' : '#' + rankNum}</div>
       <div class="podium-avatar">${avatarHtml}</div>
       <div class="podium-name">${p.riot_game_name}</div>
-      <div class="podium-meta">${p.primary_role ?? 'Sin datos'}</div>
+      <div class="podium-meta">${roleLabel(p.primary_role) ?? 'Sin datos'}</div>
       <div class="podium-lp ${lpChanged ? 'value-changed' : ''}">${lpText}</div>
       <div class="podium-tier-row">
         <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="" onerror="${HIDE_ONERROR}">

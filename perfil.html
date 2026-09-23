@@ -197,6 +197,7 @@
   .lp-change.dur{color:var(--text-faint); font-weight:600;}
   .egida-tag{font-size:10px; font-weight:700; color:var(--text-dim); background:rgba(255,255,255,.08); border:1px dashed rgba(255,255,255,.35); border-radius:99px; padding:2px 8px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;}
   .egida-tag img{width:12px; height:12px; object-fit:contain;}
+  .autofill-tag{font-size:10px; font-weight:700; color:var(--gold); background:rgba(250,204,21,.08); border:1px dashed rgba(250,204,21,.45); border-radius:99px; padding:2px 8px; white-space:nowrap; cursor:help;}
   .empty{padding:24px; text-align:center; color:var(--text-faint); font-size:13px; margin:0;}
 
   /* ── GRÁFICA LP ── */
@@ -210,11 +211,11 @@
   #lp-canvas{display:block; width:100%; height:90px;}
   .lp-chart-footer{display:flex; justify-content:space-between; font-size:11px; color:var(--text-faint); margin-top:6px;}
 
-  /* ── BOTÓN DE IA (abajo a la izquierda) + panel ── */
-  .ai-fab{position:fixed; left:22px; bottom:22px; z-index:50; display:flex; align-items:center; gap:8px; padding:12px 18px; border-radius:99px; border:1px solid var(--accent); background:rgba(3,8,18,.92); color:var(--accent); font-family:'Rajdhani',sans-serif; font-weight:800; font-size:15px; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; box-shadow:0 0 18px var(--accent-glow); backdrop-filter:blur(6px); transition:transform .2s, box-shadow .2s;}
+  /* ── BOTÓN DE IA (abajo a la derecha — el lado izquierdo queda para el futuro menú) + panel ── */
+  .ai-fab{position:fixed; right:22px; bottom:22px; z-index:50; display:flex; align-items:center; gap:8px; padding:12px 18px; border-radius:99px; border:1px solid var(--accent); background:rgba(3,8,18,.92); color:var(--accent); font-family:'Rajdhani',sans-serif; font-weight:800; font-size:15px; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; box-shadow:0 0 18px var(--accent-glow); backdrop-filter:blur(6px); transition:transform .2s, box-shadow .2s;}
   .ai-fab:hover{transform:translateY(-2px); box-shadow:0 0 28px var(--accent-glow);}
   .ai-fab .spark{font-size:17px;}
-  .ai-panel{position:fixed; left:22px; bottom:84px; z-index:50; width:min(420px, calc(100vw - 44px)); max-height:min(70vh, 620px); display:flex; flex-direction:column; background:rgba(8,18,29,.97); border:1px solid var(--accent); border-radius:18px; box-shadow:0 0 34px var(--accent-glow), 0 20px 50px rgba(0,0,0,.5); opacity:0; transform:translateY(12px); pointer-events:none; transition:opacity .25s, transform .25s;}
+  .ai-panel{position:fixed; right:22px; bottom:84px; z-index:50; width:min(420px, calc(100vw - 44px)); max-height:min(70vh, 620px); display:flex; flex-direction:column; background:rgba(8,18,29,.97); border:1px solid var(--accent); border-radius:18px; box-shadow:0 0 34px var(--accent-glow), 0 20px 50px rgba(0,0,0,.5); opacity:0; transform:translateY(12px); pointer-events:none; transition:opacity .25s, transform .25s;}
   .ai-panel.open{opacity:1; transform:none; pointer-events:auto;}
   .ai-panel-head{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 18px; border-bottom:1px solid var(--border);}
   .ai-panel-head h3{margin:0; font-family:'Rajdhani',sans-serif; font-weight:800; font-size:16px; letter-spacing:.06em; text-transform:uppercase; color:#fff;}
@@ -386,6 +387,19 @@ const QUEUE_TABS = [
 const queueGroup = (queueId) => queueId === 420 ? 'soloq' : queueId === 440 ? 'flex' : queueId === 400 ? 'reclutamiento' : 'otros';
 const HISTORY_PER_TAB = 10;
 
+// Riot guarda el rol como TOP/JUNGLE/MIDDLE/BOTTOM/UTILITY — se muestra con
+// los mismos nombres que usa players.primary_role (sync-matches).
+const ROLE_LABEL = { TOP: 'Top', JUNGLE: 'Jungla', MIDDLE: 'Mid', BOTTOM: 'ADC', UTILITY: 'Support' };
+const roleLabel = (r) => ROLE_LABEL[r] ?? r;
+
+// ¿Autofill? — Riot no dice si una partida fue autofill. Se marca como
+// posible cuando, en SoloQ, jugó un rol distinto a su rol principal.
+function esPosibleAutofill(m, primaryRole) {
+  if (m.matches?.queue_id !== 420 || !m.role || !primaryRole) return false;
+  const label = ROLE_LABEL[m.role];
+  return !!label && label !== primaryRole;
+}
+
 let ddragonVersion = '15.19.1';
 try {
   const versions = await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json());
@@ -457,6 +471,9 @@ let historyState = { byTab: new Map(), companionsByMatch: new Map(), nameById: n
 let currentTab = 'soloq';
 let lastStreamChannel = null;
 let aiState = { playerId: null, latestMatchId: null, loading: false };
+// Debe coincidir con ADVICE_VERSION de la Edge Function: si cambia el prompt,
+// los consejos viejos se regeneran solos en vez de esperar una partida nueva.
+const AI_ADVICE_VERSION = 2;
 
 if (!jugadorParam) {
   showError('Falta el jugador — la URL necesita ?jugador=<nombre o id>.');
@@ -564,7 +581,7 @@ async function loadAll() {
 
   await loadMatchCatalogs();
 
-  historyState = { byTab, companionsByMatch, nameById, playerId: player.id };
+  historyState = { byTab, companionsByMatch, nameById, playerId: player.id, primaryRole: player.primary_role };
   // Para el botón de IA: la partida de SoloQ más reciente (sin remakes) —
   // mismo criterio que usa la Edge Function para decidir si regenerar.
   aiState.playerId = player.id;
@@ -838,7 +855,7 @@ function renderRoles(soloq) {
   document.getElementById('box-roles').innerHTML = top.length ? top.map(([rol, n]) => `
     <div class="list-item">
       <div class="champ-img role-ico">✦</div>
-      <div><div class="item-title">${esc(rol)}</div><div class="item-sub">${n} ve${n === 1 ? 'z' : 'ces'} jugado</div></div>
+      <div><div class="item-title">${esc(roleLabel(rol))}</div><div class="item-sub">${n} ve${n === 1 ? 'z' : 'ces'} jugado</div></div>
     </div>`).join('') : '<span class="item-sub">Sin roles detectados.</span>';
 }
 
@@ -863,7 +880,7 @@ function renderHistory() {
   const lista = (historyState.byTab.get(currentTab) ?? []).slice(0, HISTORY_PER_TAB);
   if (!lista.length) { el.innerHTML = `<p class="empty">Sin partidas de ${tab.label} en los últimos 30 días.</p>`; return; }
 
-  const { companionsByMatch, nameById, playerId } = historyState;
+  const { companionsByMatch, nameById, playerId, primaryRole } = historyState;
   el.innerHTML = lista.map(m => {
     const duoNames = (companionsByMatch.get(m.match_id) ?? [])
       .filter(c => c.team === m.team && c.player_id !== playerId && nameById.has(c.player_id))
@@ -886,6 +903,9 @@ function renderHistory() {
     const egidaHtml = m.extra_stats?.posible_egida
       ? `<span class="egida-tag" title="Ganaste bastante más LP de lo normal en esta partida — probablemente Égida de Valor (LP doble por autocompletado). Es una estimación, Riot no lo confirma directamente."><img src="assets/Aegis_of_Valor_icon.svg" alt="">Égida de Valor</span>`
       : '';
+    const autofillHtml = resultado !== 'remake' && esPosibleAutofill(m, primaryRole)
+      ? `<span class="autofill-tag" title="Jugó ${esc(roleLabel(m.role))} y su rol principal es ${esc(primaryRole)}. Pudo haber sido autofill — es una estimación, Riot no lo confirma.">¿Autofill?</span>`
+      : '';
     const dur = formatDuration(m.matches.duration_seconds);
     const lpHtml = (m.lp_change ?? null) !== null
       ? `<span class="lp-change ${m.lp_change >= 0 ? 'win' : 'loss'}">${m.lp_change >= 0 ? '+' : ''}${m.lp_change} LP</span>`
@@ -906,6 +926,7 @@ function renderHistory() {
         <span class="match-result-block">
           <span class="result-chip ${resultado}">${resultado === 'victoria' ? 'Victoria' : resultado === 'remake' ? 'Remake' : 'Derrota'}</span>
           ${lpHtml}
+          ${autofillHtml}
           ${egidaHtml}
         </span>
       </div>`;
@@ -939,7 +960,7 @@ async function loadAiAdvice() {
       return;
     }
     const { data: cached } = await supabase.from('profile_ai_advice').select('*').eq('player_id', aiState.playerId).maybeSingle();
-    if (cached && cached.last_match_id === aiState.latestMatchId) {
+    if (cached && cached.last_match_id === aiState.latestMatchId && cached.advice?.v === AI_ADVICE_VERSION) {
       renderAiAdvice(cached.advice, cached.generated_at);
       return;
     }
@@ -972,7 +993,6 @@ function renderAiAdvice(advice, generatedAt, aviso) {
   const base = advice?.base ?? {};
   const champs = Array.isArray(advice?.mejores_campeones) ? advice.mejores_campeones : [];
   const tips = Array.isArray(advice?.consejos) ? advice.consejos : [];
-  const fecha = generatedAt ? new Date(generatedAt).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' }) : '';
   body.innerHTML = `
     ${aviso ? `<p class="ai-error" style="margin-bottom:12px;">${esc(aviso)} Mostrando la valoración anterior.</p>` : ''}
     ${base.partidas ? `<div class="ai-stats">
@@ -987,9 +1007,9 @@ function renderAiAdvice(advice, generatedAt, aviso) {
         <img src="${champIconUrl(c.campeon)}" alt="" onerror="${HIDE_ONERROR}">
         <div><b>${esc(c.campeon)}</b> — ${esc(c.motivo)}</div>
       </div>`).join('')}` : ''}
-    ${advice?.mejor_rol?.rol ? `<h4>Mejor rol probable</h4><p><b>${esc(advice.mejor_rol.rol)}</b> — ${esc(advice.mejor_rol.motivo ?? '')}</p>` : ''}
+    ${advice?.mejor_rol?.rol ? `<h4>Mejor rol probable</h4><p><b>${esc(roleLabel(advice.mejor_rol.rol))}</b> — ${esc(advice.mejor_rol.motivo ?? '')}</p>` : ''}
     ${tips.length ? `<h4>Consejos de mejora</h4><ol class="ai-tips">${tips.map(t => `<li>${esc(t)}</li>`).join('')}</ol>` : ''}
-    <div class="ai-foot">Generado ${esc(fecha)} con las últimas partidas de SoloQ. Se actualiza solo cuando juega una partida nueva. Es una estimación basada en números, no en ver las partidas.</div>`;
+    <div class="ai-foot">Es una estimación basada en números, no en ver las partidas.</div>`;
 }
 
 // ── GRÁFICA DE LP ──
