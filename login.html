@@ -2,116 +2,391 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>SharkTracker — Login (prueba)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — SharkTracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  body { font-family: system-ui, sans-serif; max-width: 420px; margin: 60px auto; padding: 0 20px; color: #1f2937; }
-  button { background:#5865F2; color:#fff; border:none; padding:10px 18px; border-radius:6px; font-size:15px; cursor:pointer; }
-  button:hover { opacity:0.9; }
-  input { padding:8px; width:100%; box-sizing:border-box; margin-bottom:8px; }
-  #status { margin-top:16px; padding:10px; border-radius:6px; font-size:14px; display:none; }
-  .ok  { background:#d1fae5; color:#065f46; display:block !important; }
-  .err { background:#fee2e2; color:#991b1b; display:block !important; }
-  #claim-form { display:none; margin-top:24px; }
+  :root{
+    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
+    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
+    --danger:#ff5f3d; --gold:#facc15; --radius:16px;
+    --discord:#5865F2; --magenta:#c026d3;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif; background:var(--bg); display:grid; grid-template-columns:1.1fr 1fr;}
+  a{color:inherit;}
+
+  /* ── Lado izquierdo: marca + qué desbloqueas ── */
+  .brand{position:relative; overflow:hidden; padding:48px 56px; display:flex; flex-direction:column; justify-content:space-between; gap:32px; min-height:100vh;
+         background:
+           radial-gradient(700px 500px at 10% 0%, rgba(0,229,199,.22), transparent 60%),
+           radial-gradient(700px 520px at 100% 100%, rgba(192,38,211,.22), transparent 60%),
+           linear-gradient(160deg, #06121f, #050b16);
+         border-right:1px solid var(--border);}
+  .brand::after{content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px); background-size:40px 40px; pointer-events:none;}
+  .brand > *{position:relative; z-index:1;}
+  .back{color:var(--accent); text-decoration:none; font-weight:700; font-size:13px;}
+  .back:hover{text-decoration:underline;}
+  .brand-mid{display:flex; flex-direction:column; gap:26px;}
+  .brand-logo{width:340px; max-width:100%; filter:drop-shadow(0 0 34px rgba(0,229,199,.25));}
+  .brand h2{margin:0; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:40px; line-height:1.05; letter-spacing:.02em; text-transform:uppercase;
+            background:linear-gradient(90deg,#fff 0%, var(--accent) 60%, #d946ef 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .perks{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px;}
+  .perks li{display:flex; align-items:center; gap:12px; font-size:14px; color:#dbe7f0; font-weight:500;}
+  .perks .ico{width:34px; height:34px; border-radius:10px; background:rgba(0,229,199,.1); border:1px solid rgba(0,229,199,.3); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;}
+
+  .preview-label{font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin-bottom:8px;}
+  .preview-row{display:flex; align-items:center; gap:14px; background:rgba(8,18,29,.9); border:1px solid var(--border); border-radius:14px; padding:12px 16px; max-width:480px; transition:border-color .3s, box-shadow .3s;}
+  .preview-row.found{border-color:var(--accent); box-shadow:0 0 20px rgba(0,229,199,.18);}
+  .preview-row .pos{font-family:'Rajdhani'; font-weight:700; font-size:18px; color:var(--text-faint); width:26px; text-align:center;}
+  .preview-row .av{width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#0ea5e9,#c026d3); border:2px solid var(--accent); overflow:hidden; flex-shrink:0;}
+  .preview-row .av img{width:100%; height:100%; object-fit:cover; display:block;}
+  .preview-row .nm{flex:1; min-width:0; font-weight:800; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .preview-row .nm small{display:block; font-weight:600; font-size:11px; color:var(--text-faint);}
+  .preview-row .pill{font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; background:rgba(0,229,199,.14); color:var(--accent);}
+  .preview-row .lp{font-family:'Rajdhani'; font-weight:700; font-size:18px; color:var(--gold); white-space:nowrap;}
+  .brand-foot{font-size:12px; color:var(--text-faint);}
+
+  /* ── Lado derecho: formulario ── */
+  .form-side{display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px; background:radial-gradient(600px 400px at 50% 30%, rgba(0,229,199,.06), transparent 70%), var(--bg);}
+  .mobile-top{display:none;}
+  .form{width:100%; max-width:400px;}
+  .progress{display:flex; gap:6px; margin-bottom:26px;}
+  .progress span{flex:1; height:4px; border-radius:4px; background:var(--border); transition:background .3s;}
+  .progress span.on{background:linear-gradient(90deg, var(--accent), #22d3ee); box-shadow:0 0 10px var(--accent-glow);}
+  .kicker{font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.1em; color:var(--accent); margin-bottom:8px;}
+  h1{margin:0 0 10px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:34px; line-height:1.05; letter-spacing:.02em; text-transform:uppercase;}
+  .sub{margin:0 0 28px; font-size:14px; line-height:1.55; color:var(--text-dim);}
+
+  button{font-family:inherit; cursor:pointer;}
+  button:disabled{opacity:.55; cursor:not-allowed;}
+  .btn-discord{width:100%; display:flex; align-items:center; justify-content:center; gap:12px; padding:15px 18px; border:none; border-radius:12px; background:var(--discord); color:#fff; font-weight:800; font-size:15px; box-shadow:0 8px 24px rgba(88,101,242,.35); transition:transform .15s, box-shadow .15s;}
+  .btn-discord:hover:not(:disabled){transform:translateY(-1px); box-shadow:0 10px 28px rgba(88,101,242,.5);}
+  .btn-discord svg{width:22px; height:22px; fill:#fff;}
+  .divider{display:flex; align-items:center; gap:12px; margin:26px 0 16px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint);}
+  .divider::before,.divider::after{content:''; flex:1; height:1px; background:var(--border);}
+  .faq{display:flex; flex-direction:column; gap:10px;}
+  .faq div{font-size:12.5px; line-height:1.5; color:var(--text-dim); padding-left:14px; border-left:2px solid var(--border);}
+  .faq b{color:#fff;}
+
+  .connected{display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-dim); margin-bottom:24px; min-width:0;}
+  .connected .av{width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg, var(--accent), var(--magenta)); overflow:hidden; flex-shrink:0;}
+  .connected .av img{width:100%; height:100%; object-fit:cover; display:block;}
+  .connected b{color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .connected .ok{margin-left:auto; font-size:11px; font-weight:800; color:#a5b4fc; background:rgba(88,101,242,.14); border:1px solid rgba(88,101,242,.4); padding:3px 10px; border-radius:99px; white-space:nowrap;}
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin-bottom:8px;}
+  .field input{width:100%; background:var(--panel-2); border:1px solid var(--border); border-radius:12px; color:#fff; font-family:'Inter'; font-size:15px; font-weight:600; padding:13px 14px; outline:none; transition:border-color .15s, box-shadow .15s;}
+  .field input:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(0,229,199,.12);}
+  .field input::placeholder{color:var(--text-faint); font-weight:500;}
+  .tag-wrap{position:relative;}
+  .tag-wrap::before{content:'#'; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-faint); font-weight:800;}
+  .tag-wrap input{padding-left:28px;}
+  .row2{display:grid; grid-template-columns:1fr 130px; gap:12px;}
+  .match{display:none; align-items:center; gap:10px; font-size:12.5px; font-weight:700; border-radius:10px; padding:10px 12px; margin:4px 0 22px;}
+  .match.show{display:flex;}
+  .match.ok{color:var(--accent); background:rgba(0,229,199,.08); border:1px solid rgba(0,229,199,.3);}
+  .match.bad{color:var(--danger); background:rgba(255,95,61,.08); border:1px solid rgba(255,95,61,.3);}
+  .match.wait{color:var(--text-dim); background:rgba(255,255,255,.03); border:1px solid var(--border);}
+  .spacer{height:22px;}
+  .btn-main{width:100%; padding:15px 18px; border:none; border-radius:12px; background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:17px; letter-spacing:.06em; text-transform:uppercase; box-shadow:0 0 20px var(--accent-glow);}
+  .link-btn{display:block; width:100%; text-align:center; margin-top:16px; font-size:12px; color:var(--text-faint); background:none; border:none; text-decoration:none;}
+  .link-btn:hover{color:#fff; text-decoration:underline;}
+  .hint{margin:14px 0 0; font-size:12px; line-height:1.5; color:var(--text-faint);}
+  .error-box{margin-top:16px; font-size:13px; font-weight:600; color:var(--danger); background:rgba(255,95,61,.08); border:1px solid rgba(255,95,61,.3); border-radius:10px; padding:10px 12px; display:none;}
+  .error-box.show{display:block;}
+
+  .loading{display:flex; align-items:center; gap:10px; color:var(--text-dim); font-size:14px;}
+  .spinner{width:16px; height:16px; border-radius:50%; border:2px solid var(--border); border-top-color:var(--accent); animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  [hidden]{display:none !important;}
+
+  /* ── Celular: se esconde la columna de marca, queda el logo arriba del formulario ── */
+  @media (max-width:860px){
+    body{grid-template-columns:1fr;}
+    .brand{display:none;}
+    .form-side{justify-content:flex-start; padding:28px 20px 48px;}
+    .mobile-top{display:flex; width:100%; max-width:400px; align-items:center; justify-content:space-between; margin-bottom:28px;}
+    .mobile-top img{height:40px;}
+  }
 </style>
 </head>
 <body>
-  <h1>SharkTracker</h1>
-  <p>Página de prueba — login con Discord + registro contra el roster.</p>
-
-  <div id="logged-out">
-    <button id="btn-discord">Entrar con Discord</button>
-  </div>
-
-  <div id="logged-in" style="display:none">
-    <p>Sesión iniciada como <strong id="discord-user"></strong>.</p>
-    <button id="btn-logout">Cerrar sesión</button>
-
-    <div id="claim-form">
-      <h3>Vincula tu cuenta de LoL</h3>
-      <input id="game-name" placeholder="Nombre de invocador (ej: Pinea)">
-      <input id="tag-line" placeholder="Tag (ej: Pinea, sin #)">
-      <button id="btn-claim">Vincular</button>
+  <section class="brand">
+    <a class="back" href="index.html">← Volver al Ranking</a>
+    <div class="brand-mid">
+      <img class="brand-logo" src="logo/MainLogo.png" alt="SharkTracker">
+      <h2>Tu perfil,<br>a tu manera</h2>
+      <ul class="perks">
+        <li><span class="ico">🎨</span>Elige tu campeón y skin favoritos para tu banner</li>
+        <li><span class="ico">📺</span>Conecta tu Twitch y aparece en vivo en el ranking</li>
+        <li><span class="ico">✏️</span>Tu apodo y una bio corta en tu perfil</li>
+      </ul>
+      <div>
+        <div class="preview-label" id="preview-label">Así te verán en el ranking</div>
+        <div class="preview-row" id="preview-row">
+          <span class="pos" id="pv-pos">#</span>
+          <span class="av" id="pv-av"></span>
+          <span class="nm"><span id="pv-name">Tu nombre</span><small id="pv-tag">#TAG</small></span>
+          <span class="pill" id="pv-role">ROL</span>
+          <span class="lp" id="pv-lp">— LP</span>
+        </div>
+      </div>
     </div>
-  </div>
+    <div class="brand-foot">hecho por KyoSumiVT</div>
+  </section>
 
-  <div id="status"></div>
+  <section class="form-side">
+    <div class="mobile-top">
+      <a class="back" href="index.html">← Volver al Ranking</a>
+      <img src="logo/FlaviIconLogo.png" alt="SharkTracker">
+    </div>
 
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    <div class="form">
+      <div class="progress"><span class="on"></span><span id="bar-2"></span></div>
 
-    // Seguro de tener acá: la anon key está protegida por las
-    // políticas RLS del esquema, no por ser secreta.
-    const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
+      <!-- Cargando sesión -->
+      <div id="step-loading" class="loading"><span class="spinner"></span>Cargando…</div>
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const $ = (id) => document.getElementById(id);
-    const statusEl = $('status');
+      <!-- Paso 1: Discord -->
+      <div id="step-1" hidden>
+        <div class="kicker">Paso 1 de 2</div>
+        <h1>Inicia sesión</h1>
+        <p class="sub">Usamos Discord para saber quién eres. Después vinculas tu cuenta de League del reto.</p>
+        <button class="btn-discord" id="btn-discord" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.182 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>Continuar con Discord</button>
+        <div class="error-box" id="err-1"></div>
+        <div class="divider">Preguntas rápidas</div>
+        <div class="faq">
+          <div><b>¿Necesito cuenta para ver el ranking?</b> No, el ranking y los perfiles son públicos. La cuenta es solo para editar el tuyo.</div>
+          <div><b>¿Qué ve SharkTracker de mi Discord?</b> Tu nombre, tu avatar y tu correo. El correo no se muestra en ningún lado.</div>
+        </div>
+      </div>
 
-    function showStatus(msg, ok) {
-      statusEl.textContent = msg;
-      statusEl.className = ok ? 'ok' : 'err';
-    }
+      <!-- Paso 2: vincular cuenta de LoL -->
+      <div id="step-2" hidden>
+        <div class="kicker">Paso 2 de 2</div>
+        <h1>Vincula tu cuenta de LoL</h1>
+        <div class="connected"><span class="av" id="dc-av"></span>Sesión de Discord: <b id="dc-name">—</b><span class="ok">Discord ✓</span></div>
+        <form id="claim-form" autocomplete="off">
+          <div class="row2">
+            <div class="field"><label for="in-name">Nombre de invocador</label><input id="in-name" placeholder="Galactic Shark" maxlength="40"></div>
+            <div class="field"><label for="in-tag">Tag</label><div class="tag-wrap"><input id="in-tag" placeholder="AYK" maxlength="10"></div></div>
+          </div>
+          <div class="match" id="match"></div>
+          <div class="spacer" id="match-spacer"></div>
+          <button class="btn-main" id="btn-claim" type="submit" disabled>Vincular y ver mi perfil</button>
+        </form>
+        <div class="error-box" id="err-2"></div>
+        <p class="hint">¿Tu cuenta no aparece? Tiene que estar en el roster del reto: pídele a KyoSumi que te agregue.</p>
+        <button class="link-btn" id="btn-logout" type="button">No soy yo — cerrar sesión</button>
+      </div>
 
-    async function refreshUI() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        $('logged-out').style.display = 'block';
-        $('logged-in').style.display = 'none';
-        return;
-      }
+      <!-- Ya vinculado -->
+      <div id="step-done" hidden>
+        <div class="kicker">Listo</div>
+        <h1>Ya tienes tu cuenta vinculada</h1>
+        <p class="sub" id="done-text"></p>
+        <a class="btn-main" id="btn-profile" href="#" style="display:block; text-align:center; text-decoration:none;">Ir a mi perfil</a>
+        <button class="link-btn" id="btn-logout-2" type="button">Cerrar sesión</button>
+      </div>
+    </div>
+  </section>
 
-      $('logged-out').style.display = 'none';
-      $('logged-in').style.display = 'block';
-      $('discord-user').textContent =
-        session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.id;
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-      const { data: profile } = await supabase
-        .from('player_profiles')
-        .select('player_id, display_name')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
+// Segura de tener acá: la anon key está protegida por las políticas RLS.
+const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      if (profile) {
-        $('claim-form').style.display = 'none';
-        showStatus(`Ya vinculado como "${profile.display_name}". Todo listo.`, true);
-      } else {
-        $('claim-form').style.display = 'block';
-      }
-    }
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ROLE_NORMALIZE = { TOP:'TOP', JUNGLE:'JUNGLE', JUNGLA:'JUNGLE', MIDDLE:'MID', MID:'MID', BOTTOM:'ADC', ADC:'ADC', UTILITY:'SUPPORT', SUPPORT:'SUPPORT' };
+const roleLabel = (r) => r ? (ROLE_NORMALIZE[String(r).trim().toUpperCase()] ?? String(r).toUpperCase()) : null;
 
-    $('btn-discord').addEventListener('click', async () => {
-      await supabase.auth.signInWithOAuth({
-        provider: 'discord',
-        options: { redirectTo: window.location.href }
-      });
-    });
+let ddragonVersion = '15.19.1';
+const versionReady = fetch('https://ddragon.leagueoflegends.com/api/versions.json')
+  .then(r => r.json()).then(v => { ddragonVersion = v[0]; }).catch(() => {});
+const profileIconUrl = (iconId) => iconId ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${iconId}.png` : null;
+const profileUrl = (playerId) => `perfil.html?jugador=${encodeURIComponent(playerId)}`;
 
-    $('btn-logout').addEventListener('click', async () => {
-      await supabase.auth.signOut();
-      refreshUI();
-    });
+function showStep(step) {
+  ['step-loading', 'step-1', 'step-2', 'step-done'].forEach(id => { $(id).hidden = id !== step; });
+  $('bar-2').classList.toggle('on', step === 'step-2' || step === 'step-done');
+}
+function showError(boxId, msg) {
+  const el = $(boxId);
+  el.textContent = msg ?? '';
+  el.classList.toggle('show', !!msg);
+}
 
-    $('btn-claim').addEventListener('click', async () => {
-      const gameName = $('game-name').value.trim();
-      const tagLine  = $('tag-line').value.trim();
-      if (!gameName || !tagLine) {
-        showStatus('Completa ambos campos.', false);
-        return;
-      }
-      const { data, error } = await supabase.rpc('claim_player', {
-        p_game_name: gameName,
-        p_tag_line: tagLine
-      });
-      if (error) {
-        showStatus(`Rechazado: ${error.message}`, false);
-      } else {
-        showStatus(`¡Vinculado como ${data.riot_game_name}#${data.riot_tag_line}!`, true);
-        $('claim-form').style.display = 'none';
-      }
-    });
+// ── Estado de la sesión: decide qué paso mostrar ──
+async function refresh() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { showStep('step-1'); return; }
 
-    refreshUI();
-  </script>
+  const meta = session.user.user_metadata ?? {};
+  $('dc-name').textContent = meta.custom_claims?.global_name || meta.full_name || meta.name || meta.user_name || 'tu cuenta';
+  $('dc-av').innerHTML = meta.avatar_url ? `<img src="${esc(meta.avatar_url)}" alt="">` : '';
+
+  // ¿Ya tiene una cuenta del roster vinculada?
+  const { data: mine } = await supabase.from('players').select('*').eq('user_id', session.user.id).maybeSingle();
+  if (mine) {
+    $('done-text').textContent = `Tu Discord está vinculado a ${mine.riot_game_name}#${mine.riot_tag_line}.`;
+    $('btn-profile').href = profileUrl(mine.id);
+    showStep('step-done');
+    fillPreview(mine);
+    return;
+  }
+  showStep('step-2');
+  $('in-name').focus();
+}
+
+// ── Vista previa de la izquierda: con datos reales cuando se encuentra la cuenta ──
+async function fillPreview(player) {
+  const row = $('preview-row');
+  if (!player) {
+    row.classList.remove('found');
+    $('preview-label').textContent = 'Así te verán en el ranking';
+    $('pv-pos').textContent = '#';
+    $('pv-av').innerHTML = '';
+    $('pv-name').textContent = 'Tu nombre';
+    $('pv-tag').textContent = '#TAG';
+    $('pv-role').textContent = 'ROL';
+    $('pv-lp').textContent = '— LP';
+    return;
+  }
+  row.classList.add('found');
+  $('preview-label').textContent = 'Tu fila en el ranking';
+  $('pv-name').textContent = player.riot_game_name;
+  $('pv-tag').textContent = `#${player.riot_tag_line}`;
+  $('pv-role').textContent = roleLabel(player.primary_role) ?? '—';
+  await versionReady;
+  const icon = profileIconUrl(player.icon_id);
+  $('pv-av').innerHTML = icon ? `<img src="${icon}" alt="" onerror="this.remove()">` : '';
+
+  // Posición y LP: mismo criterio que index.html (último snapshot de SoloQ, elo_score desc).
+  const [{ data: players }, { data: snaps }] = await Promise.all([
+    supabase.from('players').select('id'),
+    supabase.from('rank_snapshots').select('player_id, elo_score, lp').eq('queue_type', 'RANKED_SOLO_5x5').order('recorded_at', { ascending: false }),
+  ]);
+  const latest = new Map();
+  (snaps ?? []).forEach(s => { if (!latest.has(s.player_id)) latest.set(s.player_id, s); });
+  const mio = latest.get(player.id);
+  $('pv-lp').textContent = mio ? `${mio.lp ?? 0} LP` : 'Unranked';
+  if (mio) {
+    const orden = (players ?? []).map(p => ({ id: p.id, s: latest.get(p.id)?.elo_score ?? -1 })).sort((a, b) => b.s - a.s);
+    $('pv-pos').textContent = orden.findIndex(p => p.id === player.id) + 1;
+  } else {
+    $('pv-pos').textContent = '—';
+  }
+}
+
+// ── Paso 1: Discord ──
+$('btn-discord').addEventListener('click', async () => {
+  showError('err-1', null);
+  $('btn-discord').disabled = true;
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'discord',
+    options: { redirectTo: window.location.origin + window.location.pathname },
+  });
+  if (error) {
+    $('btn-discord').disabled = false;
+    showError('err-1', `No se pudo abrir Discord: ${error.message}`);
+  }
+});
+
+// ── Paso 2: buscar la cuenta en el roster mientras se escribe ──
+let found = null;
+let checkTimer = null;
+function setMatch(kind, text) {
+  const el = $('match');
+  el.className = `match ${kind ? 'show ' + kind : ''}`;
+  el.textContent = text ?? '';
+  $('match-spacer').hidden = !!kind;
+}
+
+function readInputs() {
+  let name = $('in-name').value.trim();
+  let tag = $('in-tag').value.trim().replace(/^#/, '');
+  // Si pegan "Nombre#TAG" completo en el primer campo, se separa solo.
+  if (name.includes('#')) {
+    const [n, t] = name.split('#');
+    name = n.trim();
+    if (!tag && t) { tag = t.trim(); $('in-tag').value = tag; }
+    $('in-name').value = name;
+  }
+  return { name, tag };
+}
+
+async function checkAccount() {
+  const { name, tag } = readInputs();
+  found = null;
+  $('btn-claim').disabled = true;
+  showError('err-2', null);
+  if (!name || !tag) { setMatch(null); fillPreview(null); return; }
+
+  setMatch('wait', 'Buscando en el roster…');
+  // ilike sin comodines = comparación exacta sin distinguir mayúsculas (igual que claim_player).
+  const escLike = (s) => s.replace(/[\\%_]/g, c => '\\' + c);
+  const { data, error } = await supabase.from('players').select('*')
+    .ilike('riot_game_name', escLike(name)).ilike('riot_tag_line', escLike(tag)).maybeSingle();
+  const ahora = readInputs();
+  if (ahora.name !== name || ahora.tag !== tag) return; // cambió mientras buscaba
+
+  if (error) { setMatch('bad', 'No se pudo buscar ahora mismo, prueba de nuevo.'); return; }
+  if (!data) { setMatch('bad', '✕ Esa cuenta no está en el roster del reto'); fillPreview(null); return; }
+  if (data.user_id) { setMatch('bad', '✕ Esa cuenta ya fue vinculada por otra persona'); fillPreview(null); return; }
+
+  found = data;
+  setMatch('ok', `✓ Cuenta encontrada en el roster: ${data.riot_game_name}#${data.riot_tag_line}`);
+  $('btn-claim').disabled = false;
+  fillPreview(data);
+}
+['in-name', 'in-tag'].forEach(id => $(id).addEventListener('input', () => {
+  clearTimeout(checkTimer);
+  checkTimer = setTimeout(checkAccount, 400);
+}));
+
+$('claim-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!found) return;
+  $('btn-claim').disabled = true;
+  showError('err-2', null);
+  const { data, error } = await supabase.rpc('claim_player', {
+    p_game_name: found.riot_game_name,
+    p_tag_line: found.riot_tag_line,
+  });
+  if (error) {
+    showError('err-2', error.message);
+    $('btn-claim').disabled = false;
+    return;
+  }
+  window.location.href = profileUrl(data.id);
+});
+
+async function logout() {
+  await supabase.auth.signOut();
+  found = null;
+  $('in-name').value = '';
+  $('in-tag').value = '';
+  setMatch(null);
+  fillPreview(null);
+  showStep('step-1');
+}
+$('btn-logout').addEventListener('click', logout);
+$('btn-logout-2').addEventListener('click', logout);
+
+// Al volver de Discord, Supabase procesa la sesión y avisa por acá.
+supabase.auth.onAuthStateChange((event) => {
+  if (event === 'SIGNED_IN') setTimeout(refresh, 0);
+});
+
+refresh().catch(e => { console.error(e); showStep('step-1'); showError('err-1', 'No se pudo cargar la sesión.'); });
+</script>
 </body>
 </html>

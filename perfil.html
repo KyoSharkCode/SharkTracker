@@ -37,6 +37,12 @@
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
   .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none;}
+  /* Header: ícono de invocador del jugador con sesión iniciada */
+  .avatar{overflow:hidden; transition:transform .15s, box-shadow .15s;}
+  .avatar:hover{transform:scale(1.06); box-shadow:0 0 16px var(--accent-glow);}
+  .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  /* Sesión de Discord iniciada pero sin cuenta de LoL vinculada todavía */
+  .avatar.pending{border-color:var(--gold); box-shadow:0 0 10px rgba(250,204,21,.4); color:var(--gold);}
   .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
 
   .breadcrumb{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-faint); margin:18px 0 24px;}
@@ -77,6 +83,11 @@
   .trend-arrow.down{color:var(--danger);}
   .streak-icon{font-size:15px;}
   .p-role{margin:4px 0 0; font-size:12px; color:var(--text-dim); font-weight:600;}
+  /* Personalización: apodo (arriba del nombre) y bio de máx. 2 líneas (debajo del rol) */
+  .p-nick{display:block; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin-bottom:2px;}
+  .p-bio{margin:6px 0 0; max-width:340px; font-size:12.5px; line-height:1.45; color:#dbe7f0; font-style:italic; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow-wrap:anywhere;}
+  .hero-identity.has-bio{align-items:flex-start;}
+  .p-nick[hidden], .p-bio[hidden]{display:none;}
 
   .hero-rank{display:flex; flex-direction:column; align-items:flex-end; gap:4px; background:rgba(3,8,18,.72); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:10px 18px; backdrop-filter:blur(6px);}
   .hero-tier-row{display:flex; align-items:center; gap:8px;}
@@ -276,8 +287,10 @@
               <a class="hero-twitch" id="p-twitch" style="display:none;" target="_blank" rel="noopener"><img src="" alt="Twitch"></a>
             </div>
             <div class="hero-name-block">
+              <span class="p-nick" id="p-nick" hidden></span>
               <h2 class="p-name" id="p-name">Cargando…</h2>
               <p class="p-role" id="p-role"></p>
+              <p class="p-bio" id="p-bio" hidden></p>
             </div>
           </div>
           <div class="hero-rank">
@@ -419,6 +432,27 @@ const formatDuration = (seconds) => seconds ? `${Math.floor(seconds / 60)}:${Str
 const HIDE_ONERROR = `this.style.visibility='hidden';`;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+
+// ── Header: con sesión, el botón de perfil muestra tu ícono de invocador ──
+// Vinculado → tu ícono, lleva a tu perfil. Solo Discord (sin cuenta de LoL
+// vinculada) → borde dorado, lleva a login.html a terminar el paso 2.
+function renderAuthSlot(session, players) {
+  const slot = document.getElementById('auth-slot');
+  if (!session) {
+    slot.innerHTML = `<a class="login-btn" href="login.html">Login</a>`;
+    return;
+  }
+  const mine = (players ?? []).find(p => p.user_id === session.user.id);
+  if (mine) {
+    const icon = profileIconUrl(mine.icon_id) ?? profileIconUrl(1);
+    const nombre = String(mine.riot_game_name ?? '').replace(/"/g, '&quot;');
+    slot.innerHTML = `<a class="avatar" href="perfil.html?jugador=${encodeURIComponent(mine.id)}" title="Mi perfil — ${nombre}"><img src="${icon}" alt="Mi perfil" onerror="this.onerror=null;this.src='${profileIconUrl(1)}';"></a>`;
+    return;
+  }
+  const dcAvatar = session.user.user_metadata?.avatar_url;
+  slot.innerHTML = `<a class="avatar pending" href="login.html" title="Termina de vincular tu cuenta de LoL">${dcAvatar ? `<img src="${String(dcAvatar).replace(/"/g, '&quot;')}" alt="">` : '?'}</a>`;
+}
+
 const summonerSpellById = {};
 const runeIconById = {};
 let matchCatalogsPromise = null;
@@ -485,10 +519,6 @@ if (!jugadorParam) {
 }
 
 async function init() {
-  const { data: { session } } = await supabase.auth.getSession();
-  document.getElementById('auth-slot').innerHTML = session
-    ? `<a class="avatar" href="perfil.html">…</a>`
-    : `<a class="login-btn" href="login.html">Login</a>`;
 
   await refreshAll();
   setupAiButton();
@@ -527,6 +557,9 @@ async function loadAll() {
     supabase.from('weekly_badges').select('*'),
     supabase.from('daily_first_win_state').select('*').maybeSingle(),
   ]);
+
+  const { data: { session } } = await supabase.auth.getSession();
+  renderAuthSlot(session, players ?? []);
 
   const nameById = new Map((players ?? []).map(p => [p.id, p.riot_game_name]));
   const player = (players ?? []).find(p => p.id === jugadorParam)
@@ -654,6 +687,20 @@ function renderHero(player, profile, rank, live, stream, position, soloq) {
   const tag = player.riot_tag_line ? `<span class="p-tag">#${esc(player.riot_tag_line)}</span>` : '';
   document.getElementById('p-name').innerHTML = `${esc(player.riot_game_name)}${tag}${trendHtml}${streakHtml}`;
   document.getElementById('p-role').textContent = player.primary_role ? `Rol principal: ${roleLabel(player.primary_role)}` : 'Sin rol registrado';
+
+  // Apodo: solo si lo eligió y es distinto a su nombre de invocador
+  // (al vincular la cuenta, display_name arranca igual al nombre de invocador).
+  const apodo = (profile.display_name ?? '').trim();
+  const nickEl = document.getElementById('p-nick');
+  nickEl.textContent = apodo;
+  nickEl.hidden = !apodo || apodo.toLowerCase() === String(player.riot_game_name ?? '').toLowerCase();
+  // Bio: máximo 2 líneas (el CSS corta el resto con "…").
+  const bio = (profile.bio ?? '').trim();
+  const bioEl = document.getElementById('p-bio');
+  bioEl.textContent = bio ? `“${bio}”` : '';
+  bioEl.hidden = !bio;
+  bioEl.title = bio;
+  document.querySelector('.hero-identity').classList.toggle('has-bio', !!bio);
 
   const tierText = rank ? `${TIER_LABEL[rank.tier] ?? rank.tier} ${rank.division ?? ''}`.trim() : 'Unranked';
   document.getElementById('p-tier').textContent = tierText;

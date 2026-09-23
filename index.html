@@ -41,6 +41,12 @@
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
   .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none;}
+  /* Header: ícono de invocador del jugador con sesión iniciada */
+  .avatar{overflow:hidden; transition:transform .15s, box-shadow .15s;}
+  .avatar:hover{transform:scale(1.06); box-shadow:0 0 16px var(--accent-glow);}
+  .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  /* Sesión de Discord iniciada pero sin cuenta de LoL vinculada todavía */
+  .avatar.pending{border-color:var(--gold); box-shadow:0 0 10px rgba(250,204,21,.4); color:var(--gold);}
   .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
 
   .section-title{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
@@ -460,6 +466,26 @@ const formatDuration = (seconds) => seconds ? `${Math.floor(seconds / 60)}:${Str
 // ícono de invocador todavía no existe en Data Dragon (recién salió),
 // cae a uno clásico; si un campeón/hechizo/runa/emblema no carga, se
 // oculta en vez de mostrar el ícono roto.
+
+// ── Header: con sesión, el botón de perfil muestra tu ícono de invocador ──
+// Vinculado → tu ícono, lleva a tu perfil. Solo Discord (sin cuenta de LoL
+// vinculada) → borde dorado, lleva a login.html a terminar el paso 2.
+function renderAuthSlot(session, players) {
+  const slot = document.getElementById('auth-slot');
+  if (!session) {
+    slot.innerHTML = `<a class="login-btn" href="login.html">Login</a>`;
+    return;
+  }
+  const mine = (players ?? []).find(p => p.user_id === session.user.id);
+  if (mine) {
+    const icon = profileIconUrl(mine.icon_id) ?? profileIconUrl(1);
+    const nombre = String(mine.riot_game_name ?? '').replace(/"/g, '&quot;');
+    slot.innerHTML = `<a class="avatar" href="perfil.html?jugador=${encodeURIComponent(mine.id)}" title="Mi perfil — ${nombre}"><img src="${icon}" alt="Mi perfil" onerror="this.onerror=null;this.src='${profileIconUrl(1)}';"></a>`;
+    return;
+  }
+  const dcAvatar = session.user.user_metadata?.avatar_url;
+  slot.innerHTML = `<a class="avatar pending" href="login.html" title="Termina de vincular tu cuenta de LoL">${dcAvatar ? `<img src="${String(dcAvatar).replace(/"/g, '&quot;')}" alt="">` : '?'}</a>`;
+}
 const AVATAR_ONERROR = `this.onerror=null;this.src='${profileIconUrl(1)}';`;
 const HIDE_ONERROR = `this.style.visibility='hidden';`;
 // El orden real ya lo calcula el backend (rank_snapshots.elo_score), que sí
@@ -876,13 +902,7 @@ async function render() {
 
   // Header: sesión actual
   const { data: { session } } = await supabase.auth.getSession();
-  const authSlot = document.getElementById('auth-slot');
-  if (session) {
-    const mine = roster.find(p => p.user_id === session.user.id);
-    authSlot.innerHTML = `<a class="avatar" href="perfil.html">${mine ? initials(mine.riot_game_name) : '?'}</a>`;
-  } else {
-    authSlot.innerHTML = `<a class="login-btn" href="login.html">Login</a>`;
-  }
+  renderAuthSlot(session, roster);
 
   // Podio (top 3)
   const podiumEl = document.getElementById('podium');
