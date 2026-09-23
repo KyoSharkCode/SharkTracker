@@ -669,9 +669,11 @@ async function loadAll() {
   document.getElementById('breadcrumb-name').textContent = ` /  ${player.riot_game_name}`;
   const cmp = document.getElementById('compare-link');
   cmp.href = `versus.html?a=${encodeURIComponent(player.id)}`; cmp.hidden = false;
+  // "Overlay OBS" solo en TU perfil (sesión iniciada y cuenta vinculada).
   const obs = document.getElementById('obs-link');
-  obs.onclick = () => openOverlayGenerator({ id: player.id, name: player.riot_game_name });
-  obs.hidden = false;
+  const esMio = !!session && player.user_id === session.user.id;
+  obs.onclick = esMio ? () => openOverlayGenerator({ id: player.id, name: player.riot_game_name }) : null;
+  obs.hidden = !esMio;
   document.title = `${player.riot_game_name} — SharkTracker`;
 
   const profile = (profiles ?? []).find(pr => pr.player_id === player.id) ?? {};
