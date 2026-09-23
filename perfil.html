@@ -210,6 +210,33 @@
   #lp-canvas{display:block; width:100%; height:90px;}
   .lp-chart-footer{display:flex; justify-content:space-between; font-size:11px; color:var(--text-faint); margin-top:6px;}
 
+  /* ── BOTÓN DE IA (abajo a la izquierda) + panel ── */
+  .ai-fab{position:fixed; left:22px; bottom:22px; z-index:50; display:flex; align-items:center; gap:8px; padding:12px 18px; border-radius:99px; border:1px solid var(--accent); background:rgba(3,8,18,.92); color:var(--accent); font-family:'Rajdhani',sans-serif; font-weight:800; font-size:15px; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; box-shadow:0 0 18px var(--accent-glow); backdrop-filter:blur(6px); transition:transform .2s, box-shadow .2s;}
+  .ai-fab:hover{transform:translateY(-2px); box-shadow:0 0 28px var(--accent-glow);}
+  .ai-fab .spark{font-size:17px;}
+  .ai-panel{position:fixed; left:22px; bottom:84px; z-index:50; width:min(420px, calc(100vw - 44px)); max-height:min(70vh, 620px); display:flex; flex-direction:column; background:rgba(8,18,29,.97); border:1px solid var(--accent); border-radius:18px; box-shadow:0 0 34px var(--accent-glow), 0 20px 50px rgba(0,0,0,.5); opacity:0; transform:translateY(12px); pointer-events:none; transition:opacity .25s, transform .25s;}
+  .ai-panel.open{opacity:1; transform:none; pointer-events:auto;}
+  .ai-panel-head{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 18px; border-bottom:1px solid var(--border);}
+  .ai-panel-head h3{margin:0; font-family:'Rajdhani',sans-serif; font-weight:800; font-size:16px; letter-spacing:.06em; text-transform:uppercase; color:#fff;}
+  .ai-close{background:none; border:none; color:var(--text-dim); font-size:20px; cursor:pointer; line-height:1; padding:2px 6px;}
+  .ai-close:hover{color:#fff;}
+  .ai-body{padding:16px 18px 18px; overflow-y:auto; font-size:13px; line-height:1.55; color:var(--text-dim); scrollbar-width:thin; scrollbar-color:var(--border) transparent;}
+  .ai-body h4{margin:16px 0 8px; font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--accent);}
+  .ai-body h4:first-child{margin-top:0;}
+  .ai-body p{margin:0; color:#e6eef5;}
+  .ai-stats{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+  .ai-stat{font-size:11px; font-weight:800; padding:5px 10px; border-radius:99px; background:rgba(0,229,199,.1); border:1px solid rgba(0,229,199,.3); color:var(--accent);}
+  .ai-champ{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
+  .ai-champ img{width:32px; height:32px; border-radius:8px; object-fit:cover; background:#0a1622; flex-shrink:0;}
+  .ai-champ b{color:#fff;}
+  .ai-tips{margin:0; padding-left:18px; color:#e6eef5;}
+  .ai-tips li{margin-bottom:6px;}
+  .ai-foot{margin-top:16px; padding-top:10px; border-top:1px solid var(--border); font-size:11px; color:var(--text-faint);}
+  .ai-loading{display:flex; align-items:center; gap:10px; padding:10px 0; color:var(--text-dim);}
+  .ai-spinner{width:16px; height:16px; border-radius:50%; border:2px solid var(--border); border-top-color:var(--accent); animation:ai-spin .8s linear infinite;}
+  @keyframes ai-spin{to{transform:rotate(360deg);}}
+  .ai-error{color:var(--danger); font-weight:700;}
+
   footer{margin-top:60px; padding-top:32px; border-top:1px solid var(--border); text-align:center; color:var(--text-dim); font-size:13px; display:flex; flex-direction:column; align-items:center; gap:10px;}
   .footer-logo{height:34px; width:auto;}
 </style>
@@ -311,6 +338,16 @@
       <img class="footer-logo" src="logo/HorizontalLogo.png" alt="SharkTracker">
       <div>hecho por KyoSumiVT</div>
     </footer>
+
+    <!-- Consejo de IA -->
+    <button class="ai-fab" id="ai-fab" type="button" title="Valoración del perfil con IA"><span class="spark">✨</span>IA</button>
+    <div class="ai-panel" id="ai-panel" role="dialog" aria-label="Valoración de IA">
+      <div class="ai-panel-head">
+        <h3>✨ Valoración de IA</h3>
+        <button class="ai-close" id="ai-close" type="button" aria-label="Cerrar">×</button>
+      </div>
+      <div class="ai-body" id="ai-body"></div>
+    </div>
   </div>
 </div>
 
@@ -419,6 +456,7 @@ function showError(msg) {
 let historyState = { byTab: new Map(), companionsByMatch: new Map(), nameById: new Map(), playerId: null };
 let currentTab = 'soloq';
 let lastStreamChannel = null;
+let aiState = { playerId: null, latestMatchId: null, loading: false };
 
 if (!jugadorParam) {
   showError('Falta el jugador — la URL necesita ?jugador=<nombre o id>.');
@@ -433,6 +471,7 @@ async function init() {
     : `<a class="login-btn" href="login.html">Login</a>`;
 
   await refreshAll();
+  setupAiButton();
   setInterval(tickLiveIndicator, 1000);
   setInterval(tickLiveGameDuration, 1000);
 
@@ -526,6 +565,10 @@ async function loadAll() {
   await loadMatchCatalogs();
 
   historyState = { byTab, companionsByMatch, nameById, playerId: player.id };
+  // Para el botón de IA: la partida de SoloQ más reciente (sin remakes) —
+  // mismo criterio que usa la Edge Function para decidir si regenerar.
+  aiState.playerId = player.id;
+  aiState.latestMatchId = soloq.find(m => !esRemake(m))?.match_id ?? null;
 
   renderHero(player, profile, rank, live, stream, position, soloq);
   renderTags(player, rank, position, soloq, weeklyBadges ?? [], firstWin, nameById);
@@ -867,6 +910,86 @@ function renderHistory() {
         </span>
       </div>`;
   }).join('');
+}
+
+// ── CONSEJO DE IA ──
+// Primero se mira si ya hay un consejo guardado para la última partida de
+// SoloQ del jugador; si sí, se muestra al instante sin llamar a nadie. Si
+// no (o hay partida nueva), se le pide a la Edge Function, que genera uno
+// nuevo con Gemini y lo guarda.
+function setupAiButton() {
+  const fab = document.getElementById('ai-fab');
+  const panel = document.getElementById('ai-panel');
+  fab.addEventListener('click', () => {
+    const abrir = !panel.classList.contains('open');
+    panel.classList.toggle('open', abrir);
+    if (abrir) loadAiAdvice();
+  });
+  document.getElementById('ai-close').addEventListener('click', () => panel.classList.remove('open'));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') panel.classList.remove('open'); });
+}
+
+async function loadAiAdvice() {
+  if (aiState.loading || !aiState.playerId) return;
+  const body = document.getElementById('ai-body');
+  aiState.loading = true;
+  try {
+    if (!aiState.latestMatchId) {
+      body.innerHTML = `<p>Todavía no hay partidas de SoloQ suficientes para analizar este perfil.</p>`;
+      return;
+    }
+    const { data: cached } = await supabase.from('profile_ai_advice').select('*').eq('player_id', aiState.playerId).maybeSingle();
+    if (cached && cached.last_match_id === aiState.latestMatchId) {
+      renderAiAdvice(cached.advice, cached.generated_at);
+      return;
+    }
+
+    body.innerHTML = `<div class="ai-loading"><span class="ai-spinner"></span>${cached ? 'Hay partidas nuevas, actualizando la valoración…' : 'Analizando el perfil…'}</div>`;
+    const { data, error } = await supabase.functions.invoke('generate-profile-advice', { body: { player_id: aiState.playerId } });
+    if (error) {
+      let msg = 'No se pudo generar la valoración ahora mismo.';
+      try { msg = (await error.context?.json())?.error ?? msg; } catch { /* sin detalle */ }
+      // Si falla pero había una versión anterior guardada, se muestra igual.
+      if (cached) { renderAiAdvice(cached.advice, cached.generated_at, msg); return; }
+      body.innerHTML = `<p class="ai-error">${esc(msg)}</p>`;
+      return;
+    }
+    if (data?.status === 'sin_datos') {
+      body.innerHTML = `<p>Hacen falta al menos ${data.minimo} partidas de SoloQ para analizar el perfil (tiene ${data.partidas}).</p>`;
+      return;
+    }
+    renderAiAdvice(data.advice, data.generated_at);
+  } catch (e) {
+    console.error('IA', e);
+    body.innerHTML = `<p class="ai-error">No se pudo generar la valoración ahora mismo.</p>`;
+  } finally {
+    aiState.loading = false;
+  }
+}
+
+function renderAiAdvice(advice, generatedAt, aviso) {
+  const body = document.getElementById('ai-body');
+  const base = advice?.base ?? {};
+  const champs = Array.isArray(advice?.mejores_campeones) ? advice.mejores_campeones : [];
+  const tips = Array.isArray(advice?.consejos) ? advice.consejos : [];
+  const fecha = generatedAt ? new Date(generatedAt).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' }) : '';
+  body.innerHTML = `
+    ${aviso ? `<p class="ai-error" style="margin-bottom:12px;">${esc(aviso)} Mostrando la valoración anterior.</p>` : ''}
+    ${base.partidas ? `<div class="ai-stats">
+      <span class="ai-stat">${base.partidas} partidas SoloQ</span>
+      <span class="ai-stat">${base.wins}V / ${base.partidas - base.wins}D</span>
+      <span class="ai-stat">${base.winrate}% WR</span>
+    </div>` : ''}
+    <h4>Estilo de juego</h4>
+    <p>${esc(advice?.estilo ?? '')}</p>
+    ${champs.length ? `<h4>Mejores campeones</h4>${champs.map(c => `
+      <div class="ai-champ">
+        <img src="${champIconUrl(c.campeon)}" alt="" onerror="${HIDE_ONERROR}">
+        <div><b>${esc(c.campeon)}</b> — ${esc(c.motivo)}</div>
+      </div>`).join('')}` : ''}
+    ${advice?.mejor_rol?.rol ? `<h4>Mejor rol probable</h4><p><b>${esc(advice.mejor_rol.rol)}</b> — ${esc(advice.mejor_rol.motivo ?? '')}</p>` : ''}
+    ${tips.length ? `<h4>Consejos de mejora</h4><ol class="ai-tips">${tips.map(t => `<li>${esc(t)}</li>`).join('')}</ol>` : ''}
+    <div class="ai-foot">Generado ${esc(fecha)} con las últimas partidas de SoloQ. Se actualiza solo cuando juega una partida nueva. Es una estimación basada en números, no en ver las partidas.</div>`;
 }
 
 // ── GRÁFICA DE LP ──
