@@ -14,11 +14,11 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // Token de acceso de app — dura ~60 días, se cachea y se reutiliza
 // (se refresca solo, 1h antes de vencer, no en cada corrida).
-async function getAppAccessToken(): Promise<string> {
+async function getAppAccessToken(forceNew = false): Promise<string> {
   const { data: cached } = await supabase
     .from('twitch_token_cache').select('access_token, expires_at').maybeSingle();
 
-  if (cached && new Date(cached.expires_at).getTime() > Date.now() + 60 * 60 * 1000) {
+  if (!forceNew && cached && new Date(cached.expires_at).getTime() > Date.now() + 60 * 60 * 1000) {
     return cached.access_token;
   }
 
@@ -33,6 +33,8 @@ async function getAppAccessToken(): Promise<string> {
   });
   if (!res.ok) {
     const detalle = await res.text().catch(() => '');
+    // 400/403 aquí casi siempre = TWITCH_CLIENT_ID o TWITCH_CLIENT_SECRET
+    // desactualizados (p. ej. se generó un secreto nuevo en dev.twitch.tv).
     throw new Error(`token -> ${res.status}: ${detalle}`);
   }
   const json = await res.json();
@@ -74,21 +76,44 @@ async function handle(): Promise<Response> {
     });
   }
 
+  // Solo usuarios válidos de Twitch (3–25 letras, números o _): uno mal
+  // escrito haría que Twitch rechace la consulta entera.
+  const log: string[] = [];
   const usernameToPlayerId = new Map<string, string>();
-  for (const p of profiles) usernameToPlayerId.set((p.twitch_username as string).toLowerCase(), p.player_id as string);
+  for (const p of profiles) {
+    const u = String(p.twitch_username).trim().toLowerCase().replace(/^@/, '').replace(/^https?:\/\/(www\.)?twitch\.tv\//, '').replace(/\/.*$/, '');
+    if (/^[a-z0-9_]{3,25}$/.test(u)) usernameToPlayerId.set(u, p.player_id as string);
+    else log.push(`ignorado (usuario de Twitch inválido): "${p.twitch_username}"`);
+  }
+  if (usernameToPlayerId.size === 0) {
+    return new Response(JSON.stringify({ ok: true, log }), { headers: { 'Content-Type': 'application/json' } });
+  }
 
-  const token = await getAppAccessToken();
   const params = new URLSearchParams();
   for (const username of usernameToPlayerId.keys()) params.append('user_login', username);
-
-  const res = await fetch(`https://api.twitch.tv/helix/streams?${params.toString()}`, {
+  const ask = (token: string) => fetch(`https://api.twitch.tv/helix/streams?${params.toString()}`, {
     headers: { 'Client-Id': TWITCH_CLIENT_ID, 'Authorization': `Bearer ${token}` },
   });
-  if (!res.ok) return new Response(`Twitch -> ${res.status}`, { status: 502 });
+
+  let res = await ask(await getAppAccessToken());
+  // 401 = el token guardado ya no sirve (revocado o se cambió el secreto):
+  // se pide uno nuevo y se reintenta una vez.
+  if (res.status === 401) {
+    log.push('token de Twitch caducado → renovado');
+    res = await ask(await getAppAccessToken(true));
+  }
+  if (!res.ok) {
+    const detalle = await res.text().catch(() => '');
+    console.error(`Twitch -> ${res.status}: ${detalle}`);
+    return new Response(JSON.stringify({ ok: false, error: `Twitch -> ${res.status}: ${detalle}`, log }, null, 2), {
+      status: 502, headers: { 'Content-Type': 'application/json' },
+    });
+  }
   const { data: streams } = await res.json();
+  // Diagnóstico: a quién se consultó y cuántos directos devolvió Twitch.
+  log.push(`consultados: ${[...usernameToPlayerId.keys()].join(', ')} · Twitch devolvió ${(streams ?? []).length} en vivo`);
 
   const liveUsernames = new Set<string>();
-  const log: string[] = [];
 
   for (const stream of streams ?? []) {
     const username = (stream.user_login as string).toLowerCase();
@@ -96,7 +121,7 @@ async function handle(): Promise<Response> {
     const playerId = usernameToPlayerId.get(username);
     if (!playerId) continue;
 
-    await supabase.from('stream_status').upsert({
+    const { error: upErr } = await supabase.from('stream_status').upsert({
       player_id: playerId,
       is_live: true,
       title: stream.title,
@@ -106,7 +131,7 @@ async function handle(): Promise<Response> {
       thumbnail_url: (stream.thumbnail_url as string).replace('{width}', '440').replace('{height}', '248'),
       updated_at: new Date().toISOString(),
     });
-    log.push(`${username}: en vivo (${stream.viewer_count} viewers, ${stream.game_name})`);
+    log.push(`${username}: en vivo (${stream.viewer_count} viewers, ${stream.game_name})` + (upErr ? ` · ERROR al guardar: ${upErr.message}` : ''));
   }
 
   // Todos los que tienen usuario configurado pero NO aparecieron en la

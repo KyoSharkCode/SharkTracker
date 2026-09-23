@@ -89,15 +89,23 @@
   .twitch-wrap{display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows .5s ease, opacity .4s ease, margin .5s ease; margin-bottom:0;}
   .twitch-wrap.visible{grid-template-rows:1fr; opacity:1; margin-bottom:28px;}
   .twitch-inner{min-height:0; overflow:hidden;}
-  .twitch-card{width:71%; margin:0 auto; display:flex; height:210px; background:var(--panel); border:1px solid var(--danger-glow); box-shadow:0 0 24px rgba(255,95,61,.12); border-radius:var(--radius); overflow:hidden;}
-  .twitch-preview{flex:0 0 57%; position:relative; background:repeating-linear-gradient(45deg,#0a1622,#0a1622 10px,#0d1c28 10px,#0d1c28 20px); border-right:1px solid var(--border);}
-  .twitch-preview iframe{width:100%; height:100%; border:0;}
+  .twitch-card{width:100%; max-width:880px; margin:0 auto; display:flex; background:var(--panel); border:1px solid var(--danger-glow); box-shadow:0 0 24px rgba(255,95,61,.12); border-radius:var(--radius); overflow:hidden;}
+  .twitch-preview{flex:0 0 480px; aspect-ratio:16/9; position:relative; background:repeating-linear-gradient(45deg,#0a1622,#0a1622 10px,#0d1c28 10px,#0d1c28 20px); border-right:1px solid var(--border);}
+  .twitch-preview iframe{position:absolute; inset:0; width:100%; height:100%; border:0; display:block;}
   .twitch-live-chip{position:absolute; top:12px; left:12px; display:flex; align-items:center; gap:6px; background:rgba(3,8,18,.75); padding:4px 10px; border-radius:6px;}
   .pulse-dot{width:6px; height:6px; border-radius:50%; background:var(--danger); box-shadow:0 0 6px var(--danger-glow); animation:pulse 2s infinite;}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,95,61,.6);} 70%{box-shadow:0 0 0 8px rgba(255,95,61,0);} 100%{box-shadow:0 0 0 0 rgba(255,95,61,0);}}
   .twitch-info{flex-grow:1; padding:22px 24px; display:flex; flex-direction:column; justify-content:center; gap:8px; min-width:0;}
   .twitch-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint);}
-  .twitch-title{font-size:19px; font-weight:800; line-height:1.25;}
+  .twitch-title{font-size:19px; font-weight:800; line-height:1.25; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;}
+  /* Pantallas medianas: el video se encoge un poco; en celular, video arriba a todo el ancho y la info debajo. */
+  @media (max-width:980px){ .twitch-preview{flex-basis:56%;} }
+  @media (max-width:700px){
+    .twitch-card{flex-direction:column;}
+    .twitch-preview{flex:none; width:100%; border-right:none; border-bottom:1px solid var(--border);}
+    .twitch-info{padding:14px 16px 16px; gap:5px;}
+    .twitch-title{font-size:16px; -webkit-line-clamp:3;}
+  }
   .twitch-game{font-size:13px; color:var(--accent); font-weight:700;}
   .twitch-viewers{font-size:13px; color:var(--danger); font-weight:700;}
 
@@ -962,26 +970,39 @@ async function render() {
     podiumEl.appendChild(div);
   });
 
-  // Twitch — se abre o se colapsa según quién esté en vivo ahora
+  // Twitch — se abre o se colapsa según quién esté en vivo ahora.
+  // El iframe solo se crea cuando cambia el canal: cada minuto llega una
+  // actualización (viewers, título…) y recrearlo reiniciaba el video.
   const twitchWrap = document.getElementById('twitch-wrap');
-  const liveStreamer = roster.find(p => p.stream?.is_live);
+  const liveStreamer = roster.find(p => p.stream?.is_live && p.profile?.twitch_username);
   if (liveStreamer) {
     const card = document.getElementById('twitch-card');
-    const parentDomain = window.location.hostname || 'localhost';
-    card.innerHTML = `
+    const channel = liveStreamer.profile.twitch_username;
+    if (card.dataset.channel !== channel) {
+      const parentDomain = window.location.hostname || 'localhost';
+      card.innerHTML = `
       <div class="twitch-preview">
         <div class="twitch-live-chip"><span class="pulse-dot"></span><span style="font-size:10px;font-weight:800;color:#fff;text-transform:uppercase;">En vivo</span></div>
-        <iframe src="https://player.twitch.tv/?channel=${encodeURIComponent(liveStreamer.profile.twitch_username)}&parent=${parentDomain}&muted=true" allowfullscreen></iframe>
+        <iframe src="https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parentDomain}&muted=true" allowfullscreen></iframe>
       </div>
       <div class="twitch-info">
-        <div class="twitch-label">${liveStreamer.profile.twitch_username}</div>
-        <div class="twitch-title">${liveStreamer.stream.title ?? ''}</div>
-        <div class="twitch-game">${liveStreamer.stream.game_name ?? ''}</div>
-        <div class="twitch-viewers">${liveStreamer.stream.viewer_count ?? 0} viewers</div>
+        <div class="twitch-label"></div>
+        <div class="twitch-title"></div>
+        <div class="twitch-game"></div>
+        <div class="twitch-viewers"></div>
       </div>`;
+      card.dataset.channel = channel;
+    }
+    card.querySelector('.twitch-label').textContent = channel;
+    card.querySelector('.twitch-title').textContent = liveStreamer.stream.title ?? '';
+    card.querySelector('.twitch-game').textContent = liveStreamer.stream.game_name ?? '';
+    card.querySelector('.twitch-viewers').textContent = `${liveStreamer.stream.viewer_count ?? 0} viewers`;
     requestAnimationFrame(() => twitchWrap.classList.add('visible'));
   } else {
     twitchWrap.classList.remove('visible');
+    const card = document.getElementById('twitch-card');
+    // Al terminar el directo se quita el reproductor (deja de cargar video).
+    setTimeout(() => { if (!twitchWrap.classList.contains('visible')) { card.innerHTML = ''; delete card.dataset.channel; } }, 600);
   }
 
   // Primera Victoria del Día — foto real, campeón, KDA, hechizos, lado
