@@ -65,7 +65,7 @@
   .obj-row{display:flex; align-items:center; gap:10px; justify-content:flex-end; font-size:12.5px; font-weight:700;}
   .obj-row .lbl{width:52px; text-align:right; font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;}
   .obj-row.b .lbl{color:var(--blue);} .obj-row.r .lbl{color:var(--red);}
-  .obj{display:inline-flex; align-items:center; gap:3px; color:var(--text-dim); min-width:34px;}
+  .obj{display:inline-flex; align-items:center; gap:4px; color:var(--text-dim); min-width:34px;}
 
   /* ── Gráfica de oro ── */
   .gold-card{padding:18px 18px 12px;}
@@ -77,6 +77,9 @@
   .gold-tip{position:absolute; pointer-events:none; background:rgba(3,8,18,.95); border:1px solid var(--border); border-radius:10px; padding:8px 11px; font-size:12px; line-height:1.5; white-space:nowrap; transform:translate(-50%,-110%); z-index:5;}
   .gold-tip b{font-family:'Rajdhani',sans-serif; font-size:15px;}
   .gold-wrap{position:relative;}
+  .gold-keys{display:flex; flex-wrap:wrap; align-items:center; gap:6px 16px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); font-size:11.5px; color:var(--text-faint); font-weight:600;}
+  .gold-keys span{display:inline-flex; align-items:center; gap:5px;}
+  .gold-keys .rows{margin-left:auto;} .gold-keys .rows b.b{color:var(--blue);} .gold-keys .rows b.r{color:var(--red);}
 
   /* ── Equipos ── */
   .team{margin-bottom:16px; overflow:hidden;}
@@ -192,7 +195,6 @@
   <header>
     <div class="logo-slot">
       <a href="index.html"><img src="logo/FlaviIconLogo.png" alt="SharkTracker"></a>
-      <a class="back" href="index.html">← Ranking</a>
     </div>
     <h1>Partida</h1>
     <div class="auth-slot" id="auth-slot"></div>
@@ -209,6 +211,7 @@
       <div class="card gold-card">
         <div class="gold-legend" id="gold-legend"></div>
         <div class="gold-wrap" id="gold-wrap"></div>
+        <div class="gold-keys" id="gold-keys"></div>
       </div>
     </section>
     <section>
@@ -230,6 +233,9 @@
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { createAuthMenu } from './assets/auth-menu.js';
+import { createNavMenu } from './assets/nav-menu.js';
+createNavMenu({ current: null });
+import { lolIcon, lolIconSvg, RIOT_EVENT_ICON } from './assets/lol-icons.js';
 
 const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
@@ -340,10 +346,15 @@ function drawSummary() {
   else if (me) { res = me.win ? 'Victoria' : 'Derrota'; cls = me.win ? 'win' : 'loss'; }
   const tb = d.teams.find(t => t.teamId === 100), tr = d.teams.find(t => t.teamId === 200);
   const goldT = (id) => d.participants.filter(p => p.teamId === id).reduce((s, p) => s + p.gold, 0);
-  const objRow = (t, c, label) => t ? `<div class="obj-row ${c}"><span class="lbl">${label}</span>
-      <span class="obj" title="Torres">🏰 ${t.objectives.tower}</span><span class="obj" title="Dragones">🐉 ${t.objectives.dragon}</span>
-      <span class="obj" title="Barones">👹 ${t.objectives.baron}</span><span class="obj" title="Heraldos">🦀 ${t.objectives.riftHerald}</span>
-      <span class="obj" title="Larvas del Vacío">🪲 ${t.objectives.horde}</span>${t.objectives.atakhan ? `<span class="obj" title="Atakhan">🔥 ${t.objectives.atakhan}</span>` : ''}</div>` : '';
+  const objRow = (t, c, label) => {
+    if (!t) return '';
+    const col = c === 'b' ? '#4c9dff' : '#ff5f6d';
+    const o = (icon, n, title) => `<span class="obj" title="${title}">${lolIcon(icon, { size: 19, color: col })}${n}</span>`;
+    return `<div class="obj-row ${c}"><span class="lbl">${label}</span>
+      ${o('tower', t.objectives.tower, 'Torres')}${o('inhibitor', t.objectives.inhibitor, 'Inhibidores')}${o('dragon', t.objectives.dragon, 'Dragones')}
+      ${o('baron', t.objectives.baron, 'Barones')}${o('herald', t.objectives.riftHerald, 'Heraldos')}${o('grubs', t.objectives.horde, 'Larvas del Vacío')}
+      ${t.objectives.atakhan ? o('atakhan', t.objectives.atakhan, 'Atakhan') : ''}</div>`;
+  };
   const twoTeams = !isArena() && tb && tr;
   $('summary').className = `card summary ${cls}`;
   $('summary').innerHTML = `
@@ -388,14 +399,12 @@ function drawGold() {
   const minStep = tMax > 1800 ? 5 : tMax > 900 ? 5 : 2;
   for (let m = 0; m * 60 <= tMax; m += minStep) grid += `<text x="${x(m * 60)}" y="${H - PB + 14}" text-anchor="middle">${m}'</text>`;
   // Objetivos: marcas abajo, del color del equipo que lo tomó.
-  const ICON = { DRAGON: '🐉', ELDER_DRAGON: '🐲', BARON_NASHOR: '👹', RIFTHERALD: '🦀', HORDE: '🪲', ATAKHAN: '🔥', TOWER: '🏰', INHIBITOR: '💠' };
   const NAME = { DRAGON: 'Dragón', ELDER_DRAGON: 'Dragón Ancestral', BARON_NASHOR: 'Barón', RIFTHERALD: 'Heraldo', HORDE: 'Larvas', ATAKHAN: 'Atakhan', TOWER: 'Torre', INHIBITOR: 'Inhibidor' };
-  const marks = (tl.events ?? []).filter(e => ICON[e.type] && e.type !== 'TOWER');
+  const marks = (tl.events ?? []).filter(e => RIOT_EVENT_ICON[e.type]);
+  const BIG = new Set(['DRAGON', 'ELDER_DRAGON', 'BARON_NASHOR', 'RIFTHERALD', 'HORDE', 'ATAKHAN']);
   const markSvg = marks.map(e => `<g><title>${fmtTime(e.t)} · ${NAME[e.type]} — equipo ${e.team === 100 ? 'azul' : 'rojo'}</title>
-      <line x1="${x(e.t)}" x2="${x(e.t)}" y1="${PT}" y2="${H - PB}" stroke="${e.team === 100 ? '#4c9dff' : '#ff5f6d'}" stroke-opacity=".25" stroke-dasharray="3 3"/>
-      <text x="${x(e.t)}" y="${H - PB + (e.team === 100 ? 28 : 40)}" text-anchor="middle" style="font-size:12px">${ICON[e.type]}</text></g>`).join('');
-  const towerTicks = (tl.events ?? []).filter(e => e.type === 'TOWER').map(e =>
-    `<circle cx="${x(e.t)}" cy="${e.team === 100 ? PT + 3 : H - PB - 3}" r="2.5" fill="${e.team === 100 ? '#4c9dff' : '#ff5f6d'}"><title>${fmtTime(e.t)} · Torre para el equipo ${e.team === 100 ? 'azul' : 'rojo'}</title></circle>`).join('');
+      ${BIG.has(e.type) ? `<line x1="${x(e.t)}" x2="${x(e.t)}" y1="${PT}" y2="${H - PB}" stroke="${e.team === 100 ? '#4c9dff' : '#ff5f6d'}" stroke-opacity=".25" stroke-dasharray="3 3"/>` : ''}
+      ${lolIconSvg(RIOT_EVENT_ICON[e.type], x(e.t), H - PB + (e.team === 100 ? 25 : 38), 15, e.team === 100 ? '#4c9dff' : '#ff5f6d')}</g>`).join('');
   $('gold-wrap').innerHTML = `
     <svg class="gold-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Diferencia de oro por minuto">
       <defs>
@@ -411,12 +420,17 @@ function drawGold() {
       <path d="${area}" fill="url(#gR)" clip-path="url(#cBelow)"/>
       <path d="${line}" fill="none" stroke="#4c9dff" stroke-width="2.2" clip-path="url(#cAbove)" stroke-linejoin="round"/>
       <path d="${line}" fill="none" stroke="#ff5f6d" stroke-width="2.2" clip-path="url(#cBelow)" stroke-linejoin="round"/>
-      ${markSvg}${towerTicks}
+      ${markSvg}
       <line id="g-cursor" x1="0" x2="0" y1="${PT}" y2="${H - PB}" stroke="#fff" stroke-opacity=".35" visibility="hidden"/>
       <circle id="g-dot" r="4.5" fill="#facc15" stroke="#030812" stroke-width="1.5" visibility="hidden"/>
       <rect id="g-hit" x="${PL}" y="${PT}" width="${W - PL - PR}" height="${H - PT - PB}" fill="transparent"/>
     </svg>
     <div class="gold-tip" id="g-tip" hidden></div>`;
+  const usados = [...new Set(marks.map(e => e.type))];
+  const KEY_ORDER = ['TOWER', 'INHIBITOR', 'DRAGON', 'ELDER_DRAGON', 'RIFTHERALD', 'HORDE', 'BARON_NASHOR', 'ATAKHAN'];
+  $('gold-keys').innerHTML = KEY_ORDER.filter(t => usados.includes(t))
+    .map(t => `<span>${lolIcon(RIOT_EVENT_ICON[t], { size: 15, color: '#9db3c4' })}${NAME[t]}</span>`).join('')
+    + (usados.length ? `<span class="rows">Fila de arriba: <b class="b">&nbsp;azul</b> · abajo: <b class="r">&nbsp;rojo</b></span>` : '');
   const last = pts.at(-1), maxB = pts.reduce((a, p) => p.diff > a.diff ? p : a), maxR = pts.reduce((a, p) => p.diff < a.diff ? p : a);
   $('gold-legend').innerHTML = `
     <span>Oro final: <b class="b">${k(last.b)}</b> vs <b class="r">${k(last.r)}</b></span>

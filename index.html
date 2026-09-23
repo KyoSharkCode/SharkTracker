@@ -251,6 +251,15 @@
     .rank-head{display:none;}
     .col-role, .col-wr{display:none;}
   }
+  /* Celular: que el nombre del jugador siempre quepa (la franja del campeón se oculta) y el header no se desborde. */
+  @media (max-width:560px){
+    .col-champ-outer{display:none !important;}
+    header{grid-template-columns:auto 1fr auto; gap:8px;}
+    header h1{font-size:22px;}
+    .cards-grid{grid-template-columns:minmax(0,1fr);}
+    .row-content{gap:8px;}
+    .col-estado{width:auto;}
+  }
 
   /* Historial Individual — últimas 5 partidas SoloQ del jugador
      seleccionado en el ranking (click en una fila). */
@@ -419,6 +428,8 @@
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { createAuthMenu } from './assets/auth-menu.js';
+import { createNavMenu } from './assets/nav-menu.js';
+createNavMenu({ current: 'ranking' });
 
 const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';

@@ -166,7 +166,6 @@
   <header>
     <div class="logo-slot">
       <a href="index.html"><img src="logo/FlaviIconLogo.png" alt="SharkTracker"></a>
-      <a class="back" href="index.html">← Ranking</a>
     </div>
     <h1>SoloQ Reto</h1>
     <div class="auth-slot" id="auth-slot"></div>
@@ -206,6 +205,8 @@
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { createAuthMenu } from './assets/auth-menu.js';
+import { createNavMenu } from './assets/nav-menu.js';
+createNavMenu({ current: location.hash === '#fame-sec' ? 'fama' : 'reto' });
 
 const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
@@ -261,6 +262,8 @@ async function load() {
 
   if (ch.finished_at) await drawFinished(ch);
   else await drawOpen(ch, players ?? [], profiles ?? []);
+  // Llegaste desde "Salón de la fama" del menú: bajar hasta esa sección (una sola vez).
+  if (location.hash === '#fame-sec' && !load.scrolled) { load.scrolled = true; $('fame-sec').scrollIntoView({ block: 'start' }); }
 }
 
 // ── Reto terminado: foto guardada en challenge_results ──
@@ -424,7 +427,7 @@ function drawTable(rows, title) {
 }
 
 function drawFame(list, winByCh, currentId) {
-  $('fame-sec').hidden = list.length < 2 && !list.some(c => c.finished_at);
+  $('fame-sec').hidden = !list.length;
   $('fame').innerHTML = list.map(c => {
     const w = winByCh.get(c.id);
     const live = !c.finished_at && new Date(c.starts_at).getTime() <= Date.now();
