@@ -1,5 +1,7 @@
 # perfil.html — pendientes para retomar
 
+> **Actualización 2026-09-23:** `perfil.html` final construido. Puntos 4 y 5 resueltos (ver abajo).
+
 Pausa del 2026-09-22. Acá queda todo lo que se definió para el `perfil.html` nuevo, más lo que falta decidir antes de construirlo. Cuando volvamos, arrancar leyendo esto en vez de repetir el análisis.
 
 **Contexto:** se armaron 2 mockups funcionales (conectados a Supabase real) como punto de partida — `perfil-mockup-a.html` (ficha vertical, retrato) y `perfil-mockup-b.html` (banner horizontal). KyoSumi los tomó como base y mandó un rediseño (screenshot con anotaciones en rojo) que mezcla ideas de ambos. El `perfil.html` final se construye sobre ESE rediseño, no sobre A ni B tal cual.
@@ -37,7 +39,7 @@ Casi todo ya existe en `weekly_badges` / `compute_recent_badges()` y se puede tr
 - **"Ciego"** (partidas sin ward de control): el dato (`wards_control`) ya se guarda por partida, pero no hay ninguna regla de badge que lo compute todavía.
 - **"Top 1/2/3 del Torneo"** (podio final de temporada): no existe nada parecido en el backend — probablemente se define manualmente al cerrar el reto, no se puede derivar de datos en vivo.
 
-**❓ Pendiente de tu respuesta:** ¿agrego estos dos al backend ahora (antes de construir el perfil), o el perfil arranca solo con los badges que ya existen y estos quedan para después?
+**✅ Resuelto (2026-09-23):** revisando `old/perfil.html`, ninguno de los dos necesitaba backend. "Top 1/2/3 del Torneo" era la posición ACTUAL en el ranking, y "Ciego" es personal (6+ de las últimas 10 SoloQ sin ward de control, sin remakes). Ambos se calculan en `perfil.html` con datos que ya carga. También se agregaron como tags personales: Rey de la Temporada, Primera Victoria del Día y racha 🔥/❄️.
 
 ## 5. "Dúo con" para gente fuera del roster — limitación técnica real, no solo una duda
 
@@ -47,7 +49,7 @@ Cómo funciona hoy: `duoCon` = otros jugadores TRACKEADOS que estén en el mismo
 
 **Recomendación de Claude:** dejar "Dúo con" como está (solo roster trackeado) y no extenderlo a gente externa, porque no hay forma honesta de calcularlo con los datos que entrega Riot.
 
-**❓ Pendiente de tu respuesta:** ¿de acuerdo con dejarlo así, o preferís que se intente igual con esa limitación aclarada en la UI (tipo "puede no ser exacto")?
+**✅ Resuelto (2026-09-23):** se deja solo con el roster trackeado.
 
 ---
 

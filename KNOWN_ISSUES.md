@@ -115,6 +115,22 @@ Comparando el tracker nuevo contra el viejo (SoloQReto, que se usa como referenc
 
 ---
 
+## 10. Los 4 cron jobs (Riot, Matches, Live Status, Twitch) fallaban en silencio — nada se actualizaba
+
+**Reportado:** 2026-09-22 23:03, KyoSumi en directo en Twitch, notó que el estado de stream no se actualizaba en el sitio ("el twitch estatus no da").
+
+**Causa raíz:** los 4 Cron Jobs (Integrations → Cron → Jobs) que disparan las Edge Functions vía `net.http_post` sacan el header `x-cron-secret` del Vault con `(select decrypted_secret from vault.decrypted_secrets where name = 'cron_secret')` — pero el secreto en el Vault está guardado como `CRON_SECRET` (mayúsculas). La búsqueda por nombre es sensible a mayúsculas/minúsculas, así que nunca lo encontraba, mandaba el header vacío, y las 4 funciones (`sync-twitch-status`, `sync-matches`, `sync-live-status`, `sync-riot-data`) rechazaban CADA corrida con 401 antes de ejecutar una sola línea de lógica — ni siquiera llegaban a llamar a Riot o a Twitch. Estuvo así corriendo en el vacío un buen rato (al menos ~1h30 confirmado en los logs de invocaciones de esa noche, probablemente más).
+
+**Fix aplicado:**
+1. En cada uno de los 4 cron jobs se corrigió `where name = 'cron_secret'` → `where name = 'CRON_SECRET'`.
+2. Se sincronizó también el valor en sí: se puso el mismo valor nuevo tanto en Edge Functions → Secrets (`CRON_SECRET`) como en Vault (`CRON_SECRET`), para eliminar cualquier otro desfasaje entre esos dos cajones de secretos (son independientes entre sí, aunque tengan el mismo nombre).
+
+**Estado:** ✅ aplicado y confirmado — las 4 funciones dieron su primer `200` en Invocations esa misma noche (Twitch 23:26, Matches y Live Status ~23:3x, Riot Data 23:34).
+
+**Nota para el futuro:** si se agrega una 5ta función con cron propio, chequear desde el vamos que su job use `'CRON_SECRET'` en mayúsculas — este mismo typo se copió igual en las 4 funciones existentes, así que es fácil que se repita si se copia el snippet de nuevo.
+
+---
+
 <!-- Próximos bugs de este estilo se agregan acá abajo, mismo formato:
 ## N. Título corto
 **Reportado:** fecha, cómo se detectó
