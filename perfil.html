@@ -51,6 +51,8 @@
   .breadcrumb .compare-link{margin-left:auto; border:1px solid var(--border); border-radius:99px; padding:5px 12px; font-size:12.5px;}
   .breadcrumb .compare-link:hover{border-color:var(--accent); text-decoration:none;}
   .breadcrumb [hidden]{display:none;}
+  .breadcrumb .obs-link{margin-left:0; background:none; color:var(--accent); font:700 12.5px Inter,sans-serif; cursor:pointer;}
+  .breadcrumb .obs-link:hover{border-color:var(--accent);}
 
   .section-title{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
   .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
@@ -326,7 +328,7 @@
     <div class="auth-slot" id="auth-slot"></div>
   </header>
 
-  <div class="breadcrumb"><a href="index.html">← Volver al Ranking</a><span id="breadcrumb-name"></span><a class="compare-link" id="compare-link" href="versus.html" hidden>⚔ Comparar</a></div>
+  <div class="breadcrumb"><a href="index.html">← Volver al Ranking</a><span id="breadcrumb-name"></span><a class="compare-link" id="compare-link" href="versus.html" hidden>⚔ Comparar</a><button class="compare-link obs-link" id="obs-link" type="button" hidden>📺 Overlay OBS</button></div>
 
   <div id="error-msg"></div>
 
@@ -454,6 +456,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
+import { openOverlayGenerator } from './assets/overlay-generator.js';
 createNavMenu({ current: null });
 
 const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
@@ -666,6 +669,9 @@ async function loadAll() {
   document.getElementById('breadcrumb-name').textContent = ` /  ${player.riot_game_name}`;
   const cmp = document.getElementById('compare-link');
   cmp.href = `versus.html?a=${encodeURIComponent(player.id)}`; cmp.hidden = false;
+  const obs = document.getElementById('obs-link');
+  obs.onclick = () => openOverlayGenerator({ id: player.id, name: player.riot_game_name });
+  obs.hidden = false;
   document.title = `${player.riot_game_name} — SharkTracker`;
 
   const profile = (profiles ?? []).find(pr => pr.player_id === player.id) ?? {};

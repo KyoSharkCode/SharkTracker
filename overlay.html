@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overlay — SharkTracker</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<!--
+  Overlay para OBS — "Fuente de navegador".
+  Parámetros (el generador del perfil arma la URL):
+    jugador   id o nombre de invocador (obligatorio)
+    paneles   rango,hoy,misiones        (orden de la rotación)
+    seg       segundos por panel         (por defecto 10)
+    alertas   liga,mision | no           (por defecto las dos)
+    escala    0.8 · 1 · 1.25 · 1.5       (tamaño)
+    cola      soloq | todas              (qué partidas cuenta "Hoy")
+-->
+<style>
+  :root{
+    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
+    --win:#22c55e; --loss:#ff5f3d; --gold:#facc15; --ice:#7dd3fc;
+    --text:#fff; --dim:#b4c7d6; --faint:#7f9ab0;
+    --s:1;
+  }
+  *{box-sizing:border-box;}
+  html, body{margin:0; background:transparent !important; overflow:hidden;}
+  body{padding:calc(8px * var(--s)); font-family:Inter,system-ui,sans-serif; color:var(--text); -webkit-font-smoothing:antialiased;}
+
+  .box{position:relative; width:calc(340px * var(--s)); height:calc(92px * var(--s)); border-radius:calc(16px * var(--s)); overflow:hidden;
+       background:linear-gradient(135deg, rgba(6,16,27,.92), rgba(9,24,38,.9)); border:calc(1.5px * var(--s)) solid rgba(0,229,199,.55);
+       box-shadow:0 0 calc(18px * var(--s)) rgba(0,229,199,.18), inset 0 0 calc(24px * var(--s)) rgba(0,229,199,.06);
+       transition:border-color .4s, box-shadow .4s;}
+  .box::before{content:''; position:absolute; left:0; top:0; bottom:0; width:calc(4px * var(--s)); background:var(--accent); box-shadow:0 0 12px var(--accent-glow);}
+  .box.hidden{display:none;}
+
+  .pane{position:absolute; inset:0; padding:calc(10px * var(--s)) calc(14px * var(--s)) calc(10px * var(--s)) calc(18px * var(--s)); display:flex; align-items:center; gap:calc(12px * var(--s));
+        opacity:0; transform:translateY(calc(10px * var(--s))); transition:opacity .45s ease, transform .45s ease; pointer-events:none;}
+  .pane.on{opacity:1; transform:none;}
+  .pane.out{opacity:0; transform:translateY(calc(-10px * var(--s)));}
+
+  .lbl{font-size:calc(10px * var(--s)); font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); display:flex; align-items:center; gap:calc(6px * var(--s)); white-space:nowrap;}
+  .lbl b{color:var(--accent); font-weight:800;}
+  .lbl .r{margin-left:auto; letter-spacing:.04em; text-transform:none; color:var(--dim);}
+  .big{font-family:Rajdhani,sans-serif; font-weight:800; font-size:calc(27px * var(--s)); line-height:1.05; letter-spacing:.02em; white-space:nowrap;}
+  .sub{font-size:calc(12px * var(--s)); font-weight:700; color:var(--dim); white-space:nowrap; margin-top:calc(2px * var(--s));}
+  .grow{flex:1; min-width:0;}
+
+  /* Rango */
+  .emb{width:calc(64px * var(--s)); height:calc(64px * var(--s)); flex-shrink:0; display:flex; align-items:center; justify-content:center; position:relative;}
+  .emb img{width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 0 8px rgba(0,229,199,.35));}
+  .emb .ph{font-family:Rajdhani,sans-serif; font-weight:800; font-size:calc(22px * var(--s)); color:var(--accent); width:100%; height:100%; border-radius:50%; border:calc(2px * var(--s)) solid rgba(0,229,199,.5); display:none; align-items:center; justify-content:center;}
+  .emb.noimg img{display:none;} .emb.noimg .ph{display:flex;}
+  .lp{color:var(--accent); font-family:Rajdhani,sans-serif; font-weight:800; font-size:calc(19px * var(--s)); margin-left:calc(6px * var(--s));}
+
+  /* Hoy */
+  .today{display:flex; align-items:baseline; gap:calc(12px * var(--s));}
+  .w{color:var(--win);} .l{color:var(--loss);}
+  .delta{font-family:Rajdhani,sans-serif; font-weight:800; font-size:calc(22px * var(--s));}
+  .delta.up{color:var(--win);} .delta.down{color:var(--loss);} .delta.flat{color:var(--dim);}
+  .streak{display:inline-flex; align-items:center; gap:calc(4px * var(--s));}
+  .streak.fire{color:#ffb38a;} .streak.ice{color:var(--ice);}
+  .icon-day{font-size:calc(34px * var(--s)); width:calc(48px * var(--s)); text-align:center; flex-shrink:0;}
+
+  /* Misiones */
+  .ms{display:flex; flex-direction:column; gap:calc(3px * var(--s)); margin-top:calc(5px * var(--s));}
+  .m{display:flex; align-items:center; gap:calc(7px * var(--s)); font-size:calc(12px * var(--s)); font-weight:600; color:var(--dim); min-width:0;}
+  .m i{width:calc(8px * var(--s)); height:calc(8px * var(--s)); border-radius:50%; flex-shrink:0; border:calc(1.5px * var(--s)) solid var(--tc); background:transparent;}
+  .m.done i{background:var(--tc);}
+  .m .t{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .m.done .t{color:#fff;}
+  .m .p{font-weight:800; font-size:calc(11px * var(--s)); color:var(--faint); white-space:nowrap;}
+  .m.done .p{color:var(--gold);}
+  .pane.ms-pane{flex-direction:column; align-items:stretch; justify-content:center; gap:0;}
+
+  /* Barrita de tiempo de la rotación */
+  .timer{position:absolute; left:0; bottom:0; height:calc(2px * var(--s)); width:100%; background:rgba(0,229,199,.5); transform-origin:left; transform:scaleX(0);}
+  .timer.run{animation:timer var(--dur,10s) linear forwards;}
+  @keyframes timer{from{transform:scaleX(0);} to{transform:scaleX(1);}}
+
+  /* Alertas */
+  .alert{position:absolute; inset:0; display:flex; align-items:center; gap:calc(12px * var(--s)); padding:calc(10px * var(--s)) calc(14px * var(--s)) calc(10px * var(--s)) calc(18px * var(--s)); opacity:0; pointer-events:none; z-index:3;}
+  .alert.show{animation:alert-in .55s cubic-bezier(.2,1.4,.4,1) forwards;}
+  .alert.hide{animation:alert-out .45s ease forwards;}
+  @keyframes alert-in{0%{opacity:0; transform:scale(.85);} 100%{opacity:1; transform:none;}}
+  @keyframes alert-out{0%{opacity:1;} 100%{opacity:0; transform:scale(1.04);}}
+  .box.alerting .pane, .box.alerting .timer{opacity:0 !important;}
+  .box.a-up{border-color:var(--gold); box-shadow:0 0 calc(28px * var(--s)) rgba(250,204,21,.45), inset 0 0 calc(30px * var(--s)) rgba(250,204,21,.12);}
+  .box.a-up::before{background:var(--gold); box-shadow:0 0 14px rgba(250,204,21,.8);}
+  .box.a-down{border-color:rgba(125,211,252,.6); box-shadow:0 0 calc(18px * var(--s)) rgba(125,211,252,.25);}
+  .box.a-down::before{background:var(--ice);}
+  .box.a-mis{border-color:var(--tc,#22c55e); box-shadow:0 0 calc(26px * var(--s)) color-mix(in srgb, var(--tc,#22c55e) 45%, transparent);}
+  .box.a-mis::before{background:var(--tc,#22c55e);}
+  .alert .emb img{animation:emb-pop 1.2s ease-out;}
+  @keyframes emb-pop{0%{transform:scale(.3) rotate(-20deg); filter:brightness(3);} 60%{transform:scale(1.15);} 100%{transform:none;}}
+  .alert .big.gold{color:var(--gold); text-shadow:0 0 14px rgba(250,204,21,.6);}
+  .alert .big.ice{color:var(--ice);}
+  .shine{position:absolute; inset:0; pointer-events:none; background:linear-gradient(100deg, transparent 35%, rgba(255,255,255,.28) 50%, transparent 65%); background-size:250% 100%; animation:shine 1.6s ease-in-out 2;}
+  @keyframes shine{from{background-position:150% 0;} to{background-position:-50% 0;}}
+  .alert .ic{font-size:calc(36px * var(--s)); width:calc(56px * var(--s)); text-align:center; flex-shrink:0; animation:emb-pop 1s ease-out;}
+  .alert .t2{font-size:calc(12.5px * var(--s)); font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:calc(2px * var(--s));}
+
+  .err{font:700 13px Inter,sans-serif; color:#fff; background:rgba(255,95,61,.85); border-radius:10px; padding:8px 12px; display:inline-block;}
+</style>
+</head>
+<body>
+<div class="box hidden" id="box">
+  <div class="timer" id="timer"></div>
+</div>
+<div id="err" hidden></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { rankText, emblemUrl, TIER_LABEL, esc } from './assets/lol-data.js';
+
+const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
+
+// ── Parámetros ──
+const Q = new URLSearchParams(location.search);
+const JUGADOR = (Q.get('jugador') || '').trim();
+const PANELES = (Q.get('paneles') || 'rango,hoy,misiones').split(',').map(s => s.trim()).filter(p => ['rango', 'hoy', 'misiones'].includes(p));
+const SEG = Math.min(60, Math.max(4, Number(Q.get('seg')) || 10));
+const ALERTAS = Q.get('alertas') === 'no' ? [] : (Q.get('alertas') || 'liga,mision').split(',').map(s => s.trim());
+const ESCALA = Math.min(2, Math.max(0.6, Number(Q.get('escala')) || 1));
+const COLA = Q.get('cola') === 'todas' ? 'todas' : 'soloq';
+document.documentElement.style.setProperty('--s', ESCALA);
+document.documentElement.style.setProperty('--dur', `${SEG}s`);
+
+const TIER_ORDER = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
+const MT = { easy: { label: 'Fácil', color: '#22c55e', pts: 1 }, medium: { label: 'Media', color: '#facc15', pts: 2 }, hard: { label: 'Difícil', color: '#ff5f3d', pts: 3 } };
+const MT_ORDER = ['easy', 'medium', 'hard'];
+const box = document.getElementById('box');
+const timer = document.getElementById('timer');
+
+function fail(msg) {
+  const e = document.getElementById('err');
+  e.hidden = false; e.innerHTML = `<span class="err">SharkTracker overlay: ${esc(msg)}</span>`;
+}
+
+// "Hoy" empieza a las 6:00 de Madrid (igual que las misiones).
+function madridOffsetMin(d) {
+  const s = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Madrid', timeZoneName: 'shortOffset' }).formatToParts(d).find(p => p.type === 'timeZoneName')?.value ?? 'GMT+1';
+  const m = s.match(/GMT([+-])(\d+)(?::(\d+))?/);
+  return m ? (m[1] === '-' ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3] || 0)) : 60;
+}
+function dayStartIso(now = new Date()) {
+  const off = madridOffsetMin(now);
+  const local = new Date(now.getTime() + off * 60000 - 6 * 3600000);   // "hora de Madrid − 6 h"
+  const y = local.getUTCFullYear(), mo = local.getUTCMonth(), da = local.getUTCDate();
+  const guess = Date.UTC(y, mo, da, 6, 0) - off * 60000;
+  return new Date(Date.UTC(y, mo, da, 6, 0) - madridOffsetMin(new Date(guess)) * 60000).toISOString();
+}
+function timeLeft(ms) {
+  if (ms <= 0) return 'minutos';
+  const d = Math.floor(ms / 86400000), h = Math.floor(ms / 3600000) % 24, m = Math.floor(ms / 60000) % 60;
+  return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m} min`;
+}
+const isRemake = (m) => !m.win && (m.matches?.duration_seconds ?? 0) < 300;
+
+// ── Estado ──
+let player = null, nick = null;
+let state = null;       // último dato cargado
+let prev = null;        // para detectar cambios (alertas)
+
+async function resolvePlayer() {
+  const [{ data: players }, { data: profiles }] = await Promise.all([
+    supabase.from('players').select('id, riot_game_name, icon_id'),
+    supabase.from('player_profiles').select('player_id, display_name'),
+  ]);
+  player = (players ?? []).find(p => p.id === JUGADOR)
+    ?? (players ?? []).find(p => (p.riot_game_name || '').toLowerCase() === JUGADOR.toLowerCase()) ?? null;
+  const dn = (profiles ?? []).find(p => p.player_id === player?.id)?.display_name;
+  nick = dn || player?.riot_game_name;
+}
+
+async function load() {
+  const since = dayStartIso();
+  const [{ data: snaps }, { data: parts }, { data: settings }] = await Promise.all([
+    supabase.from('rank_snapshots').select('*').eq('player_id', player.id).eq('queue_type', 'RANKED_SOLO_5x5').order('recorded_at', { ascending: false }).limit(1),
+    supabase.from('match_participants').select('match_id, player_id, win, lp_change, matches!inner(queue_id, duration_seconds, ended_at)')
+      .eq('player_id', player.id).order('ended_at', { foreignTable: 'matches', ascending: false }).limit(40),
+    supabase.from('mission_settings').select('*').maybeSingle(),
+  ]);
+  const games = (parts ?? []).filter(m => m.matches && !isRemake(m))
+    .sort((a, b) => (b.matches.ended_at > a.matches.ended_at ? 1 : -1));
+  const soloq = games.filter(m => m.matches.queue_id === 420);
+  const pool = COLA === 'todas' ? games : soloq;
+  const today = pool.filter(m => m.matches.ended_at >= since);
+  const lpToday = soloq.filter(m => m.matches.ended_at >= since && m.lp_change != null).reduce((s, m) => s + m.lp_change, 0);
+  // Racha: partidas seguidas con el mismo resultado (de la cola elegida).
+  let streak = 0, streakWin = null;
+  for (const m of pool) { if (streakWin === null) streakWin = m.win; if (m.win !== streakWin) break; streak++; }
+
+  let missions = null;
+  if (settings?.enabled) {
+    const { data: weeks } = await supabase.from('mission_weeks').select('*').order('week_start', { ascending: false }).limit(1);
+    const week = weeks?.[0];
+    if (week) {
+      const [{ data: ms }, { data: cat }] = await Promise.all([
+        supabase.from('player_missions').select('*').eq('week_start', week.week_start).eq('player_id', player.id),
+        supabase.from('mission_catalog').select('code, title, target, points'),
+      ]);
+      const byCode = new Map((cat ?? []).map(c => [c.code, c]));
+      missions = {
+        resetAt: new Date(week.week_start).getTime() + 7 * 86400000,
+        list: (ms ?? []).map(m => ({ ...m, cat: byCode.get(m.code) })).sort((a, b) => MT_ORDER.indexOf(a.tier) - MT_ORDER.indexOf(b.tier)),
+        group: byCode.get(week.group_code) ? { ...byCode.get(week.group_code), progress: week.group_progress, done: !!week.group_completed_at } : null,
+      };
+      if (!missions.list.length) missions = null;
+    }
+  }
+
+  state = {
+    rank: snaps?.[0] ?? null,
+    today: { w: today.filter(m => m.win).length, l: today.filter(m => !m.win).length, lp: lpToday, lpGames: soloq.filter(m => m.matches.ended_at >= since && m.lp_change != null).length },
+    streak: streak >= 2 ? { n: streak, win: streakWin } : null,
+    missions,
+  };
+  detectAlerts();
+  prev = state;
+  drawPanes();
+}
+
+// ── Alertas (se detectan comparando con la carga anterior) ──
+const queue = [];
+let alerting = false;
+function detectAlerts() {
+  if (!prev) return;   // primera carga: nada salta
+  const a = prev.rank?.tier, b = state.rank?.tier;
+  if (ALERTAS.includes('liga') && a && b && a !== b) {
+    queue.push({ kind: 'liga', up: TIER_ORDER.indexOf(b) > TIER_ORDER.indexOf(a), tier: b, rank: state.rank });
+  }
+  if (ALERTAS.includes('mision') && state.missions) {
+    const before = new Set((prev.missions?.list ?? []).filter(m => m.completed_at).map(m => m.id));
+    state.missions.list.filter(m => m.completed_at && !before.has(m.id)).forEach(m => queue.push({ kind: 'mision', m }));
+  }
+  runAlerts();
+}
+async function runAlerts() {
+  if (alerting || !queue.length) return;
+  alerting = true;
+  while (queue.length) await showAlert(queue.shift());
+  alerting = false;
+  restartTimer();
+}
+function showAlert(a) {
+  return new Promise(res => {
+    const el = document.createElement('div');
+    el.className = 'alert';
+    let cls;
+    if (a.kind === 'liga') {
+      cls = a.up ? 'a-up' : 'a-down';
+      el.innerHTML = `<div class="emb"><img src="${emblemUrl(a.tier)}" alt="" onerror="this.parentElement.classList.add('noimg')"><span class="ph">${esc((TIER_LABEL[a.tier] ?? a.tier)[0])}</span></div>
+        <div class="grow"><div class="lbl">${a.up ? '⬆ ¡Subida de liga!' : '⬇ Bajada de liga'}</div>
+          <div class="big ${a.up ? 'gold' : 'ice'}">${a.up ? '¡' : ''}${esc(TIER_LABEL[a.tier] ?? a.tier)}${a.up ? '!' : ''}</div>
+          <div class="sub">${esc(nick)} · ${esc(rankText(a.rank))}${a.rank?.lp != null ? ` · ${a.rank.lp} LP` : ''}</div></div>
+        ${a.up ? '<div class="shine"></div>' : ''}`;
+    } else {
+      const t = MT[a.m.tier] ?? MT.easy;
+      cls = 'a-mis';
+      box.style.setProperty('--tc', t.color);
+      el.innerHTML = `<div class="ic">🎯</div>
+        <div class="grow"><div class="lbl" style="color:${t.color}">Misión ${t.label.toLowerCase()} completada</div>
+          <div class="big" style="font-size:calc(22px * var(--s))">+${a.m.cat?.points ?? t.pts} pt${(a.m.cat?.points ?? t.pts) === 1 ? '' : 's'}</div>
+          <div class="t2">${esc(a.m.cat?.title ?? a.m.code)}</div></div><div class="shine"></div>`;
+    }
+    box.appendChild(el);
+    box.classList.add('alerting', cls);
+    requestAnimationFrame(() => el.classList.add('show'));
+    setTimeout(() => {
+      el.classList.remove('show'); el.classList.add('hide');
+      setTimeout(() => { el.remove(); box.classList.remove('alerting', cls); res(); }, 450);
+    }, 7000);
+  });
+}
+
+// ── Paneles ──
+function paneRango() {
+  const r = state.rank;
+  if (!r?.tier) return `<div class="emb noimg"><span class="ph">?</span></div>
+    <div class="grow"><div class="lbl">SoloQ · <b>${esc(nick)}</b></div><div class="big">Sin rango</div><div class="sub">Todavía sin clasificar</div></div>`;
+  const g = (r.wins ?? 0) + (r.losses ?? 0);
+  return `<div class="emb"><img src="${emblemUrl(r.tier)}" alt="" onerror="this.parentElement.classList.add('noimg')"><span class="ph">${esc((TIER_LABEL[r.tier] ?? r.tier)[0])}</span></div>
+    <div class="grow"><div class="lbl">SoloQ · <b>${esc(nick)}</b></div>
+      <div class="big">${esc(rankText(r))}<span class="lp">${r.lp ?? 0} LP</span></div>
+      <div class="sub">${r.wins ?? 0}V ${r.losses ?? 0}D${g ? ` · ${Math.round(100 * (r.wins ?? 0) / g)}% WR` : ''}</div></div>`;
+}
+function paneHoy() {
+  const t = state.today, s = state.streak;
+  const lbl = `<div class="lbl">Hoy · <b>${esc(nick)}</b><span class="r">${COLA === 'todas' ? 'Todas las colas' : 'SoloQ'}</span></div>`;
+  if (!t.w && !t.l) return `<div class="icon-day">🌅</div><div class="grow">${lbl}<div class="big" style="font-size:calc(22px * var(--s))">Sin partidas hoy</div><div class="sub">¡A por la primera victoria!</div></div>`;
+  const d = t.lp;
+  const streakHtml = s ? `<span class="streak ${s.win ? 'fire' : 'ice'}">${s.win ? '🔥' : '❄️'} Racha de ${s.n} ${s.win ? 'victorias' : 'derrotas'}</span>` : 'Sin racha';
+  return `<div class="icon-day">${d > 0 ? '📈' : d < 0 ? '📉' : '🎮'}</div><div class="grow">${lbl}
+    <div class="today"><span class="big"><span class="w">${t.w}V</span> <span class="l">${t.l}D</span></span>
+      ${t.lpGames ? `<span class="delta ${d > 0 ? 'up' : d < 0 ? 'down' : 'flat'}">${d > 0 ? '+' : ''}${d} LP</span>` : ''}</div>
+    <div class="sub">${streakHtml}</div></div>`;
+}
+function paneMisiones() {
+  const ms = state.missions;
+  const g = ms.group;
+  return `<div class="lbl">🎯 Misiones · <b>⏳ ${timeLeft(ms.resetAt - Date.now())}</b>${g ? `<span class="r">👥 ${g.done ? '✓' : `${Math.min(g.progress, g.target)}/${g.target}`}</span>` : ''}</div>
+    <div class="ms">${ms.list.map(m => {
+      const t = MT[m.tier], target = m.cat?.target ?? 1, done = !!m.completed_at;
+      return `<div class="m ${done ? 'done' : ''}" style="--tc:${t.color}"><i></i><span class="t">${esc(m.cat?.title ?? m.code)}</span><span class="p">${done ? `✓ +${m.cat?.points ?? t.pts}` : `${Math.min(m.progress, target)}/${target}`}</span></div>`;
+    }).join('')}</div>`;
+}
+const BUILDERS = { rango: paneRango, hoy: paneHoy, misiones: paneMisiones };
+
+let panes = [];      // [{key, el}]
+let idx = 0;
+function available() { return PANELES.filter(k => k !== 'misiones' || state?.missions); }
+function drawPanes() {
+  const keys = available();
+  box.classList.toggle('hidden', !keys.length);
+  // Reutiliza los nodos: solo reemplaza el contenido (sin cortar la animación).
+  const cur = panes[idx]?.key;
+  panes.forEach(p => { if (!keys.includes(p.key)) p.el.remove(); });
+  panes = keys.map(k => {
+    let el = panes.find(p => p.key === k)?.el;
+    if (!el) { el = document.createElement('div'); el.className = 'pane'; box.insertBefore(el, timer); }
+    el.classList.toggle('ms-pane', k === 'misiones');
+    el.innerHTML = BUILDERS[k]();
+    return { key: k, el };
+  });
+  idx = Math.max(0, panes.findIndex(p => p.key === cur));
+  panes.forEach((p, i) => { p.el.classList.toggle('on', i === idx); p.el.classList.remove('out'); });
+  if (!rotating) startRotation();
+}
+let rotating = null;
+function restartTimer() {
+  timer.classList.remove('run'); void timer.offsetWidth;
+  if (panes.length > 1) timer.classList.add('run');
+}
+function startRotation() {
+  restartTimer();
+  rotating = setInterval(() => {
+    if (alerting || panes.length < 2) return;
+    const a = panes[idx];
+    idx = (idx + 1) % panes.length;
+    const b = panes[idx];
+    a.el.classList.remove('on'); a.el.classList.add('out');
+    setTimeout(() => a.el.classList.remove('out'), 450);
+    b.el.innerHTML = BUILDERS[b.key]();   // contador de misiones al día
+    b.el.classList.add('on');
+    restartTimer();
+  }, SEG * 1000);
+}
+
+// Vista previa del generador: "Probar alerta".
+window.addEventListener('message', (e) => {
+  if (e.origin !== location.origin || e.data?.type !== 'st-overlay-test' || !state) return;
+  if (e.data.alert === 'liga') {
+    const t = state.rank?.tier && TIER_ORDER.indexOf(state.rank.tier) < TIER_ORDER.length - 1 ? TIER_ORDER[TIER_ORDER.indexOf(state.rank.tier) + 1] : 'GOLD';
+    queue.push({ kind: 'liga', up: true, tier: t, rank: { tier: t, division: 'IV', lp: 0 } });
+  } else if (e.data.alert === 'mision') {
+    const m = state.missions?.list?.find(x => !x.completed_at) ?? state.missions?.list?.[0]
+      ?? { id: 0, tier: 'hard', code: 'deathless', cat: { title: 'Gana una partida sin morir', points: 3 } };
+    queue.push({ kind: 'mision', m });
+  }
+  runAlerts();
+});
+
+// ── Arranque ──
+if (!JUGADOR) fail('falta ?jugador= en la URL.');
+else {
+  try {
+    await resolvePlayer();
+    if (!player) fail(`no encontré al jugador "${JUGADOR}".`);
+    else {
+      await load();
+      let t = null;
+      const reload = () => { clearTimeout(t); t = setTimeout(() => load().catch(() => {}), 1500); };
+      const ch = supabase.channel('overlay-' + player.id);
+      ['rank_snapshots', 'match_participants', 'player_missions', 'mission_weeks', 'mission_settings'].forEach(table =>
+        ch.on('postgres_changes', { event: '*', schema: 'public', table }, reload));
+      ch.subscribe();
+      // Respaldo por si OBS pierde el Realtime: refresco cada minuto.
+      setInterval(() => load().catch(() => {}), 60000);
+    }
+  } catch (err) { fail('no se pudo cargar (' + (err?.message ?? err) + ').'); }
+}
+</script>
+</body>
+</html>
