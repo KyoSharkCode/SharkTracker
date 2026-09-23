@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reto · SharkTracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
+    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
+    --danger:#ff5f3d; --gold:#facc15; --gold-glow:rgba(250,204,21,.35);
+    --silver:#cbd5e1; --bronze:#d9955b; --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  body{
+    margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
+    background:
+      radial-gradient(1000px 460px at 15% -6%, rgba(0,229,199,.14), transparent 60%),
+      radial-gradient(1000px 460px at 85% 6%, rgba(250,204,21,.07), transparent 60%),
+      var(--bg);
+  }
+  a{color:inherit;}
+  .wrap{max-width:1080px; margin:0 auto; padding:44px 20px 80px;}
+
+  header{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:30px; padding-bottom:24px; border-bottom:1px solid var(--border);}
+  .logo-slot{display:flex; align-items:center; gap:14px;}
+  .logo-slot img{height:40px; width:auto; display:block;}
+  .back{font-size:13px; font-weight:700; color:var(--text-dim); text-decoration:none;}
+  .back:hover{color:#fff;}
+  h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
+     background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .auth-slot{grid-column:3; justify-self:end;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden; transition:transform .15s, box-shadow .15s;}
+  .avatar:hover{transform:scale(1.06);}
+  .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .avatar.pending{border-color:var(--gold); color:var(--gold);}
+  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+
+  .msg{padding:70px 20px; text-align:center; color:var(--text-dim); font-size:15px; line-height:1.6;}
+  .msg b{display:block; color:#fff; font-family:'Rajdhani',sans-serif; font-size:26px; letter-spacing:.04em; text-transform:uppercase; margin-bottom:6px;}
+
+  .section-title{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
+  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
+  section{margin-bottom:38px;}
+
+  /* ── Hero ── */
+  .hero{position:relative; border-radius:22px; overflow:hidden; min-height:380px; border:1px solid var(--border); background:#06111c; display:flex; align-items:flex-end; margin-bottom:26px;}
+  .hero.win{border-color:rgba(250,204,21,.55); box-shadow:0 0 50px rgba(250,204,21,.15);}
+  .hero.live{border-color:var(--accent); box-shadow:0 0 40px rgba(0,229,199,.15);}
+  .hero-bg{position:absolute; inset:0; background-size:cover; background-position:center 20%;}
+  .hero-bg::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(3,8,18,.95) 0%, rgba(3,8,18,.7) 45%, rgba(3,8,18,.15) 100%), linear-gradient(0deg, rgba(3,8,18,.9) 0%, transparent 55%);}
+  .hero-body{position:relative; z-index:1; padding:34px 36px; width:100%;}
+  .kicker{display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; padding:5px 12px; border-radius:99px;}
+  .kicker.gold{background:var(--gold); color:#1a1300;}
+  .kicker.live{background:rgba(0,229,199,.16); color:var(--accent); border:1px solid rgba(0,229,199,.4);}
+  .kicker.soon{background:rgba(250,204,21,.14); color:var(--gold); border:1px solid rgba(250,204,21,.4);}
+  .reto-name{margin:14px 0 4px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim);}
+  .champ-name{margin:0; font-family:'Rajdhani',sans-serif; font-weight:800; font-size:clamp(40px,7vw,72px); line-height:.95; letter-spacing:.01em; text-transform:uppercase;}
+  .hero.win .champ-name{background:linear-gradient(90deg,#fff3b0 0%,var(--gold) 60%,#f59e0b 100%); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 4px 18px rgba(250,204,21,.35));}
+  .riot-id{margin-top:6px; font-size:14px; font-weight:700; color:var(--text-dim);}
+  .hero-stats{display:flex; gap:12px; flex-wrap:wrap; margin-top:20px;}
+  .hs{display:flex; align-items:center; gap:10px; background:rgba(3,8,18,.72); border:1px solid var(--border); border-radius:14px; padding:10px 16px; backdrop-filter:blur(6px);}
+  .hs img{width:34px; height:34px;}
+  .hs b{display:block; font-family:'Rajdhani',sans-serif; font-size:22px; line-height:1; color:#fff;}
+  .hs small{display:block; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin-top:3px;}
+  .hs.gold b{color:var(--gold);}
+  .dates{margin-top:16px; font-size:12.5px; color:var(--text-faint); font-weight:600;}
+  .big-count{display:flex; gap:14px; margin-top:18px;}
+  .big-count div{text-align:center; min-width:62px; background:rgba(3,8,18,.72); border:1px solid var(--border); border-radius:14px; padding:10px 8px;}
+  .big-count b{display:block; font-family:'Rajdhani',sans-serif; font-size:34px; line-height:1; color:var(--accent);}
+  .big-count small{font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint);}
+  .leader-note{margin-top:16px; font-size:14px; color:var(--text-dim);}
+  .leader-note b{color:var(--gold);}
+
+  /* ── Podio ── */
+  .podium{display:grid; grid-template-columns:1fr 1.15fr 1fr; gap:14px; align-items:end;}
+  .pod{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:22px 14px 18px; text-align:center; position:relative;}
+  .pod .medal{font-size:30px; line-height:1;}
+  .pod img.ic{width:66px; height:66px; border-radius:50%; object-fit:cover; margin:10px auto 8px; display:block; border:3px solid var(--border); background:#0a1622;}
+  .pod.p1{border-color:rgba(250,204,21,.55); padding-top:30px; box-shadow:0 0 24px rgba(250,204,21,.12);}
+  .pod.p1 img.ic{width:84px; height:84px; border-color:var(--gold);}
+  .pod.p2 img.ic{border-color:var(--silver);}
+  .pod.p3 img.ic{border-color:var(--bronze);}
+  .pod .nm{font-weight:800; font-size:15px;}
+  @media (max-width:700px){ .pod .nm, .pod .rk{grid-column:3;} .pod .nm{align-self:end;} .pod .rk{margin-top:0; align-self:start;} .pod .medal, .pod img.ic{grid-row:span 2;} }
+  .pod .nm a{text-decoration:none;}
+  .pod .nm a:hover{color:var(--accent);}
+  .pod .rk{display:flex; align-items:center; justify-content:center; gap:6px; margin-top:6px; font-size:12.5px; color:var(--text-dim); font-weight:700;}
+  .pod .rk img{width:20px; height:20px;}
+  .pod.empty{opacity:.35;}
+
+  /* ── Premios ── */
+  .awards{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+  .award{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px; display:flex; gap:12px; align-items:center;}
+  .award .ico{width:44px; height:44px; border-radius:12px; background:var(--panel-2); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;}
+  .award small{display:block; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint);}
+  .award b{display:block; font-size:14.5px; margin:2px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .award span{font-size:12px; color:var(--accent); font-weight:700;}
+  .award.none{opacity:.45;}
+
+  /* ── Tabla ── */
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  th{text-align:left; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); padding:12px 14px; border-bottom:1px solid var(--border); white-space:nowrap;}
+  td{padding:11px 14px; border-bottom:1px solid var(--border); vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr.first td{background:rgba(250,204,21,.05);}
+  .num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  th.num{text-align:right;}
+  .pos{font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:800; color:var(--text-faint); width:40px;}
+  tr.first .pos{color:var(--gold);}
+  .pl{display:flex; align-items:center; gap:10px; min-width:0;}
+  .pl img{width:32px; height:32px; border-radius:50%; object-fit:cover; border:2px solid var(--border); background:#0a1622; flex-shrink:0;}
+  .pl a{font-weight:700; text-decoration:none;}
+  .pl a:hover{color:var(--accent);}
+  .pl small{color:var(--text-faint); font-weight:600;}
+  .rank{display:flex; align-items:center; gap:7px; white-space:nowrap; font-weight:700;}
+  .rank img{width:22px; height:22px;}
+  .pos-lp{color:var(--accent);} .neg-lp{color:var(--danger);}
+  .dim{color:var(--text-faint);}
+  .note{margin:10px 2px 0; font-size:12px; color:var(--text-faint); line-height:1.5;}
+
+  /* ── Participantes (programado) ── */
+  .people{display:flex; flex-wrap:wrap; gap:10px;}
+  .person{display:inline-flex; align-items:center; gap:9px; background:var(--panel); border:1px solid var(--border); border-radius:99px; padding:4px 14px 4px 4px; font-weight:700; font-size:13.5px; text-decoration:none;}
+  .person:hover{border-color:var(--accent);}
+  .person img{width:32px; height:32px; border-radius:50%; object-fit:cover; background:#0a1622;}
+
+  /* ── Salón de la fama ── */
+  .fame{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px;}
+  .fame a{display:flex; align-items:center; gap:12px; background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:12px 14px; text-decoration:none; transition:border-color .15s;}
+  .fame a:hover{border-color:var(--gold);}
+  .fame a.current{border-color:var(--accent);}
+  .fame img{width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--gold); background:#0a1622; flex-shrink:0;}
+  .fame .ph{width:40px; height:40px; border-radius:50%; border:2px dashed var(--border); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .fame b{display:block; font-size:13.5px;}
+  .fame small{display:block; color:var(--text-faint); font-size:11.5px; font-weight:600;}
+  .fame .w{color:var(--gold); font-weight:700; font-size:12.5px;}
+  .fame .st{color:var(--accent); font-weight:700; font-size:12.5px;}
+
+  @media (max-width:860px){ .awards{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:700px){
+    header{grid-template-columns:auto 1fr auto;}
+    h1{font-size:24px;} .back{display:none;}
+    .hero{min-height:340px;} .hero-body{padding:24px 20px;}
+    .podium{grid-template-columns:1fr; } .pod.p1{order:-1;}
+    .hide-sm{display:none;}
+    td, th{padding:10px 8px;}
+    .awards{grid-template-columns:1fr;}
+    .rank .dim, .rank img{display:none;}
+    .pos{width:26px; font-size:17px;}
+    .pl img{width:26px; height:26px;}
+    .pod{display:grid; grid-template-columns:auto auto 1fr; align-items:center; gap:12px; text-align:left; padding:12px 14px !important;}
+    .pod img.ic, .pod.p1 img.ic{width:48px; height:48px; margin:0;}
+    .pod .rk{justify-content:flex-start;}
+    .pod .medal{font-size:24px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo-slot">
+      <a href="index.html"><img src="logo/FlaviIconLogo.png" alt="SharkTracker"></a>
+      <a class="back" href="index.html">← Ranking</a>
+    </div>
+    <h1>SoloQ Reto</h1>
+    <div class="auth-slot" id="auth-slot"></div>
+  </header>
+
+  <div id="loading" class="msg">Cargando…</div>
+  <div id="empty" class="msg" hidden><b>Todavía no hay retos</b>Cuando se cree el primero, aparecerá aquí.<br><a href="index.html">Volver al ranking</a></div>
+  <main id="main" hidden>
+    <div id="hero"></div>
+    <section id="podium-sec" hidden>
+      <h2 class="section-title"><span class="bar"></span>Podio</h2>
+      <div class="podium" id="podium"></div>
+    </section>
+    <section id="awards-sec" hidden>
+      <h2 class="section-title"><span class="bar"></span>Premios del reto</h2>
+      <div class="awards" id="awards"></div>
+    </section>
+    <section id="table-sec" hidden>
+      <h2 class="section-title"><span class="bar"></span><span id="table-title">Clasificación final</span></h2>
+      <div class="card"><table>
+        <thead><tr><th>#</th><th>Jugador</th><th>Rango</th><th class="num hide-sm">Partidas</th><th class="num">Winrate</th><th class="num hide-sm">KDA</th><th class="num hide-sm">LP neto</th></tr></thead>
+        <tbody id="table"></tbody>
+      </table></div>
+      <p class="note" id="table-note"></p>
+    </section>
+    <section id="people-sec" hidden>
+      <h2 class="section-title"><span class="bar"></span>Participantes</h2>
+      <div class="people" id="people"></div>
+    </section>
+    <section id="fame-sec" hidden>
+      <h2 class="section-title"><span class="bar"></span>Salón de la fama</h2>
+      <div class="fame" id="fame"></div>
+    </section>
+  </main>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createAuthMenu } from './assets/auth-menu.js';
+
+const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let ddragonVersion = '15.19.1';
+try { ddragonVersion = (await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json()))[0]; } catch {}
+const TIER_ORDER = ['IRON','BRONZE','SILVER','GOLD','PLATINUM','EMERALD','DIAMOND','MASTER','GRANDMASTER','CHALLENGER'];
+const TIER_LABEL = {IRON:'Hierro',BRONZE:'Bronce',SILVER:'Plata',GOLD:'Oro',PLATINUM:'Platino',EMERALD:'Esmeralda',DIAMOND:'Diamante',MASTER:'Maestro',GRANDMASTER:'Gran Maestro',CHALLENGER:'Aspirante'};
+const MINI_CREST_BASE = 'https://raw.communitydragon.org/14.10/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/';
+const CHAMPION_ID_OVERRIDES = { FiddleSticks: 'Fiddlesticks' };
+const champKey = (n) => { const c = (n || '').trim(); return CHAMPION_ID_OVERRIDES[c] || c; };
+const splashUrl = (champ, skin) => champ ? `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champKey(champ)}_${skin ?? 0}.jpg` : null;
+const profileIconUrl = (id) => id ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${id}.png` : null;
+const iconOr1 = (id) => profileIconUrl(id) ?? profileIconUrl(1);
+const ICON_ONERROR = `this.onerror=null;this.src='${profileIconUrl(1)}';`;
+const emblemUrl = (tier) => `${MINI_CREST_BASE}${(tier || 'unranked').toLowerCase()}.png`;
+const DIVISIONLESS = ['MASTER', 'GRANDMASTER', 'CHALLENGER'];
+const rankText = (r) => r?.tier ? `${TIER_LABEL[r.tier] ?? r.tier}${DIVISIONLESS.includes(r.tier) ? '' : ' ' + (r.division ?? '')}` : 'Sin rango';
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = (id) => document.getElementById(id);
+const fechaLarga = (iso) => new Date(iso).toLocaleString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+const fechaCorta = (iso) => new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+const nombreDe = (r) => r.display_name || r.riot_game_name;
+const kda = (r) => r.reto_games ? ((r.reto_kills + r.reto_assists) / Math.max(1, r.reto_deaths)) : null;
+const MIN_PARTIDAS_PREMIO = 5;
+
+const authMenu = createAuthMenu({ supabase, profileIconUrl });
+const idParam = Number(new URL(location.href).searchParams.get('id')) || null;
+let countdownTarget = null;
+
+async function load() {
+  const { data: { session } } = await supabase.auth.getSession();
+  const [{ data: players }, { data: profiles }, { data: challenges }, { data: winners }] = await Promise.all([
+    supabase.from('players').select('*'),
+    supabase.from('player_profiles').select('*'),
+    supabase.from('challenges').select('*').order('starts_at', { ascending: false }),
+    supabase.from('challenge_results').select('challenge_id, riot_game_name, display_name, icon_id').eq('position', 1),
+  ]);
+  authMenu.render(session, players ?? [], profiles ?? []);
+  $('loading').hidden = true;
+
+  const list = challenges ?? [];
+  if (!list.length) { $('empty').hidden = false; $('main').hidden = true; return; }
+  // Sin ?id: el reto abierto (en curso o próximo); si no hay, el último terminado.
+  const open = list.filter(c => !c.finished_at).sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at))[0];
+  const ch = (idParam && list.find(c => c.id === idParam)) || open || list.find(c => c.finished_at) || list[0];
+  document.title = `${ch.name} · SharkTracker`;
+  $('main').hidden = false;
+
+  const winByCh = new Map((winners ?? []).map(w => [w.challenge_id, w]));
+  drawFame(list, winByCh, ch.id);
+
+  if (ch.finished_at) await drawFinished(ch);
+  else await drawOpen(ch, players ?? [], profiles ?? []);
+}
+
+// ── Reto terminado: foto guardada en challenge_results ──
+async function drawFinished(ch) {
+  countdownTarget = null;
+  const { data: res } = await supabase.from('challenge_results').select('*').eq('challenge_id', ch.id).order('position', { ascending: true });
+  const rows = res ?? [];
+  const w = rows[0]?.elo_score != null ? rows[0] : null;
+  const splash = w ? splashUrl(w.favorite_champion, w.favorite_skin) : null;
+  $('hero').innerHTML = `
+    <div class="hero win">
+      <div class="hero-bg" style="${splash ? `background-image:url('${splash}')` : 'background:linear-gradient(135deg,#1a1300,#06111c)'}"></div>
+      <div class="hero-body">
+        <span class="kicker gold">🏆 ${w ? 'Ganador del reto' : 'Reto terminado'}</span>
+        <div class="reto-name">${esc(ch.name)}</div>
+        ${w ? `
+          <h2 class="champ-name">${esc(nombreDe(w))}</h2>
+          <div class="riot-id">${esc(w.riot_game_name)}#${esc(w.riot_tag_line)}</div>
+          <div class="hero-stats">
+            <div class="hs gold"><img src="${emblemUrl(w.tier)}" alt="" onerror="this.style.visibility='hidden'"><div><b>${rankText(w)}</b><small>Rango final</small></div></div>
+            <div class="hs"><div><b>${w.lp ?? 0} LP</b><small>Puntos de liga</small></div></div>
+            ${w.reto_games ? `<div class="hs"><div><b>${Math.round(100 * w.reto_wins / w.reto_games)}%</b><small>Winrate en el reto</small></div></div>` : ''}
+          </div>` : `<h2 class="champ-name">Sin ganador</h2><div class="riot-id">Ningún participante tenía rango SoloQ al cierre.</div>`}
+        <div class="dates">${fechaLarga(ch.starts_at)} → ${fechaLarga(ch.ends_at)}</div>
+      </div>
+    </div>`;
+
+  drawPodium(rows.slice(0, 3));
+  drawAwards(rows);
+  drawTable(rows, 'Clasificación final');
+  $('table-note').textContent = `Partidas, winrate, KDA y LP neto cuentan solo las SoloQ jugadas durante el reto. Premios con mínimo ${MIN_PARTIDAS_PREMIO} partidas.`;
+  $('people-sec').hidden = true;
+}
+
+// ── Reto en curso o programado: se calcula en vivo ──
+async function drawOpen(ch, players, profiles) {
+  const now = Date.now();
+  const live = new Date(ch.starts_at).getTime() <= now;
+  const { data: parts } = await supabase.from('challenge_participants').select('player_id').eq('challenge_id', ch.id);
+  const ids = (parts ?? []).map(p => p.player_id);
+  const profById = new Map(profiles.map(p => [p.player_id, p]));
+  const people = players.filter(p => ids.includes(p.id)).map(p => {
+    const pr = profById.get(p.id) ?? {};
+    return { ...p, display_name: pr.display_name && pr.display_name !== p.riot_game_name ? pr.display_name : null,
+             champ: pr.favorite_champion || p.favorite_champion,
+             skin: pr.favorite_champion ? pr.favorite_skin : p.favorite_skin };
+  });
+
+  let rows = [];
+  if (live && people.length) {
+    const [{ data: snaps }, { data: mps }] = await Promise.all([
+      supabase.from('rank_snapshots').select('player_id, tier, division, lp, wins, losses, elo_score, recorded_at')
+        .eq('queue_type', 'RANKED_SOLO_5x5').in('player_id', ids).order('recorded_at', { ascending: false }),
+      supabase.from('match_participants').select('player_id, win, kills, deaths, assists, lp_change, matches!inner(queue_id, ended_at)')
+        .in('player_id', ids).eq('matches.queue_id', 420).gte('matches.ended_at', ch.starts_at),
+    ]);
+    const lastRank = new Map();
+    for (const s of snaps ?? []) if (!lastRank.has(s.player_id)) lastRank.set(s.player_id, s);
+    const agg = new Map();
+    for (const m of mps ?? []) {
+      if (!m.matches || new Date(m.matches.ended_at) < new Date(ch.starts_at)) continue;
+      const a = agg.get(m.player_id) ?? { g: 0, w: 0, k: 0, d: 0, as: 0, lp: null };
+      a.g++; if (m.win) a.w++; a.k += m.kills ?? 0; a.d += m.deaths ?? 0; a.as += m.assists ?? 0;
+      if (m.lp_change != null) a.lp = (a.lp ?? 0) + m.lp_change;
+      agg.set(m.player_id, a);
+    }
+    rows = people.map(p => {
+      const r = lastRank.get(p.id) ?? {}; const a = agg.get(p.id) ?? { g: 0, w: 0, k: 0, d: 0, as: 0, lp: null };
+      return { player_id: p.id, riot_game_name: p.riot_game_name, riot_tag_line: p.riot_tag_line, display_name: p.display_name,
+               icon_id: p.icon_id, favorite_champion: p.champ, favorite_skin: p.skin,
+               tier: r.tier, division: r.division, lp: r.lp, elo_score: r.elo_score ?? null, season_wins: r.wins,
+               reto_games: a.g, reto_wins: a.w, reto_kills: a.k, reto_deaths: a.d, reto_assists: a.as, reto_lp_net: a.lp };
+    }).sort((x, y) => (y.elo_score ?? -1) - (x.elo_score ?? -1) || (y.season_wins ?? 0) - (x.season_wins ?? 0) || x.riot_game_name.localeCompare(y.riot_game_name));
+  }
+  const leader = rows[0]?.elo_score != null ? rows[0] : null;
+  const splash = leader ? splashUrl(leader.favorite_champion, leader.favorite_skin) : null;
+  countdownTarget = new Date(live ? ch.ends_at : ch.starts_at).getTime();
+  $('hero').innerHTML = `
+    <div class="hero ${live ? 'live' : ''}">
+      <div class="hero-bg" style="${splash ? `background-image:url('${splash}')` : 'background:linear-gradient(135deg,#032a26,#06111c)'}"></div>
+      <div class="hero-body">
+        <span class="kicker ${live ? 'live' : 'soon'}">${live ? '● En curso' : '⏳ Próximamente'}</span>
+        <h2 class="champ-name" style="margin-top:14px;">${esc(ch.name)}</h2>
+        <div class="riot-id">${live ? 'Termina en' : 'Empieza en'}</div>
+        <div class="big-count" id="count">
+          <div><b data-u="d">--</b><small>días</small></div><div><b data-u="h">--</b><small>horas</small></div>
+          <div><b data-u="m">--</b><small>min</small></div><div><b data-u="s">--</b><small>seg</small></div>
+        </div>
+        ${leader ? `<div class="leader-note">Si terminara ahora, ganaría <b>${esc(nombreDe(leader))}</b> · ${rankText(leader)} ${leader.lp ?? 0} LP</div>` : ''}
+        <div class="dates">${fechaLarga(ch.starts_at)} → ${fechaLarga(ch.ends_at)} · ${people.length} participantes</div>
+      </div>
+    </div>`;
+  tick();
+
+  $('podium-sec').hidden = true;
+  $('awards-sec').hidden = true;
+  if (live) {
+    drawTable(rows, 'Clasificación en vivo');
+    $('table-note').textContent = 'Se actualiza sola. Al llegar la fecha de fin se guarda esta tabla y gana quien esté #1.';
+    $('people-sec').hidden = true;
+  } else {
+    $('table-sec').hidden = true;
+    $('people-sec').hidden = false;
+    $('people').innerHTML = people.map(p => `
+      <a class="person" href="perfil.html?jugador=${encodeURIComponent(p.id)}"><img src="${iconOr1(p.icon_id)}" alt="" onerror="${ICON_ONERROR}">${esc(p.display_name || p.riot_game_name)}</a>`).join('')
+      || '<span class="dim">Sin participantes.</span>';
+  }
+}
+
+function playerLink(r, inner) {
+  return r.player_id ? `<a href="perfil.html?jugador=${encodeURIComponent(r.player_id)}">${inner}</a>` : inner;
+}
+
+function drawPodium(top) {
+  $('podium-sec').hidden = !top.length;
+  const card = (r, n) => {
+    if (!r) return `<div class="pod p${n} empty"><div class="medal">${['🥇','🥈','🥉'][n - 1]}</div><div class="nm">—</div></div>`;
+    return `<div class="pod p${n}">
+      <div class="medal">${['🥇','🥈','🥉'][n - 1]}</div>
+      <img class="ic" src="${iconOr1(r.icon_id)}" alt="" onerror="${ICON_ONERROR}">
+      <div class="nm">${playerLink(r, esc(nombreDe(r)))}</div>
+      <div class="rk"><img src="${emblemUrl(r.tier)}" alt="" onerror="this.style.visibility='hidden'">${rankText(r)}${r.tier ? ` · ${r.lp ?? 0} LP` : ''}</div>
+    </div>`;
+  };
+  $('podium').innerHTML = card(top[1], 2) + card(top[0], 1) + card(top[2], 3);
+}
+
+function drawAwards(rows) {
+  const elig = rows.filter(r => r.reto_games >= MIN_PARTIDAS_PREMIO);
+  const best = (arr, fn) => arr.reduce((b, r) => (fn(r) > (b ? fn(b) : -Infinity) ? r : b), null);
+  const masPartidas = best(rows.filter(r => r.reto_games > 0), r => r.reto_games);
+  const mejorWr = best(elig, r => r.reto_wins / r.reto_games);
+  const mejorKda = best(elig, r => kda(r));
+  const subida = best(rows.filter(r => (r.reto_lp_net ?? 0) > 0), r => r.reto_lp_net);
+  const a = (ico, label, r, val) => `<div class="award ${r ? '' : 'none'}"><div class="ico">${ico}</div><div style="min-width:0;">
+      <small>${label}</small><b>${r ? esc(nombreDe(r)) : 'Nadie'}</b><span>${r ? val : `mín. ${MIN_PARTIDAS_PREMIO} partidas`}</span></div></div>`;
+  $('awards').innerHTML =
+    a('⚔️', 'Más partidas', masPartidas, `${masPartidas?.reto_games} partidas`) +
+    a('🎯', 'Mejor winrate', mejorWr, mejorWr ? `${Math.round(100 * mejorWr.reto_wins / mejorWr.reto_games)}% (${mejorWr.reto_games} p.)` : '') +
+    a('🗡️', 'Mejor KDA', mejorKda, mejorKda ? `${kda(mejorKda).toFixed(2)} KDA` : '') +
+    a('📈', 'Mayor subida', subida, subida ? `+${subida.reto_lp_net} LP` : '');
+  $('awards-sec').hidden = !rows.some(r => r.reto_games > 0);
+}
+
+function drawTable(rows, title) {
+  $('table-sec').hidden = false;
+  $('table-title').textContent = title;
+  $('table').innerHTML = rows.map((r, i) => {
+    const k = kda(r);
+    const lp = r.reto_lp_net;
+    return `<tr class="${i === 0 && r.elo_score != null ? 'first' : ''}">
+      <td class="pos">${i + 1}</td>
+      <td><div class="pl"><img src="${iconOr1(r.icon_id)}" alt="" onerror="${ICON_ONERROR}"><div>${playerLink(r, esc(nombreDe(r)))}<br><small>#${esc(r.riot_tag_line)}</small></div></div></td>
+      <td><div class="rank"><img src="${emblemUrl(r.tier)}" alt="" onerror="this.style.visibility='hidden'">${rankText(r)}${r.tier ? ` <span class="dim">${r.lp ?? 0} LP</span>` : ''}</div></td>
+      <td class="num hide-sm">${r.reto_games}</td>
+      <td class="num">${r.reto_games ? Math.round(100 * r.reto_wins / r.reto_games) + '%' : '<span class="dim">—</span>'}</td>
+      <td class="num hide-sm">${k != null ? k.toFixed(2) : '<span class="dim">—</span>'}</td>
+      <td class="num hide-sm">${lp == null ? '<span class="dim">—</span>' : `<span class="${lp >= 0 ? 'pos-lp' : 'neg-lp'}">${lp >= 0 ? '+' : ''}${lp}</span>`}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="7" class="dim" style="text-align:center;padding:22px;">Sin participantes.</td></tr>`;
+}
+
+function drawFame(list, winByCh, currentId) {
+  $('fame-sec').hidden = list.length < 2 && !list.some(c => c.finished_at);
+  $('fame').innerHTML = list.map(c => {
+    const w = winByCh.get(c.id);
+    const live = !c.finished_at && new Date(c.starts_at).getTime() <= Date.now();
+    const status = c.finished_at
+      ? (w ? `<span class="w">🏆 ${esc(w.display_name || w.riot_game_name)}</span>` : '<span class="dim">Sin ganador</span>')
+      : `<span class="st">${live ? '● En curso' : '⏳ Próximo'}</span>`;
+    const pic = c.finished_at && w ? `<img src="${iconOr1(w.icon_id)}" alt="" onerror="${ICON_ONERROR}">` : `<span class="ph">${c.finished_at ? '🏆' : '⏳'}</span>`;
+    return `<a href="reto.html?id=${c.id}" class="${c.id === currentId ? 'current' : ''}">${pic}
+      <div style="min-width:0;"><b>${esc(c.name)}</b><small>${fechaCorta(c.starts_at)} → ${fechaCorta(c.ends_at)}</small>${status}</div></a>`;
+  }).join('');
+}
+
+function tick() {
+  if (!countdownTarget) return;
+  const el = $('count'); if (!el) return;
+  const diff = Math.max(0, countdownTarget - Date.now());
+  el.querySelector('[data-u="d"]').textContent = Math.floor(diff / 86400000);
+  el.querySelector('[data-u="h"]').textContent = String(Math.floor(diff / 3600000) % 24).padStart(2, '0');
+  el.querySelector('[data-u="m"]').textContent = String(Math.floor(diff / 60000) % 60).padStart(2, '0');
+  el.querySelector('[data-u="s"]').textContent = String(Math.floor(diff / 1000) % 60).padStart(2, '0');
+}
+setInterval(tick, 1000);
+
+let t = null;
+const reload = () => { clearTimeout(t); t = setTimeout(load, 700); };
+supabase.channel('reto-live')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'challenges' }, reload)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'challenge_results' }, reload)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'rank_snapshots' }, reload)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'match_participants' }, reload)
+  .subscribe();
+
+load();
+</script>
+</body>
+</html>

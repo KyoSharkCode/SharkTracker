@@ -1202,7 +1202,8 @@ async function renderSkinGrid() {
     grid.innerHTML = `<div class="picker-empty">Cargando skins…</div>`;
     try {
       const data = await fetch(`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/data/es_ES/champion/${id}.json`).then(r => r.json());
-      editState.skinsCache.set(id, (data.data?.[id]?.skins ?? []).map(s => ({ num: s.num, name: s.num === 0 ? 'Clásica' : s.name })));
+      // Sin chromas: Data Dragon los marca con parentSkin (la skin de la que salen) y no tienen splash propio.
+      editState.skinsCache.set(id, (data.data?.[id]?.skins ?? []).map(s => ({ num: s.num, name: s.num === 0 ? 'Clásica' : s.name, chroma: s.parentSkin != null })));
     } catch (e) {
       grid.innerHTML = `<div class="picker-empty">No se pudieron cargar las skins.</div>`;
       return;
@@ -1210,10 +1211,11 @@ async function renderSkinGrid() {
     if (champKey(currentPickerChamp()) !== id) return; // cambió de campeón mientras cargaba
   }
   const skinSel = editState.champion ? editState.skin : favoriteOf(viewState.player, { favorite_champion: null }).skin;
-  const skins = editState.skinsCache.get(id);
+  // Si la skin guardada es un chroma (caso viejo), se sigue mostrando para no perderla de vista.
+  const skins = editState.skinsCache.get(id).filter(s => !s.chroma || s.num === skinSel);
   grid.innerHTML = skins.map(s => `
     <button class="skin-opt ${s.num === skinSel ? 'sel' : ''}" data-num="${s.num}" type="button" title="${esc(s.name)}">
-      <img src="https://ddragon.leagueoflegends.com/cdn/img/champion/tiles/${id}_${s.num}.jpg" alt="" loading="lazy" onerror="${HIDE_ONERROR}">
+      <img src="https://ddragon.leagueoflegends.com/cdn/img/champion/tiles/${id}_${s.num}.jpg" alt="" loading="lazy" onerror="if(!this.closest('.skin-opt').classList.contains('sel'))this.closest('.skin-opt').style.display='none';else this.style.visibility='hidden';">
       <span>${esc(s.name)}</span>
     </button>`).join('');
   grid.querySelectorAll('.skin-opt').forEach(btn => btn.addEventListener('click', () => {

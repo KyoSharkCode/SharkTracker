@@ -216,3 +216,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ── SharkTracker: fuera de GitHub ──
+# Notas, mockups y código viejo: viven solo en la PC.
+_privado/
+# Por si algún día hay claves en archivos locales:
+.env
+.env.*
+supabase/.temp/
+supabase/.branches/

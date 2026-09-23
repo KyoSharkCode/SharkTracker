@@ -96,6 +96,46 @@
   .confirm b{color:#fff;}
   .confirm .actions{justify-content:flex-start; margin-top:8px;}
 
+  /* Retos */
+  .title-btn{margin-left:auto; font-family:'Inter',system-ui,sans-serif; letter-spacing:0; text-transform:none;}
+  .ch-card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; margin-bottom:12px;}
+  .ch-card.live{border-color:var(--accent); box-shadow:0 0 24px rgba(0,229,199,.12);}
+  .ch-top{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .ch-top h3{margin:0; font-family:'Rajdhani',sans-serif; font-size:22px; font-weight:700; letter-spacing:.03em;}
+  .chip{font-size:11px; font-weight:800; padding:3px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:.05em;}
+  .chip.live{background:rgba(0,229,199,.15); color:var(--accent);}
+  .chip.soon{background:rgba(250,204,21,.14); color:var(--gold);}
+  .ch-meta{margin:6px 0 12px; font-size:13px; color:var(--text-dim);}
+  .ch-meta b{color:#fff;}
+  .ch-people{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;}
+  .person{display:inline-flex; align-items:center; gap:7px; background:var(--panel-2); border:1px solid var(--border); border-radius:99px; padding:3px 11px 3px 3px; font-size:12.5px; font-weight:600;}
+  .person img{width:24px; height:24px; border-radius:50%; object-fit:cover; background:#0a1622;}
+  .ch-actions{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .ch-actions a.btn{text-decoration:none; display:inline-block;}
+  .past{display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); font-size:13.5px;}
+  .past:last-child{border-bottom:none;}
+  .past .nm{flex:1; min-width:0;}
+  .past .nm b{color:#fff; display:block;}
+  .past .nm small{color:var(--text-faint);}
+  .past .win{color:var(--gold); font-weight:700; white-space:nowrap;}
+  .past a{color:var(--accent); font-weight:700; text-decoration:none; white-space:nowrap;}
+  .form{background:var(--panel); border:1px solid var(--accent); border-radius:var(--radius); padding:18px 20px; margin-bottom:14px;}
+  .form h3{margin:0 0 14px; font-family:'Rajdhani',sans-serif; font-size:18px; letter-spacing:.05em; text-transform:uppercase;}
+  .fields{display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; margin-bottom:14px;}
+  .fields label, .pick-label{display:block; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:5px;}
+  .in{width:100%; background:#06111c; border:1px solid var(--border); border-radius:9px; padding:9px 11px; color:#fff; font:600 13.5px Inter,sans-serif; outline:none; color-scheme:dark;}
+  .in:focus{border-color:var(--accent);}
+  .pick{display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:8px; margin-bottom:14px;}
+  .pick label{display:flex; align-items:center; gap:9px; background:var(--panel-2); border:1px solid var(--border); border-radius:10px; padding:7px 10px; cursor:pointer; font-size:13px; font-weight:600;}
+  .pick label:has(input:checked){border-color:var(--accent); background:rgba(0,229,199,.08);}
+  .pick input{accent-color:var(--accent);}
+  .pick img{width:26px; height:26px; border-radius:50%; object-fit:cover; background:#0a1622;}
+  .pick-head{display:flex; align-items:center; gap:10px;}
+  .pick-head button{margin-left:auto; background:none; border:none; color:var(--accent); font-weight:700; font-size:12px;}
+  .add-row{display:flex; gap:8px; padding:12px 16px; border-bottom:1px solid var(--border); align-items:center; flex-wrap:wrap;}
+  .add-row .in{max-width:260px;}
+  .add-row small{color:var(--text-faint); font-size:12px;}
+
   @media (max-width:760px){
     header{grid-template-columns:auto 1fr auto;}
     h1{font-size:24px;}
@@ -111,6 +151,8 @@
     .req .who{flex-basis:calc(100% - 56px);}
     .req .btn{flex:1;}
     .back{display:none;}
+    .fields{grid-template-columns:1fr;}
+    .title-btn{padding:6px 10px;}
   }
 </style>
 </head>
@@ -136,8 +178,36 @@
     </section>
 
     <section>
-      <h2 class="section-title"><span class="bar"></span>Jugadores</h2>
+      <h2 class="section-title"><span class="bar"></span>Retos <button class="btn ok title-btn" id="btn-new-ch" type="button">+ Nuevo reto</button></h2>
+      <form class="form" id="ch-form" hidden>
+        <h3>Nuevo reto</h3>
+        <div class="fields">
+          <div><label for="ch-name">Nombre</label><input class="in" id="ch-name" maxlength="60" placeholder="Reto de Octubre" required></div>
+          <div><label for="ch-start">Empieza</label><input class="in" id="ch-start" type="datetime-local" required></div>
+          <div><label for="ch-end">Termina</label><input class="in" id="ch-end" type="datetime-local" required></div>
+        </div>
+        <div class="pick-head"><span class="pick-label">Participantes <span id="ch-count">(0)</span></span><button type="button" id="ch-all">Marcar todos</button></div>
+        <div class="pick" id="ch-pick"></div>
+        <div class="ch-actions">
+          <button class="btn ok" type="submit" id="ch-create">Crear reto</button>
+          <button class="btn ghost" type="button" id="ch-cancel">Cancelar</button>
+        </div>
+        <p class="err" id="ch-form-err"></p>
+      </form>
+      <div id="ch-current"></div>
+      <div class="card" id="ch-past"></div>
+      <p class="err" id="ch-err"></p>
+    </section>
+
+    <section>
+      <h2 class="section-title"><span class="bar"></span>Jugadores <button class="btn ghost title-btn" id="btn-add-pl" type="button">+ Agregar cuenta</button></h2>
       <div class="card">
+        <form class="add-row" id="add-form" hidden>
+          <input class="in" id="add-riotid" placeholder="Nombre#TAG" maxlength="23" autocomplete="off">
+          <button class="btn ok" type="submit" id="add-go">Agregar</button>
+          <button class="btn ghost" type="button" id="add-cancel">Cancelar</button>
+          <small>Se busca en Riot (LAN) antes de agregarla.</small>
+        </form>
         <table>
           <thead><tr><th>Cuenta de LoL</th><th>Discord</th><th>Twitch</th><th></th></tr></thead>
           <tbody id="pl-list"></tbody>
@@ -171,7 +241,7 @@ const authMenu = createAuthMenu({ supabase, profileIconUrl });
 
 // Qué fila de jugador está en modo "editar Twitch" o "confirmar desvincular"
 // (se conserva al redibujar por Realtime).
-const ui = { editTw: null, confirmUnlink: null };
+const ui = { editTw: null, confirmUnlink: null, confirmRemove: null, chConfirm: null };
 let playersCache = [];
 
 async function init() {
@@ -189,13 +259,15 @@ async function init() {
   if (!soyAdmin) { $('no-access').hidden = false; return; }
   $('dash').hidden = false;
 
-  await Promise.all([loadRequests(), loadPlayers()]);
+  await Promise.all([loadRequests(), loadPlayers(), loadChallenges()]);
+  setInterval(tickCountdowns, 30000);
 
-  let t1 = null, t2 = null;
+  let t1 = null, t2 = null, t3 = null;
   supabase.channel('admin-dash')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'claim_requests' }, () => { clearTimeout(t1); t1 = setTimeout(() => { loadRequests(); loadPlayers(); }, 300); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => { clearTimeout(t2); t2 = setTimeout(loadPlayers, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'player_profiles' }, () => { clearTimeout(t2); t2 = setTimeout(loadPlayers, 500); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'challenges' }, () => { clearTimeout(t3); t3 = setTimeout(loadChallenges, 400); })
     .subscribe();
 }
 
@@ -242,6 +314,7 @@ async function loadPlayers() {
   $('pl-err').textContent = '';
   playersCache = data ?? [];
   drawPlayers();
+  if (challengesCache.length) drawChallenges();
 }
 
 function drawPlayers() {
@@ -250,6 +323,7 @@ function drawPlayers() {
     const linked = !!p.user_id;
     const editing = ui.editTw === p.player_id;
     const confirming = ui.confirmUnlink === p.player_id;
+    const removing = ui.confirmRemove === p.player_id;
     const twCell = editing
       ? `<div class="tw-edit"><input id="tw-input" maxlength="25" placeholder="usuario de twitch" value="${esc(p.twitch_username ?? '')}">
            <button class="btn ok" data-act="tw-save" data-id="${p.player_id}" type="button">Guardar</button>
@@ -257,14 +331,20 @@ function drawPlayers() {
       : p.twitch_username
         ? `<span class="tw">📺 ${esc(p.twitch_username)}</span> <span class="badge ${p.twitch_verified ? 'ok' : 'warn'}">${p.twitch_verified ? 'Verificado' : 'A mano'}</span>`
         : `<span class="none">—</span>`;
-    const actions = linked ? `
-        ${editing ? '' : `<button class="btn ghost" data-act="tw-edit" data-id="${p.player_id}" type="button">Twitch</button>`}
-        ${confirming ? '' : `<button class="btn no" data-act="unlink" data-id="${p.player_id}" type="button">Desvincular</button>`}` : '';
+    const actions = `
+        ${linked && !editing ? `<button class="btn ghost" data-act="tw-edit" data-id="${p.player_id}" type="button">Twitch</button>` : ''}
+        ${linked && !confirming ? `<button class="btn no" data-act="unlink" data-id="${p.player_id}" type="button">Desvincular</button>` : ''}
+        ${removing ? '' : `<button class="btn no" data-act="remove" data-id="${p.player_id}" type="button" title="Quitar del roster">✕</button>`}`;
     const confirmBox = confirming ? `
       <div class="confirm">¿Desvincular <b>${esc(p.riot_game_name)}</b> de <b>${esc(p.discord_name ?? 'ese Discord')}</b>?
         Se borran su apodo, bio, campeón/skin elegidos y su Twitch. La cuenta queda libre para una nueva solicitud.
         <div class="actions"><button class="btn danger" data-act="unlink-yes" data-id="${p.player_id}" type="button">Sí, desvincular</button>
-        <button class="btn ghost" data-act="unlink-no" type="button">Cancelar</button></div></div>` : '';
+        <button class="btn ghost" data-act="unlink-no" type="button">Cancelar</button></div></div>` : removing ? `
+      <div class="confirm">¿Quitar <b>${esc(p.riot_game_name)}#${esc(p.riot_tag_line)}</b> del roster?
+        Deja de seguirse y se borra su historial de la temporada (rangos, partidas${linked ? ', perfil y vínculo de Discord' : ''}).
+        Los retos que ya terminaron lo conservan.
+        <div class="actions"><button class="btn danger" data-act="remove-yes" data-id="${p.player_id}" type="button">Sí, quitar</button>
+        <button class="btn ghost" data-act="remove-no" type="button">Cancelar</button></div></div>` : '';
     return `<tr>
       <td data-label="Cuenta de LoL"><div class="pl"><img src="${profileIconUrl(p.icon_id) ?? profileIconUrl(1)}" alt="" onerror="${ICON_ONERROR}">
         <div><a href="perfil.html?jugador=${encodeURIComponent(p.player_id)}">${esc(p.riot_game_name)}</a> <small>#${esc(p.riot_tag_line)}</small></div></div>${confirmBox}</td>
@@ -283,7 +363,18 @@ $('pl-list').addEventListener('click', async (e) => {
   $('pl-err').textContent = '';
   if (act === 'tw-edit') { ui.editTw = id; ui.confirmUnlink = null; drawPlayers(); return; }
   if (act === 'tw-cancel') { ui.editTw = null; drawPlayers(); return; }
-  if (act === 'unlink') { ui.confirmUnlink = id; ui.editTw = null; drawPlayers(); return; }
+  if (act === 'unlink') { ui.confirmUnlink = id; ui.confirmRemove = null; ui.editTw = null; drawPlayers(); return; }
+  if (act === 'remove') { ui.confirmRemove = id; ui.confirmUnlink = null; ui.editTw = null; drawPlayers(); return; }
+  if (act === 'remove-no') { ui.confirmRemove = null; drawPlayers(); return; }
+  if (act === 'remove-yes') {
+    btn.disabled = true;
+    const { error } = await supabase.rpc('admin_remove_player', { p_player_id: id });
+    if (error) { $('pl-err').textContent = error.message; btn.disabled = false; return; }
+    ui.confirmRemove = null;
+    authMenu.toast('Cuenta quitada del roster');
+    await Promise.all([loadPlayers(), loadChallenges()]);
+    return;
+  }
   if (act === 'unlink-no') { ui.confirmUnlink = null; drawPlayers(); return; }
   if (act === 'tw-save') {
     btn.disabled = true;
@@ -307,6 +398,164 @@ $('pl-list').addEventListener('keydown', (e) => {
   if (e.target.id !== 'tw-input') return;
   if (e.key === 'Enter') $('pl-list').querySelector('[data-act="tw-save"]')?.click();
   if (e.key === 'Escape') { ui.editTw = null; drawPlayers(); }
+});
+
+// ── Agregar cuenta al roster (Edge Function: la busca en Riot) ──
+$('btn-add-pl').addEventListener('click', () => { $('add-form').hidden = false; $('add-riotid').focus(); });
+$('add-cancel').addEventListener('click', () => { $('add-form').hidden = true; $('add-riotid').value = ''; });
+$('add-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('pl-err').textContent = '';
+  const raw = $('add-riotid').value.trim();
+  const m = raw.match(/^(.{3,16})#([^#\s]{2,5})$/);
+  if (!m) { $('pl-err').textContent = 'Escríbelo como Nombre#TAG (ej. Galactic Shark#AYK).'; return; }
+  $('add-go').disabled = true; $('add-go').textContent = 'Buscando…';
+  const { data, error } = await supabase.functions.invoke('admin-add-player', { body: { game_name: m[1].trim(), tag_line: m[2] } });
+  $('add-go').disabled = false; $('add-go').textContent = 'Agregar';
+  if (error || data?.error) {
+    let msg = data?.error ?? error?.message ?? 'No se pudo agregar.';
+    try { const b = await error?.context?.json?.(); if (b?.error) msg = b.error; } catch {}
+    $('pl-err').textContent = msg;
+    return;
+  }
+  $('add-riotid').value = ''; $('add-form').hidden = true;
+  authMenu.toast(`✅ ${data.player.riot_game_name}#${data.player.riot_tag_line} agregada al roster`);
+  await loadPlayers();
+});
+
+// ── Retos ──
+let challengesCache = [];
+const pad = (n) => String(n).padStart(2, '0');
+const toLocalInput = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const fechaLarga = (iso) => new Date(iso).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+const fechaCorta = (iso) => new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+function faltan(iso) {
+  let ms = new Date(iso).getTime() - Date.now();
+  if (ms <= 0) return 'unos minutos';
+  const d = Math.floor(ms / 86400000); ms -= d * 86400000;
+  const h = Math.floor(ms / 3600000); ms -= h * 3600000;
+  const m = Math.floor(ms / 60000);
+  return d ? `${d} d ${h} h` : h ? `${h} h ${m} min` : `${m} min`;
+}
+function tickCountdowns() {
+  document.querySelectorAll('[data-countdown]').forEach(el => { el.textContent = faltan(el.dataset.countdown); });
+}
+
+async function loadChallenges() {
+  const [{ data: chs, error }, { data: parts }, { data: winners }] = await Promise.all([
+    supabase.from('challenges').select('*').order('starts_at', { ascending: false }),
+    supabase.from('challenge_participants').select('challenge_id, player_id'),
+    supabase.from('challenge_results').select('challenge_id, riot_game_name, display_name, tier, division, lp').eq('position', 1),
+  ]);
+  if (error) { $('ch-err').textContent = `No se pudieron cargar los retos: ${error.message}`; return; }
+  $('ch-err').textContent = '';
+  const byCh = new Map();
+  for (const p of parts ?? []) byCh.set(p.challenge_id, [...(byCh.get(p.challenge_id) ?? []), p.player_id]);
+  const winByCh = new Map((winners ?? []).map(w => [w.challenge_id, w]));
+  challengesCache = (chs ?? []).map(c => ({ ...c, players: byCh.get(c.id) ?? [], winner: winByCh.get(c.id) ?? null }));
+  drawChallenges();
+}
+
+function drawChallenges() {
+  const byId = new Map(playersCache.map(p => [p.player_id, p]));
+  const now = Date.now();
+  const abiertos = challengesCache.filter(c => !c.finished_at).sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+  const cerrados = challengesCache.filter(c => c.finished_at);
+  $('ch-current').innerHTML = abiertos.map(c => {
+    const live = new Date(c.starts_at).getTime() <= now;
+    const conf = ui.chConfirm?.id === c.id ? ui.chConfirm.action : null;
+    const people = c.players.map(id => byId.get(id)).filter(Boolean)
+      .map(p => `<span class="person"><img src="${profileIconUrl(p.icon_id) ?? profileIconUrl(1)}" alt="" onerror="${ICON_ONERROR}">${esc(p.riot_game_name)}</span>`).join('');
+    const confirmBox = conf === 'finish' ? `
+      <div class="confirm">¿Finalizar <b>${esc(c.name)}</b> ahora? Se guarda el ranking de este momento y gana quien esté #1. No se puede deshacer.
+        <div class="actions"><button class="btn danger" data-ch="finish-yes" data-id="${c.id}" type="button">Sí, finalizar</button>
+        <button class="btn ghost" data-ch="no" type="button">Cancelar</button></div></div>`
+      : conf === 'delete' ? `
+      <div class="confirm">¿Borrar <b>${esc(c.name)}</b>? ${live ? 'Está en curso: se descarta sin ganador.' : 'Todavía no empezó.'}
+        <div class="actions"><button class="btn danger" data-ch="delete-yes" data-id="${c.id}" type="button">Sí, borrar</button>
+        <button class="btn ghost" data-ch="no" type="button">Cancelar</button></div></div>` : '';
+    return `<div class="ch-card ${live ? 'live' : ''}">
+      <div class="ch-top"><h3>${esc(c.name)}</h3><span class="chip ${live ? 'live' : 'soon'}">${live ? 'En curso' : 'Programado'}</span></div>
+      <div class="ch-meta">${fechaLarga(c.starts_at)} → ${fechaLarga(c.ends_at)}<br>
+        ${live ? 'Termina en' : 'Empieza en'} <b data-countdown="${live ? c.ends_at : c.starts_at}">${faltan(live ? c.ends_at : c.starts_at)}</b>
+        ${live ? ' · se cierra solo al llegar la fecha' : ''}</div>
+      <div class="ch-people">${people || '<span class="none">Sin participantes (salieron del roster)</span>'}</div>
+      ${conf ? confirmBox : `<div class="ch-actions">
+        <a class="btn ghost" href="reto.html?id=${c.id}">Ver página</a>
+        ${live ? `<button class="btn no" data-ch="finish" data-id="${c.id}" type="button">Finalizar ahora</button>` : ''}
+        <button class="btn no" data-ch="delete" data-id="${c.id}" type="button">Borrar</button></div>`}
+    </div>`;
+  }).join('') || (cerrados.length ? '' : `<div class="card"><div class="empty">Todavía no hay retos. Crea el primero con “+ Nuevo reto”.</div></div>`);
+  $('ch-past').hidden = !cerrados.length;
+  $('ch-past').innerHTML = cerrados.map(c => `
+    <div class="past">
+      <div class="nm"><b>${esc(c.name)}</b><small>${fechaCorta(c.starts_at)} → ${fechaCorta(c.ends_at)}</small></div>
+      <span class="win">${c.winner ? `🏆 ${esc(c.winner.display_name || c.winner.riot_game_name)}` : 'Sin ganador'}</span>
+      <a href="reto.html?id=${c.id}">Ver →</a>
+    </div>`).join('');
+}
+
+$('ch-current').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-ch]');
+  if (!btn) return;
+  const act = btn.dataset.ch, id = Number(btn.dataset.id);
+  $('ch-err').textContent = '';
+  if (act === 'no') { ui.chConfirm = null; drawChallenges(); return; }
+  if (act === 'finish' || act === 'delete') { ui.chConfirm = { id, action: act }; drawChallenges(); return; }
+  btn.disabled = true;
+  const { error } = await supabase.rpc(act === 'finish-yes' ? 'admin_finish_challenge' : 'admin_delete_challenge', { p_challenge_id: id });
+  if (error) { $('ch-err').textContent = error.message; btn.disabled = false; return; }
+  ui.chConfirm = null;
+  authMenu.toast(act === 'finish-yes' ? '🏆 Reto finalizado' : 'Reto borrado');
+  await loadChallenges();
+});
+
+// Formulario "Nuevo reto"
+function drawPick() {
+  $('ch-pick').innerHTML = playersCache.map(p => `
+    <label><input type="checkbox" value="${p.player_id}"><img src="${profileIconUrl(p.icon_id) ?? profileIconUrl(1)}" alt="" onerror="${ICON_ONERROR}">${esc(p.riot_game_name)}</label>`).join('');
+  updatePickCount();
+}
+function updatePickCount() {
+  const n = $('ch-pick').querySelectorAll('input:checked').length;
+  $('ch-count').textContent = `(${n})`;
+  $('ch-all').textContent = n === playersCache.length && n ? 'Desmarcar todos' : 'Marcar todos';
+}
+$('ch-pick').addEventListener('change', updatePickCount);
+$('ch-all').addEventListener('click', () => {
+  const boxes = [...$('ch-pick').querySelectorAll('input')];
+  const all = boxes.every(b => b.checked);
+  boxes.forEach(b => { b.checked = !all; });
+  updatePickCount();
+});
+$('btn-new-ch').addEventListener('click', () => {
+  const start = new Date(); start.setSeconds(0, 0); start.setMinutes(Math.ceil(start.getMinutes() / 5) * 5);
+  const end = new Date(start.getTime() + 30 * 86400000); end.setHours(23, 59, 0, 0);
+  $('ch-name').value = '';
+  $('ch-start').value = toLocalInput(start);
+  $('ch-end').value = toLocalInput(end);
+  $('ch-form-err').textContent = '';
+  drawPick();
+  $('ch-form').hidden = false;
+  $('ch-name').focus();
+});
+$('ch-cancel').addEventListener('click', () => { $('ch-form').hidden = true; });
+$('ch-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('ch-form-err').textContent = '';
+  const ids = [...$('ch-pick').querySelectorAll('input:checked')].map(i => i.value);
+  const starts = new Date($('ch-start').value), ends = new Date($('ch-end').value);
+  if (ids.length < 2) { $('ch-form-err').textContent = 'Elige al menos 2 participantes.'; return; }
+  if (!(ends > starts)) { $('ch-form-err').textContent = 'La fecha de fin tiene que ser después de la de inicio.'; return; }
+  $('ch-create').disabled = true;
+  const { error } = await supabase.rpc('admin_create_challenge', {
+    p_name: $('ch-name').value.trim(), p_starts_at: starts.toISOString(), p_ends_at: ends.toISOString(), p_player_ids: ids,
+  });
+  $('ch-create').disabled = false;
+  if (error) { $('ch-form-err').textContent = error.message; return; }
+  $('ch-form').hidden = true;
+  authMenu.toast('✅ Reto creado');
+  await loadChallenges();
 });
 
 init();

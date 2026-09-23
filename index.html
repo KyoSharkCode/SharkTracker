@@ -207,8 +207,11 @@
   .rank-row.streak-ice .streak-icon{animation:ice-float 2.4s ease-in-out infinite; filter:drop-shadow(0 0 4px rgba(125,211,252,.8));}
   @keyframes fire-flicker{0%,100%{transform:scale(1) rotate(-4deg);} 50%{transform:scale(1.18) rotate(4deg);}}
   @keyframes ice-float{0%,100%{transform:translateY(0) rotate(-6deg);} 50%{transform:translateY(-2px) rotate(8deg);}}
-  .col-role{width:70px;}
-  .role-pill{display:inline-block; background:rgba(0,229,199,.14); color:var(--accent); font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px;}
+  .col-role{width:96px; flex-shrink:0;}
+  /* Todas las píldoras del mismo ancho; la flecha tiene su propio hueco fijo
+     (aunque no haya flecha) para que nada se desplace. */
+  .role-pill, .role-head{display:inline-block; width:74px; text-align:center; box-sizing:border-box;}
+  .role-pill{ background:rgba(0,229,199,.14); color:var(--accent); font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px;}
   .avatar-circle img{width:100%; height:100%; object-fit:cover;}
   .col-name{flex-grow:1; min-width:0; font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   /* Campeón representativo — en vivo si está jugando, si no su campeón
@@ -232,8 +235,8 @@
   .status-chip{font-size:10px; font-weight:800; padding:4px 8px; border-radius:6px; text-transform:uppercase; white-space:nowrap;}
   .status-chip.in-game{background:rgba(255,95,61,.15); color:var(--danger); border:1px solid rgba(255,95,61,.4);}
   .status-chip.offline{background:rgba(161,161,170,.1); color:#a1a1aa; border:1px solid rgba(161,161,170,.2);}
-  .col-role{width:70px; font-size:12px; color:var(--text-dim); font-weight:600; display:flex; align-items:center; gap:5px;}
-  .trend-arrow{font-size:11px; font-weight:900; line-height:1;}
+  .col-role{width:96px; flex-shrink:0; font-size:12px; color:var(--text-dim); font-weight:600; display:flex; align-items:center; gap:6px;}
+  .trend-arrow{width:12px; flex-shrink:0; text-align:center; font-size:11px; font-weight:900; line-height:1;}
   .trend-arrow.up{color:var(--accent);}
   .trend-arrow.down{color:var(--danger);}
   .col-rank{width:110px; display:flex; align-items:center; gap:6px;}
@@ -307,6 +310,11 @@
   .cd-value{font-family:'Rajdhani',sans-serif; font-size:28px; font-weight:800; color:var(--accent); line-height:1;}
   .cd-caption{font-size:10px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em; margin-top:4px;}
   .countdown-card.finished .cd-value{color:var(--gold);}
+  a.countdown-card{display:block; text-decoration:none; color:inherit; transition:border-color .15s, box-shadow .15s;}
+  a.countdown-card:hover{border-color:var(--accent); box-shadow:0 0 18px rgba(0,229,199,.15);}
+  .reto-winner-card{border-color:rgba(250,204,21,.45);}
+  .reto-winner-name{font-family:'Rajdhani',sans-serif; font-size:30px; font-weight:800; color:var(--gold); line-height:1.1;}
+  .reto-winner-link{margin-top:8px; font-size:12px; font-weight:700; color:var(--accent);}
   @media (max-width:600px){ .countdown-grid{grid-template-columns:1fr;} }
 
   /* Barrido — cuando un dato en vivo cambia (LP, rango, winrate...) se
@@ -367,7 +375,7 @@
       <div class="col-pos">#</div><div style="width:44px;"></div>
       <div style="flex-grow:1;">Jugador</div>
       <div class="col-estado">Estado</div>
-      <div class="col-role">Rol (10p)</div>
+      <div class="col-role"><span class="trend-arrow"></span><span class="role-head">Rol (10p)</span></div>
       <div class="col-rank">Rango</div>
       <div class="col-wr">Winrate</div>
     </div>
@@ -439,7 +447,7 @@ const BADGE_META = {
 };
 const EVENT_META = {
   badge_semanal:'🏅', badge_reciente:'🏅', record_lp:'📈', adelantamiento:'🔥', rey_temporada:'👑',
-  primera_victoria_dia:'🌅', posible_egida:'assets/Aegis_of_Valor_icon.svg', logro_partida:'⚔️',
+  primera_victoria_dia:'🌅', reto_ganado:'🏆', posible_egida:'assets/Aegis_of_Valor_icon.svg', logro_partida:'⚔️',
 };
 
 let ddragonVersion = '15.19.1';
@@ -693,7 +701,7 @@ function buildRow(p, idx) {
   const wr = p.rank && (p.rank.wins + p.rank.losses) > 0 ? Math.round(p.rank.wins / (p.rank.wins + p.rank.losses) * 100) : null;
   const trend = getTrendArrow(p.id);
   const trendHtml = trend
-    ? `<span class="trend-arrow ${trend}" title="${trend === 'up' ? 'Más victorias que derrotas en sus últimas 5' : 'Más derrotas que victorias en sus últimas 5'}">${trend === 'up' ? '▲' : '▼'}</span>` : '';
+    ? `<span class="trend-arrow ${trend}" title="${trend === 'up' ? 'Más victorias que derrotas en sus últimas 5' : 'Más derrotas que victorias en sus últimas 5'}">${trend === 'up' ? '▲' : '▼'}</span>` : '<span class="trend-arrow"></span>';
 
   // Top 3 con corona/medalla (con glow) reemplazando el número — el
   // resto de las posiciones muestra el número normal.
@@ -733,7 +741,7 @@ function buildRow(p, idx) {
         <span class="status-chip ${enPartida ? 'in-game' : 'offline'}">${enPartida ? 'En partida' : 'Offline'}</span>
         ${enPartida && duoCon.length ? `<span class="duo-tag" title="Dúo con ${duoCon.join(', ')}">🎮 con ${duoCon.join(', ')}</span>` : ''}
       </div>
-      <div class="col-role">${trendHtml}${p.primary_role ? `<span class="role-pill">${roleLabel(p.primary_role)}</span>` : '—'}</div>
+      <div class="col-role">${trendHtml}${p.primary_role ? `<span class="role-pill">${roleLabel(p.primary_role)}</span>` : '<span class="role-head">—</span>'}</div>
       <div class="col-rank">
         <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="" onerror="${HIDE_ONERROR}">
         <div class="tier-lp"><div class="tier">${tierText}</div><div class="lp">${lpText}</div></div>
@@ -837,6 +845,7 @@ async function render() {
     supabase.from('events').select('*').order('occurred_at', { ascending: false }).limit(20),
     supabase.from('daily_first_win_state').select('*').maybeSingle(),
   ]);
+  loadRetoCountdown();
 
   const profileByPlayer = new Map((profiles ?? []).map(p => [p.player_id, p]));
   const liveByPlayer = new Map((liveStatus ?? []).map(l => [l.player_id, l]));
@@ -1070,6 +1079,7 @@ async function render() {
       else if (ev.type === 'adelantamiento') texto = `<b>${nombreNuevo}</b> superó a <b>${nombreAnterior}</b>`;
       else if (ev.type === 'rey_temporada') texto = `<b>${nombreNuevo}</b> es el nuevo Rey de la Temporada` + (nombreAnterior ? ` (se lo quitó a <b>${nombreAnterior}</b>)` : '');
       else if (ev.type === 'primera_victoria_dia') texto = `<b>${nombreNuevo}</b> consiguió la primera victoria del día`;
+      else if (ev.type === 'reto_ganado') texto = `<b>${nombreNuevo}</b> ganó el reto`;
       else if (ev.type === 'posible_egida') texto = `<b>${nombreNuevo}</b> posible Égida de Valor`;
       else if (ev.category?.startsWith('perfecta:')) texto = `<b>${nombreNuevo}</b> logró Partida Perfecta`;
       else if (ev.category?.startsWith('ace:')) texto = `<b>${nombreNuevo}</b> logró Ace Perfecto`;
@@ -1083,7 +1093,7 @@ async function render() {
         <div class="logro-icon">${iconoHtml}</div>
         <div style="flex:1;min-width:0;">
           <div class="logro-text">${texto}</div>
-          ${ev.detail ? `<div class="logro-detail">${ev.detail}</div>` : ''}
+          ${ev.detail ? `<div class="logro-detail">${ev.type === 'reto_ganado' ? String(ev.detail).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`) : ev.detail}</div>` : ''}
         </div>
         <div class="logro-time">${timeAgo(ev.occurred_at)}</div>`;
       logrosEl.appendChild(item);
@@ -1110,15 +1120,33 @@ function madridWallToUTC(year, month, day, hour = 0, minute = 0) {
 
 // Fin del split: sin fecha oficial de Riot todavía — placeholder
 // acordado con KyoSumi, actualizar cuando Riot confirme la real.
-const COUNTDOWNS = [
-  { label: 'Fin del Split', target: madridWallToUTC(2027, 1, 1) },
-  { label: 'Final del SoloQReto', target: madridWallToUTC(2026, 10, 26) },
-];
 
-function buildCountdowns() {
+// El reto sale de la base (se crea en el Admin Dashboard): en curso →
+// cuenta hasta su final; programado → cuenta hasta que empieza; si no
+// hay ninguno abierto, muestra al ganador del último reto terminado.
+var countdownSig; // var: se usa antes de esta línea (ver buildCountdowns)
+function buildCountdowns(reto) {
+  // Se arma acá adentro: render() (más arriba) puede llamar a esto antes de que
+  // el script llegue a esta parte del archivo.
+  const list = [{ label: 'Fin del Split', target: madridWallToUTC(2027, 1, 1) }];
+  const escHtml = (t) => String(t ?? '').replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+  if (reto?.open) {
+    const live = new Date(reto.open.starts_at).getTime() <= Date.now();
+    list.push({ label: `${live ? 'Final de' : 'Empieza'} ${escHtml(reto.open.name)}`,
+                target: new Date(live ? reto.open.ends_at : reto.open.starts_at), href: `reto.html?id=${reto.open.id}` });
+  }
+  const sig = JSON.stringify([list.map(c => [c.label, c.target.getTime()]), reto?.lastWinner ?? null]);
+  if (sig === countdownSig) return;
+  countdownSig = sig;
   const grid = document.getElementById('countdown-grid');
-  grid.innerHTML = COUNTDOWNS.map((c) => `
-    <div class="countdown-card" data-target-ms="${c.target.getTime()}">
+  const winnerCard = !reto?.open && reto?.lastWinner ? `
+    <a class="countdown-card reto-winner-card" href="reto.html?id=${reto.lastWinner.id}">
+      <div class="countdown-label">🏆 Ganador de ${escHtml(reto.lastWinner.name)}</div>
+      <div class="reto-winner-name">${escHtml(reto.lastWinner.player)}</div>
+      <div class="reto-winner-link">Ver resultados →</div>
+    </a>` : '';
+  grid.innerHTML = list.map((c) => `
+    <${c.href ? `a href="${c.href}"` : 'div'} class="countdown-card${c.href ? ' is-link' : ''}" data-target-ms="${c.target.getTime()}">
       <div class="countdown-label">${c.label}</div>
       <div class="countdown-digits">
         <div class="cd-unit"><span class="cd-value" data-unit="d">--</span><span class="cd-caption">días</span></div>
@@ -1126,11 +1154,13 @@ function buildCountdowns() {
         <div class="cd-unit"><span class="cd-value" data-unit="m">--</span><span class="cd-caption">min</span></div>
         <div class="cd-unit"><span class="cd-value" data-unit="s">--</span><span class="cd-caption">seg</span></div>
       </div>
-    </div>`).join('');
+    </${c.href ? 'a' : 'div'}>`).join('') + winnerCard;
+  grid.style.gridTemplateColumns = grid.children.length === 1 ? '1fr' : '';
+  tickCountdowns();
 }
 
 function tickCountdowns() {
-  document.querySelectorAll('.countdown-card').forEach((card) => {
+  document.querySelectorAll('.countdown-card[data-target-ms]').forEach((card) => {
     const targetMs = Number(card.dataset.targetMs);
     const diff = Math.max(0, targetMs - Date.now());
     const days = Math.floor(diff / 86400000);
@@ -1145,8 +1175,20 @@ function tickCountdowns() {
   });
 }
 
-buildCountdowns();
-tickCountdowns();
+async function loadRetoCountdown() {
+  const [{ data: open }, { data: last }] = await Promise.all([
+    supabase.from('challenges').select('id, name, starts_at, ends_at').is('finished_at', null).order('starts_at', { ascending: true }).limit(1),
+    supabase.from('challenges').select('id, name, finished_at').not('finished_at', 'is', null).order('finished_at', { ascending: false }).limit(1),
+  ]);
+  let lastWinner = null;
+  if (last?.[0]) {
+    const { data: w } = await supabase.from('challenge_results').select('riot_game_name, display_name')
+      .eq('challenge_id', last[0].id).eq('position', 1).maybeSingle();
+    if (w) lastWinner = { id: last[0].id, name: last[0].name, player: w.display_name || w.riot_game_name };
+  }
+  buildCountdowns({ open: open?.[0] ?? null, lastWinner });
+}
+if (!countdownSig) buildCountdowns(null); // si el reto ya cargó, no se pisa
 setInterval(tickCountdowns, 1000);
 setInterval(tickLiveIndicator, 1000);
 
@@ -1168,6 +1210,7 @@ supabase.channel('sharktracker-live')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'stream_status' }, scheduleRerender)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'weekly_badges' }, scheduleRerender)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, scheduleRerender)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'challenges' }, scheduleRerender)
   // matches/match_participants: sin esto, el Historial Individual y la
   // racha 🔥/❄️ solo se refrescaban "de rebote" cuando el mismo sync
   // tocaba rank_snapshots también. Con esto quedan cubiertos aparte.
