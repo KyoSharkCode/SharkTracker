@@ -874,7 +874,7 @@ let dc = null;
 const DC_KINDS = {
   liga: ['📈 Subidas y bajadas de liga', 'general'], penta: ['🖐️ Pentakills', 'general'], reto: ['🏆 Retos finalizados', 'general'],
   partida_mes: ['🌟 Partida del mes (día 1)', 'general'], semana: ['📅 Resumen semanal (lunes 6:00)', 'general'],
-  partida_grupo: ['🎮 Partidas en grupo o enfrentados', 'general'], partida: ['🕹️ Cada vez que alguien empieza partida', 'general'], canje: ['🎁 Premios canjeados', 'admins'],
+  partida_grupo: ['🎮 Partidas en grupo o enfrentados', 'general'], partida: ['🕹️ Cada vez que alguien empieza partida', 'general'], rewind: ['🎞️ SoloQ Rewind al terminar un split', 'general'], canje: ['🎁 Premios canjeados', 'admins'],
 };
 async function loadDiscord() {
   const [{ data: set, error }, { data: log }, { data: sec }] = await Promise.all([

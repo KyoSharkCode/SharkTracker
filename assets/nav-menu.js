@@ -21,6 +21,8 @@ const ITEMS = [
     icon: 'M3 4h4.5L12 13l4.5-9H21l-7 14h-4zM2 20h20v2H2z' },
   { key: 'tienda', label: 'Tienda', href: 'tienda.html', desc: 'Gasta tus 🦷 en marcos, efectos y premios',
     icon: 'M6 7V6a6 6 0 0 1 12 0v1h3l-1.5 14h-15L3 7zm2 0h8V6a4 4 0 0 0-8 0zM9 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2m6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2' },
+  { key: 'rewind', label: 'SoloQ Rewind', href: 'rewind.html', desc: 'Tu split en historias',
+    icon: 'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1m1 2v10h14V7zm8.5 1.5L9 12l4.5 3.5zm-1 0v7l-4.5-3.5z' },
   { key: 'stats', label: 'Estadísticas', href: 'estadisticas.html', desc: 'Campeones, roles, dúos y récords',
     icon: 'M3 3h2v16h16v2H3zM7 13l4-4 3 3 5-6 1.5 1.3-6.4 7.6-3.1-3.1L8.4 14.4z' },
 ];

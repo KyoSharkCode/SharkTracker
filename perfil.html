@@ -164,6 +164,47 @@
   .hero-tier-row span{font-size:13px; color:var(--text-dim); font-weight:700; text-transform:uppercase; letter-spacing:.08em;}
   .hero-lp{font-family:'Rajdhani',sans-serif; font-size:34px; font-weight:800; line-height:1; white-space:nowrap; background:linear-gradient(90deg, var(--gold), #fff3c4); -webkit-background-clip:text; background-clip:text; color:transparent;}
 
+  #act-sec[hidden]{display:none;}
+  /* Cuándo juegas */
+  .act-modes{display:flex; gap:6px;}
+  .act-mode{border:1px solid var(--border); background:var(--panel); color:var(--text-dim); border-radius:99px; padding:6px 13px; font:700 12.5px Inter,sans-serif; cursor:pointer;}
+  .act-mode.on{border-color:var(--accent); color:#fff; background:rgba(0,229,199,.1);}
+  .act-card{background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:18px 20px;}
+  .act-grid{display:grid; grid-template-columns:44px repeat(8, minmax(0,1fr)); gap:5px; align-items:center;}
+  .act-grid .hl{font-size:10.5px; font-weight:800; color:var(--text-faint); text-align:center; letter-spacing:.04em;}
+  .act-grid .dl{font-size:11.5px; font-weight:800; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em;}
+  .act-grid .cell{height:30px; border-radius:7px; background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.04); position:relative; cursor:default; transition:transform .12s;}
+  .act-grid .cell:hover{transform:scale(1.08); z-index:2; outline:1px solid rgba(255,255,255,.35);}
+  .act-grid .cell span{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:800; color:rgba(255,255,255,.85);}
+  .act-legend{display:flex; align-items:center; gap:8px; margin:12px 0 0 49px; font-size:11px; color:var(--text-faint);}
+  .act-legend i{display:inline-block; width:90px; height:8px; border-radius:99px;}
+  .act-insights{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; margin-top:16px;}
+  .act-insights div{background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-size:13px; color:var(--text-dim); line-height:1.45;}
+  .act-insights b{color:#fff;} .act-insights .good b.v{color:var(--accent);} .act-insights .bad b.v{color:#ff8a6b;}
+  .act-note{margin-top:12px; font-size:11px; color:var(--text-faint);}
+  @media (max-width:560px){ .act-grid{grid-template-columns:34px repeat(8, minmax(0,1fr)); gap:3px;} .act-grid .cell{height:26px;} .act-grid .cell span{font-size:9.5px;} .act-legend{margin-left:37px;} }
+  /* SoloQ Rewind */
+  .rewind-cta{display:flex; align-items:center; gap:14px; margin:0 0 30px; padding:16px 20px; border-radius:16px; text-decoration:none; border:1px solid rgba(255,95,168,.45);
+    background:linear-gradient(100deg, rgba(0,229,199,.12), rgba(166,107,255,.14) 55%, rgba(255,95,168,.16)); transition:box-shadow .15s, transform .15s;}
+  .rewind-cta[hidden]{display:none;}
+  .rewind-cta:hover{box-shadow:0 0 26px rgba(255,95,168,.25); transform:translateY(-1px);}
+  .rewind-cta .rw-ic{font-size:28px;}
+  .rewind-cta .rw-tx{flex:1; min-width:0;} .rewind-cta b{display:block; font-family:'Rajdhani',sans-serif; font-size:20px; letter-spacing:.05em; text-transform:uppercase;}
+  .rewind-cta small{color:var(--text-dim); font-size:12.5px;}
+  .rewind-cta .rw-go{font-weight:800; font-size:13px; color:#fff; white-space:nowrap;}
+  /* ¿Cuánto me falta? — franja debajo del banner */
+  .rank-goal{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px 18px; background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:14px 20px; margin:0 0 22px;}
+  .rank-goal .gk{font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); white-space:nowrap;}
+  .rank-goal .gk b{display:block; font-family:'Rajdhani',sans-serif; font-size:17px; letter-spacing:.04em; color:#fff; margin-top:1px;}
+  .rank-goal .gmid{display:flex; flex-direction:column; gap:7px; min-width:0;}
+  .rank-goal .gbar{height:8px; border-radius:99px; background:rgba(255,255,255,.07); overflow:hidden;}
+  .rank-goal .gbar i{display:block; height:100%; border-radius:99px; background:linear-gradient(90deg, var(--accent), var(--gold)); box-shadow:0 0 10px var(--accent-glow);}
+  .rank-goal .glines{display:flex; gap:6px 18px; flex-wrap:wrap; font-size:12.5px; color:var(--text-dim);}
+  .rank-goal .glines b{color:#fff;}
+  .rank-goal .pace{font-size:12px; font-weight:700; color:var(--text-faint); text-align:right; max-width:260px;}
+  .rank-goal .pace.good{color:var(--accent);} .rank-goal .pace.bad{color:#ffb4a3;}
+  .rank-goal[hidden]{display:none;}
+  @media (max-width:700px){ .rank-goal{grid-template-columns:1fr;} .rank-goal .pace{text-align:left; max-width:none;} }
   @media (max-width:560px){ .hero-content{flex-direction:column; align-items:stretch;} .hero-rank{align-items:flex-start;} }
 
   /* ── TAGS DESTACADOS (columna derecha) ── */
@@ -386,6 +427,9 @@
       </aside>
     </div>
 
+    <!-- ¿Cuánto me falta? -->
+    <div class="rank-goal view-only" id="p-goal" hidden></div>
+
     <!-- Selector de campeón y skin del banner (modo edición) -->
     <section class="picker ed-only" id="picker" hidden>
       <div class="picker-head">
@@ -416,6 +460,30 @@
       <div class="stat-card"><h3>Top Campeones (SoloQ)</h3><div id="box-champs"></div></div>
       <div class="stat-card"><h3>Roles Más Jugados</h3><div id="box-roles"></div></div>
     </div>
+
+    <!-- Cuándo juegas (mapa de actividad) -->
+    <section id="act-sec" hidden>
+      <div class="history-head">
+        <div class="section-title"><span class="bar"></span><h2>Cuándo juegas</h2></div>
+        <div class="act-modes" id="act-modes">
+          <button class="act-mode on" data-mode="n" type="button">Partidas</button>
+          <button class="act-mode" data-mode="wr" type="button">Winrate</button>
+        </div>
+      </div>
+      <div class="act-card">
+        <div class="act-grid" id="act-grid"></div>
+        <div class="act-legend" id="act-legend"></div>
+        <div class="act-insights" id="act-insights"></div>
+        <div class="act-note">Hora de tu dispositivo · todas las colas · últimos 30 días</div>
+      </div>
+    </section>
+
+    <!-- SoloQ Rewind -->
+    <a class="rewind-cta" id="rewind-cta" href="rewind.html" hidden>
+      <span class="rw-ic">🎞️</span>
+      <span class="rw-tx"><b>SoloQ Rewind</b><small id="rewind-sub">Tu split en historias: campeón estrella, rachas, dúo, némesis y más</small></span>
+      <span class="rw-go">Ver →</span>
+    </a>
 
     <section>
       <div class="history-head">
@@ -770,6 +838,8 @@ async function loadAll() {
   renderMastery(masteries ?? []);
   renderTopChamps(soloq);
   renderRoles(soloq);
+  renderActivity(todas);
+  renderRewindCta(player, soloq);
   renderTabs();
   renderHistory();
   await renderLpChart(player.id);
@@ -804,6 +874,141 @@ function getStreak(soloq) {
   let racha = 0;
   for (const g of games) { if (g.win === primero) racha++; else break; }
   return racha >= 3 ? { tipo: primero ? 'fire' : 'ice', n: racha } : null;
+}
+
+// ── Cuándo juegas: días × franjas de 3 horas (hora local del que mira) ──
+const ACT_DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const ACT_DAYS_LONG = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábados', 'domingos'];
+const ACT_SLOTS = ['0–3h', '3–6h', '6–9h', '9–12h', '12–15h', '15–18h', '18–21h', '21–24h'];
+let actState = { mode: 'n', cells: null };
+function renderActivity(todas) {
+  const games = todas.filter(m => !esRemake(m));
+  const sec = document.getElementById('act-sec');
+  if (games.length < 5) { sec.hidden = true; return; }
+  sec.hidden = false;
+  const cells = Array.from({ length: 7 }, () => Array.from({ length: 8 }, () => ({ n: 0, w: 0 })));
+  games.forEach(m => {
+    const d = new Date(m.matches.ended_at);
+    const c = cells[(d.getDay() + 6) % 7][Math.floor(d.getHours() / 3)];
+    c.n++; if (m.win) c.w++;
+  });
+  actState.cells = cells;
+  drawActivity();
+  // Conclusiones
+  const all = games.length, allWr = Math.round(100 * games.filter(g => g.win).length / all);
+  const flat = cells.flatMap((row, di) => row.map((c, si) => ({ ...c, di, si })));
+  const busiest = flat.reduce((a, c) => c.n > a.n ? c : a, flat[0]);
+  const slots = ACT_SLOTS.map((lbl, si) => { const n = cells.reduce((a, r) => a + r[si].n, 0), w = cells.reduce((a, r) => a + r[si].w, 0); return { lbl, n, wr: n ? Math.round(100 * w / n) : null }; }).filter(x => x.n >= 5);
+  const days = ACT_DAYS_LONG.map((lbl, di) => { const n = cells[di].reduce((a, c) => a + c.n, 0), w = cells[di].reduce((a, c) => a + c.w, 0); return { lbl, n, wr: n ? Math.round(100 * w / n) : null }; }).filter(x => x.n >= 5);
+  const best = slots.slice().sort((a, b) => b.wr - a.wr)[0], worst = slots.slice().sort((a, b) => a.wr - b.wr)[0];
+  const bestDay = days.slice().sort((a, b) => b.wr - a.wr)[0];
+  const night = (() => { const n = cells.reduce((a, r) => a + r[0].n + r[1].n, 0), w = cells.reduce((a, r) => a + r[0].w + r[1].w, 0); return n >= 5 ? { n, wr: Math.round(100 * w / n) } : null; })();
+  const out = [`<div>📅 Donde más juegas: <b>${ACT_DAYS_LONG[busiest.di]}</b> de <b>${ACT_SLOTS[busiest.si]}</b> (${busiest.n} partidas)</div>`];
+  if (best && worst && best.lbl !== worst.lbl) {
+    out.push(`<div class="good">⭐ Tu mejor franja: <b>${best.lbl}</b> · <b class="v">${best.wr}%</b> en ${best.n}</div>`);
+    out.push(`<div class="bad">⚠️ Tu peor franja: <b>${worst.lbl}</b> · <b class="v">${worst.wr}%</b> en ${worst.n}</div>`);
+  }
+  if (bestDay) out.push(`<div class="good">🏆 Tu mejor día: los <b>${bestDay.lbl}</b> · <b class="v">${bestDay.wr}%</b> en ${bestDay.n}</div>`);
+  if (night && night.wr <= allWr - 10) out.push(`<div class="bad">😴 De madrugada (0–6h) ganas el <b class="v">${night.wr}%</b> (normalmente ${allWr}%). Quizá mejor dormir.</div>`);
+  document.getElementById('act-insights').innerHTML = out.join('');
+}
+function drawActivity() {
+  const cells = actState.cells; if (!cells) return;
+  const max = Math.max(1, ...cells.flat().map(c => c.n));
+  const colorN = (c) => c.n ? `rgba(0,229,199,${(0.14 + 0.8 * c.n / max).toFixed(2)})` : '';
+  const colorWr = (c) => {
+    if (c.n < 3) return c.n ? 'rgba(157,179,196,.14)' : '';
+    const wr = c.w / c.n;
+    return wr >= 0.5 ? `rgba(0,229,199,${(0.2 + Math.min(1, (wr - 0.5) / 0.25) * 0.7).toFixed(2)})` : `rgba(255,95,61,${(0.2 + Math.min(1, (0.5 - wr) / 0.25) * 0.7).toFixed(2)})`;
+  };
+  const head = `<span></span>${ACT_SLOTS.map(s => `<span class="hl">${s.split('–')[0]}h</span>`).join('')}`;
+  const rows = cells.map((row, di) => `<span class="dl">${ACT_DAYS[di]}</span>${row.map((c, si) => {
+    const bg = actState.mode === 'n' ? colorN(c) : colorWr(c);
+    const tip = c.n ? `${ACT_DAYS_LONG[di]} ${ACT_SLOTS[si]}: ${c.n} partida${c.n === 1 ? '' : 's'} · ${Math.round(100 * c.w / c.n)}% WR` : `${ACT_DAYS_LONG[di]} ${ACT_SLOTS[si]}: sin partidas`;
+    const label = !c.n ? '' : actState.mode === 'n' ? c.n : (c.n >= 3 ? Math.round(100 * c.w / c.n) + '%' : '');
+    return `<div class="cell" style="${bg ? `background:${bg}` : ''}" title="${tip}"><span>${label}</span></div>`;
+  }).join('')}`).join('');
+  document.getElementById('act-grid').innerHTML = head + rows;
+  document.getElementById('act-legend').innerHTML = actState.mode === 'n'
+    ? `Menos <i style="background:linear-gradient(90deg, rgba(0,229,199,.14), rgba(0,229,199,.94))"></i> Más partidas`
+    : `Pierdes más <i style="background:linear-gradient(90deg, rgba(255,95,61,.9), rgba(157,179,196,.2), rgba(0,229,199,.9))"></i> Ganas más <span style="margin-left:6px">(mín. 3 partidas)</span>`;
+}
+document.getElementById('act-modes')?.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-mode]'); if (!b) return;
+  actState.mode = b.dataset.mode;
+  document.querySelectorAll('.act-mode').forEach(x => x.classList.toggle('on', x === b));
+  drawActivity();
+});
+
+// ── Botón del SoloQ Rewind ──
+function renderRewindCta(player, soloq) {
+  const a = document.getElementById('rewind-cta');
+  a.href = `rewind.html?jugador=${encodeURIComponent(player.id)}`;
+  a.hidden = !soloq.length;
+}
+
+// ── ¿Cuánto me falta? — siguiente división / liga al ritmo de las últimas 20 SoloQ ──
+const TIER_ORDER = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
+const DIVS = ['IV', 'III', 'II', 'I'];
+function rankGoal(rank, soloq) {
+  if (!rank?.tier || !DIVS.includes(rank.division) || ['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(rank.tier)) return null;
+  const lp = Math.max(0, Math.min(100, rank.lp ?? 0));
+  const d = DIVS.indexOf(rank.division);                       // 0 = IV … 3 = I
+  const tierIdx = TIER_ORDER.indexOf(rank.tier);
+  const nextTier = TIER_ORDER[tierIdx + 1];
+  const nextDiv = d < 3 ? `${TIER_LABEL[rank.tier]} ${DIVS[d + 1]}` : (nextTier === 'MASTER' ? 'Maestro' : `${TIER_LABEL[nextTier]} IV`);
+  const toDiv = 100 - lp;
+  const toTier = (3 - d) * 100 + (100 - lp);
+  const nextTierLabel = nextTier === 'MASTER' ? 'Maestro' : TIER_LABEL[nextTier];
+  // Ritmo: LP medio por partida (sin remakes, solo las que tienen LP guardado)
+  const recent = soloq.filter(m => !esRemake(m) && typeof m.lp_change === 'number').slice(0, 20);
+  let pace = null;
+  if (recent.length >= 5) {
+    const avg = recent.reduce((a, m) => a + m.lp_change, 0) / recent.length;
+    const wins = recent.filter(m => m.lp_change > 0), losses = recent.filter(m => m.lp_change < 0);
+    const g = wins.length ? wins.reduce((a, m) => a + m.lp_change, 0) / wins.length : 20;
+    const l = losses.length ? Math.abs(losses.reduce((a, m) => a + m.lp_change, 0) / losses.length) : 20;
+    pace = { avg, n: recent.length, needWr: Math.round(100 * l / (g + l)) };
+  }
+  return { lp, nextDiv, toDiv, toTier, nextTierLabel, sameTarget: d === 3, pace };
+}
+function renderRankGoal(rank, soloq) {
+  const el = document.getElementById('p-goal');
+  const g = rankGoal(rank, soloq);
+  if (!g) { el.hidden = true; el.innerHTML = ''; return; }
+  const games = (n) => g.pace && g.pace.avg > 0 ? Math.max(1, Math.ceil(n / g.pace.avg)) : null;
+  const line = (label, n) => { const k = games(n); return `<span>→ <b>${esc(label)}</b>: faltan ${n} LP${k ? ` · ~${k} partida${k === 1 ? '' : 's'}` : ''}</span>`; };
+  const paceHtml = !g.pace ? `<div class="pace">Juega unas SoloQ más para calcular tu ritmo</div>`
+    : g.pace.avg > 0 ? `<div class="pace good">Ritmo: +${g.pace.avg.toFixed(1)} LP por partida<br><small style="font-weight:600;color:var(--text-faint)">últimas ${g.pace.n} SoloQ</small></div>`
+    : `<div class="pace bad">A este ritmo no subes (${g.pace.avg.toFixed(1)} LP/partida).<br>Necesitas ganar ~${g.pace.needWr}% de tus partidas</div>`;
+  el.innerHTML = `<div class="gk">Próximo objetivo<b>${esc(g.nextDiv)}</b></div>
+    <div class="gmid"><div class="gbar" title="${g.lp}/100 LP"><i style="width:${g.lp}%"></i></div>
+      <div class="glines">${line(g.nextDiv, g.toDiv)}${g.sameTarget ? '' : line(g.nextTierLabel, g.toTier)}</div></div>
+    ${paceHtml}`;
+  el.hidden = false;
+}
+
+// ── Tilteado (estilo Porofessor): solo si viene de perder hace poco y además
+//    a) su winrate después de una derrota cae claramente respecto a su winrate normal, o
+//    b) la última fue un desastre (7+ muertes y K+A ≤ la mitad de sus muertes, tipo 0/7/0).
+//    "Después de una derrota" = la siguiente partida jugada en menos de 2 horas.
+function getTilt(soloq) {
+  const games = soloq.filter(m => !esRemake(m)).slice().reverse();   // de más vieja a más nueva
+  const last = games.at(-1);
+  if (!last || last.win || Date.now() - new Date(last.matches.ended_at).getTime() > 12 * 3600 * 1000) return null;
+  const why = [];
+  const afterLoss = [];
+  for (let i = 1; i < games.length; i++) {
+    const prev = games[i - 1], g = games[i];
+    const gap = new Date(g.matches.ended_at) - new Date(prev.matches.ended_at) - (g.matches.duration_seconds ?? 0) * 1000;
+    if (!prev.win && gap < 2 * 3600 * 1000) afterLoss.push(g);
+  }
+  const wr = (l) => l.length ? Math.round(100 * l.filter(g => g.win).length / l.length) : null;
+  const wrAll = wr(games), wrAfter = wr(afterLoss);
+  if (afterLoss.length >= 6 && games.length >= 12 && wrAfter <= wrAll - 12) why.push(`Gana solo el ${wrAfter}% después de perder (normalmente ${wrAll}%)`);
+  const k = last.kills ?? 0, d = last.deaths ?? 0, as = last.assists ?? 0;
+  if (d >= 7 && (k + as) <= d / 2) why.push(`Viene de un ${k}/${d}/${as} con ${last.champion}`);
+  return why.length ? { detail: why.join(' · ') } : null;
 }
 
 // Cosméticos de la tienda: marco en el avatar, borde del banner y nombre.
@@ -876,6 +1081,7 @@ function renderHero(player, profile, rank, live, stream, position, soloq) {
   emblem.style.visibility = '';
   emblem.src = emblemUrl(rank?.tier);
   emblem.onerror = () => { emblem.style.visibility = 'hidden'; };
+  renderRankGoal(rank, soloq);
 
   // Fondo: campeón en vivo si está en partida, si no su campeón/skin favorito
   // (el que eligió en su perfil, o el que venía cargado por defecto).
@@ -906,6 +1112,10 @@ function renderTags(player, rank, position, soloq, weeklyBadges, firstWin, nameB
     const hora = new Date(firstWin.won_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' });
     tags.push({ icono: '🌅', label: 'Primera Victoria del Día', detail: `${hora}h${firstWin.champion ? ' · ' + firstWin.champion : ''}`, champion: firstWin.champion, cls: 'gold' });
   }
+
+  // Tilteado (lo ve todo el mundo; convive con "Racha Fría")
+  const tilt = getTilt(soloq);
+  if (tilt) tags.push({ icono: '😵', label: 'Tilteado', detail: tilt.detail, cls: 'warn' });
 
   // Racha de victorias / derrotas
   const streak = getStreak(soloq);
