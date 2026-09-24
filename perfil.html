@@ -78,8 +78,16 @@
   .hero-avatar-wrap{position:relative; flex-shrink:0;}
   .hero-avatar.framed{border-radius:50%;}
   .hero-avatar{width:64px; height:64px; border-radius:14px; border:2px solid var(--accent); object-fit:cover; display:block; box-shadow:0 0 14px var(--accent-glow); background:#0a1622;}
-  /* Mismo criterio que index.html: sin círculo de fondo, solo el anillo rojo cuando está en vivo */
-  .hero-twitch{position:absolute; bottom:-4px; right:-4px; width:20px; height:20px; filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));}
+  /* Twitch: esquina inferior derecha de la tarjeta del nombre (a la
+     altura de la bio), fuera del avatar para no chocar con los marcos.
+     La tarjeta reserva ese hueco a la derecha solo si hay Twitch. */
+  .hero-identity{position:relative;}
+  /* Solo se reserva hueco en las líneas de abajo (rol y bio), no en toda
+     la tarjeta: así no se ensancha y la tarjeta del elo sigue cabiendo
+     a la derecha del banner. */
+  .hero-identity.has-twitch .p-role, .hero-identity.has-twitch .p-bio{padding-right:26px;}
+  .hero-twitch{position:absolute; bottom:10px; right:12px; width:22px; height:22px; filter:drop-shadow(0 1px 2px rgba(0,0,0,.6)); transition:transform .15s;}
+  .hero-twitch:hover{transform:scale(1.12);}
   .hero-twitch img{width:100%; height:100%; display:block;}
   .hero-twitch.live{border-radius:50%; box-shadow:0 0 0 1px var(--danger), 0 0 8px var(--danger-glow);}
   .hero-twitch.live img{filter:brightness(0) saturate(100%) invert(46%) sepia(89%) saturate(1657%) hue-rotate(325deg) brightness(103%) contrast(101%);}
@@ -348,7 +356,6 @@
           <div class="hero-identity">
             <div class="hero-avatar-wrap">
               <img id="p-avatar" class="hero-avatar" src="" alt="Avatar">
-              <a class="hero-twitch" id="p-twitch" style="display:none;" target="_blank" rel="noopener"><img src="" alt="Twitch"></a>
             </div>
             <div class="hero-name-block">
               <span class="p-nick view-only" id="p-nick" hidden></span>
@@ -359,6 +366,7 @@
               <textarea class="ed-input ed-bio ed-only" id="ed-bio" maxlength="100" placeholder="Una bio corta, máximo 2 líneas…" aria-label="Bio"></textarea>
               <div class="ed-count ed-only" id="ed-bio-count">0/100</div>
             </div>
+            <a class="hero-twitch view-only" id="p-twitch" style="display:none;" target="_blank" rel="noopener"><img src="" alt="Twitch"></a>
           </div>
           <div class="hero-rank">
             <div class="hero-tier-row">
@@ -822,9 +830,10 @@ function renderHero(player, profile, rank, live, stream, position, soloq) {
 
   const twitchLive = !!stream?.is_live;
   const twitchEl = document.getElementById('p-twitch');
+  document.querySelector('.hero-identity').classList.toggle('has-twitch', !!profile.twitch_username);
   if (profile.twitch_username) {
     twitchEl.style.display = 'block';
-    twitchEl.className = `hero-twitch ${twitchLive ? 'live' : ''}`;
+    twitchEl.className = `hero-twitch view-only ${twitchLive ? 'live' : ''}`;
     twitchEl.href = `https://twitch.tv/${encodeURIComponent(profile.twitch_username)}`;
     twitchEl.title = `Twitch${twitchLive ? ' — en vivo' : ''}`;
     twitchEl.querySelector('img').src = `assets/${twitchLive ? 'Online_Twitch' : 'Offline_Twitch'}.svg`;
