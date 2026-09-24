@@ -177,6 +177,15 @@
   .rw-bal{font-weight:800; color:var(--gold); min-width:70px;}
   .rw-kind{font-size:10.5px; font-weight:800; text-transform:uppercase; color:var(--text-faint); border:1px solid var(--border); border-radius:99px; padding:1px 8px;}
   .rw-ic{width:34px; height:34px;} .rw-ic svg{width:100%; height:100%;}
+  /* Discord */
+  .dc-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:8px 16px; padding:14px 16px;}
+  .dc-grid label{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim); cursor:pointer;}
+  .dc-grid label small{color:var(--text-faint); font-size:11px;}
+  .dc-secrets{display:flex; gap:8px; flex-wrap:wrap; margin:0 0 4px;}
+  .dc-tests{display:flex; gap:8px; flex-wrap:wrap; padding:12px 16px; border-top:1px solid var(--border);}
+  .dc-err{display:block; color:var(--danger); font-size:11.5px; margin-top:2px;}
+  .badge.sent{background:rgba(0,229,199,.14); color:var(--accent);}
+  .badge.bad{background:rgba(255,95,61,.14); color:var(--danger);}
   .rw-check{display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--text-dim);}
 
   @media (max-width:760px){
@@ -275,6 +284,21 @@
     </section>
 
     <section>
+      <h2 class="section-title"><span class="bar"></span>Notificaciones de Discord</h2>
+      <div id="dc-status"></div>
+      <div class="rw-sub">Qué se avisa</div>
+      <div class="card"><div class="dc-grid" id="dc-kinds"></div>
+        <div class="dc-tests">
+          <button class="btn ghost" data-dc-test="general" type="button">📨 Probar canal general</button>
+          <button class="btn ghost" data-dc-test="admin" type="button">📨 Probar canal de admins</button>
+          <button class="btn ghost" data-dc-test="semana" type="button">📅 Vista previa del resumen</button>
+        </div></div>
+      <div class="rw-sub">Últimos mensajes <button class="btn ghost" id="dc-reload" type="button" style="margin-left:8px;padding:4px 10px">Actualizar</button></div>
+      <div class="card" id="dc-log"></div>
+      <p class="err" id="dc-err"></p>
+    </section>
+
+    <section>
       <h2 class="section-title"><span class="bar"></span>Jugadores <button class="btn ghost title-btn" id="btn-add-pl" type="button">+ Agregar cuenta</button></h2>
       <div class="card">
         <form class="add-row" id="add-form" hidden>
@@ -338,8 +362,9 @@ async function init() {
   if (!soyAdmin) { $('no-access').hidden = false; return; }
   $('dash').hidden = false;
 
-  await Promise.all([loadRequests(), loadPlayers(), loadChallenges(), loadMissions(), loadSplits(), loadRewards()]);
+  await Promise.all([loadRequests(), loadPlayers(), loadChallenges(), loadMissions(), loadSplits(), loadRewards(), loadDiscord()]);
   setInterval(tickCountdowns, 30000);
+  setInterval(() => { if (!document.hidden) loadDiscord(); }, 30000);
 
   let t1 = null, t2 = null, t3 = null, t4 = null, t5 = null;
   supabase.channel('admin-dash')
@@ -792,6 +817,71 @@ const AMOUNT_LABELS = { mision_facil: 'Misión fácil', mision_media: 'Misión m
   grupal_resto: 'Grupal: a repartir entre el resto', top1: 'Top 1 semanal', top2: 'Top 2 semanal', top3: 'Top 3 semanal', victoria: 'Cada victoria',
   primera_victoria: 'Primera victoria del día', perfecta: 'Partida perfecta', pentakill: 'Pentakill', partida_mes: 'Partida del mes', reto1: 'Reto 1º', reto2: 'Reto 2º', reto3: 'Reto 3º' };
 const KIND_ES = { marco: 'Marco', fila: 'Fila', banner: 'Banner', nombre: 'Nombre', emoji: 'Emoji', premio: 'Premio' };
+// ── Discord ──
+let dc = null;
+const DC_KINDS = {
+  liga: ['📈 Subidas y bajadas de liga', 'general'], penta: ['🖐️ Pentakills', 'general'], reto: ['🏆 Retos finalizados', 'general'],
+  partida_mes: ['🌟 Partida del mes (día 1)', 'general'], semana: ['📅 Resumen semanal (lunes 6:00)', 'general'], canje: ['🎁 Premios canjeados', 'admins'],
+};
+async function loadDiscord() {
+  const [{ data: set, error }, { data: log }, { data: sec }] = await Promise.all([
+    supabase.from('discord_settings').select('*').maybeSingle(),
+    supabase.from('discord_outbox').select('id, channel, kind, embed, status, last_error, created_at, sent_at').order('id', { ascending: false }).limit(15),
+    supabase.rpc('admin_discord_secrets'),
+  ]);
+  if (error || !set) { $('dc-err').textContent = `No se pudieron cargar los avisos de Discord${error ? ': ' + error.message : ' (¿corriste la migración?)'}`; return; }
+  $('dc-err').textContent = '';
+  dc = { set, log: log ?? [], sec: sec ?? {} };
+  drawDiscord();
+}
+function drawDiscord() {
+  if (!dc) return;
+  const on = !!dc.set.enabled, k = dc.set.kinds ?? {};
+  const secChip = (ch, lbl) => `<span class="badge ${dc.sec[ch] ? 'sent' : 'warn'}">${lbl}: ${dc.sec[ch] ? 'conectado' : 'falta el webhook'}</span>`;
+  $('dc-status').innerHTML = `<div class="ms-status ${on ? 'on' : ''}">
+    <span class="chip ${on ? 'live' : 'off'}">${on ? 'Activas' : 'Apagadas'}</span>
+    <div class="txt">${on ? `Se revisa cada minuto. Activas desde <b>${dc.set.enabled_at ? fecha(dc.set.enabled_at) : '—'}</b>: solo se avisa lo que pase desde ese momento.`
+      : 'No se manda nada a Discord. Guarda los webhooks en Vault, prueba los canales y actívalas.'}
+      <div class="dc-secrets" style="margin-top:8px">${secChip('general', 'Canal general')}${secChip('admin', 'Canal de admins')}</div></div>
+    <button class="btn ${on ? 'no' : 'ok'}" id="dc-toggle" type="button">${on ? 'Apagar' : 'Activar'}</button>
+  </div>`;
+  $('dc-kinds').innerHTML = Object.entries(DC_KINDS).map(([key, [lbl, ch]]) =>
+    `<label><input type="checkbox" data-dc-kind="${key}" ${k[key] !== false ? 'checked' : ''}><span>${lbl} <small>· ${ch}</small></span></label>`).join('');
+  const ST = { pendiente: ['warn', 'En cola'], enviando: ['warn', 'Enviando'], enviado: ['sent', 'Enviado'], error: ['bad', 'Error'] };
+  const errs = dc.log.filter(m => m.status === 'error').length;
+  $('dc-log').innerHTML = dc.log.length ? dc.log.map(m => `<div class="rw-row"><div class="nm"><b>${esc(m.embed?.title ?? m.kind)}</b>
+      <small>${m.channel === 'admin' ? 'admins' : 'general'} · ${fecha(m.created_at)}${m.kind === 'prueba' ? ' · prueba' : ''}</small>
+      ${m.last_error && m.status !== 'enviado' ? `<span class="dc-err">${esc(m.last_error)}</span>` : ''}</div>
+      <span class="badge ${ST[m.status][0]}">${ST[m.status][1]}</span></div>`).join('')
+    + (errs ? `<div class="rw-row"><div class="nm"><small>${errs} con error. Revisa el webhook y reintenta.</small></div><button class="btn ghost" id="dc-retry" type="button">Reintentar errores</button></div>` : '')
+    : '<div class="empty">Todavía no se ha mandado nada.</div>';
+}
+document.querySelector('#dc-status').closest('section').addEventListener('click', async (e) => {
+  const b = e.target.closest('button'); if (!b || !dc) return;
+  $('dc-err').textContent = '';
+  const run = async (fn, args, ok) => {
+    b.disabled = true;
+    const { error } = await supabase.rpc(fn, args);
+    b.disabled = false;
+    if (error) { $('dc-err').textContent = error.message; return; }
+    if (ok) authMenu.toast(ok);
+    await loadDiscord();
+    setTimeout(loadDiscord, 4000);   // la respuesta de Discord llega en la siguiente vuelta
+  };
+  if (b.id === 'dc-reload') return loadDiscord();
+  if (b.id === 'dc-toggle') { const was = !!dc.set.enabled; return run('admin_set_discord', { p_enabled: !was, p_kinds: null }, was ? 'Avisos de Discord apagados' : '🔔 Avisos de Discord activados'); }
+  if (b.id === 'dc-retry') return run('admin_discord_retry', {}, 'Reintentando…');
+  if (b.dataset.dcTest) return run('admin_discord_test', { p_what: b.dataset.dcTest }, '📨 Enviado, míralo en Discord');
+});
+document.getElementById('dc-kinds').addEventListener('change', async (e) => {
+  const c = e.target.closest('[data-dc-kind]'); if (!c || !dc) return;
+  $('dc-err').textContent = '';
+  const { error } = await supabase.rpc('admin_set_discord', { p_enabled: !!dc.set.enabled, p_kinds: { [c.dataset.dcKind]: c.checked } });
+  if (error) { $('dc-err').textContent = error.message; c.checked = !c.checked; return; }
+  authMenu.toast(c.checked ? 'Aviso activado' : 'Aviso desactivado');
+  await loadDiscord();
+});
+
 let rw = null;
 const fmtN = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 async function loadRewards() {
