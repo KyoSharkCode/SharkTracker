@@ -47,6 +47,23 @@
   .section-title .count{font-family:'Inter'; font-size:11px; font-weight:800; color:#032018; background:var(--gold); border-radius:99px; padding:2px 9px; letter-spacing:0;}
   .section-title .count.zero{background:var(--border); color:var(--text-dim);}
   section{margin-bottom:40px;}
+  /* Pestañas del dashboard: una sección a la vez */
+  .tabs{position:sticky; top:10px; z-index:20; display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; margin:0 0 28px; padding:5px;
+    background:rgba(6,14,24,.85); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border:1px solid var(--border); border-radius:99px;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{flex-shrink:0; display:inline-flex; align-items:center; gap:7px; background:transparent; border:1px solid transparent; color:var(--text-dim);
+    border-radius:99px; padding:9px 16px; font:700 13px Inter,sans-serif; cursor:pointer; transition:border-color .15s, color .15s, box-shadow .15s;}
+  .tab:hover{border-color:var(--accent); color:#fff;}
+  .tab.on{background:rgba(0,229,199,.12); border-color:var(--accent); color:#fff; box-shadow:0 0 16px rgba(0,229,199,.18);}
+  .tab .tc{font-size:10.5px; font-weight:800; color:#032018; background:var(--gold); border-radius:99px; padding:1px 7px;}
+  .tab .tc.bad{background:var(--danger); color:#fff;}
+  .tab .tc[hidden]{display:none;}
+  @media (max-width:560px){
+    .tabs{position:static; flex-wrap:wrap; border-radius:18px; overflow:visible;}
+    .tab{flex:1 1 30%; justify-content:center; padding:8px 4px; font-size:12px; border-radius:12px;}
+  }
+  section[data-tab]{display:none;}
+  section[data-tab].on{display:block;}
 
   .card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
   .empty{padding:22px; text-align:center; color:var(--text-faint); font-size:13.5px;}
@@ -225,13 +242,21 @@
   <div id="no-access" class="msg" hidden><b>Sin acceso</b>Esta página es solo para administradoras.<br><a href="index.html">Volver al ranking</a></div>
 
   <main id="dash" hidden>
-    <section>
+    <nav class="tabs" id="tabs" aria-label="Secciones del dashboard">
+      <button class="tab" data-go="jugadores" type="button">👥 Jugadores <span class="tc" id="tc-jugadores" hidden></span></button>
+      <button class="tab" data-go="retos" type="button">🏆 Retos</button>
+      <button class="tab" data-go="misiones" type="button">🎯 Misiones</button>
+      <button class="tab" data-go="splits" type="button">📅 Splits</button>
+      <button class="tab" data-go="tienda" type="button">🦷 Tienda <span class="tc" id="tc-tienda" hidden></span></button>
+      <button class="tab" data-go="discord" type="button">🔔 Discord <span class="tc bad" id="tc-discord" hidden></span></button>
+    </nav>
+    <section data-tab="jugadores">
       <h2 class="section-title"><span class="bar"></span>Solicitudes para vincular <span class="count zero" id="req-count">0</span></h2>
       <div class="card" id="req-list"></div>
       <p class="err" id="req-err"></p>
     </section>
 
-    <section>
+    <section data-tab="retos">
       <h2 class="section-title"><span class="bar"></span>Retos <button class="btn ok title-btn" id="btn-new-ch" type="button">+ Nuevo reto</button></h2>
       <form class="form" id="ch-form" hidden>
         <h3>Nuevo reto</h3>
@@ -253,21 +278,21 @@
       <p class="err" id="ch-err"></p>
     </section>
 
-    <section>
+    <section data-tab="misiones">
       <h2 class="section-title"><span class="bar"></span>Misiones semanales</h2>
       <div id="ms-status"></div>
       <div class="card" id="ms-list" hidden></div>
       <p class="err" id="ms-err"></p>
     </section>
 
-    <section>
+    <section data-tab="splits">
       <h2 class="section-title"><span class="bar"></span>Splits (historial de rangos) <button class="btn ghost title-btn" id="btn-new-sp" type="button">+ Nuevo split</button></h2>
       <div class="card" id="sp-list"></div>
       <p class="sp-note">Las fechas vienen con el calendario de Riot de 2026; si Riot las cambia, ajústalas aquí. Al guardar se recalcula el pico y el rango final de todos. Deja "Termina" vacío si todavía no se sabe.</p>
       <p class="err" id="sp-err"></p>
     </section>
 
-    <section>
+    <section data-tab="tienda">
       <h2 class="section-title"><span class="bar"></span>Recompensas y tienda 🦷</h2>
       <div id="rw-status"></div>
       <div class="rw-sub">Premios por entregar <span class="count zero" id="rw-claims-n" style="font-size:11px">0</span></div>
@@ -283,7 +308,7 @@
       <p class="err" id="rw-err"></p>
     </section>
 
-    <section>
+    <section data-tab="discord">
       <h2 class="section-title"><span class="bar"></span>Notificaciones de Discord</h2>
       <div id="dc-status"></div>
       <div class="rw-sub">Qué se avisa</div>
@@ -298,7 +323,7 @@
       <p class="err" id="dc-err"></p>
     </section>
 
-    <section>
+    <section data-tab="jugadores">
       <h2 class="section-title"><span class="bar"></span>Jugadores <button class="btn ghost title-btn" id="btn-add-pl" type="button">+ Agregar cuenta</button></h2>
       <div class="card">
         <form class="add-row" id="add-form" hidden>
@@ -346,6 +371,33 @@ const authMenu = createAuthMenu({ supabase, profileIconUrl });
 // (se conserva al redibujar por Realtime).
 const ui = { editTw: null, confirmUnlink: null, confirmRemove: null, chConfirm: null, msConfirm: null };
 let playersCache = [];
+
+// ── Pestañas ──
+const TABS = ['jugadores', 'retos', 'misiones', 'splits', 'tienda', 'discord'];
+function showTab(t, push = true) {
+  if (!TABS.includes(t)) t = 'jugadores';
+  document.querySelectorAll('section[data-tab]').forEach(sec => sec.classList.toggle('on', sec.dataset.tab === t));
+  document.querySelectorAll('.tab').forEach(b => { b.classList.toggle('on', b.dataset.go === t); b.setAttribute('aria-current', b.dataset.go === t ? 'page' : 'false'); });
+  document.querySelector(`.tab[data-go="${t}"]`)?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  if (push && location.hash !== '#' + t) history.replaceState(null, '', '#' + t);
+}
+document.getElementById('tabs').addEventListener('click', (e) => {
+  const b = e.target.closest('.tab'); if (!b) return;
+  showTab(b.dataset.go);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+window.addEventListener('hashchange', () => showTab(location.hash.slice(1), false));
+showTab(location.hash.slice(1), false);
+// Contadores de pendientes en las pestañas
+function setTabCount(tab, n) {
+  const el = document.getElementById('tc-' + tab); if (!el) return;
+  el.textContent = n; el.hidden = !n;
+}
+const syncCounts = () => {
+  setTabCount('jugadores', Number($('req-count')?.textContent) || 0);
+  setTabCount('tienda', Number($('rw-claims-n')?.textContent) || 0);
+};
+['req-count', 'rw-claims-n'].forEach(id => $(id) && new MutationObserver(syncCounts).observe($(id), { childList: true, characterData: true, subtree: true }));
 
 async function init() {
   const { data: { session } } = await supabase.auth.getSession();
@@ -821,7 +873,8 @@ const KIND_ES = { marco: 'Marco', fila: 'Fila', banner: 'Banner', nombre: 'Nombr
 let dc = null;
 const DC_KINDS = {
   liga: ['📈 Subidas y bajadas de liga', 'general'], penta: ['🖐️ Pentakills', 'general'], reto: ['🏆 Retos finalizados', 'general'],
-  partida_mes: ['🌟 Partida del mes (día 1)', 'general'], semana: ['📅 Resumen semanal (lunes 6:00)', 'general'], canje: ['🎁 Premios canjeados', 'admins'],
+  partida_mes: ['🌟 Partida del mes (día 1)', 'general'], semana: ['📅 Resumen semanal (lunes 6:00)', 'general'],
+  partida_grupo: ['🎮 Partidas en grupo o enfrentados', 'general'], partida: ['🕹️ Cada vez que alguien empieza partida', 'general'], canje: ['🎁 Premios canjeados', 'admins'],
 };
 async function loadDiscord() {
   const [{ data: set, error }, { data: log }, { data: sec }] = await Promise.all([
@@ -845,10 +898,11 @@ function drawDiscord() {
       <div class="dc-secrets" style="margin-top:8px">${secChip('general', 'Canal general')}${secChip('admin', 'Canal de admins')}</div></div>
     <button class="btn ${on ? 'no' : 'ok'}" id="dc-toggle" type="button">${on ? 'Apagar' : 'Activar'}</button>
   </div>`;
-  $('dc-kinds').innerHTML = Object.entries(DC_KINDS).map(([key, [lbl, ch]]) =>
+  $('dc-kinds').innerHTML = Object.entries(DC_KINDS).filter(([key]) => key in k).map(([key, [lbl, ch]]) =>
     `<label><input type="checkbox" data-dc-kind="${key}" ${k[key] !== false ? 'checked' : ''}><span>${lbl} <small>· ${ch}</small></span></label>`).join('');
   const ST = { pendiente: ['warn', 'En cola'], enviando: ['warn', 'Enviando'], enviado: ['sent', 'Enviado'], error: ['bad', 'Error'] };
   const errs = dc.log.filter(m => m.status === 'error').length;
+  setTabCount('discord', errs);
   $('dc-log').innerHTML = dc.log.length ? dc.log.map(m => `<div class="rw-row"><div class="nm"><b>${esc(m.embed?.title ?? m.kind)}</b>
       <small>${m.channel === 'admin' ? 'admins' : 'general'} · ${fecha(m.created_at)}${m.kind === 'prueba' ? ' · prueba' : ''}</small>
       ${m.last_error && m.status !== 'enviado' ? `<span class="dc-err">${esc(m.last_error)}</span>` : ''}</div>

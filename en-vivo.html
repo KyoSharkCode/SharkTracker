@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>En vivo · SharkTracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
+    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
+    --danger:#ff5f3d; --danger-glow:rgba(255,95,61,.45); --gold:#facc15; --radius:16px;
+    --blue:#4c9dff; --blue-bg:rgba(76,157,255,.1); --red:#ff5f6d; --red-bg:rgba(255,95,109,.1);
+  }
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  body{margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
+    background:radial-gradient(1000px 460px at 15% -6%, rgba(76,157,255,.12), transparent 60%), radial-gradient(1000px 460px at 85% 6%, rgba(255,95,109,.10), transparent 60%), var(--bg);}
+  a{color:inherit;}
+  .wrap{max-width:1160px; margin:0 auto; padding:44px 20px 80px;}
+  header{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:26px; padding-bottom:24px; border-bottom:1px solid var(--border);}
+  .logo-slot{display:flex; align-items:center; gap:14px;}
+  .logo-slot img{height:40px; width:auto; display:block;}
+  h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
+     background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .auth-slot{grid-column:3; justify-self:end;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
+  .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .avatar.pending{border-color:var(--gold); color:var(--gold);}
+  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+  .msg{padding:60px 20px; text-align:center; color:var(--text-dim); font-size:15px; line-height:1.6;}
+  .msg b{display:block; color:#fff; font-size:18px; margin-bottom:4px;}
+  .note{margin-top:26px; font-size:12px; color:var(--text-faint); text-align:center; line-height:1.6;}
+
+  /* ── Cabecera de la partida ── */
+  .gbar{display:flex; align-items:center; gap:18px; flex-wrap:wrap; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 20px; margin-bottom:22px;}
+  .livechip{display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:900; letter-spacing:.12em; color:var(--danger); background:rgba(255,95,61,.12); border:1px solid rgba(255,95,61,.4); border-radius:99px; padding:5px 12px;}
+  .livechip i{width:8px; height:8px; border-radius:50%; background:var(--danger); animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 var(--danger-glow);} 70%{box-shadow:0 0 0 8px rgba(255,95,61,0);} 100%{box-shadow:0 0 0 0 rgba(255,95,61,0);}}
+  .livechip.ended{color:var(--text-dim); background:rgba(157,179,196,.1); border-color:var(--border);} .livechip.ended i{background:var(--text-faint); animation:none;}
+  .gmeta{flex:1; min-width:180px;}
+  .gmeta b{display:block; font-family:'Rajdhani',sans-serif; font-size:22px; letter-spacing:.04em; text-transform:uppercase; line-height:1.1;}
+  .gmeta small{color:var(--text-dim); font-size:12.5px;}
+  .gclock{font-family:'Rajdhani',sans-serif; font-weight:800; font-size:40px; line-height:1; letter-spacing:.02em; font-variant-numeric:tabular-nums;}
+  .gclock small{display:block; font-family:'Inter',sans-serif; font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); text-align:right;}
+  .grp{width:100%; display:flex; gap:8px; flex-wrap:wrap;}
+  .grp span{font-size:12.5px; font-weight:700; border-radius:99px; padding:4px 12px; background:rgba(0,229,199,.1); color:var(--accent); border:1px solid rgba(0,229,199,.3);}
+  .grp span.vs{background:rgba(250,204,21,.1); color:var(--gold); border-color:rgba(250,204,21,.35);}
+  .ended-box{display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:rgba(0,229,199,.06); border:1px solid rgba(0,229,199,.35); border-radius:var(--radius); padding:14px 18px; margin-bottom:22px; font-size:14px; color:var(--text-dim);}
+  .ended-box b{color:#fff;}
+  .btn{display:inline-block; border:none; border-radius:9px; padding:9px 16px; font-weight:800; font-size:13px; text-decoration:none; background:var(--accent); color:#032018; cursor:pointer;}
+
+  /* ── Equipos ── */
+  .team{margin-bottom:26px;}
+  .thead{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;}
+  .thead h2{margin:0; display:flex; align-items:center; gap:10px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
+  .thead h2 .bar{width:4px; height:16px; border-radius:2px;}
+  .team.blue .bar{background:var(--blue); box-shadow:0 0 10px var(--blue);} .team.red .bar{background:var(--red); box-shadow:0 0 10px var(--red);}
+  .bans{margin-left:auto; display:flex; align-items:center; gap:6px;}
+  .bans small{font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); margin-right:4px;}
+  .ban{position:relative; width:30px; height:30px; border-radius:7px; overflow:hidden; border:1px solid var(--border); background:#0a1622;}
+  .ban img{width:100%; height:100%; object-fit:cover; filter:grayscale(1) brightness(.6);}
+  .ban::after{content:''; position:absolute; left:-4px; right:-4px; top:50%; height:2px; background:var(--danger); transform:rotate(-45deg); box-shadow:0 0 4px rgba(0,0,0,.8);}
+  .ban.none::after{display:none;}
+
+  .cards{display:grid; grid-template-columns:repeat(5,1fr); gap:12px;}
+  .pc{position:relative; aspect-ratio:308/560; border-radius:14px; overflow:hidden; border:1px solid var(--border); background:#06111c; text-decoration:none; display:block;}
+  .team.blue .pc{border-color:rgba(76,157,255,.35);} .team.red .pc{border-color:rgba(255,95,109,.35);}
+  .pc .art{position:absolute; inset:0; background-size:cover; background-position:center top; transition:transform .4s ease;}
+  .pc:hover .art{transform:scale(1.04);}
+  .pc::after{content:''; position:absolute; inset:0; background:linear-gradient(0deg, rgba(3,8,18,.97) 8%, rgba(3,8,18,.55) 38%, rgba(3,8,18,0) 62%); pointer-events:none;}
+  .pc .info{position:absolute; left:0; right:0; bottom:0; z-index:2; padding:12px;}
+  .pc .champ{font-family:'Rajdhani',sans-serif; font-weight:800; font-size:19px; letter-spacing:.03em; text-transform:uppercase; line-height:1.05;}
+  .pc .who{display:flex; align-items:center; gap:6px; margin-top:3px; font-size:12.5px; font-weight:700; color:var(--text-dim); min-width:0;}
+  .pc .who img{width:18px; height:18px; border-radius:50%; flex-shrink:0;}
+  .pc .who span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .pc .who small{color:var(--text-faint); font-weight:600;}
+  .pc .kit{display:flex; gap:4px; margin-top:8px;}
+  .pc .kit img{width:22px; height:22px; border-radius:5px; border:1px solid rgba(255,255,255,.12); background:#0a1622;}
+  .pc .kit img.rune{border-radius:50%; padding:1px; object-fit:contain;}
+  .pc .kit img.sub{width:18px; height:18px; margin-top:2px;}
+  /* Del grupo */
+  .pc.mine{border:2px solid var(--accent); box-shadow:0 0 22px rgba(0,229,199,.28);}
+  .pc .tag{position:absolute; top:10px; left:10px; z-index:2; font-size:10.5px; font-weight:900; letter-spacing:.06em; color:#032018; background:var(--accent); border-radius:99px; padding:3px 9px; box-shadow:0 2px 10px rgba(0,0,0,.4);}
+  .pc .st{margin-top:8px; font-size:11.5px; font-weight:700; color:var(--accent); line-height:1.35;}
+  .pc .st small{display:block; color:var(--text-faint); font-weight:600; font-size:10.5px;}
+
+  /* ── Lista de partidas (sin parámetro) ── */
+  .glist{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px;}
+  .gcard{position:relative; display:block; overflow:hidden; border-radius:var(--radius); border:1px solid var(--border); background:#06111c; min-height:170px; text-decoration:none; transition:border-color .15s, box-shadow .15s;}
+  .gcard:hover{border-color:var(--accent); box-shadow:0 0 22px rgba(0,229,199,.18);}
+  .gcard .art{position:absolute; inset:0; background-size:cover; background-position:center 20%; opacity:.55;}
+  .gcard::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(3,8,18,.95) 30%, rgba(3,8,18,.4));}
+  .gcard .in{position:relative; z-index:1; padding:16px 18px; display:flex; flex-direction:column; gap:10px; height:100%;}
+  .gcard .top{display:flex; align-items:center; gap:10px;}
+  .gcard .top .gclock{font-size:24px; margin-left:auto;}
+  .gcard .ppl{display:flex; flex-direction:column; gap:6px;}
+  .gcard .pp{display:flex; align-items:center; gap:9px; font-size:14px; font-weight:700;}
+  .gcard .pp img{width:30px; height:30px; border-radius:8px; border:1px solid var(--border);}
+  .gcard .pp small{color:var(--text-dim); font-weight:600;}
+  .gcard .go{margin-top:auto; font-size:12px; font-weight:800; color:var(--accent);}
+
+  @media (max-width:860px){
+    .cards{grid-template-columns:1fr; gap:8px;}
+    .pc{aspect-ratio:auto; height:92px;}
+    .pc .art{background-position:center 18%; background-size:cover;}
+    .pc::after{background:linear-gradient(90deg, rgba(3,8,18,.96) 35%, rgba(3,8,18,.55) 70%, rgba(3,8,18,.25));}
+    .pc .info{top:0; display:flex; flex-direction:column; justify-content:center; padding:10px 14px; padding-right:110px;}
+    .pc .kit{position:absolute; right:12px; top:50%; transform:translateY(-50%); margin:0;}
+    .pc .st{margin-top:4px;} .pc .st small{display:inline; margin-left:4px;}
+    .pc .tag{top:auto; bottom:8px; left:auto; right:12px; font-size:9.5px;}
+    .pc.mine{height:112px;}
+    .pc.mine .kit{top:36%;}
+    .bans{margin-left:0; width:100%;}
+  }
+  @media (max-width:560px){
+    header{grid-template-columns:auto 1fr auto;}
+    h1{font-size:24px;}
+    .gclock{font-size:32px;}
+    .glist{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo-slot"><a href="index.html"><img src="logo/FlaviIconLogo.png" alt="SharkTracker"></a></div>
+    <h1>En vivo</h1>
+    <div class="auth-slot" id="auth-slot"></div>
+  </header>
+
+  <div id="loading" class="msg">Cargando…</div>
+  <main id="view" hidden></main>
+  <p class="note" id="note" hidden>Datos de la API de Riot (Spectator), se actualizan solos cada pocos minutos. El cronómetro es aproximado. Durante la partida Riot no da KDA, oro ni objetos: aparecen cuando termina, en Partidas.</p>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createAuthMenu } from './assets/auth-menu.js';
+import { createNavMenu } from './assets/nav-menu.js';
+import { createMissionsWidget } from './assets/missions-widget.js';
+import { loadCatalogs, champName, champKey, champImg, profileIconUrl, DD, V, esc, HIDE } from './assets/lol-data.js';
+createNavMenu({ current: 'envivo' });
+
+const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = (id) => document.getElementById(id);
+const authMenu = createAuthMenu({ supabase, profileIconUrl });
+createMissionsWidget({ supabase, profileIconUrl });
+
+const PLATFORM = 'LA1';   // mismo servidor que sync-live-status (match_id = LA1_<gameId>)
+const params = new URL(location.href).searchParams;
+const st = { players: [], byId: new Map(), live: [], games: new Map(), stats: new Map(), gameId: null, playerParam: params.get('jugador'), ended: false, matchId: null };
+
+// ── Catálogos de hechizos y runas (Data Dragon) ──
+const spellById = {}, runeById = {};
+async function loadKit() {
+  await loadCatalogs();   // actualiza V (versión de Data Dragon) y los nombres en español
+  try {
+    const [s, r] = await Promise.all([
+      fetch(`${DD}/${V}/data/es_ES/summoner.json`).then(x => x.json()),
+      fetch(`${DD}/${V}/data/es_ES/runesReforged.json`).then(x => x.json()),
+    ]);
+    Object.values(s.data ?? {}).forEach(x => { spellById[Number(x.key)] = x.image.full; });
+    (r ?? []).forEach(style => { runeById[style.id] = style.icon; (style.slots ?? []).forEach(sl => (sl.runes ?? []).forEach(x => { runeById[x.id] = x.icon; })); });
+  } catch {}
+}
+const spellUrl = (id) => spellById[id] ? `${DD}/${V}/img/spell/${spellById[id]}` : null;
+const runeUrl = (id) => runeById[id] ? `${DD}/img/${runeById[id]}` : null;
+const loadingArt = (c) => `${DD}/img/champion/loading/${champKey(c)}_0.jpg`;
+const splash = (c) => `${DD}/img/champion/splash/${champKey(c)}_0.jpg`;
+const mapName = (q) => /aram/i.test(q ?? '') ? 'Abismo de los Lamentos' : /arena/i.test(q ?? '') ? 'Arena' : 'Grieta del Invocador';
+const clock = (startIso) => {
+  if (!startIso) return '--:--';
+  const s = Math.max(0, Math.floor((Date.now() - new Date(startIso).getTime()) / 1000));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+};
+const splitName = (n) => { const [g, t] = String(n ?? '').split('#'); return [g || '¿?', t ?? '']; };
+
+// ── Datos ──
+async function loadBase() {
+  const [{ data: { session } }, { data: players }, { data: profiles }] = await Promise.all([
+    supabase.auth.getSession(), supabase.from('players').select('*'), supabase.from('player_profiles').select('*'), loadKit(),
+  ]);
+  authMenu.render(session, players ?? [], profiles ?? []);
+  st.players = players ?? [];
+  st.players.forEach(p => st.byId.set(p.id, p));
+}
+async function loadLive() {
+  const { data: live } = await supabase.from('live_status').select('*').eq('in_game', true);
+  st.live = (live ?? []).filter(l => l.game_id);
+  const ids = [...new Set([...st.live.map(l => l.game_id), ...(st.gameId ? [st.gameId] : [])])];
+  st.games = new Map();
+  if (ids.length) {
+    const { data: games } = await supabase.from('live_games').select('*').in('game_id', ids);
+    (games ?? []).forEach(g => st.games.set(Number(g.game_id), g));
+  }
+}
+// Stats del grupo con su campeón (últimos 30 días, todas las colas, sin remakes)
+async function loadStats(pairs) {
+  const need = pairs.filter(([pid, c]) => !st.stats.has(pid + '|' + c));
+  if (!need.length) return;
+  const { data } = await supabase.from('match_participants')
+    .select('player_id, champion, win, kills, deaths, assists, matches!inner(duration_seconds)')
+    .in('player_id', [...new Set(need.map(x => x[0]))]);
+  for (const [pid, c] of need) {
+    const rows = (data ?? []).filter(r => r.player_id === pid && r.champion === c && !(!r.win && (r.matches?.duration_seconds ?? 0) < 300));
+    const g = rows.length, w = rows.filter(r => r.win).length;
+    const k = rows.reduce((a, r) => a + (r.kills ?? 0), 0), d = rows.reduce((a, r) => a + (r.deaths ?? 0), 0), as = rows.reduce((a, r) => a + (r.assists ?? 0), 0);
+    st.stats.set(pid + '|' + c, { g, wr: g ? Math.round(100 * w / g) : null, kda: g ? (d ? (k + as) / d : k + as) : null });
+  }
+}
+
+// ¿Quién del grupo es cada participante? (por campeón + equipo, y si no por Riot ID)
+function rosterFor(game) {
+  const inGame = st.live.filter(l => Number(l.game_id) === Number(game.game_id));
+  return (game.participants ?? []).map(pt => {
+    const byLive = inGame.find(l => l.champion === pt.campeon && l.team === pt.equipo);
+    const byName = st.players.find(p => `${p.riot_game_name}#${p.riot_tag_line}`.toLowerCase() === String(pt.nombre ?? '').toLowerCase());
+    return { ...pt, player: byLive ? st.byId.get(byLive.player_id) : byName ?? null };
+  });
+}
+
+// ── Vista: una partida ──
+function cardHtml(pt) {
+  const [g, t] = splitName(pt.nombre);
+  const p = pt.player;
+  const s = p ? st.stats.get(p.id + '|' + pt.campeon) : null;
+  const spells = (pt.hechizos ?? []).map(id => spellUrl(id)).filter(Boolean).map(u => `<img src="${u}" alt="" onerror="${HIDE}">`).join('');
+  const k1 = runeUrl(pt.runas?.principal), k2 = runeUrl(pt.runas?.secundario);
+  const runes = `${k1 ? `<img class="rune" src="${k1}" alt="" onerror="${HIDE}">` : ''}${k2 ? `<img class="rune sub" src="${k2}" alt="" onerror="${HIDE}">` : ''}`;
+  const stats = p ? (s?.g ? `<div class="st">${s.g} partida${s.g === 1 ? '' : 's'} · ${s.wr}% WR · ${s.kda.toFixed(1)} KDA<small>con ${esc(champName(pt.campeon))}, últimos 30 días</small></div>`
+                              : `<div class="st">Primera con ${esc(champName(pt.campeon))}<small>en los últimos 30 días</small></div>`) : '';
+  const tagName = p ? 'a' : 'div';
+  return `<${tagName} class="pc ${p ? 'mine' : ''}" ${p ? `href="perfil.html?jugador=${encodeURIComponent(p.id)}" title="Ver perfil de ${esc(p.riot_game_name)}"` : ''}>
+    <div class="art" style="background-image:url('${loadingArt(pt.campeon)}')"></div>
+    ${p ? '<span class="tag">🦈 DEL GRUPO</span>' : ''}
+    <div class="info">
+      <div class="champ">${esc(champName(pt.campeon))}</div>
+      <div class="who">${pt.icono_invocador ? `<img src="${profileIconUrl(pt.icono_invocador)}" alt="" onerror="${HIDE}">` : ''}<span>${esc(g)}${t ? ` <small>#${esc(t)}</small>` : ''}</span></div>
+      ${stats}
+      <div class="kit">${spells}${runes}</div>
+    </div></${tagName}>`;
+}
+function teamHtml(game, side, list) {
+  const bans = (game.bans ?? []).filter(b => b.equipo === side);
+  const bansHtml = bans.length ? `<div class="bans"><small>Baneos</small>${bans.map(b => b.campeon
+      ? `<span class="ban" title="${esc(champName(b.campeon))}"><img src="${champImg(b.campeon)}" alt="${esc(champName(b.campeon))}" onerror="${HIDE}"></span>`
+      : '<span class="ban none" title="Sin baneo"></span>').join('')}</div>` : '';
+  return `<section class="team ${side}">
+    <div class="thead"><h2><span class="bar"></span>Equipo ${side === 'blue' ? 'Azul' : 'Rojo'}</h2>${bansHtml}</div>
+    <div class="cards">${list.map(cardHtml).join('')}</div></section>`;
+}
+async function renderGame() {
+  const game = st.games.get(Number(st.gameId));
+  if (!game) {
+    $('view').innerHTML = `<div class="msg"><b>No encontramos esa partida</b>Puede que ya haya terminado hace rato o que el enlace esté mal.<br><br><a class="btn" href="en-vivo.html">Ver quién está jugando ahora</a></div>`;
+    return;
+  }
+  const ppl = rosterFor(game);
+  await loadStats(ppl.filter(x => x.player).map(x => [x.player.id, x.campeon]));
+  const mine = ppl.filter(x => x.player);
+  st.ended = !st.live.some(l => Number(l.game_id) === Number(game.game_id));
+
+  // Dúo / enfrentamiento
+  const blueM = mine.filter(x => x.equipo === 'blue'), redM = mine.filter(x => x.equipo === 'red');
+  const nm = (x) => esc(x.player.riot_game_name);
+  const grp = [];
+  if (blueM.length > 1) grp.push(`<span>🎮 Juntos: ${blueM.map(nm).join(' + ')}</span>`);
+  if (redM.length > 1) grp.push(`<span>🎮 Juntos: ${redM.map(nm).join(' + ')}</span>`);
+  if (blueM.length && redM.length) grp.push(`<span class="vs">⚔️ Se enfrentan: ${blueM.map(nm).join(' + ')} vs ${redM.map(nm).join(' + ')}</span>`);
+
+  let endedHtml = '';
+  if (st.ended) {
+    st.matchId = `${PLATFORM}_${game.game_id}`;
+    const { data: m } = await supabase.from('matches').select('match_id').eq('match_id', st.matchId).maybeSingle();
+    endedHtml = `<div class="ended-box"><span>🏁 <b>La partida terminó.</b> ${m ? 'Ya está el resultado con KDA, oro y objetos.' : 'El resultado aparecerá en Partidas en unos minutos.'}</span>
+      ${m ? `<a class="btn" href="partidas.html?id=${encodeURIComponent(st.matchId)}${mine[0] ? `&jugador=${encodeURIComponent(mine[0].player.id)}` : ''}">Ver resultado</a>` : ''}</div>`;
+  }
+
+  document.title = `${mine.map(x => x.player.riot_game_name).join(', ') || 'Partida'} en vivo · SharkTracker`;
+  $('view').innerHTML = `
+    <div class="gbar">
+      <span class="livechip ${st.ended ? 'ended' : ''}"><i></i>${st.ended ? 'TERMINADA' : 'EN VIVO'}</span>
+      <div class="gmeta"><b>${esc(game.queue_type ?? 'Partida')}</b><small>${mapName(game.queue_type)}</small></div>
+      <div class="gclock"><span id="clock">${st.ended ? '—' : clock(game.started_at)}</span><small>${st.ended ? 'terminada' : 'tiempo de juego'}</small></div>
+      ${grp.length ? `<div class="grp">${grp.join('')}</div>` : ''}
+    </div>
+    ${endedHtml}
+    ${teamHtml(game, 'blue', ppl.filter(x => x.equipo === 'blue'))}
+    ${teamHtml(game, 'red', ppl.filter(x => x.equipo === 'red'))}`;
+}
+
+// ── Vista: lista de partidas del grupo ahora mismo ──
+function renderList() {
+  const byGame = new Map();
+  st.live.forEach(l => (byGame.get(Number(l.game_id)) ?? byGame.set(Number(l.game_id), []).get(Number(l.game_id))).push(l));
+  if (!byGame.size) {
+    $('view').innerHTML = `<div class="msg"><b>Nadie del grupo está jugando ahora 😴</b>Esta página se actualiza sola: en cuanto alguien entre a una partida, aparece aquí.</div>`;
+    return;
+  }
+  $('view').innerHTML = `<div class="glist">${[...byGame.entries()].map(([gid, ls]) => {
+    const g = st.games.get(gid);
+    return `<a class="gcard" href="en-vivo.html?partida=${gid}">
+      <div class="art" style="background-image:url('${splash(ls[0].champion)}')"></div>
+      <div class="in">
+        <div class="top"><span class="livechip"><i></i>EN VIVO</span><div class="gmeta"><b style="font-size:17px">${esc(g?.queue_type ?? 'Partida')}</b></div><span class="gclock" data-start="${g?.started_at ?? ''}">${clock(g?.started_at)}</span></div>
+        <div class="ppl">${ls.map(l => { const p = st.byId.get(l.player_id); return `<div class="pp"><img src="${champImg(l.champion)}" alt="" onerror="${HIDE}">${esc(p?.riot_game_name ?? '?')} <small>· ${esc(champName(l.champion))}</small></div>`; }).join('')}</div>
+        <span class="go">Ver partida →</span>
+      </div></a>`;
+  }).join('')}</div>`;
+}
+
+async function refresh() {
+  await loadLive();
+  if (st.playerParam && !st.gameId) {
+    const p = st.players.find(x => x.id === st.playerParam || x.riot_game_name.toLowerCase() === st.playerParam.toLowerCase());
+    const l = p && st.live.find(x => x.player_id === p.id);
+    if (l) { st.gameId = Number(l.game_id); history.replaceState(null, '', `en-vivo.html?partida=${st.gameId}`); await loadLive(); }
+  }
+  if (st.gameId) await renderGame(); else renderList();
+  $('loading').hidden = true; $('view').hidden = false; $('note').hidden = false;
+}
+
+async function init() {
+  st.gameId = Number(params.get('partida')) || null;
+  await loadBase();
+  await refresh();
+  setInterval(() => {
+    if (st.gameId && !st.ended) { const g = st.games.get(Number(st.gameId)); const el = $('clock'); if (el && g) el.textContent = clock(g.started_at); }
+    document.querySelectorAll('.gcard .gclock[data-start]').forEach(el => { el.textContent = clock(el.dataset.start || null); });
+  }, 1000);
+  let t = null;
+  const later = () => { clearTimeout(t); t = setTimeout(refresh, 600); };
+  supabase.channel('en-vivo')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'live_status' }, later)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'live_games' }, later)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'matches' }, later)
+    .subscribe();
+}
+init();
+</script>
+</body>
+</html>

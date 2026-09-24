@@ -11,6 +11,8 @@
 const ITEMS = [
   { key: 'ranking', label: 'Ranking', href: 'index.html', desc: 'Clasificación SoloQ en vivo',
     icon: 'M4 20h4v-8H4zM10 20h4V4h-4zM16 20h4v-12h-4z' },
+  { key: 'envivo', label: 'En vivo', href: 'en-vivo.html', desc: 'Partidas del grupo ahora mismo',
+    icon: 'M12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6M6.3 6.3l1.4 1.4a6 6 0 0 0 0 8.6l-1.4 1.4a8 8 0 0 1 0-11.4m11.4 0a8 8 0 0 1 0 11.4l-1.4-1.4a6 6 0 0 0 0-8.6zM3.5 3.5l1.4 1.4a10 10 0 0 0 0 14.2l-1.4 1.4a12 12 0 0 1 0-17m17 0a12 12 0 0 1 0 17l-1.4-1.4a10 10 0 0 0 0-14.2z' },
   { key: 'reto', label: 'Reto actual', href: 'reto.html', desc: 'Cuenta regresiva y clasificación',
     icon: 'M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V17h3v4H8v-4h3v-2.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zM6 7v1a2 2 0 0 0 1.2 1.8A5 5 0 0 1 7 8.5V7zM18 7h-1v1.5c0 .5 0 .9-.2 1.3A2 2 0 0 0 18 8z' },
   { key: 'fama', label: 'Salón de la fama', href: 'reto.html#fame-sec', desc: 'Ganadores de retos anteriores',

@@ -131,13 +131,61 @@ returns text language sql immutable as $$
   select 'https://raw.communitydragon.org/14.10/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/' || lower(coalesce(t, 'unranked')) || '.png'
 $$;
 
+-- Splash grande (no depende de la versión) — "FiddleSticks" en Riot = "Fiddlesticks" en Data Dragon
+create or replace function dc_splash(c text, skin integer default 0)
+returns text language sql immutable as $$
+  select case when c is null or c = '' then null else
+    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/' || case when c = 'FiddleSticks' then 'Fiddlesticks' else c end
+    || '_' || coalesce(skin, 0) || '.jpg' end
+$$;
+
+-- Icono de invocador (CommunityDragon "latest": no hace falta versión)
+create or replace function dc_profile_icon(id integer)
+returns text language sql immutable as $$
+  select 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/' || coalesce(id, 29) || '.jpg'
+$$;
+
+-- Cabecera de la tarjeta: foto de perfil + nombre, con link al perfil
+create or replace function dc_author(p uuid)
+returns jsonb language plpgsql stable security definer set search_path = public as $$
+declare v_name text; v_icon integer;
+begin
+  select riot_game_name, icon_id into v_name, v_icon from players where id = p;
+  if not found then return null; end if;
+  return jsonb_build_object('name', v_name, 'icon_url', dc_profile_icon(v_icon),
+                            'url', (select site_url from discord_settings) || 'perfil.html?jugador=' || p);
+end;
+$$;
+
+-- Splash del campeón/skin favoritos del jugador (el mismo del banner del perfil)
+create or replace function dc_fav_splash(p uuid)
+returns text language plpgsql stable security definer set search_path = public as $$
+declare c text; k integer;
+begin
+  begin
+    execute 'select favorite_champion, favorite_skin from player_profiles where player_id = $1' into c, k using p;
+  exception when others then c := null; end;
+  if c is null then
+    begin
+      execute 'select favorite_champion, favorite_skin from players where id = $1' into c, k using p;
+    exception when others then c := null; end;
+  end if;
+  return dc_splash(c, k);
+end;
+$$;
+
 -- ── Meter un aviso en la cola (si ese tipo está activado) ──
 create or replace function discord_enqueue(p_channel text, p_kind text, p_key text, p_embed jsonb)
 returns void language plpgsql security definer set search_path = public as $$
+declare e jsonb := jsonb_strip_nulls(p_embed);
 begin
   if p_kind <> 'prueba' and not coalesce((select (kinds->>p_kind)::boolean from discord_settings), false) then return; end if;
+  -- Discord rechaza imágenes/cabeceras vacías: fuera las que quedaron sin URL
+  if not (e->'image' ? 'url') then e := e - 'image'; end if;
+  if not (e->'thumbnail' ? 'url') then e := e - 'thumbnail'; end if;
+  if not (e->'author' ? 'name') then e := e - 'author'; end if;
   insert into discord_outbox (channel, kind, dedupe_key, embed)
-  values (p_channel, p_kind, p_key, jsonb_strip_nulls(p_embed))
+  values (p_channel, p_kind, p_key, e)
   on conflict (dedupe_key) do nothing;
 end;
 $$;
@@ -152,6 +200,7 @@ declare
   v_fields jsonb := '[]'::jsonb;
   r record;
   v_desc text;
+  v_img text;
 begin
   -- SoloQ de la semana (sin remakes)
   create temp table if not exists _dc_week (player_id uuid, match_id text, champion text, role text, win boolean,
@@ -205,6 +254,7 @@ begin
       'inline', false);
   end if;
 
+  select champion into v_img from _dc_week where score is not null order by score desc limit 1;
   v_desc := case when p_preview then 'Del ' || dc_day(p_from) || ' hasta hoy.'
                  when extract(month from p_from at time zone 'Europe/Madrid') = extract(month from (p_to - interval '1 day') at time zone 'Europe/Madrid')
                    then 'Del ' || extract(day from p_from at time zone 'Europe/Madrid')::int || ' al ' || dc_day(p_to - interval '1 day') || '.'
@@ -215,6 +265,8 @@ begin
   return jsonb_build_object(
     'title', case when p_preview then '📅 Resumen semanal (vista previa)' else '📅 Resumen semanal' end,
     'description', v_desc, 'url', dc_site(), 'color', 58823,
+    'thumbnail', jsonb_build_object('url', dc_site() || 'logo/FlaviIconLogo.png'),
+    'image', case when v_img is not null then jsonb_build_object('url', dc_splash(v_img, 0)) end,
     'fields', v_fields,
     'footer', jsonb_build_object('text', case when p_preview then 'SharkTracker · la semana sigue en curso' else 'SharkTracker · ¡ya hay misiones nuevas!' end));
 end;
@@ -252,7 +304,9 @@ begin
                      || ' **' || dc_rank(r.tier, r.division, r.lp) || '**' || E'\n' || '_Venía de ' || dc_rank(r.ptier, r.pdiv, null) || '_',
       'color', case when dc_tier_idx(r.tier) > dc_tier_idx(r.ptier) then 16436245 else 8246268 end,
       'url', dc_site() || 'perfil.html?jugador=' || r.player_id,
+      'author', dc_author(r.player_id),
       'thumbnail', jsonb_build_object('url', dc_emblem(r.tier)),
+      'image', jsonb_build_object('url', dc_fav_splash(r.player_id)),
       'timestamp', r.recorded_at));
   end loop;
 
@@ -269,7 +323,9 @@ begin
                      || ' · ' || case when r.win then 'Victoria' else 'Derrota' end || ' · ' || dc_queue(r.queue_id),
       'color', 16736168,
       'url', dc_site() || 'partidas.html?id=' || r.match_id || '&jugador=' || r.player_id,
+      'author', dc_author(r.player_id),
       'thumbnail', jsonb_build_object('url', dc_champ_icon(r.champion)),
+      'image', jsonb_build_object('url', dc_splash(r.champion, 0)),
       'timestamp', r.ended_at));
   end loop;
 
@@ -285,6 +341,7 @@ begin
       'color', 16436245,
       'url', dc_site() || 'reto.html?id=' || r.id,
       'thumbnail', jsonb_build_object('url', dc_champ_icon((select favorite_champion from challenge_results where challenge_id = r.id and position = 1))),
+      'image', jsonb_build_object('url', (select dc_splash(favorite_champion, favorite_skin) from challenge_results where challenge_id = r.id and position = 1)),
       'timestamp', r.finished_at));
   end loop;
 
@@ -301,7 +358,9 @@ begin
                        || ' · **' || round(r.score) || ' pts**',
         'color', 16436245,
         'url', dc_site() || 'partidas.html?id=' || r.match_id || '&jugador=' || r.player_id,
+        'author', dc_author(r.player_id),
         'thumbnail', jsonb_build_object('url', dc_champ_icon(r.champion)),
+        'image', jsonb_build_object('url', dc_splash(r.champion, 0)),
         'fields', jsonb_build_array(
           jsonb_build_object('name', 'Daño', 'value', dc_num(r.damage), 'inline', true),
           jsonb_build_object('name', 'Part. en kills', 'value', coalesce(round(r.kp * 100) || '%', '—'), 'inline', true),
@@ -324,6 +383,7 @@ begin
       'description', '**' || dc_name(r.player_id) || '** canjeó **' || r.item_name || '** por 🦷 ' || dc_num(r.price) || E'\n' || 'Márcalo como entregado en el Admin.',
       'color', 16436245,
       'url', dc_site() || 'admin.html',
+      'author', dc_author(r.player_id),
       'timestamp', r.created_at));
   end loop;
 end;
@@ -447,7 +507,10 @@ begin
       'title', '🦈 Prueba de SharkTracker',
       'description', case when p_what = 'general' then 'Si ves esto, los avisos del canal **general** funcionan: subidas de liga, pentas, retos, partida del mes y resumen semanal.'
                           else 'Si ves esto, los avisos del canal de **admins** funcionan: aquí llegarán los canjes de premios.' end,
-      'color', 58823, 'url', dc_site()));
+      'color', 58823, 'url', dc_site(),
+      'author', dc_author((select id from players where user_id = auth.uid() limit 1)),
+      'thumbnail', jsonb_build_object('url', dc_site() || 'logo/FlaviIconLogo.png'),
+      'image', jsonb_build_object('url', coalesce(dc_fav_splash((select id from players where user_id = auth.uid() limit 1)), dc_splash('Nami', 0)))));
   else
     raise exception 'Prueba desconocida: %', p_what;
   end if;
@@ -489,7 +552,7 @@ drop policy if exists "solo admins" on discord_outbox;
 create policy "solo admins" on discord_outbox for select using (is_admin());
 
 revoke execute on function discord_enqueue(text, text, text, jsonb), discord_weekly_embed(timestamptz, timestamptz, boolean),
-                           discord_scan(), discord_send(), discord_tick(), dc_name(uuid), dc_site(), dc_champ_icon(text)
+                           discord_scan(), discord_send(), discord_tick(), dc_name(uuid), dc_site(), dc_champ_icon(text), dc_author(uuid), dc_fav_splash(uuid)
   from public, anon, authenticated;
 revoke execute on function admin_set_discord(boolean, jsonb), admin_discord_test(text), admin_discord_retry(), admin_discord_secrets() from public, anon;
 grant execute on function admin_set_discord(boolean, jsonb), admin_discord_test(text), admin_discord_retry(), admin_discord_secrets() to authenticated;
