@@ -548,25 +548,33 @@ let companionsByMatch = new Map(); // match_id -> [{team, player_id}, ...]
 async function loadAllHistories(playerIds) {
   if (!playerIds.length) { historyByPlayer = new Map(); companionsByMatch = new Map(); return; }
 
-  const { data: participaciones } = await supabase
-    .from('match_participants')
-    .select('*, matches!inner(match_id, duration_seconds, ended_at, queue_id)')
-    .in('player_id', playerIds)
-    .eq('matches.queue_id', 420)
-    .order('ended_at', { foreignTable: 'matches', ascending: false })
-    .limit(300);
+  // 1) Las partidas de SoloQ más recientes, ordenadas por fecha EN LA TABLA
+  //    matches (ordenar por una tabla enlazada desde match_participants solo
+  //    ordena el dato enlazado, no la lista: por eso antes se perdían
+  //    partidas nuevas). 2) Sus participantes del grupo, en tandas.
+  const { data: recientes } = await supabase
+    .from('matches')
+    .select('match_id, duration_seconds, ended_at, queue_id')
+    .eq('queue_id', 420)
+    .order('ended_at', { ascending: false })
+    .limit(500);
+  const matchById = new Map((recientes ?? []).map(m => [m.match_id, m]));
+  const ids = [...matchById.keys()];
+  const tandas = [];
+  for (let i = 0; i < ids.length; i += 100) tandas.push(ids.slice(i, i + 100));
+  const participaciones = (await Promise.all(tandas.map(t => supabase.from('match_participants').select('*').in('match_id', t))))
+    .flatMap(r => r.data ?? []);
+  participaciones.forEach(m => { m.matches = matchById.get(m.match_id); });
+  participaciones.sort((x, y) => new Date(y.matches.ended_at) - new Date(x.matches.ended_at));
 
   historyByPlayer = new Map();
-  (participaciones ?? []).forEach(m => {
+  participaciones.filter(m => playerIds.includes(m.player_id)).forEach(m => {
     const list = historyByPlayer.get(m.player_id) ?? [];
     if (list.length < 10) list.push(m);
     historyByPlayer.set(m.player_id, list);
   });
 
-  const matchIds = [...new Set((participaciones ?? []).map(m => m.match_id))];
-  const { data: companeros } = matchIds.length
-    ? await supabase.from('match_participants').select('match_id, team, player_id').in('match_id', matchIds)
-    : { data: [] };
+  const companeros = participaciones;
   companionsByMatch = new Map();
   (companeros ?? []).forEach(c => {
     const list = companionsByMatch.get(c.match_id) ?? [];

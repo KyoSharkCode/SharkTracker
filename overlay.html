@@ -182,7 +182,7 @@ async function load() {
   const [{ data: snaps }, { data: parts }, { data: settings }] = await Promise.all([
     supabase.from('rank_snapshots').select('*').eq('player_id', player.id).eq('queue_type', 'RANKED_SOLO_5x5').order('recorded_at', { ascending: false }).limit(1),
     supabase.from('match_participants').select('match_id, player_id, win, lp_change, matches!inner(queue_id, duration_seconds, ended_at)')
-      .eq('player_id', player.id).order('ended_at', { foreignTable: 'matches', ascending: false }).limit(40),
+      .eq('player_id', player.id).limit(500),   // se ordena aquí abajo (el historial guarda 30 días)
     supabase.from('mission_settings').select('*').maybeSingle(),
   ]);
   const games = (parts ?? []).filter(m => m.matches && !isRemake(m))
