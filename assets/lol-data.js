@@ -35,11 +35,12 @@ export const QUEUES = {
 
 // Versión de Data Dragon + nombres de campeones en español.
 export const champNames = {};
+export const champNums = {};   // id de Data Dragon → clave numérica (para Meraki)
 export async function loadCatalogs() {
   try { V = (await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json()))[0] || V; } catch {}
   try {
     const c = await fetch(`${DD}/${V}/data/es_ES/champion.json`).then(r => r.json());
-    Object.values(c.data ?? {}).forEach(x => { champNames[x.id] = x.name; });
+    Object.values(c.data ?? {}).forEach(x => { champNames[x.id] = x.name; champNums[x.id] = Number(x.key); });
   } catch {}
 }
 export const champName = (id) => champNames[champKey(id)] ?? id;

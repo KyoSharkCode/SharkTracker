@@ -84,6 +84,8 @@
   /* Del grupo */
   .pc.mine{border:2px solid var(--accent); box-shadow:0 0 22px rgba(0,229,199,.28);}
   .pc .tag{position:absolute; top:10px; left:10px; z-index:2; font-size:10.5px; font-weight:900; letter-spacing:.06em; color:#032018; background:var(--accent); border-radius:99px; padding:3px 9px; box-shadow:0 2px 10px rgba(0,0,0,.4);}
+  .pc .rtag{position:absolute; top:10px; right:10px; z-index:2; font-size:10.5px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:#fff; background:rgba(3,8,18,.78); border:1px solid rgba(255,255,255,.28); border-radius:99px; padding:3px 9px; backdrop-filter:blur(4px);}
+  .pc .rtag.unsure{color:var(--text-dim); border-style:dashed; border-color:rgba(157,179,196,.45);}
   .pc .st{margin-top:8px; font-size:11.5px; font-weight:700; color:var(--accent); line-height:1.35;}
   .pc .st small{display:block; color:var(--text-faint); font-weight:600; font-size:10.5px;}
 
@@ -111,6 +113,7 @@
     .pc .kit{position:absolute; right:12px; top:50%; transform:translateY(-50%); margin:0;}
     .pc .st{margin-top:4px;} .pc .st small{display:inline; margin-left:4px;}
     .pc .tag{top:auto; bottom:8px; left:auto; right:12px; font-size:9.5px;}
+    .pc .rtag{top:8px; right:12px; font-size:9.5px; padding:2px 8px;}
     .pc.mine{height:112px;}
     .pc.mine .kit{top:36%;}
     .bans{margin-left:0; width:100%;}
@@ -133,7 +136,7 @@
 
   <div id="loading" class="msg">Cargando…</div>
   <main id="view" hidden></main>
-  <p class="note" id="note" hidden>Datos de la API de Riot (Spectator), se actualizan solos cada pocos minutos. El cronómetro es aproximado. Durante la partida Riot no da KDA, oro ni objetos: aparecen cuando termina, en Partidas.</p>
+  <p class="note" id="note" hidden>Datos de la API de Riot (Spectator), se actualizan solos cada pocos minutos. El cronómetro es aproximado. Durante la partida Riot no da KDA, oro ni objetos: aparecen cuando termina, en Partidas. Las líneas son una estimación (campeón, hechizos e historial del grupo): con «?» no es seguro.</p>
 </div>
 
 <script type="module">
@@ -141,7 +144,8 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
-import { loadCatalogs, champName, champKey, champImg, profileIconUrl, DD, V, esc, HIDE } from './assets/lol-data.js';
+import { loadCatalogs, champName, champKey, champImg, champNums, profileIconUrl, DD, V, esc, HIDE } from './assets/lol-data.js';
+import { loadRoleRates, assignRoles, ROLE_SHORT } from './assets/champion-roles.js';
 createNavMenu({ current: 'envivo' });
 
 const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
@@ -158,7 +162,7 @@ const st = { players: [], byId: new Map(), live: [], games: new Map(), stats: ne
 // ── Catálogos de hechizos y runas (Data Dragon) ──
 const spellById = {}, runeById = {};
 async function loadKit() {
-  await loadCatalogs();   // actualiza V (versión de Data Dragon) y los nombres en español
+  await Promise.all([loadCatalogs(), loadRoleRates()]);   // V (Data Dragon), nombres en español y roles por campeón
   try {
     const [s, r] = await Promise.all([
       fetch(`${DD}/${V}/data/es_ES/summoner.json`).then(x => x.json()),
@@ -178,6 +182,8 @@ const clock = (startIso) => {
   const s = Math.max(0, Math.floor((Date.now() - new Date(startIso).getTime()) / 1000));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 };
+const normRole = (r) => ({ TOP: 'TOP', JUNGLE: 'JUNGLE', MIDDLE: 'MIDDLE', MID: 'MIDDLE', BOTTOM: 'BOTTOM', ADC: 'BOTTOM', UTILITY: 'UTILITY', SUPPORT: 'UTILITY' })[String(r ?? '').toUpperCase()] ?? null;
+const isRift = (q) => !/aram|arena|urf|destacado/i.test(q ?? '');
 const splitName = (n) => { const [g, t] = String(n ?? '').split('#'); return [g || '¿?', t ?? '']; };
 
 // ── Datos ──
@@ -204,13 +210,14 @@ async function loadStats(pairs) {
   const need = pairs.filter(([pid, c]) => !st.stats.has(pid + '|' + c));
   if (!need.length) return;
   const { data } = await supabase.from('match_participants')
-    .select('player_id, champion, win, kills, deaths, assists, matches!inner(duration_seconds)')
+    .select('player_id, champion, win, kills, deaths, assists, role, matches!inner(duration_seconds)')
     .in('player_id', [...new Set(need.map(x => x[0]))]);
   for (const [pid, c] of need) {
     const rows = (data ?? []).filter(r => r.player_id === pid && r.champion === c && !(!r.win && (r.matches?.duration_seconds ?? 0) < 300));
     const g = rows.length, w = rows.filter(r => r.win).length;
     const k = rows.reduce((a, r) => a + (r.kills ?? 0), 0), d = rows.reduce((a, r) => a + (r.deaths ?? 0), 0), as = rows.reduce((a, r) => a + (r.assists ?? 0), 0);
-    st.stats.set(pid + '|' + c, { g, wr: g ? Math.round(100 * w / g) : null, kda: g ? (d ? (k + as) / d : k + as) : null });
+    const roles = {}; rows.forEach(r => { const R = normRole(r.role); if (R) roles[R] = (roles[R] ?? 0) + 1; });
+    st.stats.set(pid + '|' + c, { g, wr: g ? Math.round(100 * w / g) : null, kda: g ? (d ? (k + as) / d : k + as) : null, roles });
   }
 }
 
@@ -238,6 +245,7 @@ function cardHtml(pt) {
   return `<${tagName} class="pc ${p ? 'mine' : ''}" ${p ? `href="perfil.html?jugador=${encodeURIComponent(p.id)}" title="Ver perfil de ${esc(p.riot_game_name)}"` : ''}>
     <div class="art" style="background-image:url('${loadingArt(pt.campeon)}')"></div>
     ${p ? '<span class="tag">🦈 DEL GRUPO</span>' : ''}
+    ${pt.role ? `<span class="rtag ${pt.sure ? '' : 'unsure'}" title="${pt.sure ? 'Rol estimado' : 'Rol estimado, no seguro'}">${ROLE_SHORT[pt.role]}${pt.sure ? '' : '?'}</span>` : ''}
     <div class="info">
       <div class="champ">${esc(champName(pt.campeon))}</div>
       <div class="who">${pt.icono_invocador ? `<img src="${profileIconUrl(pt.icono_invocador)}" alt="" onerror="${HIDE}">` : ''}<span>${esc(g)}${t ? ` <small>#${esc(t)}</small>` : ''}</span></div>
@@ -263,6 +271,14 @@ async function renderGame() {
   const ppl = rosterFor(game);
   await loadStats(ppl.filter(x => x.player).map(x => [x.player.id, x.campeon]));
   const mine = ppl.filter(x => x.player);
+  // Orden por rol estimado (solo Grieta 5v5; en ARAM/Arena se deja como viene)
+  const ordered = (side) => {
+    const list = ppl.filter(x => x.equipo === side);
+    if (!isRift(game.queue_type) || list.length !== 5) return list;
+    return assignRoles(list.map(x => ({ ...x, champNum: champNums[champKey(x.campeon)],
+      history: x.player ? st.stats.get(x.player.id + '|' + x.campeon)?.roles : null,
+      mainRole: x.player ? normRole(x.player.primary_role) : null })));
+  };
   st.ended = !st.live.some(l => Number(l.game_id) === Number(game.game_id));
 
   // Dúo / enfrentamiento
@@ -290,8 +306,8 @@ async function renderGame() {
       ${grp.length ? `<div class="grp">${grp.join('')}</div>` : ''}
     </div>
     ${endedHtml}
-    ${teamHtml(game, 'blue', ppl.filter(x => x.equipo === 'blue'))}
-    ${teamHtml(game, 'red', ppl.filter(x => x.equipo === 'red'))}`;
+    ${teamHtml(game, 'blue', ordered('blue'))}
+    ${teamHtml(game, 'red', ordered('red'))}`;
 }
 
 // ── Vista: lista de partidas del grupo ahora mismo ──
