@@ -242,6 +242,7 @@ function crearEstadoPartida() {
     // ── Diferencia de oro por fila del Tab ──
     // Fila i: el i-ésimo de tu equipo contra el i-ésimo del rival (mismo orden
     // que el marcador del juego). Positivo = va por delante tu equipo.
+    // En el Tab el lado azul SIEMPRE va a la izquierda y el rojo a la derecha.
     const valorObjetos = (p) => (p.items ?? []).reduce((suma, it) => suma + (it.price ?? 0) * (it.count || 1), 0);
     const aliados = jugadores.filter((p) => lado(p.team) === miLado);
     const enemigos = jugadores.filter((p) => lado(p.team) && lado(p.team) !== miLado);
@@ -252,7 +253,7 @@ function crearEstadoPartida() {
       oro.push({ diferencia: a - b, aliado: aliados[i].championName, enemigo: enemigos[i].championName });
     }
 
-    return { tiempo: t, miLado, baron, ancestral, toast, proximos, dragones: cuenta, oro };
+    return { tiempo: t, miLado, baron, ancestral, toast, proximos, dragones: cuenta, oro, aliadoIzquierda: miLado !== 'red' };
   }
 
   return { actualizar };

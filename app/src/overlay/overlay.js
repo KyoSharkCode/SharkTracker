@@ -145,6 +145,7 @@ function pintarToast(toast) {
 const FILAS_Y = [352, 428, 501, 577, 653];
 let tab = false;
 let oro = [];
+let aliadoIzquierda = true;   // lado azul a la izquierda del Tab, rojo a la derecha
 function pintarOro() {
   const nodo = $('oro');
   mostrar(nodo, tab && oro.length > 0);
@@ -152,8 +153,10 @@ function pintarOro() {
   const filas = oro.slice(0, 5).map((f, i) => {
     const d = f.diferencia;
     const n = Math.abs(Math.round(d));
-    // Como en el mockup: "1550 >" tu equipo va por delante, "< 1180" el rival.
-    const texto = n < 50 ? '≈' : d > 0 ? `${n} >` : `< ${n}`;
+    // La flecha sale del lado que va por delante ("1550 >" = gana la columna izquierda,
+    // "< 1180" = gana la derecha). El color dice quién: azul tu equipo, rojo el rival.
+    const ganaIzquierda = aliadoIzquierda ? d > 0 : d < 0;
+    const texto = n < 50 ? '≈' : ganaIzquierda ? `${n} >` : `< ${n}`;
     const fila = el('div', `oro-fila ${n < 50 ? 'igual' : d > 0 ? 'aliado' : 'enemigo'}`, texto);
     fila.style.top = `${FILAS_Y[i]}px`;
     fila.title = `${f.aliado} vs ${f.enemigo}`;
@@ -171,5 +174,6 @@ window.overlay.onState((estado) => {
   pintarAnuncio();
   pintarToast(estado.toast);
   oro = estado.oro ?? [];
+  aliadoIzquierda = estado.aliadoIzquierda !== false;
   pintarOro();
 });

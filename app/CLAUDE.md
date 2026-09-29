@@ -167,8 +167,10 @@ visual" y "Overlay — estructuras" del canvas)
    aliado vs i-ésimo enemigo (orden de `allPlayers`). "1550 >" azul = va por delante
    tu equipo; "< 1180" rojo = el rival. Filas a y = 352/428/501/577/653 (1920×1080),
    medidas sobre una captura real del Tab.
-   **Verificar**: que `price` sea el coste total del objeto y que el Tab ponga tu
-   equipo a la izquierda también cuando juegas en el lado rojo.
+   En el Tab el **lado azul va siempre a la izquierda** y el rojo a la derecha
+   (confirmado por Alex): si juegas en rojo, la flecha se invierte (la flecha sale
+   de la columna que va por delante); el color sigue siendo azul = tu equipo.
+   **Verificar**: que `price` sea el coste total del objeto.
 3. "Tu rendimiento": por ahora contra **el promedio propio en SharkTracker**; en la
    Fase 2 se cambia la fuente a promedios por elo (Alex quiere datos tipo OP.GG;
    ojo: OP.GG no tiene API pública oficial, revisar cómo obtenerlos).
