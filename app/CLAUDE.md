@@ -100,6 +100,7 @@ app/
                            de partida (cada 5 s, avisa solo al cambiar)
     preload.js           → contextBridge (window.sharkTracker): ventana, checkLiveGame,
                            estado de partida, auth
+    rendimiento.js       → "Tu rendimiento": división objetivo y comparación con la referencia
     game-state.js        → "cerebro" del overlay (sin Electron, se prueba en Node):
                            buff de Barón/Ancestral y titulares, anuncios de objetivos
                            e inhibidores por reaparecer, toasts de dragón/alma,
@@ -171,13 +172,34 @@ visual" y "Overlay — estructuras" del canvas)
    (confirmado por Alex): si juegas en rojo, la flecha se invierte (la flecha sale
    de la columna que va por delante); el color sigue siendo azul = tu equipo.
    **Verificar**: que `price` sea el coste total del objeto.
-3. "Tu rendimiento": por ahora contra **el promedio propio en SharkTracker**; en la
-   Fase 2 se cambia la fuente a promedios por elo (Alex quiere datos tipo OP.GG;
-   ojo: OP.GG no tiene API pública oficial, revisar cómo obtenerlos).
+3. ✅ (pendiente de probar en partida real) "Tu rendimiento" **contra la división de
+   ARRIBA de la tuya** (Oro → Platino; Diamante y Master+ → Master+; sin rango → Oro),
+   por rol. **Siempre a la vista desde que empieza la partida**, arriba a la derecha
+   (y = 72, encima de los avisos; como en el mockup). Oro/min, CS/min, visión/min y KP;
+   azul ▲ = por encima de la referencia, rojo ▼ = por debajo. Antes del minuto 5 no se
+   colorea (los números por minuto saltan mucho al principio).
+   - Datos propios (no OP.GG): Edge Function `referencias-elo` (cron cada 10 min, ≤ 11
+     llamadas a Riot por corrida). Key **personal** (100 peticiones / 2 min) compartida
+     con la web, que con 7 jugadores gasta ~33 cada 2 min: el recolector empieza 30 s
+     tarde, pide de a una cada 1.5 s y se corta si la key pasa del 60 % (lo lee de las
+     cabeceras de Riot) o si hay 429. Responde 202 y trabaja en segundo plano
+     (EdgeRuntime.waitUntil; el log sale en Logs de la Function). Toma 2 jugadores al azar de una
+     división de LAN (rota Bronce…Master+), baja sus partidas de SoloQ y suma los 10
+     jugadores en `elo_referencias` (sumas por división + rol + día, sin guardar partidas).
+   - **Rotación de 14 días** (≈ un parche): la vista `elo_referencias_promedio` solo mira
+     los últimos 14 días y `limpiar_referencias_elo()` borra lo demás cada madrugada.
+   - Oro/min en partida = valor de objetos + oro sin gastar (el juego no da el oro
+     ganado): sale algo por debajo del `goldEarned` real. Con < 30 muestras en ese
+     rol/división (o sin sesión) se ven tus números sin comparar, con el aviso arriba.
+   - Lógica en `rendimiento.js`; `auth.getReferencia()` lee rango (rank_latest), rol
+     principal y promedios al empezar la partida.
 4. Ajustes → Overlay: interruptores reales + editor "Reposicionar elementos".
 
 Decisiones:
 - **"Tu build"**: se deja para cuando exista "Meta" (hace falta la build de referencia).
+- **Meta**: el MCP oficial de OP.GG (`https://mcp-api.op.gg/mcp`) tiene tier list, builds y
+  counters; es la fuente candidata para Meta y "Tu build" (no documenta límites de uso).
+  Alternativa: un recolector propio como `referencias-elo`, rotando por parche.
 - **Timers de campamentos**: SÍ se quieren, solo de campamentos cuya muerte se vio
   (como Blitz/Porofessor/Itero). La API local no tiene eventos de campamentos: hay
   que leer el minimapa por captura de pantalla → se hace después, reutilizando la

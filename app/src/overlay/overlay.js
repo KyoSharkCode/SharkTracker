@@ -164,6 +164,32 @@ function pintarOro() {
   });
   nodo.replaceChildren(...filas);
 }
+
+// ── Tu rendimiento: tus números vs la división de arriba (siempre a la vista) ──
+// Azul ▲ = vas por encima de la referencia; rojo ▼ = por debajo.
+let rendimiento = null;
+function pintarRendimiento() {
+  const nodo = $('rendimiento');
+  mostrar(nodo, !!rendimiento);
+  if (!rendimiento) return;
+  const r = rendimiento;
+  const cab = el('div', 'rend-cab');
+  const vs = r.aviso ?? `vs ${r.division}${r.rol ? ' · ' + r.rol : ''}`;
+  cab.append(el('div', 'etiqueta', 'Tu rendimiento'), el('div', 'vs', vs));
+  const filas = r.metricas.map((m) => {
+    const fila = el('div', 'rend-fila');
+    const texto = el('div');
+    texto.append(el('div', 'nombre', m.etiqueta));
+    if (m.referencia != null) texto.append(el('div', 'ref', `vs. ${m.referencia} prom. ${r.division}`));
+    const estado = m.arriba === true ? 'arriba' : m.arriba === false ? 'abajo' : '';
+    const valor = el('div', `valor ${estado}`, m.valor);
+    if (estado) valor.append(el('span', 'flecha', m.arriba ? '▲' : '▼'));
+    fila.append(texto, valor);
+    return fila;
+  });
+  nodo.replaceChildren(cab, ...filas);
+}
+
 window.overlay.onTab((pulsado) => { tab = pulsado; pintarOro(); });
 
 window.overlay.onState((estado) => {
@@ -176,4 +202,6 @@ window.overlay.onState((estado) => {
   oro = estado.oro ?? [];
   aliadoIzquierda = estado.aliadoIzquierda !== false;
   pintarOro();
+  rendimiento = estado.rendimiento ?? null;
+  pintarRendimiento();
 });

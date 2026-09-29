@@ -15,6 +15,7 @@ const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 const WebSocket = require('ws');
 const cfg = require('./config');
+const { tierObjetivo, ROL_WEB } = require('./rendimiento');
 
 // ── Almacenamiento de la sesión (cifrado) ──
 let cache = null;
@@ -105,6 +106,28 @@ async function getState() {
   return { loggedIn: true, discord, player };
 }
 
+// Promedios de referencia para "Tu rendimiento": los de la división de arriba
+// de tu rango de SoloQ, por rol. Sin sesión o sin cuenta vinculada → null.
+async function getReferencia() {
+  const { data: { session } } = await client().auth.getSession();
+  if (!session) return null;
+  const { data: player } = await client()
+    .from('players').select('id, primary_role').eq('user_id', session.user.id).maybeSingle();
+  if (!player) return null;
+
+  const { data: rango } = await client()
+    .from('rank_latest').select('tier')
+    .eq('player_id', player.id).eq('queue_type', 'RANKED_SOLO_5x5').maybeSingle();
+  const tier = tierObjetivo(rango?.tier);
+
+  const { data: filas, error } = await client()
+    .from('elo_referencias_promedio').select('rol, muestras, cs_min, oro_min, vision_min, kp').eq('tier', tier);
+  if (error) throw error;
+  const porRol = {};
+  for (const f of filas ?? []) porRol[f.rol] = f;
+  return { tier, rolPrincipal: ROL_WEB[player.primary_role] ?? null, porRol };
+}
+
 // Cierra la sesión SOLO en esta app (la web de SharkTracker sigue con la suya).
 async function signOut() {
   await client().auth.signOut({ scope: 'local' });
@@ -118,4 +141,4 @@ function onChange(callback) {
   });
 }
 
-module.exports = { signIn, handleCallback, getState, signOut, onChange, client };
+module.exports = { signIn, handleCallback, getState, getReferencia, signOut, onChange, client };
