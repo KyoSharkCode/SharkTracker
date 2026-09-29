@@ -1,6 +1,7 @@
-# Tu Tracker — contexto del proyecto
+# SharkTracker (app de escritorio) — contexto del proyecto
 
-App de escritorio personal (Electron) estilo Porofessor para League of Legends.
+App de escritorio personal (Electron) estilo Porofessor para League of Legends,
+con la marca **SharkTracker** (mismo nombre y logo que la web `sharktracker.lol`).
 Vive en la carpeta `app/` del **repo de SharkTracker** (monorepo) y comparte su
 backend de Supabase: las Edge Functions y migraciones de ambos están en
 `supabase/` en la raíz del repo. Construida por Alex (streamer, sabe desarrollo web, primera
@@ -28,7 +29,7 @@ vez haciendo una app de escritorio).
   activado** en el proyecto de Supabase de SharkTracker (Client ID/Secret ya
   cargados) — no hace falta crear una app nueva en el Discord Developer
   Portal. Lo que sí falta configurar:
-  1. Agregar un redirect URL propio (ej. `tutracker://auth-callback`) en
+  1. Agregar el redirect URL propio `sharktracker://auth-callback` en
      Supabase → Authentication → URL Configuration → Redirect URLs.
   2. Registrar ese esquema en Electron (`app.setAsDefaultProtocolClient`).
   3. Manejar el deep link entrante en el proceso main y pasárselo al cliente
@@ -81,33 +82,51 @@ tono oscuro con acento turquesa `#00e5c7`) al construir cada pantalla real.
 
 ## Estado actual del código
 
-Esqueleto funcional **validado en Windows** (29/09/2026): `npm start` abre la
-ventana, la navegación funciona y "Comprobar ahora" lee una partida real
-(Herramienta de práctica / bots) vía Live Client Data API.
+Esqueleto **validado en Windows** (29/09/2026) + **login con Discord**
+implementado (pendiente de probar en Windows).
 
 ```
 app/
-  package.json           → Electron como devDependency, script "start"
+  package.json           → Electron (dev) + @supabase/supabase-js 2.117.2 + ws
+  package-lock.json      → versiones exactas (npm install las respeta)
   CLAUDE.md              → este archivo
   src/
-    main.js              → ventana sin frame propio, controles de ventana por IPC,
-                           handler "lcdata:check" que llama a la Live Client Data API
-    preload.js           → contextBridge exponiendo minimize/maximize/close/checkLiveGame
+    config.js            → URL y anon key de Supabase (públicas), protocolo sharktracker://
+    auth.js              → sesión de Discord en el proceso main: PKCE, sesión cifrada
+                           con safeStorage (userData/session.bin), cuenta de LoL
+                           vinculada (players.user_id), cierre de sesión local
+    main.js              → ventana, instancia única + deep link sharktracker://auth-callback,
+                           IPC de sesión, Live Client Data API y detección automática
+                           de partida (cada 5 s, avisa solo al cambiar)
+    preload.js           → contextBridge (window.sharkTracker): ventana, checkLiveGame,
+                           estado de partida, auth
+    assets/icon.png      → ícono de la ventana (logo del tiburón)
     renderer/
-      index.html         → barra de título + sidebar con 4 items + 4 secciones placeholder
-      style.css          → mismo look del mockup (fondo oscuro, Inter/Rajdhani, acento turquesa)
-      app.js             → navegación entre secciones + lógica del panel de prueba
+      img/               → logos (copias de /logo; la app empaquetada no ve la raíz del repo)
+      index.html         → CSP estricta, barra de título (chip de partida + chip de Discord), login,
+                           sidebar, secciones; Ajustes → Cuentas conectadas
+      style.css          → estilos del mockup (Login y Ajustes → Cuenta incluidos)
+      app.js             → navegación, login/cierre de sesión, chips, panel de prueba
 ```
 
 Para correrla: abrir el repo en VS Code, y en la terminal `cd app`,
-`npm install` (una vez) y `npm start`.
+`npm install` (una vez, y cada vez que cambien las dependencias) y `npm start`.
 
-Notas de la Live Client Data API: `activePlayer.summonerName` trae el Riot ID
-completo (`Nombre#TAG`); los bots no tienen `#tag` (ignorarlos al buscar rangos).
+Notas técnicas:
+- Nombre visible "SharkTracker" (`productName`), AppUserModelId `lol.sharktracker.app`.
+- El renderer tiene una CSP estricta (sin scripts inline): no usar `onclick="…"` ni
+  `<script>` dentro del HTML; los eventos se enganchan desde `app.js`.
+- El Node de Electron 33 no trae WebSocket: supabase-js recibe `ws` como
+  `realtime.transport`.
+- Live Client Data API: `activePlayer.summonerName` trae el Riot ID completo
+  (`Nombre#TAG`); los bots no tienen `#tag` (ignorarlos al buscar rangos).
+- Íconos de invocador sin versión de parche: CommunityDragon `latest`.
 
 ## Siguiente paso pendiente
 
-El login con Discord/Supabase (ver arriba, "Login").
+1. Alex agrega `sharktracker://auth-callback` en Supabase → Authentication →
+   URL Configuration → Redirect URLs, y prueba el login en Windows.
+2. Después: "En partida" (overlay real con la Live Client Data API).
 
 ## Estilo de comunicación de Alex
 

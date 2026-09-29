@@ -1,11 +1,16 @@
 {
-  "name": "tu-tracker-app",
+  "name": "sharktracker-app",
+  "productName": "SharkTracker",
   "version": "0.1.0",
-  "description": "Tracker personal estilo Porofessor para League of Legends",
+  "description": "SharkTracker para escritorio: compañero personal para League of Legends",
   "main": "src/main.js",
   "private": true,
   "scripts": {
     "start": "electron ."
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.2",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "electron": "^33.0.0"

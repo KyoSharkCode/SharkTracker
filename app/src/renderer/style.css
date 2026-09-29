@@ -21,13 +21,7 @@ html, body {
   -webkit-app-region: drag;
 }
 .tbleft { display: flex; align-items: center; gap: 9px; }
-.logo {
-  width: 22px; height: 22px; border-radius: 6px;
-  background: linear-gradient(135deg,#00e5c7,#0a8f7f);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 11px;
-  color: #05070c;
-}
+.logo { width: 26px; height: 26px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(0,229,199,0.35)); }
 .appname { font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; }
 .dim { color: #5b6b7c; font-weight: 500; }
 .winctrl { display: flex; gap: 4px; -webkit-app-region: no-drag; }
@@ -112,3 +106,113 @@ html, body {
   border-radius: 8px; padding: 10px 12px; font-size: 10px; color: #b4bfca;
   white-space: pre-wrap; word-break: break-word;
 }
+
+/* Todo lo que tenga el atributo hidden se oculta, aunque tenga display propio */
+[hidden] { display: none !important; }
+
+/* ---- Barra de título: lado derecho ---- */
+.tbright { display: flex; align-items: center; gap: 12px; }
+
+/* Indicador de detección automática del cliente de LoL */
+.gamechip {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 600; color: #5b6b7c;
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 4px 10px;
+}
+.gamechip .gd { width: 6px; height: 6px; border-radius: 50%; background: #4a5768; }
+.gamechip.ingame { color: #6fdba8; border-color: rgba(79,214,140,0.35); background: rgba(79,214,140,0.08); }
+.gamechip.ingame .gd { background: #4fd68c; animation: pulseGlow 1.8s ease-in-out infinite; }
+
+/* Ficha de Discord (sesión iniciada) */
+.discordchip {
+  -webkit-app-region: no-drag;
+  display: flex; align-items: center; gap: 7px; cursor: pointer;
+  background: rgba(88,101,242,0.12); border: 1px solid rgba(88,101,242,0.4);
+  border-radius: 20px; padding: 3px 11px 3px 3px; font-family: inherit;
+}
+.discordchip:hover { background: rgba(88,101,242,0.2); }
+.discordchip .dcavatar { width: 20px; height: 20px; border-radius: 50%; background: #5865f2; object-fit: cover; }
+.discordchip .dcname { font-size: 10px; font-weight: 600; color: #b9beff; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.discordchip .dcdot { width: 6px; height: 6px; border-radius: 50%; background: #4fd68c; box-shadow: 0 0 5px rgba(79,214,140,0.8); }
+
+@keyframes drift { 0%,100% { transform: translate(0,0); } 50% { transform: translate(10px,-8px); } }
+@keyframes pulseGlow { 0%,100% { box-shadow: 0 0 4px rgba(79,214,140,0.55); } 50% { box-shadow: 0 0 11px rgba(79,214,140,1); } }
+
+/* ---- Pantalla de login ---- */
+.login { position: relative; height: calc(100vh - 44px); overflow: hidden; }
+.glow { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; }
+.glow1 { width: 460px; height: 460px; background: radial-gradient(circle, rgba(0,229,199,0.17), transparent 70%); top: -150px; left: -80px; animation: drift 12s ease-in-out infinite; }
+.glow2 { width: 420px; height: 420px; background: radial-gradient(circle, rgba(193,155,242,0.14), transparent 70%); bottom: -160px; right: -60px; animation: drift 14s ease-in-out infinite reverse; }
+.glow3 { width: 320px; height: 320px; background: radial-gradient(circle, rgba(88,101,242,0.14), transparent 70%); top: 40%; left: 50%; margin: -160px 0 0 -160px; animation: drift 16s ease-in-out infinite; }
+
+.centerwrap { position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+.mainlogo { width: 300px; max-width: 70vw; height: auto; filter: drop-shadow(0 0 34px rgba(0,229,199,0.25)); margin-bottom: 6px; }
+.wordsub { font-size: 11px; color: #5b6b7c; margin-bottom: 30px; }
+
+.logincard {
+  width: 400px; max-width: 100%;
+  background: linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.012));
+  border: 1px solid rgba(255,255,255,0.09); border-radius: 16px; padding: 30px 32px;
+  text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.logintitle { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; color: #e7ecf2; margin-bottom: 8px; }
+.logindesc { font-size: 11px; color: #8a97a6; line-height: 1.7; margin-bottom: 22px; }
+.logindesc b { color: #7fe0cf; }
+.discordbtn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: linear-gradient(135deg,#5865f2,#4752c4); border: none; border-radius: 10px; padding: 13px 0; cursor: pointer;
+  font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.01em;
+  box-shadow: 0 0 20px rgba(88,101,242,0.35);
+}
+.discordbtn:hover { filter: brightness(1.1); }
+.discordbtn:disabled { opacity: 0.65; cursor: default; filter: none; }
+.discordglyph { width: 22px; height: 22px; border-radius: 6px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+.loginstatus { margin-top: 14px; font-size: 11px; line-height: 1.6; color: #8a97a6; }
+.loginstatus.bad { color: #f0a487; }
+.stepsrow { display: flex; justify-content: space-between; margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.06); }
+.stepitem { flex: 1; text-align: center; font-size: 9px; color: #5b6b7c; }
+.stepnum {
+  width: 18px; height: 18px; border-radius: 50%; background: rgba(0,229,199,0.1); border: 1px solid rgba(0,229,199,0.3);
+  color: #7fe0cf; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 10px;
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 5px;
+}
+.privacynote { font-size: 10px; color: #4a5768; margin-top: 22px; max-width: 400px; text-align: center; line-height: 1.6; }
+.privacynote b { color: #5b6b7c; }
+.linkedchip {
+  display: flex; align-items: center; gap: 8px; margin-top: 16px;
+  background: rgba(0,229,199,0.06); border: 1px solid rgba(0,229,199,0.2); border-radius: 20px; padding: 6px 15px;
+  font-size: 10px; color: #7fe0cf;
+}
+.linkedchip .pd { width: 6px; height: 6px; border-radius: 50%; background: #00e5c7; box-shadow: 0 0 6px rgba(0,229,199,0.8); }
+
+/* ---- Ajustes → Cuentas conectadas ---- */
+.card-discord::before { background: linear-gradient(90deg,#5865f2,transparent); }
+.cardhd .dot-discord { background: #5865f2; }
+.cardsub { font-size: 10px; color: #5b6b7c; margin: -6px 0 10px; }
+.acctrow { display: flex; align-items: center; gap: 11px; padding: 11px 2px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.accic {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 12px;
+}
+.accimg { object-fit: cover; background: #5865f2; }
+.acclol { background: linear-gradient(135deg,#123a35,#0a1420); border: 1px solid rgba(0,229,199,0.4); color: #00e5c7; overflow: hidden; }
+.acclol img { width: 100%; height: 100%; object-fit: cover; }
+.accnm { font-size: 12px; color: #e7ecf2; font-weight: 600; }
+.accnm .tag { color: #5b6b7c; font-weight: 500; }
+.accsub { font-size: 10px; color: #5b6b7c; margin-top: 2px; }
+.accbadge {
+  margin-left: auto; font-size: 9px; font-weight: 600; color: #4fd68c;
+  background: rgba(79,214,140,0.1); border: 1px solid rgba(79,214,140,0.35); border-radius: 10px;
+  padding: 4px 10px 4px 8px; display: flex; align-items: center; gap: 5px; white-space: nowrap;
+}
+.accbadge .pd { width: 6px; height: 6px; border-radius: 50%; background: #4fd68c; animation: pulseGlow 1.8s ease-in-out infinite; }
+.accbadge.off { color: #8a97a6; background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.14); }
+.accbadge.off .pd { background: #5b6b7c; animation: none; }
+.dangerrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(234,138,138,0.25); }
+.dangertxt { font-size: 10px; color: #5b6b7c; }
+.dangerbtn {
+  font-family: inherit; font-size: 10px; font-weight: 600; color: #ea8a8a; background: transparent; cursor: pointer;
+  border: 1px solid rgba(234,138,138,0.35); border-radius: 7px; padding: 6px 12px; white-space: nowrap;
+}
+.dangerbtn:hover { background: rgba(234,138,138,0.1); }
