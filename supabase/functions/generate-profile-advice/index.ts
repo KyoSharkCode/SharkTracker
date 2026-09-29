@@ -185,9 +185,10 @@ Responde SOLO con un objeto JSON con esta forma exacta:
 "mejores_campeones" tiene de 1 a 3 elementos. "consejos" tiene de 3 a 5 elementos, cada uno de 1-2 frases, concretos y basados en los números.`;
 
     const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent';
-    const res = await fetch(`${url}?key=${encodeURIComponent(GEMINI_API_KEY)}`, {
+    const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      // La clave va en un header (no en la URL) para que no quede escrita en logs.
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.7, maxOutputTokens: 900, responseMimeType: 'application/json' },
@@ -195,7 +196,8 @@ Responde SOLO con un objeto JSON con esta forma exacta:
     });
     if (!res.ok) {
       const detalle = await res.text().catch(() => '');
-      return json({ error: `Gemini -> ${res.status}`, detalle: detalle.slice(0, 300) }, 502);
+      console.error(`Gemini -> ${res.status}: ${detalle.slice(0, 500)}`);
+      return json({ error: `La IA respondió ${res.status}. Prueba de nuevo en un rato.` }, 502);
     }
     const data = await res.json();
     const texto: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
@@ -220,6 +222,8 @@ Responde SOLO con un objeto JSON con esta forma exacta:
 
     return json({ status: 'ok', cached: false, advice, generated_at: generatedAt, last_match_id: lastMatchId });
   } catch (e) {
-    return json({ error: e instanceof Error ? e.message : String(e) }, 500);
+    // El detalle técnico queda en los logs de Supabase, no se le muestra al visitante.
+    console.error('generate-profile-advice:', e);
+    return json({ error: 'Error inesperado. Prueba de nuevo en un rato.' }, 500);
   }
 });

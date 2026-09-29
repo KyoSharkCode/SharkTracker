@@ -177,6 +177,17 @@ async function detalle(matchId: string) {
   const { data: cached } = await supabase.from('match_details').select('data, timeline').eq('match_id', matchId).maybeSingle();
   if (cached) return { data: cached.data, timeline: cached.timeline, cached: true };
 
+  // Antes de gastar cupo de Riot: la partida tiene que estar registrada en
+  // SharkTracker (historial de 30 días, o guardada como "mejor partida").
+  // Así nadie puede mandar IDs inventados en bucle para agotar la API key.
+  const [{ data: enHistorial }, { data: enMejores }] = await Promise.all([
+    supabase.from('matches').select('match_id').eq('match_id', matchId).maybeSingle(),
+    supabase.from('best_matches').select('match_id').eq('match_id', matchId).limit(1).maybeSingle(),
+  ]);
+  if (!enHistorial && !enMejores) {
+    throw new HttpError(404, 'Esa partida no está registrada en SharkTracker.');
+  }
+
   const md = await riot(`https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/${matchId}`);
   const roster = await getRosterPuuids();
   if (!(md.info?.participants ?? []).some((p: any) => roster.has(p.puuid))) {
@@ -262,9 +273,10 @@ Responde SOLO con JSON válido, sin texto extra, con esta forma:
 "bien" y "mejorar": 2 a 4 elementos cada uno. "momentos": 2 a 4 (usa los minutos del timeline si los hay; si no, déjalo vacío). "consejos": 3 elementos. Frases cortas.`;
 
   const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent';
-  const res = await fetch(`${url}?key=${encodeURIComponent(GEMINI_API_KEY)}`, {
+  const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    // La clave va en un header (no en la URL) para que no quede escrita en logs.
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: { temperature: 0.6, maxOutputTokens: 1200, responseMimeType: 'application/json' },
@@ -298,6 +310,8 @@ Deno.serve(async (req) => {
     return json(await detalle(matchId));
   } catch (e) {
     if (e instanceof HttpError) return json({ error: e.message }, e.status);
-    return json({ error: (e as Error).message ?? 'Error inesperado' }, 500);
+    // El detalle técnico queda en los logs de Supabase, no se le muestra al visitante.
+    console.error('partida:', e);
+    return json({ error: 'Error inesperado. Prueba de nuevo en un rato.' }, 500);
   }
 });
