@@ -52,8 +52,8 @@ vez haciendo una app de escritorio).
 **Sí entra:**
 - Login con Discord (Supabase Auth) + detección automática del cliente de LoL.
 - Ventana flotante + navegación entre secciones (ya hecho, ver abajo).
-- "En partida": overlay real vía Live Client Data API — oro, timers, indicador
-  Barón/Ancestral, objetivos, build propia, rendimiento propio.
+- ✅ "En partida": overlay real vía Live Client Data API — oro, timers, indicador
+  Barón/Ancestral, objetivos, rendimiento propio ("Tu build" pasa a la Fase 2 con Meta).
 - ✅ "Pantalla de carga": rango/LP propio y rival vía la key de Riot de SharkTracker.
 - ✅ "Mi Perfil" completo, incluido el estado "sin conexión" (tira del backend
   de SharkTracker/Supabase).
@@ -82,8 +82,11 @@ tono oscuro con acento turquesa `#00e5c7`) al construir cada pantalla real.
 
 ## Estado actual del código
 
-Validado en Windows (29/09/2026): esqueleto, **login con Discord** (PKCE +
-deep link) y nombre/logo de SharkTracker. En curso: **overlay "En partida"**.
+**Fase 1 completa y validada por Alex en partidas reales (29/09/2026)**: login con
+Discord, overlay en partida (Barón/Ancestral, avisos, oro con Tab, Tu rendimiento),
+pantalla de carga (con Ctrl + X), Ajustes → Overlay con editor y Mi Perfil.
+Próximo: Fase 2 (subir la versión a 0.2.0 en package.json y que la barra de título la
+lea de ahí en vez de tenerla escrita a mano — pedido de Alex).
 
 ```
 app/
@@ -170,7 +173,7 @@ visual" y "Overlay — estructuras" del canvas)
    las 20:00** (visto en partida real; antes estaba a 25:00).
    ✅ Estructuras: toast de torre/inhibidor destruido (qué nivel y carril) y aviso
    1:00 antes de que reaparezca un inhibidor (5:00 tras caer).
-2. ✅ (pendiente de probar en partida real) Diferencia de oro **solo con Tab pulsado**:
+2. ✅ Diferencia de oro **solo con Tab pulsado**:
    `uiohook-napi` en el proceso main escucha SOLO la tecla Tab mientras hay partida.
    Oro = suma de `items[].price × count` (lo visible en el Tab). Fila i = i-ésimo
    aliado vs i-ésimo enemigo (orden de `allPlayers`). La flecha **apunta al jugador
@@ -183,7 +186,7 @@ visual" y "Overlay — estructuras" del canvas)
    **Verificado en partida real: `items[].price` NO es el coste total** (solo el último
    paso de la receta). Se usa `gold.total` de DDragon `item.json` (main.js `cargarPrecios`,
    `estadoPartida.setPrecios`); `price` queda solo de respaldo.
-3. ✅ (pendiente de probar en partida real) "Tu rendimiento" **contra la división de
+3. ✅ "Tu rendimiento" **contra la división de
    ARRIBA de la tuya** (Oro → Platino; Diamante y Master+ → Master+; sin rango → Oro),
    por rol. **Siempre a la vista desde que empieza la partida**, arriba a la derecha
    (y = 72, encima de los avisos; como en el mockup). Oro/min, CS/min, visión/min y KP;
@@ -204,7 +207,7 @@ visual" y "Overlay — estructuras" del canvas)
      rol/división (o sin sesión) se ven tus números sin comparar, con el aviso arriba.
    - Lógica en `rendimiento.js`; `auth.getReferencia()` lee rango (rank_latest), rol
      principal y promedios al empezar la partida.
-4. ✅ (pendiente de probar en Windows) Ajustes → Overlay (pestañas Cuenta / Overlay en Ajustes):
+4. ✅ Ajustes → Overlay (pestañas Cuenta / Overlay en Ajustes):
    - Interruptores reales: diferencia de oro, Barón/Ancestral, anuncios de objetivos,
      avisos de lo que pasó (toasts) y Tu rendimiento. Se aplican al instante (IPC
      `overlay:config`), también en partida. "Timers de campamentos", "Tu build" y la
@@ -221,8 +224,8 @@ visual" y "Overlay — estructuras" del canvas)
 
 ## Pantalla de carga (acordado con Alex)
 
-✅ (pendiente de probar en una normal/ranked real — la herramienta de práctica y algunas
-partidas contra bots no salen en el "espectador" de Riot)
+✅ Validado en normales reales (la herramienta de práctica y algunas partidas contra bots
+no salen en el "espectador" de Riot).
 - Detección: el proceso `League of Legends.exe` abierto (tasklist) y la partida sin
   empezar = pantalla de carga. **Ojo: la API local YA responde durante la carga, y hasta
   el reloj avanza** (visto en dos pruebas reales), así que "en partida" = existe el evento
@@ -232,6 +235,7 @@ partidas contra bots no salen en el "espectador" de Riot)
   Discord y cuenta de LoL vinculada; la key de Riot vive allí). 1 petición al espectador
   (los 10 jugadores) + liga por jugador (rango, LP, V/D, racha) + maestría top 3 (etiqueta
   "Main del campeón" / "Fuera de su main"). Los de SharkTracker salen de la base (0 peticiones).
+  Ojo: en league-v4 la división viene en el campo **`rank`** (no `division`).
 - Cupo (la key es la personal, compartida con la web): lo esencial hasta el 85 % de la
   ventana de 2 min, la maestría solo por debajo del 60 %; rivales primero. Lo que falte
   queda "Rango pendiente…" y la app reintenta cada 15 s (hasta 5 min). Caché: panel por
@@ -252,7 +256,7 @@ partidas contra bots no salen en el "espectador" de Riot)
 
 ## Mi Perfil (mockup "La cara de la app" + su estado "sin conexión")
 
-✅ (pendiente de probar en Windows con datos reales)
+✅ Validado con datos reales.
 - `perfil.js` (main) lee con tu sesión (RLS: lectura pública) players, rank_latest,
   rank_snapshots (SoloQ, 30 días), player_masteries y matches + match_participants
   (150 más recientes; la base guarda 30 días). Íconos y nombres en español de DDragon

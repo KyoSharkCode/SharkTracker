@@ -81,7 +81,8 @@ const nombreRiot = (p: any) => p.riotId
 
 // Entrada de liga de Riot → lo que dibuja la app.
 const rangoDe = (e: any, cola: string) => e ? {
-  cola, tier: e.tier, division: e.division ?? '', lp: e.leaguePoints ?? e.lp ?? 0,
+  // Riot manda la división como "rank" (I–IV); la base de SharkTracker, como "division".
+  cola, tier: e.tier, division: e.rank ?? e.division ?? '', lp: e.leaguePoints ?? e.lp ?? 0,
   victorias: e.wins ?? 0, derrotas: e.losses ?? 0, racha: !!e.hotStreak,
 } : null;
 
