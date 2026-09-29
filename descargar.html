@@ -5,6 +5,9 @@
 <!-- Seguridad (CSP): igual que las demás páginas + api.github.com (versión de la última publicación de la app). -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://mvupiohecvoiwuxwjdrt.supabase.co wss://mvupiohecvoiwuxwjdrt.supabase.co https://ddragon.leagueoflegends.com https://raw.communitydragon.org https://cdn.jsdelivr.net https://api.github.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="logo/FlaviIconLogo.png">
+<link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
 <title>App de escritorio · SharkTracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -58,6 +61,22 @@
   kbd{font-family:inherit; font-size:12px; font-weight:700; color:#fff; background:#0d2031; border:1px solid var(--border); border-bottom-width:2px; border-radius:5px; padding:1px 6px;}
   b{color:#fff;}
 
+  /* Vista previa: capturas de la app (se amplían al hacer clic) */
+  .shots{display:grid; grid-template-columns:repeat(2, 1fr); gap:14px;}
+  .shot{margin:0; border:1px solid var(--border); border-radius:var(--radius); background:var(--panel-2); overflow:hidden; cursor:zoom-in; transition:border-color .15s, transform .15s;}
+  .shot:hover{border-color:rgba(0,229,199,.5); transform:translateY(-2px);}
+  .shot img{display:block; width:100%; aspect-ratio:16/9; object-fit:cover; object-position:top;}
+  .shot figcaption{padding:12px 16px 14px;}
+  .shot b{display:block; font-size:14px; margin-bottom:3px;}
+  .shot span{color:var(--text-dim); font-size:12.5px; line-height:1.5;}
+  .lightbox{position:fixed; inset:0; z-index:100; background:rgba(3,8,18,.92); backdrop-filter:blur(4px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:24px; cursor:zoom-out;}
+  .lightbox img{max-width:min(1600px, 100%); max-height:calc(100vh - 110px); border-radius:12px; border:1px solid var(--border); box-shadow:0 20px 80px rgba(0,0,0,.6);}
+  .lightbox p{margin:0; color:var(--text-dim); font-size:13.5px; text-align:center;}
+  .lb-nav{position:absolute; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:50%; border:1px solid var(--border); background:rgba(10,22,34,.85); color:#fff; font-size:22px; cursor:pointer;}
+  .lb-nav:hover{border-color:var(--accent);}
+  .lb-prev{left:16px;} .lb-next{right:16px;}
+  @media (max-width:700px){ .shots{grid-template-columns:1fr;} .lb-nav{display:none;} }
+
   footer{margin-top:60px; padding-top:32px; border-top:1px solid var(--border); text-align:center; color:var(--text-dim); font-size:13px; display:flex; flex-direction:column; align-items:center; gap:12px;}
   .footer-logo{height:34px; width:auto;}
   footer .legal{max-width:640px; margin:0 auto; font-size:11px; line-height:1.5; color:var(--text-faint); opacity:.75;}
@@ -90,6 +109,11 @@
       <small id="dl-info">Solo para miembros de SharkTracker</small>
     </div>
   </div>
+
+  <section>
+    <h2 class="section-title"><span class="bar"></span>Vista previa</h2>
+    <div class="shots" id="shots"></div>
+  </section>
 
   <div id="guia" hidden>
   <section>
@@ -188,6 +212,52 @@ async function init() {
   });
 }
 init();
+
+// Vista previa: capturas reales de la app (nombres de otros jugadores difuminados).
+const CAPTURAS = [
+  { img: 'assets/app/pantalla-carga.webp', titulo: 'Pantalla de carga', texto: 'Rango, winrate y etiquetas de los 10 jugadores mientras carga la partida. Ctrl + X lo muestra u oculta.' },
+  { img: 'assets/app/partida-tab.webp', titulo: 'En partida', texto: 'Con Tab, la diferencia de oro de cada fila; arriba a la derecha, tu rendimiento y el próximo objetivo.' },
+  { img: 'assets/app/mi-perfil.webp', titulo: 'Mi Perfil', texto: 'Tu rendimiento por cola, etiquetas activas, maestrías, historial de elo y de partidas.' },
+  { img: 'assets/app/editor-overlay.webp', titulo: 'Tu overlay, a tu gusto', texto: 'Apaga piezas y muévelas sobre una pantalla que imita la del juego.' },
+];
+const shots = $('shots');
+CAPTURAS.forEach((c, i) => {
+  const fig = document.createElement('figure');
+  fig.className = 'shot';
+  fig.tabIndex = 0;
+  fig.innerHTML = `<img src="${c.img}" alt="${c.titulo}" loading="lazy"><figcaption><b></b><span></span></figcaption>`;
+  fig.querySelector('b').textContent = c.titulo;
+  fig.querySelector('span').textContent = c.texto;
+  fig.addEventListener('click', () => ampliar(i));
+  fig.addEventListener('keydown', (e) => { if (e.key === 'Enter') ampliar(i); });
+  shots.appendChild(fig);
+});
+let lb = null;
+function ampliar(i) {
+  i = (i + CAPTURAS.length) % CAPTURAS.length;
+  if (!lb) {
+    lb = document.createElement('div');
+    lb.className = 'lightbox';
+    lb.innerHTML = '<button class="lb-nav lb-prev" type="button" aria-label="Anterior">‹</button><img alt=""><p></p><button class="lb-nav lb-next" type="button" aria-label="Siguiente">›</button>';
+    lb.addEventListener('click', (e) => {
+      if (e.target.classList.contains('lb-prev')) return ampliar(lb.dataset.i - 1);
+      if (e.target.classList.contains('lb-next')) return ampliar(+lb.dataset.i + 1);
+      cerrar();
+    });
+    document.body.appendChild(lb);
+  }
+  lb.dataset.i = i;
+  lb.querySelector('img').src = CAPTURAS[i].img;
+  lb.querySelector('p').textContent = `${CAPTURAS[i].titulo} — ${CAPTURAS[i].texto}`;
+  lb.hidden = false;
+}
+function cerrar() { if (lb) lb.hidden = true; }
+document.addEventListener('keydown', (e) => {
+  if (!lb || lb.hidden) return;
+  if (e.key === 'Escape') cerrar();
+  if (e.key === 'ArrowLeft') ampliar(lb.dataset.i - 1);
+  if (e.key === 'ArrowRight') ampliar(+lb.dataset.i + 1);
+});
 </script>
 </body>
 </html>

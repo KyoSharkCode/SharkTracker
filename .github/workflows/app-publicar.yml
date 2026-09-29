@@ -5,9 +5,9 @@
 # de GitHub y lo sube como Release "vX.Y.Z". Las apps instaladas lo detectan y se
 # actualizan solas. (No toca la web: GitHub Pages sigue igual.)
 #
-# En dos pasos: electron-builder sube todo a un Release en BORRADOR (GitHub no deja
-# crear uno ya publicado si la etiqueta vX.Y.Z todavía no existe) y después se publica
-# el borrador, lo que crea la etiqueta en el commit que se armó.
+# En tres pasos: se crea un Release en BORRADOR (GitHub no deja crear uno ya publicado
+# si la etiqueta vX.Y.Z todavía no existe), electron-builder sube ahí el instalador y
+# latest.yml, y al final se publica el borrador, lo que crea la etiqueta.
 name: "App: publicar versión"
 
 on:
@@ -29,7 +29,7 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: app/package-lock.json
-      - name: Revisar que la versión sea nueva
+      - name: Preparar el Release en borrador
         shell: bash
         run: |
           VERSION="v$(node -p "require('./package.json').version")"
@@ -37,6 +37,14 @@ jobs:
             echo "::error::Ya existe el Release $VERSION publicado. Sube \"version\" en app/package.json (o borra ese Release y su etiqueta) y vuelve a correr."
             exit 1
           fi
+          # Borradores sobrantes de intentos anteriores con esta versión: fuera.
+          gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            -q ".[] | select(.draft and .tag_name == \"$VERSION\") | .id" |
+            while read -r id; do gh api -X DELETE "repos/$GITHUB_REPOSITORY/releases/$id"; done
+          # Se crea UN borrador antes de subir: si lo crea electron-builder, sube los
+          # archivos en paralelo y a veces arma dos borradores con la misma versión.
+          gh release create "$VERSION" --draft --title "$VERSION" --target "$GITHUB_SHA" \
+            --notes "SharkTracker para Windows $VERSION. Descarga: https://sharktracker.lol/descargar.html"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm ci
@@ -49,7 +57,7 @@ jobs:
         run: |
           VERSION="v$(node -p "require('./package.json').version")"
           # Sin latest.yml las apps instaladas no encuentran la actualización.
-          for f in latest.yml SharkTracker-Setup.exe; do
+          for f in latest.yml SharkTracker-Setup.exe SharkTracker-Setup.exe.blockmap; do
             gh release view "$VERSION" --json assets -q '.assets[].name' | grep -qx "$f" \
               || { echo "::error::Al Release $VERSION le falta $f"; exit 1; }
           done

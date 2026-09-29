@@ -117,6 +117,9 @@ de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no
   LoL vinculada, no descarga. La guía y el enlace del instalador solo aparecen a miembros.
   Ojo: es un candado de la web; el Release de GitHub es público (repo público). El candado
   real es la app, que exige Discord + cuenta vinculada.
+- **Vista previa** en descargar.html (visible para todos): capturas en `assets/app/*.webp`
+  (lista `CAPTURAS` en la página). Son capturas reales con los nombres de otros jugadores
+  y el chat difuminados: al cambiar una, difuminar igual.
 - `app/GUIA.md`: guía para los amigos (instalar, primera vez, atajos, actualizaciones).
 
 ```
