@@ -232,9 +232,14 @@ partidas contra bots no salen en el "espectador" de Riot)
   vez) y rango por jugador 30 min (`carga_rangos`); limpieza cada hora.
 - Winrate con ese campeón concreto y "Autorrelleno" (del mockup) NO: costarían ~200
   peticiones o necesitan la selección de campeones (LCU). Se muestra el winrate de la temporada.
-- Overlay: panel `#carga` **angosto (228 px) en la franja libre a la derecha de las cartas**
-  (x 1684, y 68). Medido en una captura real a 1920×1080: las cartas van de x 233 a 1671
-  (5 por fila, 254 px + 42 de separación), filas en y 68–528 y 591–1051. Movible en el editor
+- Overlay: panel `#carga` arriba a la derecha (x 1500, y 60; 400 px). Tapa la última
+  columna de cartas **a propósito**: Alex prefirió mantener el panel grande y ocultarlo
+  con un atajo antes que una columna angosta. **Ctrl + X** (durante la carga) lo muestra u
+  oculta; la decisión se guarda (`visible.carga`) y oculto queda una pastilla mini
+  "Ctrl + X: rangos". El atajo usa el mismo uiohook-napi que Tab (encendido en carga y
+  partida; solo mira Tab y Ctrl+X). También hay interruptor en Ajustes → Overlay.
+  Medidas de la pantalla de carga real a 1920×1080 (esquema del editor): cartas de x 233
+  a 1671 (5 por fila, 254 px + 42), filas en y 68–528 y 591–1051. Movible en el editor
   ("Ver pantalla de carga"). Interruptores en Ajustes → Overlay (rango/winrate de cada
   equipo y etiquetas; "Counters del rival" próximamente).
 

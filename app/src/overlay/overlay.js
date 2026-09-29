@@ -210,21 +210,20 @@ function textoRango(j) {
   if (!j.rango) return 'Sin clasificar';
   const r = j.rango;
   const sinDivision = ['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(r.tier);
-  return `${TIER_ES[r.tier] ?? r.tier}${sinDivision ? '' : ' ' + r.division} · ${r.lp} LP${r.cola === 'Flex' ? ' · Flex' : ''}`;
+  return `${TIER_ES[r.tier] ?? r.tier}${sinDivision ? '' : ' ' + r.division} · ${r.lp} LP${r.cola === 'Flex' ? ' (Flex)' : ''}`;
 }
 function filaCarga(j, equipo, verRango, verWinrate) {
   const fila = el('div', 'carga-fila');
   const quien = el('div', 'carga-quien');
   quien.append(el('div', 'carga-nombre', j.nombre));
-  // El campeón ya se ve en la ficha (y en su carta): la línea de abajo es solo el rango.
-  if (verRango) quien.append(el('div', `carga-rango${j.pendiente ? ' pendiente' : ''}`, textoRango(j)));
+  if (verRango) quien.append(el('div', `carga-rango${j.pendiente ? ' pendiente' : ''}`, `${j.campeon} · ${textoRango(j)}`));
   else quien.append(el('div', 'carga-rango', j.campeon));
   if (ver('cargaEtiquetas')) {
     const tags = [];
-    if (j.main === true) tags.push(['main', 'Main']);
-    if (j.main === false) tags.push(['fuera', 'Fuera de main']);
+    if (j.main === true) tags.push(['main', 'Main del campeón']);
+    if (j.main === false) tags.push(['fuera', 'Fuera de su main']);
     if (j.rango?.racha) tags.push(['racha', 'En racha']);
-    if (j.sharktracker) tags.push(['st', 'ST']);
+    if (j.sharktracker) tags.push(['st', 'SharkTracker']);
     if (tags.length) {
       const fila2 = el('div', 'carga-tags');
       for (const [cls, texto] of tags) fila2.append(el('span', `carga-tag ${cls}`, texto));
@@ -247,8 +246,19 @@ function pintarCarga() {
   mostrar(nodo, !!carga);
   if (!carga) return;
   if (carga.ddVersion) versionDD = carga.ddVersion;
+  // Oculto con Ctrl + X: solo queda una pastilla chiquita que recuerda el atajo.
+  const oculto = !ver('carga');
+  nodo.classList.toggle('mini', oculto);
+  if (oculto) {
+    const cab = el('div', 'carga-cab');
+    cab.append(el('div', 'carga-marca', 'SHARKTRACKER'), el('div', 'carga-atajo', 'Ctrl + X: rangos'));
+    nodo.replaceChildren(cab);
+    return;
+  }
   const cab = el('div', 'carga-cab');
-  cab.append(el('div', 'carga-marca', 'SHARKTRACKER'), el('div', 'carga-cola', carga.cola ?? ''));
+  const der = el('div', 'carga-der');
+  der.append(el('div', 'carga-cola', carga.cola ?? ''), el('div', 'carga-atajo', 'Ctrl + X ocultar'));
+  cab.append(el('div', 'carga-marca', 'SHARKTRACKER'), der);
   const partes = [cab];
   const aviso = carga.estado !== 'ok' ? AVISO_CARGA[carga.estado] : null;
   if (aviso) partes.push(el('div', 'carga-aviso', aviso));

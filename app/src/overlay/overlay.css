@@ -124,34 +124,39 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .rend-fila .valor.abajo { color: var(--enemigo); }
 .rend-fila .flecha { font-size: 10px; margin-left: 3px; }
 
-/* ── Pantalla de carga: columna angosta en la franja libre a la derecha de las cartas ──
-   (las 10 cartas ocupan de x 233 a 1671 a 1920×1080; queda libre de 1680 a 1912) */
+/* ── Pantalla de carga: panel con los 10 jugadores (como en el mockup) ── */
 .carga {
-  position: absolute; left: 1684px; top: 68px; width: 228px;
-  background: var(--panel); border: 1px solid color-mix(in srgb, var(--acento) 25%, var(--borde)); border-radius: 10px;
+  position: absolute; left: 1500px; top: 60px; width: 400px;
+  background: var(--panel); border: 1px solid color-mix(in srgb, var(--acento) 25%, var(--borde)); border-radius: 12px;
   box-shadow: 0 6px 18px rgba(0,0,0,.35); overflow: hidden;
 }
-.carga-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; padding: 6px 9px; border-bottom: 1px solid rgba(255,255,255,.07); }
-.carga-marca { display: flex; align-items: center; gap: 5px; font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: #9db3c4; }
-.carga-marca::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--acento); }
-.carga-cola { font-size: 8.5px; color: var(--tenue); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.carga-aviso { padding: 5px 9px; font-size: 9.5px; line-height: 1.35; color: var(--tenue); border-bottom: 1px solid rgba(255,255,255,.05); }
-.carga-lado { padding: 5px 9px 2px; font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.carga-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,.07); }
+.carga-marca { display: flex; align-items: center; gap: 7px; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .12em; color: #9db3c4; }
+.carga-marca::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--acento); }
+.carga-cola { font-size: 10px; color: var(--tenue); white-space: nowrap; }
+.carga-aviso { padding: 7px 12px; font-size: 11px; color: var(--tenue); border-bottom: 1px solid rgba(255,255,255,.05); }
+.carga-lado { padding: 7px 12px 3px; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .carga-lado.aliado { color: var(--aliado); }
-.carga-lado.enemigo { color: var(--enemigo); border-top: 1px solid rgba(255,255,255,.07); margin-top: 2px; }
-.carga-lista { display: flex; flex-direction: column; gap: 3px; padding: 0 6px 6px; }
-.carga-fila { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,.03); border-radius: 6px; padding: 3px 5px; }
-.carga-fila .ficha { width: 24px; height: 24px; border-radius: 6px; font-size: 9px; }
+.carga-lado.enemigo { color: var(--enemigo); border-top: 1px solid rgba(255,255,255,.07); margin-top: 3px; }
+.carga-lista { display: flex; flex-direction: column; gap: 4px; padding: 0 10px 8px; }
+.carga-fila { display: flex; align-items: center; gap: 9px; background: rgba(255,255,255,.03); border-radius: 8px; padding: 5px 8px; }
+.carga-fila .ficha { width: 30px; height: 30px; border-radius: 7px; font-size: 11px; }
 .carga-quien { flex: 1; min-width: 0; }
-.carga-nombre { font-size: 10.5px; font-weight: 600; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.carga-rango { font-size: 9px; color: var(--tenue); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.carga-nombre { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.carga-rango { font-size: 10px; color: var(--tenue); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .carga-rango.pendiente { font-style: italic; }
 .carga-wr { text-align: right; flex-shrink: 0; }
-.carga-wr .pct { font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; line-height: 1; }
-.carga-wr .part { font-size: 8px; color: var(--tenue); margin-top: 1px; }
-.carga-tags { display: flex; gap: 3px; margin-top: 2px; flex-wrap: wrap; }
-.carga-tag { font-size: 8px; font-weight: 600; border-radius: 4px; padding: 0 4px; white-space: nowrap; }
+.carga-wr .pct { font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700; line-height: 1; }
+.carga-wr .part { font-size: 9px; color: var(--tenue); margin-top: 2px; }
+.carga-tags { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; }
+.carga-tag { font-size: 9px; font-weight: 600; border-radius: 5px; padding: 1px 6px; white-space: nowrap; }
 .carga-tag.main { background: rgba(70,200,140,.14); color: #6fdba8; }
 .carga-tag.fuera { background: rgba(230,180,60,.14); color: #e8c766; }
 .carga-tag.racha { background: rgba(70,200,140,.14); color: #6fdba8; }
 .carga-tag.st { background: color-mix(in srgb, var(--acento) 14%, transparent); color: var(--acento); }
+/* Atajo Ctrl + X: recordatorio en la cabecera y versión mini cuando el panel está oculto */
+.carga-der { text-align: right; }
+.carga-atajo { font-size: 9px; color: var(--tenue); opacity: .8; margin-top: 1px; white-space: nowrap; }
+.carga.mini { width: auto; }
+.carga.mini .carga-cab { border-bottom: none; gap: 14px; }
+.carga.mini .carga-atajo { margin-top: 0; }

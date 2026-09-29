@@ -10,6 +10,7 @@ const path = require('path');
 const PIEZAS = [
   'oro', 'buffs', 'anuncios', 'toasts', 'rendimiento',
   // Pantalla de carga
+  'carga', // el panel entero (se alterna con Ctrl + X durante la carga)
   'cargaRangoAliados', 'cargaWinrateAliados', 'cargaRangoRivales', 'cargaWinrateRivales', 'cargaEtiquetas',
 ];
 
@@ -19,7 +20,7 @@ const POSICIONES_FABRICA = {
   ancestral:   { x: 1138, y: 8 },
   rendimiento: { x: 1690, y: 72 },   // arriba a la derecha (220 px de ancho)
   avisos:      { x: 1648, y: 280 },  // columna de anuncio + toast (262 px de ancho)
-  carga:       { x: 1684, y: 68 },   // pantalla de carga: franja libre a la derecha de las cartas (228 px)
+  carga:       { x: 1500, y: 60 },   // panel de la pantalla de carga (400 px de ancho)
 };
 
 const archivo = () => path.join(app.getPath('userData'), 'overlay.json');
