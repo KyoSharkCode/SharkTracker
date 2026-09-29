@@ -111,9 +111,10 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
   background: var(--panel); border: 1px solid var(--borde); border-radius: 12px;
   padding: 9px 12px 8px; box-shadow: 0 6px 18px rgba(0,0,0,.35);
 }
-.rend-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
-.rend-cab .etiqueta { color: var(--acento); margin: 0; }
-.rend-cab .vs { font-size: 10px; color: var(--tenue); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Título en una línea y, debajo, contra quién te comparas (o el aviso), completo. */
+.rend-cab { margin-bottom: 4px; }
+.rend-cab .etiqueta { color: var(--acento); margin: 0; white-space: nowrap; }
+.rend-cab .vs { font-size: 10px; color: var(--tenue); line-height: 1.3; margin-top: 1px; }
 .rend-fila { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 0; }
 .rend-fila .nombre { font-size: 12px; font-weight: 500; line-height: 1.2; }
 .rend-fila .ref { font-size: 10px; color: var(--tenue); line-height: 1.2; }
