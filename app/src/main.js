@@ -186,14 +186,17 @@ let lastInGame = null;
 let partidaTerminada = false; // acabó una partida y el juego sigue abierto: no es pantalla de carga
 function startGameWatcher() {
   const tick = async () => {
-    const { inGame } = await liveClientGet('gamestats', 1200);
+    // La API local ya responde DURANTE la pantalla de carga, con el reloj en 0.
+    // La partida empieza de verdad cuando el reloj avanza.
+    const stats = await liveClientGet('gamestats', 1200);
+    const inGame = stats.inGame && (stats.data?.gameTime ?? 0) > 0;
     if (inGame !== lastInGame) {
       if (lastInGame === true && !inGame) partidaTerminada = true;
       lastInGame = inGame;
       mainWindow?.webContents.send('game:status', { inGame });
       if (inGame) { detenerCarga(); startOverlay(); } else stopOverlay();
     }
-    // Pantalla de carga: el juego ya está abierto pero la API todavía no da datos.
+    // Pantalla de carga: el juego ya está abierto pero el reloj de la partida no arrancó.
     if (!inGame) {
       const abierto = await juegoAbierto();
       if (!abierto) {

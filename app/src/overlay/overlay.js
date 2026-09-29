@@ -210,20 +210,21 @@ function textoRango(j) {
   if (!j.rango) return 'Sin clasificar';
   const r = j.rango;
   const sinDivision = ['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(r.tier);
-  return `${TIER_ES[r.tier] ?? r.tier}${sinDivision ? '' : ' ' + r.division} · ${r.lp} LP${r.cola === 'Flex' ? ' (Flex)' : ''}`;
+  return `${TIER_ES[r.tier] ?? r.tier}${sinDivision ? '' : ' ' + r.division} · ${r.lp} LP${r.cola === 'Flex' ? ' · Flex' : ''}`;
 }
 function filaCarga(j, equipo, verRango, verWinrate) {
   const fila = el('div', 'carga-fila');
   const quien = el('div', 'carga-quien');
   quien.append(el('div', 'carga-nombre', j.nombre));
-  if (verRango) quien.append(el('div', `carga-rango${j.pendiente ? ' pendiente' : ''}`, `${j.campeon} · ${textoRango(j)}`));
+  // El campeón ya se ve en la ficha (y en su carta): la línea de abajo es solo el rango.
+  if (verRango) quien.append(el('div', `carga-rango${j.pendiente ? ' pendiente' : ''}`, textoRango(j)));
   else quien.append(el('div', 'carga-rango', j.campeon));
   if (ver('cargaEtiquetas')) {
     const tags = [];
-    if (j.main === true) tags.push(['main', 'Main del campeón']);
-    if (j.main === false) tags.push(['fuera', 'Fuera de su main']);
+    if (j.main === true) tags.push(['main', 'Main']);
+    if (j.main === false) tags.push(['fuera', 'Fuera de main']);
     if (j.rango?.racha) tags.push(['racha', 'En racha']);
-    if (j.sharktracker) tags.push(['st', 'SharkTracker']);
+    if (j.sharktracker) tags.push(['st', 'ST']);
     if (tags.length) {
       const fila2 = el('div', 'carga-tags');
       for (const [cls, texto] of tags) fila2.append(el('span', `carga-tag ${cls}`, texto));

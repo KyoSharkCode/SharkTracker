@@ -87,16 +87,16 @@ body.editor {
 .tab-fila.f4 { top: 337px; }
 .tab-fila.f5 { top: 413px; }
 
-/* Esquema de la pantalla de carga: 2 filas de 5 cartas de campeón */
+/* Esquema de la pantalla de carga: 2 filas de 5 cartas (medidas de una captura real a 1920×1080) */
 .carga-silueta { position: absolute; inset: 0; background: linear-gradient(180deg, #10151f, #0a0e16); }
-.carta { position: absolute; width: 230px; height: 420px; box-sizing: border-box; border: 2px solid rgba(200,170,110,0.4); border-radius: 6px; background: linear-gradient(180deg, rgba(60,70,90,0.35), rgba(20,26,36,0.6)); }
-.carta[data-c="0"] { left: 355px; top: 60px; }
-.carta[data-c="1"] { left: 600px; top: 60px; }
-.carta[data-c="2"] { left: 845px; top: 60px; }
-.carta[data-c="3"] { left: 1090px; top: 60px; }
-.carta[data-c="4"] { left: 1335px; top: 60px; }
-.carta[data-c="5"] { left: 355px; top: 560px; }
-.carta[data-c="6"] { left: 600px; top: 560px; }
-.carta[data-c="7"] { left: 845px; top: 560px; }
-.carta[data-c="8"] { left: 1090px; top: 560px; }
-.carta[data-c="9"] { left: 1335px; top: 560px; }
+.carta { position: absolute; width: 254px; height: 460px; box-sizing: border-box; border: 2px solid rgba(200,170,110,0.4); border-radius: 6px; background: linear-gradient(180deg, rgba(60,70,90,0.35), rgba(20,26,36,0.6)); }
+.carta[data-c="0"] { left: 233px; top: 68px; }
+.carta[data-c="1"] { left: 529px; top: 68px; }
+.carta[data-c="2"] { left: 825px; top: 68px; }
+.carta[data-c="3"] { left: 1121px; top: 68px; }
+.carta[data-c="4"] { left: 1417px; top: 68px; }
+.carta[data-c="5"] { left: 233px; top: 591px; }
+.carta[data-c="6"] { left: 529px; top: 591px; }
+.carta[data-c="7"] { left: 825px; top: 591px; }
+.carta[data-c="8"] { left: 1121px; top: 591px; }
+.carta[data-c="9"] { left: 1417px; top: 591px; }
