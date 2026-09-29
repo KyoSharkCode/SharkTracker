@@ -138,7 +138,9 @@ async function checkLiveGame() {
       {
         gameTime: g.gameData?.gameTime,
         activePlayer: g.activePlayer?.summonerName,
-        jugadores: g.allPlayers?.map((p) => p.summonerName)
+        jugadores: g.allPlayers?.map((p) => p.summonerName),
+        // Eventos de la partida (para comprobar los nombres que usa Riot)
+        eventos: g.events?.Events?.map((e) => `${Math.floor(e.EventTime / 60)}:${String(Math.floor(e.EventTime % 60)).padStart(2, '0')} ${e.EventName}${e.DragonType ? ' (' + e.DragonType + ')' : ''}${e.KillerName ? ' — ' + e.KillerName : ''}`)
       },
       null,
       2

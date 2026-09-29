@@ -1,70 +1,90 @@
-/* Overlay en partida: fondo transparente, solo se ven las "pastillas". */
+/* Overlay en partida — estilo de sharktracker.lol (paleta, tipografía, paneles). */
+:root {
+  --panel: rgba(8,18,29,.9);
+  --borde: #16324a;
+  --texto: #ffffff;
+  --tenue: #6d8ba3;
+  --acento: #00e5c7;
+  --dorado: #facc15;
+  --aliado: #4c9dff;     /* tu equipo (colores relativos de LoL) */
+  --enemigo: #ff5f6d;    /* equipo rival */
+}
 * { box-sizing: border-box; }
-html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: transparent; font-family: 'Inter', sans-serif; user-select: none; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: transparent; font-family: 'Inter', sans-serif; color: var(--texto); user-select: none; }
 [hidden] { display: none !important; }
 
-/* Posiciones en coordenadas del mockup (1600×900); overlay.js escala el escenario. */
-.stage { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; transform-origin: 0 0; }
+/* ── Zonas ancladas (coordenadas a 1920×1080, escaladas con --s) ── */
+.zona { position: absolute; top: 0; width: 1920px; height: 1080px; }
+.zona-centro { left: 50%; transform-origin: top center; transform: translateX(-50%) scale(var(--s, 1)); }
+.zona-derecha { right: 0; transform-origin: top right; transform: scale(var(--s, 1)); }
+.columna { position: absolute; right: 10px; top: 280px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
 
-.toppill {
-  position: absolute; display: flex; align-items: center; gap: 8px;
-  background: rgba(4,9,17,0.88); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
-  padding: 5px 10px; backdrop-filter: blur(2px);
+/* ── Pastilla base (panel de la web) ── */
+.pill {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--panel); border: 1px solid var(--borde); border-radius: 12px;
+  padding: 7px 12px 7px 8px; box-shadow: 0 6px 18px rgba(0,0,0,.35);
 }
-.pic {
-  width: 26px; height: 26px; border-radius: 6px; flex-shrink: 0;
+.tile {
+  width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; font-family: 'Rajdhani', sans-serif;
+  color: var(--c); background: color-mix(in srgb, var(--c) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 38%, transparent);
 }
-.ptime { font-size: 15px; font-weight: 700; font-family: 'Rajdhani', sans-serif; color: #e7ecf2; line-height: 1; }
-.plabel { font-size: 9px; font-weight: 600; margin-top: 1px; white-space: nowrap; }
-.chiprow { display: flex; gap: 4px; margin-left: 2px; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.1); }
-.chip {
-  width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0;
+.tiempo { font-family: 'Rajdhani', sans-serif; font-size: 19px; font-weight: 700; line-height: 1; }
+.etiqueta { font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; color: var(--tenue); }
+.aliado { color: var(--aliado); }
+.enemigo { color: var(--enemigo); }
+
+/* ── Barón (izquierda de la barra del juego) y Ancestral (derecha) ── */
+#baron { position: absolute; left: 492px; top: 8px; }
+#ancestral { position: absolute; left: 1138px; top: 8px; }
+.buff.es-aliado { border-color: color-mix(in srgb, var(--aliado) 35%, var(--borde)); }
+.buff.es-enemigo { border-color: color-mix(in srgb, var(--enemigo) 35%, var(--borde)); }
+.fichas { display: flex; gap: 4px; padding-left: 10px; border-left: 1px solid var(--borde); }
+/* Fichas variante B: cuadrado redondeado con borde del equipo y retrato */
+.ficha {
+  width: 22px; height: 22px; border-radius: 6px; overflow: hidden; flex-shrink: 0;
+  border: 1.5px solid var(--eq); background: #0d1c2b;
   display: flex; align-items: center; justify-content: center;
-  font-size: 8px; font-weight: 700; font-family: 'Rajdhani', sans-serif;
+  font-family: 'Rajdhani', sans-serif; font-size: 9px; font-weight: 700; color: #cfe0ee;
 }
-.dotrow { position: absolute; display: flex; gap: 4px; }
-.rdot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+.ficha img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ficha.aliado { --eq: var(--aliado); }
+.ficha.enemigo { --eq: var(--enemigo); }
 
-/* Barón (izquierda de la barra del juego) y Ancestral (derecha) */
-#baron { left: 410px; top: 7px; }
-#ancestral { left: 948px; top: 7px; }
-#baron .pic { background: rgba(150,90,220,0.2); color: #c19bf2; }
-#ancestral .pic { background: rgba(235,215,150,0.2); color: #ecdca4; }
-.objpill .plabel.mio { color: #6fdba8; }
-.objpill .plabel.rival { color: #ea8a8a; }
-.chip.mio { background: rgba(70,200,140,0.16); color: #8fe0b8; }
-.chip.rival { background: rgba(220,90,100,0.18); color: #e79aa8; }
+/* ── Avisos (anuncios y toasts) ── */
+.aviso {
+  width: 262px;
+  border-color: color-mix(in srgb, var(--c) 40%, var(--borde));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c) 14%, rgba(8,18,29,.92)), rgba(8,18,29,.92));
+}
+.aviso .titulo { font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700; line-height: 1.1; }
+.aviso .titulo.urgente { color: var(--enemigo); }
+.puntos { display: flex; gap: 4px; margin-top: 5px; }
+.punto { width: 6px; height: 6px; border-radius: 50%; background: rgba(157,179,196,.22); }
+.punto.on { background: var(--c); }
+.aviso.alma { box-shadow: 0 0 22px color-mix(in srgb, var(--c) 45%, transparent), 0 6px 18px rgba(0,0,0,.35); }
 
-/* Anuncio del próximo objetivo (rota si hay varios) */
-.anuncio { left: 1420px; top: 233px; width: 172px; background: rgba(235,180,60,0.12); border-color: rgba(235,180,60,0.3); }
-.anuncio .titulo { color: #e8c766; font-size: 11px; font-weight: 700; }
-.anuncio .sub { color: #8a97a6; font-size: 8px; }
-.anuncio-dots { left: 1424px; top: 276px; }
-.anuncio-dots .rdot.on { background: #e8c766; }
+/* Colores de cada objetivo / dragón / equipo */
+.c-baron { --c: #b18cff; }
+.c-heraldo { --c: #c49bff; }
+.c-larvas { --c: #9d7cf5; }
+.c-ancestral, .c-Elder { --c: #f2e2a8; }
+.c-dragon, .c-Fire { --c: #ff8a4c; }
+.c-Water { --c: #4cc3ff; }
+.c-Earth { --c: #d6a15e; }
+.c-Air { --c: #bfe3f2; }
+.c-Hextech { --c: #5fb4ff; }
+.c-Chemtech { --c: #9fe05b; }
+.c-alma { --c: var(--dorado); }
+.c-aliado { --c: var(--aliado); }
+.c-enemigo { --c: var(--enemigo); }
 
-/* Toast de dragón (5 s) */
-.toast { left: 1420px; top: 292px; width: 172px; }
-.toast .titulo { font-size: 10px; font-weight: 700; }
-.toast .sub { font-size: 8px; }
-.toast .sub.mio { color: #6fdba8; }
-.toast .sub.rival { color: #ea8a8a; }
-.toast-dots { left: 1424px; top: 335px; }
-
-/* Colores de cada objetivo / dragón */
-.c-baron { --c: #c19bf2; --bg: rgba(150,90,220,0.25); }
-.c-atakhan { --c: #e37a7a; --bg: rgba(200,70,70,0.22); }
-.c-heraldo { --c: #b78cf0; --bg: rgba(140,90,220,0.22); }
-.c-larvas { --c: #b58cf0; --bg: rgba(120,80,200,0.22); }
-.c-dragon, .c-Fire { --c: #f0a15e; --bg: rgba(220,120,60,0.2); }
-.c-Water { --c: #5ec3f0; --bg: rgba(60,160,220,0.2); }
-.c-Earth { --c: #c9a26b; --bg: rgba(170,130,70,0.2); }
-.c-Air { --c: #b8d6e6; --bg: rgba(160,200,220,0.2); }
-.c-Hextech { --c: #6fb6f0; --bg: rgba(80,150,230,0.2); }
-.c-Chemtech { --c: #9ad65e; --bg: rgba(120,200,80,0.2); }
-.c-ancestral, .c-Elder { --c: #ecdca4; --bg: rgba(235,215,150,0.2); }
-.anuncio .pic, .toast .pic { background: var(--bg); color: var(--c); }
-.toast { background: color-mix(in srgb, var(--c) 12%, rgba(4,9,17,0.88)); border-color: color-mix(in srgb, var(--c) 35%, transparent); }
-.toast .titulo { color: var(--c); }
-.toast-dots .rdot.on { background: var(--c); }
+/* ── Animación: solo entrada y salida (una vez, 250 ms, sin bucles) ── */
+@keyframes entrar { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+@keyframes salir { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-8px); } }
+@keyframes entrar-arriba { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+.entrando { animation: entrar .25s cubic-bezier(.2,.7,.2,1) both; }
+.buff.entrando { animation-name: entrar-arriba; }
+.saliendo { animation: salir .25s ease-in both; }

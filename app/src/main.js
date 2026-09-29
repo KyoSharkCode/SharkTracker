@@ -221,11 +221,26 @@ function createOverlayWindow() {
   });
   overlayWindow.setIgnoreMouseEvents(true);
   overlayWindow.setAlwaysOnTop(true, 'screen-saver');
+  // Toda la pantalla, incluida la zona de la barra de tareas (el juego la tapa en "Sin bordes").
+  overlayWindow.setBounds(bounds);
   overlayWindow.loadFile(path.join(__dirname, 'overlay', 'index.html'));
   overlayWindow.on('closed', () => { overlayWindow = null; });
 }
 
+// Versión actual de Data Dragon (para los retratos de campeones del overlay).
+// Se pide una vez por sesión de la app.
+let ddVersion = null;
+function cargarVersionDD() {
+  if (ddVersion) return;
+  https.get('https://ddragon.leagueoflegends.com/api/versions.json', { timeout: 5000 }, (res) => {
+    let body = '';
+    res.on('data', (c) => (body += c));
+    res.on('end', () => { try { ddVersion = JSON.parse(body)[0] ?? null; } catch { /* sin retratos: se usan iniciales */ } });
+  }).on('error', () => { /* sin retratos: se usan iniciales */ });
+}
+
 function startOverlay() {
+  cargarVersionDD();
   if (!overlayWindow) createOverlayWindow();
   estadoPartida = crearEstadoPartida();
   overlayWindow.showInactive();
@@ -234,7 +249,7 @@ function startOverlay() {
   overlayTimer = setInterval(async () => {
     const res = await liveClientGet('allgamedata');
     if (!res.inGame || !overlayWindow) return;
-    overlayWindow.webContents.send('overlay:state', estadoPartida.actualizar(res.data));
+    overlayWindow.webContents.send('overlay:state', { ...estadoPartida.actualizar(res.data), ddVersion });
   }, 1000);
 }
 

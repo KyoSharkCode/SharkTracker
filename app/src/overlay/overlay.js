@@ -1,10 +1,12 @@
 // Dibuja el overlay con el estado que calcula game-state.js (llega por IPC cada segundo).
+// Estilo de sharktracker.lol; regla de color: tu equipo = azul, enemigo = rojo.
 const $ = (id) => document.getElementById(id);
 
-// ── Escalado: el diseño está hecho a 1600×900 y se ajusta a tu pantalla ──
+// ── Escalado: el diseño está pensado a 1920×1080 y se ajusta a tu pantalla ──
+// (las zonas se anclan al centro y al borde derecho en overlay.css)
 function escalar() {
-  const s = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
-  $('stage').style.transform = `scale(${s})`;
+  const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+  document.documentElement.style.setProperty('--s', String(s));
 }
 window.addEventListener('resize', escalar);
 escalar();
@@ -16,65 +18,132 @@ const el = (tag, cls, texto) => {
   if (texto != null) n.textContent = texto;
   return n;
 };
+const tile = (nombreIcono, claseColor) => {
+  const t = el('div', `tile ${claseColor}`);
+  t.append(icono(nombreIcono, 18));
+  return t;
+};
 
-// ── Barón / Ancestral: tiempo del buff, de quién es y quién lo tiene ──
-function pintarBuff(nodo, letra, buff) {
-  nodo.hidden = !buff;
-  if (!buff) return;
-  const quien = buff.esMio ? 'mio' : 'rival';
-  const info = el('div');
-  info.append(el('div', 'ptime', mmss(buff.restante)),
-              el('div', `plabel ${quien}`, buff.esMio ? 'Tu equipo lo tiene' : 'Rival lo tiene'));
-  const fichas = el('div', 'chiprow');
-  for (const t of buff.titulares) {
-    const f = el('div', `chip ${quien}`, t.corto);
-    f.title = t.nombre;
-    fichas.append(f);
+// ── Entrada y salida (una vez, 250 ms; sin bucles) ──
+function mostrar(nodo, visible, reiniciar = false) {
+  const oculto = nodo.hidden || nodo.classList.contains('saliendo');
+  if (visible) {
+    if (oculto || reiniciar) {
+      clearTimeout(nodo._salida);
+      nodo.hidden = false;
+      nodo.classList.remove('saliendo', 'entrando');
+      void nodo.offsetWidth; // reinicia la animación
+      nodo.classList.add('entrando');
+    }
+  } else if (!oculto) {
+    nodo.classList.remove('entrando');
+    nodo.classList.add('saliendo');
+    nodo._salida = setTimeout(() => { nodo.hidden = true; nodo.classList.remove('saliendo'); }, 250);
   }
-  nodo.replaceChildren(el('div', 'pic', letra), info, fichas);
 }
 
-// ── Anuncios: rotan cada 4 s si hay varios objetivos próximos ──
-const LETRA = { dragon: 'D', ancestral: 'A', larvas: 'V', heraldo: 'H', atakhan: 'K', baron: 'B' };
+// ── Retratos de campeones (DDragon) con respaldo de iniciales ──
+let versionDD = null;
+function ficha(t, equipo) {
+  const f = el('div', `ficha ${equipo}`);
+  f.title = t.nombre;
+  if (versionDD && t.clave) {
+    const img = el('img');
+    img.alt = '';
+    img.addEventListener('error', () => { img.remove(); f.textContent = t.corto; });
+    img.src = `https://ddragon.leagueoflegends.com/cdn/${versionDD}/img/champion/${t.clave}.png`;
+    f.append(img);
+  } else {
+    f.textContent = t.corto;
+  }
+  return f;
+}
+
+// ── Barón / Ancestral: tiempo del buff, de quién es y quién lo tiene ──
+function pintarBuff(nodo, icon, claseColor, buff) {
+  mostrar(nodo, !!buff);
+  if (!buff) return;
+  const equipo = buff.esMio ? 'aliado' : 'enemigo';
+  const firma = `${equipo}|${buff.titulares.map((t) => t.clave || t.corto).join(',')}`;
+  if (nodo._firma !== firma) {
+    // Solo se reconstruye si cambian el dueño o las fichas (así no se recargan los retratos cada segundo).
+    nodo._firma = firma;
+    nodo.className = `pill buff es-${equipo}${nodo.classList.contains('entrando') ? ' entrando' : ''}`;
+    const info = el('div');
+    info.append(el('div', 'tiempo'), el('div', `etiqueta ${equipo}`, buff.esMio ? 'Tu equipo lo tiene' : 'Rival lo tiene'));
+    const fichas = el('div', 'fichas');
+    for (const t of buff.titulares) fichas.append(ficha(t, equipo));
+    nodo.replaceChildren(tile(icon, claseColor), info, fichas);
+  }
+  nodo.querySelector('.tiempo').textContent = mmss(buff.restante);
+}
+
+// ── Avisos (anuncio de próximo objetivo y toast de lo que acaba de pasar) ──
+function pintarAviso(nodo, { icon, claseColor, titulo, urgente, sub, subClase, puntos, alma }) {
+  nodo.className = `pill aviso ${claseColor}${alma ? ' alma' : ''}${nodo.classList.contains('entrando') ? ' entrando' : ''}${nodo.classList.contains('saliendo') ? ' saliendo' : ''}`;
+  const texto = el('div');
+  texto.append(el('div', `titulo${urgente ? ' urgente' : ''}`, titulo), el('div', `etiqueta ${subClase ?? ''}`, sub));
+  if (puntos) {
+    const fila = el('div', 'puntos');
+    for (let i = 0; i < puntos.total; i++) fila.append(el('span', i < puntos.llenos ? 'punto on' : 'punto'));
+    texto.append(fila);
+  }
+  nodo.replaceChildren(tile(icon, claseColor), texto);
+}
+
+// Anuncios: rotan cada 4 s si hay varios (el cambio de contenido no se anima).
+const ICONO_OBJ = { dragon: 'dragon', ancestral: 'elder', larvas: 'grubs', heraldo: 'herald', baron: 'baron', inhib: 'inhibitor' };
 let anuncioIdx = 0;
 let proximos = [];
 setInterval(() => { anuncioIdx++; pintarAnuncio(); }, 4000);
 
 function pintarAnuncio() {
-  const hay = proximos.length > 0;
-  $('anuncio').hidden = !hay;
-  $('anuncio-dots').hidden = proximos.length < 2;
-  if (!hay) return;
+  const nodo = $('anuncio');
+  mostrar(nodo, proximos.length > 0);
+  if (!proximos.length) return;
   const i = anuncioIdx % proximos.length;
   const p = proximos[i];
-  const nodo = $('anuncio');
-  nodo.className = `toppill anuncio c-${p.clave}`;
-  nodo.querySelector('.pic').textContent = LETRA[p.clave] ?? '•';
-  nodo.querySelector('.titulo').textContent = `${p.nombre} en ${mmss(p.falta)}`;
-  const dots = proximos.slice(0, 4).map((_, j) => el('span', j === i ? 'rdot on' : 'rdot'));
-  $('anuncio-dots').replaceChildren(...dots);
+  const claseColor = p.clave === 'inhib' ? (p.esMio ? 'c-aliado' : 'c-enemigo') : `c-${p.clave}`;
+  pintarAviso(nodo, {
+    icon: ICONO_OBJ[p.clave] ?? 'dragon',
+    claseColor,
+    titulo: `${p.nombre} en ${mmss(p.falta)}`,
+    urgente: p.falta <= 10,
+    sub: p.detalle ?? 'Próximo objetivo',
+    puntos: proximos.length > 1 ? { llenos: 0, total: 0 } : null,
+  });
+  if (proximos.length > 1) {
+    // Puntitos de rotación: el activo se marca.
+    const fila = el('div', 'puntos');
+    proximos.slice(0, 4).forEach((_, j) => fila.append(el('span', j === i ? 'punto on' : 'punto')));
+    nodo.querySelector('.puntos').replaceWith(fila);
+  }
 }
 
-// ── Toast de dragón ──
+let ultimoToast = null;
 function pintarToast(toast) {
-  $('toast').hidden = !toast;
-  $('toast-dots').hidden = !toast || toast.tipo === 'Elder';
-  if (!toast) return;
   const nodo = $('toast');
-  nodo.className = `toppill toast c-${toast.tipo}`;
-  $('toast-dots').className = `dotrow toast-dots c-${toast.tipo}`;
-  nodo.querySelector('.pic').textContent = 'D';
-  nodo.querySelector('.titulo').textContent = toast.titulo + (toast.robado ? ' (robado)' : '');
-  const sub = nodo.querySelector('.sub');
-  sub.textContent = toast.equipo ? (toast.esMio ? 'Tu equipo' : 'Equipo rival') : '';
-  sub.className = `plabel sub ${toast.esMio ? 'mio' : 'rival'}`;
-  const dots = [0, 1, 2, 3].map((j) => el('span', j < toast.dragones ? 'rdot on' : 'rdot'));
-  $('toast-dots').replaceChildren(...dots);
+  const nuevo = !!toast && toast.id !== ultimoToast;
+  mostrar(nodo, !!toast, nuevo && !nodo.hidden);
+  if (!toast) { ultimoToast = null; return; }
+  ultimoToast = toast.id;
+  const equipo = toast.esMio ? 'aliado' : 'enemigo';
+  const esEstructura = toast.tipo === 'estructura';
+  pintarAviso(nodo, {
+    icon: toast.icono,
+    claseColor: esEstructura ? `c-${equipo}` : `c-${toast.tipo}`,
+    titulo: toast.titulo + (toast.robado ? ' (robado)' : ''),
+    sub: esEstructura ? toast.detalle : (toast.equipo ? (toast.esMio ? 'Tu equipo' : 'Equipo rival') : ''),
+    subClase: equipo,
+    puntos: toast.puntos,
+    alma: toast.tipo === 'alma',
+  });
 }
 
 window.overlay.onState((estado) => {
-  pintarBuff($('baron'), 'B', estado.baron);
-  pintarBuff($('ancestral'), 'A', estado.ancestral);
+  if (estado.ddVersion) versionDD = estado.ddVersion;
+  pintarBuff($('baron'), 'baron', 'c-baron', estado.baron);
+  pintarBuff($('ancestral'), 'elder', 'c-ancestral', estado.ancestral);
   proximos = estado.proximos ?? [];
   pintarAnuncio();
   pintarToast(estado.toast);

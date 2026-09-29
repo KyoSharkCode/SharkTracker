@@ -101,12 +101,14 @@ app/
     preload.js           → contextBridge (window.sharkTracker): ventana, checkLiveGame,
                            estado de partida, auth
     game-state.js        → "cerebro" del overlay (sin Electron, se prueba en Node):
-                           buff de Barón/Ancestral y titulares, anuncios de objetivos,
-                           toast de dragón/alma. Tiempos de aparición en TIEMPOS
+                           buff de Barón/Ancestral y titulares, anuncios de objetivos
+                           e inhibidores por reaparecer, toasts de dragón/alma,
+                           Vacuolarvas, Heraldo, torres e inhibidores. Tiempos en TIEMPOS
     preload-overlay.js   → contextBridge (window.overlay): solo recibe el estado
     overlay/             → ventana transparente sobre el juego (index.html, overlay.css,
-                           overlay.js). Diseño en coordenadas 1600×900 del mockup,
-                           escalado a la pantalla
+                           overlay.js, icons.js). Coordenadas a 1920×1080 escaladas con
+                           --s; zona central anclada a la barra de objetivos y zona
+                           derecha al borde derecho
     assets/icon.png      → ícono de la ventana (logo del tiburón)
     renderer/
       img/               → logos (copias de /logo; la app empaquetada no ve la raíz del repo)
@@ -136,9 +138,28 @@ Notas técnicas:
 - Los buffs se aproximan: titulares = vivos del equipo al detectar el evento,
   y se pierden al morir (ChampionKill). Barón 180 s, Ancestral 150 s.
 
+## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
+visual" y "Overlay — estructuras" del canvas)
+
+- TODO el estilo de sharktracker.lol: paleta (#030812, paneles rgba(8,18,29,.9),
+  borde #16324a, acento #00e5c7, dorado #facc15), Rajdhani para tiempos/etiquetas
+  (etiquetas en MAYÚSCULAS) e Inter para texto.
+- **Regla de color única: lo hace o lo tiene tu equipo → azul #4c9dff; el enemigo →
+  rojo #ff5f6d** (colores relativos de LoL). Objetivos con su color propio (dragón
+  por elemento), Alma en dorado con brillo.
+- Íconos: SVG propios (mismo set que assets/lol-icons.js de la web), sin imágenes
+  externas. Fichas de campeón **variante B**: cuadrado redondeado con borde del
+  equipo y retrato de DDragon (respaldo: iniciales).
+- Animación: **solo entrada y salida** (250 ms, opacidad + posición), una vez por
+  aviso. Nada en bucle. Urgencia (últimos 10 s) solo cambia el color.
+
 ## Plan del overlay "En partida" (acordado con Alex)
 
-1. ✅ Ventana del overlay + Barón/Ancestral + anuncios de objetivos + toast de dragón.
+1. ✅ Ventana del overlay + Barón/Ancestral + anuncios de objetivos + toasts de
+   dragón/alma, Vacuolarvas (x de 3, una sola aparición a las 8:00) y Heraldo.
+   Probado en partida real. Atakhan ya no existe en el juego (quitado).
+   ✅ Estructuras: toast de torre/inhibidor destruido (qué nivel y carril) y aviso
+   1:00 antes de que reaparezca un inhibidor (5:00 tras caer).
 2. Diferencia de oro **solo con Tab pulsado** (librería `uiohook-napi` para escuchar
    la tecla sin quitársela al juego). Valor de objetos = info visible en el Tab.
    Posición del mockup (1920×1080); se calibra con el editor de posiciones.
@@ -156,8 +177,8 @@ Decisiones:
 
 ## Pendiente fuera de la app
 
-- Dominio `sharktracker.lol` (GitHub Pages): cuando cargue con HTTPS, cambiar la
-  Site URL de Supabase y correr `supabase/migrations/20260929000000_dominio_sharktracker.sql`.
+- Dominio `sharktracker.lol` (GitHub Pages) activo con HTTPS: falta cambiar la Site
+  URL de Supabase y correr `supabase/migrations/20260929000000_dominio_sharktracker.sql`.
 - Actualizar Electron (el de la v33 trae Node 20 y supabase-js avisa que lo dejará).
 
 ## Estilo de comunicación de Alex
