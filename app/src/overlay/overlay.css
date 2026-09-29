@@ -105,15 +105,19 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .oro.entrando { animation: fundir .12s ease-out both; }
 .oro.saliendo { animation: fundir .12s ease-in reverse both; }
 
-/* ── Tu rendimiento (solo con Tab), centrado debajo del marcador ── */
-.rend { position: absolute; left: 960px; top: 716px; transform: translateX(-50%); gap: 14px; padding: 8px 16px 8px 8px; }
-.rend .tile { --c: var(--acento); }
-.rend-cab .vs { font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; line-height: 1.1; white-space: nowrap; }
-.rend-celda { padding-left: 14px; border-left: 1px solid var(--borde); min-width: 78px; }
-.rend-celda .tiempo { color: var(--tenue); }
-.rend-celda.arriba .tiempo { color: var(--aliado); }
-.rend-celda.abajo .tiempo { color: var(--enemigo); }
-.rend-celda .ref { font-size: 11px; color: var(--tenue); margin-top: 2px; white-space: nowrap; }
-.rend-aviso { font-size: 12px; color: var(--tenue); padding-left: 14px; border-left: 1px solid var(--borde); max-width: 280px; }
-.rend.entrando { animation: fundir .12s ease-out both; }
-.rend.saliendo { animation: fundir .12s ease-in reverse both; }
+/* ── Tu rendimiento: siempre a la vista, arriba a la derecha (encima de los avisos) ── */
+.rend {
+  position: absolute; right: 10px; top: 72px; width: 220px;
+  background: var(--panel); border: 1px solid var(--borde); border-radius: 12px;
+  padding: 9px 12px 8px; box-shadow: 0 6px 18px rgba(0,0,0,.35);
+}
+.rend-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.rend-cab .etiqueta { color: var(--acento); margin: 0; }
+.rend-cab .vs { font-size: 10px; color: var(--tenue); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rend-fila { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 0; }
+.rend-fila .nombre { font-size: 12px; font-weight: 500; line-height: 1.2; }
+.rend-fila .ref { font-size: 10px; color: var(--tenue); line-height: 1.2; }
+.rend-fila .valor { font-family: 'Rajdhani', sans-serif; font-size: 17px; font-weight: 700; white-space: nowrap; color: #cfe0ee; }
+.rend-fila .valor.arriba { color: var(--aliado); }
+.rend-fila .valor.abajo { color: var(--enemigo); }
+.rend-fila .flecha { font-size: 10px; margin-left: 3px; }

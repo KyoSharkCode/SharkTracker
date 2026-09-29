@@ -165,30 +165,32 @@ function pintarOro() {
   nodo.replaceChildren(...filas);
 }
 
-// ── Tu rendimiento: tus números vs la división de arriba (solo con Tab) ──
-// Azul = vas por encima de la referencia; rojo = por debajo.
+// ── Tu rendimiento: tus números vs la división de arriba (siempre a la vista) ──
+// Azul ▲ = vas por encima de la referencia; rojo ▼ = por debajo.
 let rendimiento = null;
 function pintarRendimiento() {
   const nodo = $('rendimiento');
-  mostrar(nodo, tab && !!rendimiento);
-  if (!tab || !rendimiento) return;
+  mostrar(nodo, !!rendimiento);
+  if (!rendimiento) return;
   const r = rendimiento;
   const cab = el('div', 'rend-cab');
-  cab.append(el('div', 'etiqueta', 'Tu rendimiento'), el('div', 'vs', `vs ${r.division}${r.rol ? ' · ' + r.rol : ''}`));
-  const partes = [tile('stats', ''), cab];
-  if (r.sinDatos) {
-    partes.push(el('div', 'rend-aviso', 'Aún reuniendo partidas de referencia de esta división y rol.'));
-  } else {
-    for (const m of r.metricas) {
-      const celda = el('div', `rend-celda ${m.arriba === true ? 'arriba' : m.arriba === false ? 'abajo' : ''}`);
-      celda.append(el('div', 'etiqueta', m.etiqueta), el('div', 'tiempo', m.valor), el('div', 'ref', `${r.division}: ${m.referencia}`));
-      partes.push(celda);
-    }
-  }
-  nodo.replaceChildren(...partes);
+  const vs = r.aviso ?? `vs ${r.division}${r.rol ? ' · ' + r.rol : ''}`;
+  cab.append(el('div', 'etiqueta', 'Tu rendimiento'), el('div', 'vs', vs));
+  const filas = r.metricas.map((m) => {
+    const fila = el('div', 'rend-fila');
+    const texto = el('div');
+    texto.append(el('div', 'nombre', m.etiqueta));
+    if (m.referencia != null) texto.append(el('div', 'ref', `vs. ${m.referencia} prom. ${r.division}`));
+    const estado = m.arriba === true ? 'arriba' : m.arriba === false ? 'abajo' : '';
+    const valor = el('div', `valor ${estado}`, m.valor);
+    if (estado) valor.append(el('span', 'flecha', m.arriba ? '▲' : '▼'));
+    fila.append(texto, valor);
+    return fila;
+  });
+  nodo.replaceChildren(cab, ...filas);
 }
 
-window.overlay.onTab((pulsado) => { tab = pulsado; pintarOro(); pintarRendimiento(); });
+window.overlay.onTab((pulsado) => { tab = pulsado; pintarOro(); });
 
 window.overlay.onState((estado) => {
   if (estado.ddVersion) versionDD = estado.ddVersion;

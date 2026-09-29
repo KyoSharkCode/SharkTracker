@@ -174,8 +174,10 @@ visual" y "Overlay — estructuras" del canvas)
    **Verificar**: que `price` sea el coste total del objeto.
 3. ✅ (pendiente de probar en partida real) "Tu rendimiento" **contra la división de
    ARRIBA de la tuya** (Oro → Platino; Diamante y Master+ → Master+; sin rango → Oro),
-   por rol. Se ve con Tab, debajo del marcador (y = 716), desde el minuto 5.
-   CS/min, oro/min, visión/min y KP; azul = por encima de la referencia, rojo = por debajo.
+   por rol. **Siempre a la vista desde que empieza la partida**, arriba a la derecha
+   (y = 72, encima de los avisos; como en el mockup). Oro/min, CS/min, visión/min y KP;
+   azul ▲ = por encima de la referencia, rojo ▼ = por debajo. Antes del minuto 5 no se
+   colorea (los números por minuto saltan mucho al principio).
    - Datos propios (no OP.GG): Edge Function `referencias-elo` (cron cada 10 min, ≤ 11
      llamadas a Riot por corrida). Key **personal** (100 peticiones / 2 min) compartida
      con la web, que con 7 jugadores gasta ~33 cada 2 min: el recolector empieza 30 s
@@ -188,7 +190,7 @@ visual" y "Overlay — estructuras" del canvas)
      los últimos 14 días y `limpiar_referencias_elo()` borra lo demás cada madrugada.
    - Oro/min en partida = valor de objetos + oro sin gastar (el juego no da el oro
      ganado): sale algo por debajo del `goldEarned` real. Con < 30 muestras en ese
-     rol/división se muestra "Aún reuniendo partidas".
+     rol/división (o sin sesión) se ven tus números sin comparar, con el aviso arriba.
    - Lógica en `rendimiento.js`; `auth.getReferencia()` lee rango (rank_latest), rol
      principal y promedios al empezar la partida.
 4. Ajustes → Overlay: interruptores reales + editor "Reposicionar elementos".
