@@ -174,7 +174,8 @@
       pintarFicha(id, r);
     } else {
       pintarFicha(id, null, r?.estado === 'opgg_caido'
-        ? 'OP.GG no respondió. Prueba de nuevo en un rato.' : 'No se pudo cargar la ficha de este campeón.');
+        ? 'OP.GG no respondió. Prueba de nuevo en un rato.'
+        : `No se pudo cargar la ficha de este campeón.${r?.detalle ? ` (${r.detalle})` : r?.estado ? ` (${r.estado})` : ''}`);
     }
   }
 
