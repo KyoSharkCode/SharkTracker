@@ -85,12 +85,13 @@
     <div class="dl">
       <a class="dl-btn off" id="dl-btn" href="#">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16"/></svg>
-        <span id="dl-txt">Buscando…</span>
+        <span id="dl-txt">Cargando…</span>
       </a>
-      <small id="dl-info">Windows 10/11 · 64 bits</small>
+      <small id="dl-info">Solo para miembros de SharkTracker</small>
     </div>
   </div>
 
+  <div id="guia" hidden>
   <section>
     <h2 class="section-title"><span class="bar"></span>Instalar</h2>
     <div class="grid">
@@ -108,6 +109,7 @@
       <div class="card"><h3>Actualizaciones</h3><p>Son <b>automáticas</b>: la app descarga las versiones nuevas sola y las instala al cerrarla. En Ajustes → Cuenta ves tu versión.</p></div>
     </div>
   </section>
+  </div>
 
   <footer>
     <img class="footer-logo" src="logo/HorizontalLogo.webp" alt="SharkTracker">
@@ -127,53 +129,64 @@ const supabase = createSupabase();
 const authMenu = createAuthMenu({ supabase, profileIconUrl });
 const $ = (id) => document.getElementById(id);
 
-// El instalador vive en GitHub Releases (de ahí también salen las actualizaciones
-// automáticas). Este enlace siempre apunta al de la última versión publicada.
+// Solo para el grupo: con sesión iniciada Y cuenta de LoL vinculada. Hasta entonces
+// ni se pide a GitHub el enlace del instalador ni se muestra la guía.
+// (El instalador vive en GitHub Releases, de donde salen las actualizaciones automáticas.)
 const REPO = 'KyoSharkCode/SharkTracker';
-const INSTALADOR = `https://github.com/${REPO}/releases/latest/download/SharkTracker-Setup.exe`;
+const ICONO_BAJAR = $('dl-btn').querySelector('svg').outerHTML;
 
-async function version() {
+async function ultimaVersion() {
   try {
     const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, { headers: { Accept: 'application/vnd.github+json' } });
     if (res.status === 404) return { publicada: false };
     if (!res.ok) throw new Error(res.status);
     const r = await res.json();
     const exe = (r.assets ?? []).find((a) => a.name === 'SharkTracker-Setup.exe');
-    return { publicada: !!exe, tag: r.tag_name, fecha: r.published_at, mb: exe ? exe.size / 1048576 : null };
+    return exe
+      ? { publicada: true, url: exe.browser_download_url, tag: r.tag_name, fecha: r.published_at, mb: exe.size / 1048576 }
+      : { publicada: false };
   } catch {
-    return { publicada: null }; // GitHub no respondió: se ofrece el enlace igual
+    return { publicada: null }; // GitHub no respondió
   }
 }
 
-async function sesion() {
+function boton({ texto, info, href = null, icono = true }) {
+  const btn = $('dl-btn');
+  btn.innerHTML = `${icono ? ICONO_BAJAR : ''}<span id="dl-txt"></span>`;
+  $('dl-txt').textContent = texto;
+  $('dl-info').textContent = info;
+  btn.classList.toggle('off', !href);
+  if (href) btn.href = href; else btn.removeAttribute('href');
+}
+
+async function init() {
   const [{ data: { session } }, { data: players }, { data: profiles }] = await Promise.all([
     supabase.auth.getSession(),
     supabase.from('players').select('*'),
     supabase.from('player_profiles').select('*'),
   ]);
   authMenu.render(session, players ?? [], profiles ?? []);
-}
 
-async function boton() {
-  const v = await version();
-  const btn = $('dl-btn');
-  if (v.publicada === false) {
-    $('dl-txt').textContent = 'Muy pronto';
-    $('dl-info').textContent = 'Todavía no hay una versión publicada';
-    return;
+  if (!session) {
+    return boton({ texto: 'Iniciar sesión', info: 'Inicia sesión para descargar la app', href: 'login.html', icono: false });
   }
-  btn.href = INSTALADOR;
-  btn.classList.remove('off');
-  $('dl-txt').textContent = 'Descargar';
-  if (v.publicada) {
-    const fecha = v.fecha ? new Date(v.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-    $('dl-info').textContent = [String(v.tag).replace(/^v?/, 'v'), fecha, v.mb ? `${Math.round(v.mb)} MB` : null, 'Windows 10/11']
-      .filter(Boolean).join(' · ');
+  if (!(players ?? []).some((p) => p.user_id === session.user.id)) {
+    return boton({ texto: 'Descargar', info: 'Primero vincula tu cuenta de LoL (menú de tu perfil)' });
   }
-}
 
-boton();
-sesion();
+  $('guia').hidden = false;
+  const v = await ultimaVersion();
+  if (v.publicada === false) return boton({ texto: 'Muy pronto', info: 'Todavía no hay una versión publicada' });
+  if (v.publicada === null) {
+    return boton({ texto: 'Descargar', info: 'Windows 10/11', href: `https://github.com/${REPO}/releases/latest/download/SharkTracker-Setup.exe` });
+  }
+  const fecha = v.fecha ? new Date(v.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  boton({
+    texto: 'Descargar', href: v.url,
+    info: [String(v.tag).replace(/^v?/, 'v'), fecha, `${Math.round(v.mb)} MB`, 'Windows 10/11'].filter(Boolean).join(' · '),
+  });
+}
+init();
 </script>
 </body>
 </html>
