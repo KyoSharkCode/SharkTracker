@@ -266,6 +266,7 @@ function crearEstadoPartida() {
 
     const rendimiento = calcularRendimiento({
       t, yo, equipo: aliados, oroActual: datos?.activePlayer?.currentGold, valorObjetos, referencia,
+      modo: datos?.gameData?.gameMode,
     });
 
     return { tiempo: t, miLado, baron, ancestral, toast, proximos, dragones: cuenta, oro, rendimiento, aliadoIzquierda: miLado !== 'red' };
