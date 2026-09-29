@@ -170,12 +170,13 @@ visual" y "Overlay — estructuras" del canvas)
 2. ✅ (pendiente de probar en partida real) Diferencia de oro **solo con Tab pulsado**:
    `uiohook-napi` en el proceso main escucha SOLO la tecla Tab mientras hay partida.
    Oro = suma de `items[].price × count` (lo visible en el Tab). Fila i = i-ésimo
-   aliado vs i-ésimo enemigo (orden de `allPlayers`). "1550 >" azul = va por delante
-   tu equipo; "< 1180" rojo = el rival. Filas a y = 352/428/501/577/653 (1920×1080),
+   aliado vs i-ésimo enemigo (orden de `allPlayers`). La flecha **apunta al jugador
+   con más oro** ("◀ 425" = el de la izquierda, "425 ▶" = el de la derecha; antes era al
+   revés y confundía) y el color dice de quién es: azul tu equipo, rojo el rival. Filas a y = 352/428/501/577/653 (1920×1080),
    medidas sobre una captura real del Tab.
    En el Tab el **lado azul va siempre a la izquierda** y el rojo a la derecha
-   (confirmado por Alex): si juegas en rojo, la flecha se invierte (la flecha sale
-   de la columna que va por delante); el color sigue siendo azul = tu equipo.
+   (confirmado por Alex): si juegas en rojo, la flecha se invierte (sigue apuntando a
+   la columna que va por delante); el color sigue siendo azul = tu equipo.
    **Verificado en partida real: `items[].price` NO es el coste total** (solo el último
    paso de la receta). Se usa `gold.total` de DDragon `item.json` (main.js `cargarPrecios`,
    `estadoPartida.setPrecios`); `price` queda solo de respaldo.

@@ -153,10 +153,10 @@ function pintarOro() {
   const filas = oro.slice(0, 5).map((f, i) => {
     const d = f.diferencia;
     const n = Math.abs(Math.round(d));
-    // La flecha sale del lado que va por delante ("1550 >" = gana la columna izquierda,
-    // "< 1180" = gana la derecha). El color dice quién: azul tu equipo, rojo el rival.
+    // La flecha APUNTA al jugador que tiene más oro ("◀ 425" = el de la izquierda,
+    // "425 ▶" = el de la derecha). El color dice de quién es: azul tu equipo, rojo el rival.
     const ganaIzquierda = aliadoIzquierda ? d > 0 : d < 0;
-    const texto = n < 50 ? '≈' : ganaIzquierda ? `${n} >` : `< ${n}`;
+    const texto = n < 50 ? '≈' : ganaIzquierda ? `◀ ${n}` : `${n} ▶`;
     const fila = el('div', `oro-fila ${n < 50 ? 'igual' : d > 0 ? 'aliado' : 'enemigo'}`, texto);
     fila.style.top = `${FILAS_Y[i]}px`;
     fila.title = `${f.aliado} vs ${f.enemigo}`;
