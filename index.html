@@ -501,7 +501,7 @@ const timeAgo = (iso) => {
 let selectedPlayerId = null;
 let nameById = new Map();
 let playersById = new Map();
-// Indicador de "en vivo" del header — se pisa cada vez que render()
+// Indicador de "en vivo" del header — se pisa cada vez que refresh()
 // termina de traer datos de Supabase, igual que hacía el sitio viejo.
 let lastUpdate = null;
 function tickLiveIndicator() {
@@ -534,7 +534,7 @@ const spellIconUrl = (id) => summonerSpellById[id] ? `https://ddragon.leagueofle
 const runeIconUrl = (perkId) => runeIconById[perkId] ? `https://ddragon.leagueoflegends.com/cdn/img/${runeIconById[perkId]}` : null;
 
 // ── Historial reciente de TODOS los jugadores — se trae una sola vez
-// por render() (no una consulta por click), y queda cacheado en memoria.
+// por refresh() (no una consulta por click), y queda cacheado en memoria.
 // Así cambiar de jugador en "Historial Individual" es instantáneo, y
 // además alimenta el cálculo de racha 🔥/❄️ de la fila del ranking.
 let historyByPlayer = new Map();   // player_id -> hasta 10 partidas recientes de SoloQ, más nuevas primero
@@ -850,27 +850,42 @@ function renderBadgeCard(container, categoria, badgeByCategory, nameById) {
 
 // ── Carga + dibuja TODO — se vuelve a llamar cada vez que Realtime
 // avisa que algo cambió en las tablas suscritas (ver más abajo).
-async function render() {
-  const [{ data: players }, { data: profiles }, { data: rankSnaps }, { data: liveStatus },
-         { data: streamStatus }, { data: weeklyBadges }, { data: events }, { data: firstWin }] = await Promise.all([
-    supabase.from('players').select('*'),
-    supabase.from('player_profiles').select('*'),
-    supabase.from('rank_snapshots').select('*').eq('queue_type', 'RANKED_SOLO_5x5').order('recorded_at', { ascending: false }),
-    supabase.from('live_status').select('*'),
-    supabase.from('stream_status').select('*'),
-    supabase.from('weekly_badges').select('*'),
-    supabase.from('events').select('*').order('occurred_at', { ascending: false }).limit(20),
-    supabase.from('daily_first_win_state').select('*').maybeSingle(),
-  ]);
-  loadRetoCountdown();
-  try { equippedMap = await loadEquipped(supabase); } catch { equippedMap = new Map(); }
+// ── Datos de la portada, guardados por tabla. Cada aviso de Realtime
+// recarga SOLO la tabla que cambió y redibuja SOLO las secciones que
+// dependen de ella (antes cualquier cambio volvía a descargar y dibujar
+// toda la portada, incluidas 500 partidas).
+const state = { players: [], profiles: [], rankSnaps: [], liveStatus: [], streamStatus: [], weeklyBadges: [], events: [], firstWin: null };
+const loaders = {
+  core: async () => {
+    const [{ data: players }, { data: profiles }] = await Promise.all([
+      supabase.from('players').select('*'),
+      supabase.from('player_profiles').select('*'),
+    ]);
+    state.players = players ?? [];
+    state.profiles = profiles ?? [];
+  },
+  cosmetics: async () => { try { equippedMap = await loadEquipped(supabase); } catch { equippedMap = new Map(); } },
+  // Vista rank_latest: solo el último rango de cada jugador (no 30 días de historial).
+  rank: async () => { state.rankSnaps = (await supabase.from('rank_latest').select('*').eq('queue_type', 'RANKED_SOLO_5x5')).data ?? []; },
+  live: async () => { state.liveStatus = (await supabase.from('live_status').select('*')).data ?? []; },
+  stream: async () => { state.streamStatus = (await supabase.from('stream_status').select('*')).data ?? []; },
+  badges: async () => { state.weeklyBadges = (await supabase.from('weekly_badges').select('*')).data ?? []; },
+  events: async () => { state.events = (await supabase.from('events').select('*').order('occurred_at', { ascending: false }).limit(20)).data ?? []; },
+  firstWin: async () => { state.firstWin = (await supabase.from('daily_first_win_state').select('*').maybeSingle()).data ?? null; },
+  history: async () => { await Promise.all([loadMatchCatalogs(), loadAllHistories(state.players.map(p => p.id))]); },
+  reto: async () => { await loadRetoCountdown(); },
+};
 
-  const profileByPlayer = new Map((profiles ?? []).map(p => [p.player_id, p]));
-  const liveByPlayer = new Map((liveStatus ?? []).map(l => [l.player_id, l]));
-  const streamByPlayer = new Map((streamStatus ?? []).map(s => [s.player_id, s]));
-  const badgeByCategory = new Map((weeklyBadges ?? []).map(b => [b.category, b]));
-  nameById = new Map((players ?? []).map(p => [p.id, p.riot_game_name]));
-  playersById = new Map((players ?? []).map(p => [p.id, p]));
+// Qué secciones hay que redibujar según lo que se recargó.
+const ROSTER_KEYS = ['core', 'cosmetics', 'rank', 'live', 'stream', 'history'];
+
+function buildRoster() {
+  const { players, profiles, liveStatus, streamStatus, rankSnaps } = state;
+  const profileByPlayer = new Map(profiles.map(p => [p.player_id, p]));
+  const liveByPlayer = new Map(liveStatus.map(l => [l.player_id, l]));
+  const streamByPlayer = new Map(streamStatus.map(s => [s.player_id, s]));
+  nameById = new Map(players.map(p => [p.id, p.riot_game_name]));
+  playersById = new Map(players.map(p => [p.id, p]));
 
   // Dúo en vivo: si dos o más del roster están AHORA MISMO en la misma
   // partida (mismo game_id) y del mismo equipo, se muestran como dúo
@@ -880,7 +895,7 @@ async function render() {
   const liveDuoByPlayer = new Map();
   {
     const byGame = new Map();
-    for (const l of liveStatus ?? []) {
+    for (const l of liveStatus) {
       if (!l.in_game || !l.game_id) continue;
       const list = byGame.get(l.game_id) ?? [];
       list.push(l);
@@ -898,27 +913,23 @@ async function render() {
     }
   }
 
-  const latestRankByPlayer = new Map();
-  for (const row of rankSnaps ?? []) {
-    if (!latestRankByPlayer.has(row.player_id)) latestRankByPlayer.set(row.player_id, row);
-  }
+  const latestRankByPlayer = new Map(rankSnaps.map(r => [r.player_id, r]));
 
-  roster = (players ?? []).map(p => ({
+  roster = players.map(p => ({
     ...p,
     profile: profileByPlayer.get(p.id) ?? {},
     live: { ...(liveByPlayer.get(p.id) ?? { in_game: false }), duo_con: liveDuoByPlayer.get(p.id) ?? [] },
     stream: streamByPlayer.get(p.id) ?? { is_live: false },
     rank: latestRankByPlayer.get(p.id) ?? null,
   })).sort((a, b) => (b.rank?.elo_score ?? -1) - (a.rank?.elo_score ?? -1));
+}
 
-  // Historial reciente de todos los jugadores (para el panel individual
-  // y para calcular la racha 🔥/❄️) — una sola vez acá, no por click.
-  await Promise.all([loadMatchCatalogs(), loadAllHistories(roster.map(p => p.id))]);
-
-  // Header: sesión actual
+async function renderAuth() {
   const { data: { session } } = await supabase.auth.getSession();
-  authMenu.render(session, players ?? [], profiles ?? []);
+  authMenu.render(session, state.players, state.profiles);
+}
 
+function renderPodium() {
   // Podio (top 3)
   const podiumEl = document.getElementById('podium');
   podiumEl.innerHTML = '';
@@ -963,7 +974,9 @@ async function render() {
       </div>`;
     podiumEl.appendChild(div);
   });
+}
 
+function renderTwitch() {
   // Twitch — se abre o se colapsa según quién esté en vivo ahora.
   // El iframe solo se crea cuando cambia el canal: cada minuto llega una
   // actualización (viewers, título…) y recrearlo reiniciaba el video.
@@ -998,7 +1011,10 @@ async function render() {
     // Al terminar el directo se quita el reproductor (deja de cargar video).
     setTimeout(() => { if (!twitchWrap.classList.contains('visible')) { card.innerHTML = ''; delete card.dataset.channel; } }, 600);
   }
+}
 
+function renderFirstWin() {
+  const firstWin = state.firstWin;
   // Primera Victoria del Día — foto real, campeón, KDA, hechizos, lado
   // y duración (antes solo mostraba iniciales y nombre). Ahora la
   // sección siempre se muestra: si todavía nadie ganó hoy, se ve una
@@ -1043,7 +1059,10 @@ async function render() {
         <div style="margin-top:8px;font-size:13px;color:var(--text-faint);font-weight:600;">Nadie ha ganado hoy todavía.</div>
       </div>`;
   }
+}
 
+function renderBadges() {
+  const badgeByCategory = new Map(state.weeklyBadges.map(b => [b.category, b]));
   // Badges últimas 10 + destacados semana
   const badgesRecientesEl = document.getElementById('badges-recientes');
   const destacadosEl = document.getElementById('destacados-semana');
@@ -1082,7 +1101,9 @@ async function render() {
   } else {
     reySection.style.display = 'none';
   }
+}
 
+function renderHistorySelection() {
   // Historial Individual — mantiene la selección si el jugador sigue
   // en el roster, si no elige al primero (mismo criterio que el sitio viejo).
   // selectPlayer() ya se encarga de llamar a renderRanking().
@@ -1093,7 +1114,10 @@ async function render() {
     selectedPlayerId = null;
     renderRanking();
   }
+}
 
+function renderLogros() {
+  const events = state.events;
   // Historial de Logros
   const logrosEl = document.getElementById('logros');
   logrosEl.innerHTML = '';
@@ -1136,12 +1160,33 @@ async function render() {
       logrosEl.appendChild(item);
     });
   }
+}
+
+// Recarga las tablas indicadas y redibuja solo las secciones afectadas.
+// Sin argumento = todo (carga inicial).
+async function refresh(keys = Object.keys(loaders)) {
+  const k = new Set(keys);
+  if (k.has('core')) k.add('history');   // jugadores nuevos → también su historial
+  // El historial necesita la lista de jugadores: 'core' va primero.
+  if (k.has('core')) await loaders.core();
+  await Promise.all([...k].filter(key => key !== 'core').map(key => loaders[key]()));
+
+  if (ROSTER_KEYS.some(key => k.has(key))) {
+    buildRoster();
+    renderPodium();
+    renderHistorySelection();   // ranking + historial individual
+  }
+  if (k.has('core') || k.has('stream')) renderTwitch();
+  if (k.has('core') || k.has('firstWin') || k.has('history')) renderFirstWin();
+  if (k.has('core') || k.has('badges')) renderBadges();
+  if (k.has('core') || k.has('events')) renderLogros();
+  if (k.has('core')) renderAuth();
 
   lastUpdate = Date.now();
   tickLiveIndicator();
 }
 
-await render();
+await refresh();
 
 // ── Cuenta regresiva — fija, no depende de datos de Supabase.
 // Convierte hora "de pared" en Madrid a UTC real (mismo patrón que
@@ -1163,7 +1208,7 @@ function madridWallToUTC(year, month, day, hour = 0, minute = 0) {
 // hay ninguno abierto, muestra al ganador del último reto terminado.
 var countdownSig; // var: se usa antes de esta línea (ver buildCountdowns)
 function buildCountdowns(reto) {
-  // Se arma acá adentro: render() (más arriba) puede llamar a esto antes de que
+  // Se arma acá adentro: refresh() (más arriba) puede llamar a esto antes de que
   // el script llegue a esta parte del archivo.
   const list = [{ label: 'Fin del Split', target: madridWallToUTC(2027, 1, 1) }];
   const escHtml = (t) => String(t ?? '').replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
@@ -1230,34 +1275,47 @@ setInterval(tickCountdowns, 1000);
 setInterval(tickLiveIndicator, 1000);
 
 // ── Realtime — Supabase avisa al instante cuando cambia algo en
-// estas tablas; se agrupan avisos que lleguen muy seguidos (p.ej.
-// varios rangos actualizándose en la misma corrida) en un solo
-// redibujado, en vez de redibujar varias veces en el mismo segundo.
-let rerenderTimer = null;
+// estas tablas.
+
 // Partida del mes (la mejor de SoloQ del grupo en el mes, Fase 5).
 const partidaMes = renderMatchOfMonth(document.getElementById('partida-mes'), { supabase });
 let pmTimer = null;
 
-function scheduleRerender() {
-  clearTimeout(rerenderTimer);
-  rerenderTimer = setTimeout(render, 600);
+// Qué recargar según la tabla que avisó. Los avisos que llegan muy
+// seguidos se juntan en una sola recarga (p. ej. varios rangos de la
+// misma corrida), y nunca corren dos recargas a la vez.
+const TABLE_KEYS = {
+  players: ['core'],
+  player_profiles: ['core'],
+  player_cosmetics: ['cosmetics'],
+  rank_snapshots: ['rank'],
+  live_status: ['live'],
+  stream_status: ['stream'],
+  weekly_badges: ['badges'],
+  // La primera victoria del día se guarda junto con su evento y sus partidas.
+  events: ['events', 'firstWin'],
+  challenges: ['reto'],
+  // matches/match_participants: Historial Individual y racha 🔥/❄️.
+  matches: ['history', 'firstWin'],
+  match_participants: ['history', 'firstWin'],
+};
+const pendingKeys = new Set();
+let refreshTimer = null;
+let refreshChain = Promise.resolve();
+function scheduleRefresh(table) {
+  (TABLE_KEYS[table] ?? []).forEach(k => pendingKeys.add(k));
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(() => {
+    const keys = [...pendingKeys];
+    pendingKeys.clear();
+    refreshChain = refreshChain.then(() => refresh(keys)).catch(e => console.error('Error al actualizar la portada', e));
+  }, 600);
 }
 
-supabase.channel('sharktracker-live')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, scheduleRerender)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'player_profiles' }, scheduleRerender)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'rank_snapshots' }, scheduleRerender)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'live_status' }, scheduleRerender)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'stream_status' }, scheduleRerender)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'weekly_badges' }, scheduleRerender)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, scheduleRerender)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'challenges' }, scheduleRerender)
-  // matches/match_participants: sin esto, el Historial Individual y la
-  // racha 🔥/❄️ solo se refrescaban "de rebote" cuando el mismo sync
-  // tocaba rank_snapshots también. Con esto quedan cubiertos aparte.
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, scheduleRerender)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'match_participants' }, scheduleRerender)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'player_cosmetics' }, scheduleRerender)
+const liveChannel = supabase.channel('sharktracker-live');
+Object.keys(TABLE_KEYS).forEach(table =>
+  liveChannel.on('postgres_changes', { event: '*', schema: 'public', table }, () => scheduleRefresh(table)));
+liveChannel
   .on('postgres_changes', { event: '*', schema: 'public', table: 'best_matches' }, () => { clearTimeout(pmTimer); pmTimer = setTimeout(partidaMes.reload, 800); })
   .subscribe();
 </script>
