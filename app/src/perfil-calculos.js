@@ -39,9 +39,9 @@ function aplanar(m) {
   };
 }
 
-// Promedios de tus últimas N SoloQ (sin remakes).
-function resumen(partidas, n = 20) {
-  const lista = partidas.filter((p) => p.cola === 420 && !esRemake(p)).slice(0, n);
+// Promedios de tus últimas N partidas de esas colas (sin remakes). Por defecto, SoloQ.
+function resumen(partidas, colas = [420], n = 20) {
+  const lista = partidas.filter((p) => colas.includes(p.cola) && !esRemake(p)).slice(0, n);
   if (!lista.length) return null;
   const minutos = lista.reduce((s, p) => s + p.duracion / 60, 0) || 1;
   const suma = (k) => lista.reduce((s, p) => s + p[k], 0);
@@ -174,6 +174,16 @@ function historialElo(snapshots) {
   };
 }
 
+// Radar por pestaña (la misma que el historial). En la Grieta se compara con la
+// referencia de la división de arriba; en ARAM y Arena, sin comparar.
+const GRIETA = ['solo', 'flex', 'normal', 'rapida'];
+function rendimientoPorCola(partidas, ref) {
+  return Object.fromEntries(PESTANAS.map((t) => {
+    const res = resumen(partidas, t.colas);
+    return [t.clave, { nombre: t.nombre, grieta: GRIETA.includes(t.clave), resumen: res, radar: radar(res, GRIETA.includes(t.clave) ? ref : null) }];
+  }));
+}
+
 // Historial por pestaña: últimas 10 de cada cola.
 function historial(partidas) {
   return PESTANAS.map((t) => ({
@@ -182,4 +192,4 @@ function historial(partidas) {
   }));
 }
 
-module.exports = { aplanar, resumen, radar, etiquetas, historialElo, historial, textoRango, esRemake, TIERS, TIER_ES };
+module.exports = { aplanar, resumen, radar, rendimientoPorCola, etiquetas, historialElo, historial, textoRango, esRemake, TIERS, TIER_ES };

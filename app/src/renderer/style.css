@@ -399,3 +399,41 @@ span.sw { cursor: default; opacity: 0.6; }
 .errtitle { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; color: #e7ecf2; }
 .errtxt { font-size: 11px; color: #8a97a6; max-width: 480px; line-height: 1.7; margin-bottom: 8px; }
 .cachednote { margin-top: 12px; font-size: 9px; color: #4a5768; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; max-width: 480px; }
+
+/* ---- Barra de desplazamiento con la estética de la app ---- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(0,229,199,0.18); border-radius: 10px;
+  border: 3px solid transparent; background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(0,229,199,0.4); border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:active { background: rgba(0,229,199,0.55); border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* ---- Mi Perfil: podio de maestrías ---- */
+.card-maestria { display: flex; flex-direction: column; }
+.podio { flex: 1; display: grid; grid-template-columns: 1fr 1.18fr 1fr; gap: 8px; align-items: end; min-height: 300px; }
+.pcarta {
+  position: relative; border-radius: 10px; overflow: hidden; height: 88%;
+  border: 1px solid rgba(255,255,255,0.12); background: #0d1c2b;
+}
+.pcarta.puesto-1 { height: 100%; border-color: rgba(232,199,102,0.65); box-shadow: 0 0 16px rgba(232,199,102,0.2); }
+.pcarta.puesto-3 { height: 78%; }
+.pcarta-arte {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 22px; color: #e8c766;
+}
+.pcarta-arte img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
+.pcarta-info {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 9px 9px;
+  background: linear-gradient(180deg, transparent, rgba(5,7,12,0.85) 40%, rgba(5,7,12,0.95));
+}
+.pcarta-puesto { position: absolute; top: 6px; left: 8px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 12px; color: #8a97a6; }
+.pcarta.puesto-1 .pcarta-puesto { color: #e8c766; }
+.pcarta-nivel { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; color: #e8c766; }
+.pcarta.puesto-1 .pcarta-nivel { font-size: 24px; }
+.pcarta-nombre { font-size: 11px; font-weight: 600; color: #e7ecf2; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pcarta-pts { font-size: 9px; color: #8a97a6; }
+.pcarta-barra { height: 3px; border-radius: 3px; background: rgba(255,255,255,0.1); margin-top: 5px; overflow: hidden; }
+.pcarta-barra span { display: block; height: 100%; background: linear-gradient(90deg,#e8c766,#f5dd8f); }
