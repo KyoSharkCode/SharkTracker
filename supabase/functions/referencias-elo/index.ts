@@ -17,8 +17,8 @@
 //  - Riot dice en cada respuesta cuántas peticiones lleva la key en la ventana
 //    de 2 min: si pasa del 60 %, se corta y sigue en la próxima corrida.
 //  - Si aun así Riot responde 429 (límite), también se corta.
-// Responde al cron al instante y trabaja en segundo plano (el log queda en
-// Supabase → Edge Functions → referencias-elo → Logs).
+// Responde al cron al instante y trabaja en segundo plano. Cada paso se anota
+// en Supabase → Edge Functions → referencias-elo → Logs.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -101,16 +101,19 @@ async function jugadoresDe(tier: string): Promise<string[]> {
   return (entradas ?? []).map((e: any) => e.puuid).filter(Boolean);
 }
 
-async function recolectar(): Promise<string[]> {
+async function recolectar(): Promise<void> {
   cupoAgotado = false;
   await esperar(ESPERA_INICIAL_MS);
   const tier = TIERS[Math.floor(Date.now() / TURNO_MS) % TIERS.length];
-  const log: string[] = [`División: ${tier}`];
+  // Cada paso se escribe en el log en cuanto pasa (si Supabase corta la
+  // corrida a mitad, se ve hasta dónde llegó).
+  const log = { push: (texto: string) => console.log(`[referencias-elo] ${texto}`) };
+  log.push(`División: ${tier}`);
   let sumadas = 0;
 
   try {
     const elegidos = alAzar(await jugadoresDe(tier), JUGADORES_POR_CORRIDA);
-    if (!elegidos.length) log.push('Riot no devolvió jugadores para esta división');
+    log.push(elegidos.length ? `Jugadores elegidos: ${elegidos.length}` : 'Riot no devolvió jugadores para esta división');
     const desde = Math.floor((Date.now() - DIAS * 86400000) / 1000);
 
     // IDs de partidas de SoloQ recientes de los elegidos (sin repetir).
@@ -130,6 +133,7 @@ async function recolectar(): Promise<string[]> {
     if (error) throw error;
     const vistas = new Set((yaEstan ?? []).map((m: any) => m.match_id));
     const nuevas = lista.filter((id) => !vistas.has(id)).slice(0, MAX_PARTIDAS);
+    log.push(`Partidas encontradas: ${lista.length} (nuevas: ${nuevas.length})`);
 
     for (const matchId of nuevas) {
       const { info } = await riotFetch(`https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/${matchId}`);
@@ -169,8 +173,12 @@ async function recolectar(): Promise<string[]> {
   }
 
   log.push(`Partidas sumadas: ${sumadas}`);
-  return log;
 }
+
+// Si Supabase cierra la función antes de tiempo, queda anotado el motivo.
+addEventListener('beforeunload', (ev: any) => {
+  console.log(`[referencias-elo] cierre: ${ev?.detail?.reason ?? 'sin motivo'}`);
+});
 
 // Para que TypeScript conozca el runtime de Supabase (tareas en segundo plano).
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
@@ -180,9 +188,7 @@ Deno.serve((req) => {
     return new Response('Unauthorized', { status: 401 });
   }
   EdgeRuntime.waitUntil(
-    recolectar()
-      .then((log) => console.log(log.join('\n')))
-      .catch((e) => console.error('referencias-elo:', e)),
+    recolectar().catch((e) => console.error('[referencias-elo] ERROR:', e)),
   );
   return new Response(JSON.stringify({ ok: true, enSegundoPlano: true }), {
     status: 202,
