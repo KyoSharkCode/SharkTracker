@@ -315,15 +315,21 @@ Deno.serve(async (req) => {
       // Se recalcula SIEMPRE (haya o no partidas nuevas esta corrida)
       // sobre las últimas 10 de SoloQ, para que la ventana se mueva
       // sola con el tiempo — mismo criterio que ya usan los badges.
-      const { data: todasSolo } = await supabase
-        .from('match_participants')
-        .select('id, champion, role, win, lp_change, extra_stats, matches!inner(ended_at, queue_id)')
-        .eq('player_id', player.id)
-        .eq('matches.queue_id', 420);
+      // Se parte de matches para que la base ordene por fecha y devuelva
+      // solo esas 10 (antes se descargaba todo el mes y se recortaba acá).
+      const { data: ultimasSolo, error: soloErr } = await supabase
+        .from('matches')
+        .select('ended_at, match_participants!inner(id, player_id, champion, role, win, lp_change, extra_stats)')
+        .eq('queue_id', 420)
+        .eq('match_participants.player_id', player.id)
+        .order('ended_at', { ascending: false })
+        .limit(10);
+      if (soloErr) throw soloErr;
 
-      const recientesSolo = (todasSolo ?? [])
-        .sort((a: any, b: any) => new Date(b.matches.ended_at).getTime() - new Date(a.matches.ended_at).getTime())
-        .slice(0, 10);
+      const recientesSolo: any[] = (ultimasSolo ?? []).map((m: any) => ({
+        ...m.match_participants[0],
+        matches: { ended_at: m.ended_at },
+      }));
 
       // Reintento de lp_change — si una partida se procesó ANTES de que
       // sync-riot-data alcanzara a registrar el cambio de rango posterior,
