@@ -9,9 +9,12 @@
 //     las Vacuolarvas (cuántas de 3 lleva el equipo) o el Heraldo.
 //   - Diferencia de oro por fila del Tab (valor de los objetos de cada jugador,
 //     que es lo que el propio Tab muestra; el oro sin gastar del rival no se ve).
+//   - Tu rendimiento contra la división de arriba de la tuya (rendimiento.js).
 //
 // Solo usa información que el juego ya muestra (eventos de la partida y el
 // estado de los jugadores). No depende de Electron: se puede probar en Node.
+
+const { calcularRendimiento } = require('./rendimiento');
 
 // Tiempos en segundos de partida. Riot los cambia entre temporadas:
 // si un anuncio sale desfasado, se ajusta aquí.
@@ -68,6 +71,9 @@ function crearEstadoPartida() {
   // dice quién está muerto AHORA, no quién lo estaba cuando cayó el objetivo.
   const titularesPorEvento = new Map();
   let ultimoGameId = null;
+  // Promedios de referencia (llegan de Supabase al empezar la partida).
+  let referencia = null;
+  const setReferencia = (ref) => { referencia = ref; };
 
   function actualizar(datos) {
     const t = datos?.gameData?.gameTime ?? 0;
@@ -253,10 +259,14 @@ function crearEstadoPartida() {
       oro.push({ diferencia: a - b, aliado: aliados[i].championName, enemigo: enemigos[i].championName });
     }
 
-    return { tiempo: t, miLado, baron, ancestral, toast, proximos, dragones: cuenta, oro, aliadoIzquierda: miLado !== 'red' };
+    const rendimiento = calcularRendimiento({
+      t, yo, equipo: aliados, oroActual: datos?.activePlayer?.currentGold, valorObjetos, referencia,
+    });
+
+    return { tiempo: t, miLado, baron, ancestral, toast, proximos, dragones: cuenta, oro, rendimiento, aliadoIzquierda: miLado !== 'red' };
   }
 
-  return { actualizar };
+  return { actualizar, setReferencia };
 }
 
 module.exports = { crearEstadoPartida, TIEMPOS, DURACION_BUFF, iniciales };

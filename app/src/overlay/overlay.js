@@ -164,7 +164,31 @@ function pintarOro() {
   });
   nodo.replaceChildren(...filas);
 }
-window.overlay.onTab((pulsado) => { tab = pulsado; pintarOro(); });
+
+// ── Tu rendimiento: tus números vs la división de arriba (solo con Tab) ──
+// Azul = vas por encima de la referencia; rojo = por debajo.
+let rendimiento = null;
+function pintarRendimiento() {
+  const nodo = $('rendimiento');
+  mostrar(nodo, tab && !!rendimiento);
+  if (!tab || !rendimiento) return;
+  const r = rendimiento;
+  const cab = el('div', 'rend-cab');
+  cab.append(el('div', 'etiqueta', 'Tu rendimiento'), el('div', 'vs', `vs ${r.division}${r.rol ? ' · ' + r.rol : ''}`));
+  const partes = [tile('stats', ''), cab];
+  if (r.sinDatos) {
+    partes.push(el('div', 'rend-aviso', 'Aún reuniendo partidas de referencia de esta división y rol.'));
+  } else {
+    for (const m of r.metricas) {
+      const celda = el('div', `rend-celda ${m.arriba === true ? 'arriba' : m.arriba === false ? 'abajo' : ''}`);
+      celda.append(el('div', 'etiqueta', m.etiqueta), el('div', 'tiempo', m.valor), el('div', 'ref', `${r.division}: ${m.referencia}`));
+      partes.push(celda);
+    }
+  }
+  nodo.replaceChildren(...partes);
+}
+
+window.overlay.onTab((pulsado) => { tab = pulsado; pintarOro(); pintarRendimiento(); });
 
 window.overlay.onState((estado) => {
   if (estado.ddVersion) versionDD = estado.ddVersion;
@@ -176,4 +200,6 @@ window.overlay.onState((estado) => {
   oro = estado.oro ?? [];
   aliadoIzquierda = estado.aliadoIzquierda !== false;
   pintarOro();
+  rendimiento = estado.rendimiento ?? null;
+  pintarRendimiento();
 });

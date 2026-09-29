@@ -274,6 +274,11 @@ function startOverlay() {
   if (!overlayWindow) createOverlayWindow();
   iniciarTab();
   estadoPartida = crearEstadoPartida();
+  // "Tu rendimiento": promedios de la división de arriba (una vez por partida).
+  const partida = estadoPartida;
+  auth.getReferencia()
+    .then((ref) => partida.setReferencia(ref))
+    .catch((e) => console.error('No se pudieron cargar las referencias de rendimiento:', e));
   overlayWindow.showInactive();
   clearInterval(overlayTimer);
   // Cada segundo: leer la partida, calcular qué mostrar y mandárselo al overlay.
