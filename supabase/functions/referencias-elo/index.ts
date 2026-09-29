@@ -6,7 +6,8 @@
 //
 // En cada corrida:
 //  1. Elige una división (va rotando: Bronce → … → Master+ → Bronce …).
-//  2. Toma 2 jugadores al azar de esa división en LAN.
+//  2. Toma 2 jugadores al azar de esa división en LAN (hasta 4 si los primeros
+//     no tienen ranked recientes).
 //  3. Baja sus últimas partidas de SoloQ de los últimos 14 días y suma los
 //     números de los 10 jugadores (CS, oro, visión, KP, minutos) en
 //     elo_referencias, por división + rol + día.
@@ -16,7 +17,8 @@
 // Cupo de la key: la usa también el resto de SharkTracker, así que este
 // recolector solo gasta lo que sobra:
 //  - Empieza 30 s tarde (los demás cron arrancan en el segundo 0 de cada minuto).
-//  - Pide de a una, con 1.5 s entre peticiones (≤ 11 por corrida).
+//  - Pide de a una, con 1.5 s entre peticiones (normalmente 11 por corrida; hasta 13
+//    si hay que probar jugadores extra).
 //  - Riot dice en cada respuesta cuántas peticiones lleva la key en la ventana
 //    de 2 min: si pasa del 60 %, se corta y sigue en la próxima corrida.
 //  - Si aun así Riot responde 429 (límite), también se corta.
@@ -38,6 +40,7 @@ const TIERS = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MA
 const DIVISIONES = ['I', 'II', 'III', 'IV'];
 const ROLES = new Set(['TOP', 'JUNGLE', 'MIDDLE', 'BOTTOM', 'UTILITY']);
 const JUGADORES_POR_CORRIDA = 2;
+const MAX_JUGADORES = 4;       // si los 2 primeros no tienen ranked recientes, se prueban hasta 2 más
 const PARTIDAS_POR_JUGADOR = 5;
 const MAX_PARTIDAS = 8;
 const DIAS = 14;
@@ -115,18 +118,24 @@ async function recolectar(): Promise<void> {
   let sumadas = 0;
 
   try {
-    const elegidos = alAzar(await jugadoresDe(tier), JUGADORES_POR_CORRIDA);
-    log.push(elegidos.length ? `Jugadores elegidos: ${elegidos.length}` : 'Riot no devolvió jugadores para esta división');
+    // Se sacan algunos candidatos de más: se usan 2, y los extra solo si esos 2
+    // no tienen ninguna ranked reciente (así la corrida no termina vacía).
+    const candidatos = alAzar(await jugadoresDe(tier), MAX_JUGADORES);
+    if (!candidatos.length) log.push('Riot no devolvió jugadores para esta división');
     const desde = Math.floor((Date.now() - DIAS * 86400000) / 1000);
 
     // IDs de partidas de SoloQ recientes de los elegidos (sin repetir).
     const ids = new Set<string>();
-    for (const puuid of elegidos) {
+    let usados = 0;
+    for (const puuid of candidatos) {
+      if (usados >= JUGADORES_POR_CORRIDA && ids.size > 0) break;
       const suyas: string[] = await riotFetch(
         `https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&type=ranked&startTime=${desde}&start=0&count=${PARTIDAS_POR_JUGADOR}`
       );
       suyas.forEach((id) => ids.add(id));
+      usados++;
     }
+    if (candidatos.length) log.push(`Jugadores revisados: ${usados}`);
 
     // Las que ya se sumaron antes no se vuelven a pedir.
     const lista = [...ids];
