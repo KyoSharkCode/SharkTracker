@@ -437,3 +437,10 @@ span.sw { cursor: default; opacity: 0.6; }
 .pcarta-pts { font-size: 9px; color: #8a97a6; }
 .pcarta-barra { height: 3px; border-radius: 3px; background: rgba(255,255,255,0.1); margin-top: 5px; overflow: hidden; }
 .pcarta-barra span { display: block; height: 100%; background: linear-gradient(90deg,#e8c766,#f5dd8f); }
+
+/* ---- Ajustes → Cuenta: Acerca de ---- */
+.card-acerca { margin-top: 12px; }
+.acercarow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.accsub.ok { color: #6fdba8; }
+.accsub.nueva { color: #7fe0cf; }
+.legaltxt { margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 9px; line-height: 1.6; color: #4a5768; }

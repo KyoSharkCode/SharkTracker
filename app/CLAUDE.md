@@ -85,8 +85,30 @@ tono oscuro con acento turquesa `#00e5c7`) al construir cada pantalla real.
 **Fase 1 completa y validada por Alex en partidas reales (29/09/2026)**: login con
 Discord, overlay en partida (Barón/Ancestral, avisos, oro con Tab, Tu rendimiento),
 pantalla de carga (con Ctrl + X), Ajustes → Overlay con editor y Mi Perfil.
-Próximo: Fase 2 (subir la versión a 0.2.0 en package.json y que la barra de título la
-lea de ahí en vez de tenerla escrita a mano — pedido de Alex).
+**Fase 2 en curso** (plan acordado): Bloque 0 puesta a punto ✅ · Bloque 1 early access ✅
+(instalador + actualizaciones automáticas) · Bloque 2 Meta (probar el MCP de OP.GG desde
+Supabase; plan B recolector propio por parche) · Bloque 3 En Vivo (LCU; en ranked NO revelar
+nombres ocultos en selección) · Bloque 4 Ajustes Apariencia/Notificaciones · Bloque 5 motor
+de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no pública).
+
+## Versión, empaquetado y publicación (Fase 2, bloques 0 y 1)
+
+- **Versión**: sale de `package.json` (`app.getVersion()`); la barra de título muestra
+  "vX.Y" y Ajustes → Cuenta → "Acerca de" la versión completa + el aviso legal de Riot
+  (también en el pie de index.html y perfil.html de la web).
+- **Electron 44** (antes 33; Node más nuevo). supabase-js sigue recibiendo `ws` como
+  transporte de realtime.
+- **Empaquetado**: electron-builder (campo `build` de package.json): instalador NSIS de un
+  clic por usuario, `SharkTracker-Setup-X.Y.Z.exe`, registra `sharktracker://`.
+  `npmRebuild: false` (uiohook-napi trae binarios N-API precompilados; quedan fuera del
+  asar solos). Sin firma de código: Windows avisa "Windows protegió tu PC" la primera vez.
+- **Actualizaciones**: electron-updater desde **GitHub Releases** (repo público): busca al
+  abrir y cada 4 h, descarga sola, instala al cerrar o con "Reiniciar y actualizar".
+  Solo en la app instalada (con `npm start` no).
+- **Publicar una versión**: subir `version` en app/package.json (merge) → pestaña Actions
+  del repo → **"App: publicar versión"** → Run workflow (`.github/workflows/app-publicar.yml`,
+  arma en windows-latest y crea el Release `vX.Y.Z`). Probar local: `npm run dist`.
+- `app/GUIA.md`: guía para los amigos (instalar, primera vez, atajos, actualizaciones).
 
 ```
 app/

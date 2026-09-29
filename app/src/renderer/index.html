@@ -16,7 +16,7 @@
   <div class="titlebar">
     <div class="tbleft">
       <img class="logo" src="img/icon.webp" alt="">
-      <span class="appname">SHARKTRACKER <span class="dim">— v0.1</span></span>
+      <span class="appname">SHARKTRACKER <span id="app-version" class="dim"></span></span>
     </div>
     <div class="tbright">
       <span id="game-chip" class="gamechip" title="Detección automática del cliente de LoL"><span class="gd"></span><span id="game-chip-text">Buscando LoL…</span></span>
@@ -127,6 +127,19 @@
             <span class="dangertxt">Cierra la sesión solo en esta app (la web sigue igual).</span>
             <button id="btn-signout" class="dangerbtn" type="button">Cerrar sesión</button>
           </div>
+        </div>
+
+        <!-- Acerca de: versión, actualizaciones automáticas y aviso legal de Riot -->
+        <div class="card card-acerca">
+          <div class="cardhd"><span class="dot"></span>Acerca de SharkTracker</div>
+          <div class="acercarow">
+            <div>
+              <div class="accnm">Versión <span id="acerca-version"></span></div>
+              <div id="acerca-update" class="accsub">Buscando actualizaciones…</div>
+            </div>
+            <button id="btn-actualizar" class="checkbtn" type="button" hidden>Reiniciar y actualizar</button>
+          </div>
+          <div class="legaltxt">SharkTracker no está respaldado por Riot Games y no refleja las opiniones de Riot Games ni de nadie involucrado oficialmente en la producción o gestión de sus propiedades. Riot Games y todas sus propiedades asociadas son marcas comerciales o marcas registradas de Riot Games, Inc.</div>
         </div>
 
         <!-- Diagnóstico: ¿la app puede leer la partida? (antes estaba en Mi Perfil) -->

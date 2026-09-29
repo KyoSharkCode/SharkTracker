@@ -48,6 +48,7 @@ if (!gotLock) {
 
   app.whenReady().then(() => {
     createWindow();
+    iniciarActualizaciones();
     auth.onChange(() => sendAuthState());
     // En Windows, si la app estaba cerrada, el enlace llega en los argumentos.
     const link = findDeepLink(process.argv);
@@ -115,6 +116,35 @@ function createWindow() {
     }
   });
 }
+
+// --- Versión y actualizaciones automáticas ---
+// La versión sale de package.json. Las actualizaciones llegan desde GitHub
+// Releases (electron-updater): al abrir la app y cada 4 h se busca una versión
+// nueva, se descarga sola y se instala al cerrar la app (o al pulsar
+// "Reiniciar y actualizar" en Ajustes → Cuenta). Con `npm start` no se busca nada.
+ipcMain.handle('app:version', () => app.getVersion());
+let estadoActualizacion = { estado: app.isPackaged ? 'buscando' : 'desarrollo' };
+function avisarActualizacion(estado) {
+  estadoActualizacion = estado;
+  mainWindow?.webContents.send('update:estado', estado);
+}
+function iniciarActualizaciones() {
+  if (!app.isPackaged) return;
+  const { autoUpdater } = require('electron-updater');
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.on('checking-for-update', () => avisarActualizacion({ estado: 'buscando' }));
+  autoUpdater.on('update-not-available', () => avisarActualizacion({ estado: 'al_dia' }));
+  autoUpdater.on('update-available', (info) => avisarActualizacion({ estado: 'descargando', version: info.version, porcentaje: 0 }));
+  autoUpdater.on('download-progress', (p) => avisarActualizacion({ ...estadoActualizacion, estado: 'descargando', porcentaje: Math.round(p.percent) }));
+  autoUpdater.on('update-downloaded', (info) => avisarActualizacion({ estado: 'lista', version: info.version }));
+  autoUpdater.on('error', () => avisarActualizacion({ estado: 'error' }));
+  const buscar = () => autoUpdater.checkForUpdates().catch(() => avisarActualizacion({ estado: 'error' }));
+  buscar();
+  setInterval(buscar, 4 * 3600 * 1000);
+  ipcMain.on('update:instalar', () => autoUpdater.quitAndInstall());
+}
+ipcMain.handle('update:estado', () => estadoActualizacion);
 
 // --- Controles de la barra de título propia (–  □  ×) ---
 ipcMain.on('window:minimize', () => mainWindow?.minimize());

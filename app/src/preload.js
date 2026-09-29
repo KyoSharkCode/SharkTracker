@@ -12,6 +12,14 @@ contextBridge.exposeInMainWorld('sharkTracker', {
   getGameStatus: () => ipcRenderer.invoke('game:getStatus'),
   onGameStatus: (callback) => ipcRenderer.on('game:status', (_e, status) => callback(status)),
 
+  // Versión y actualizaciones automáticas
+  app: {
+    version: () => ipcRenderer.invoke('app:version'),
+    estadoActualizacion: () => ipcRenderer.invoke('update:estado'),
+    onActualizacion: (callback) => ipcRenderer.on('update:estado', (_e, estado) => callback(estado)),
+    instalarActualizacion: () => ipcRenderer.send('update:instalar'),
+  },
+
   // Mi Perfil
   perfil: {
     get: () => ipcRenderer.invoke('perfil:get'),
