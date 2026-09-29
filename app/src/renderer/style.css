@@ -444,3 +444,131 @@ span.sw { cursor: default; opacity: 0.6; }
 .accsub.ok { color: #6fdba8; }
 .accsub.nueva { color: #7fe0cf; }
 .legaltxt { margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 9px; line-height: 1.6; color: #4a5768; }
+
+/* ---- Meta ---- */
+.mt-roles { display: flex; gap: 6px; margin-bottom: 14px; }
+.mt-roles .qtab { font-size: 11px; padding: 5px 14px; }
+.mt-roles .qtab.active { color: #7fe0cf; border-color: rgba(0,229,199,0.5); background: rgba(0,229,199,0.1); }
+.mt-grid { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 14px; align-items: start; }
+.mt-izq, .mt-der { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.mt-card { max-width: none; }
+.mt-vacio { font-size: 11px; color: #5b6b7c; padding: 10px 2px; line-height: 1.6; }
+.mt-vacio.sm { padding: 4px 0; font-size: 10px; }
+.mt-nota { font-size: 10px; color: #5b6b7c; margin: -6px 0 -4px 4px; }
+
+/* Tier list */
+.mt-lista { display: flex; flex-direction: column; gap: 2px; max-height: 470px; overflow-y: auto; margin: 0 -6px; padding: 0 6px; }
+.mt-fila, .mt-tfila, .mt-cfila {
+  display: flex; align-items: center; gap: 9px; width: 100%; text-align: left;
+  font-family: inherit; color: inherit; background: transparent; border: 1px solid transparent;
+  border-radius: 8px; padding: 5px 7px; cursor: pointer;
+}
+.mt-fila:hover, .mt-tfila:hover, .mt-cfila:hover { background: rgba(255,255,255,0.04); }
+.mt-fila.sel { background: rgba(0,229,199,0.08); border-color: rgba(0,229,199,0.35); }
+.mt-fila.rip { opacity: 0.55; }
+.mt-tier {
+  flex-shrink: 0; width: 24px; height: 20px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center;
+  font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700;
+}
+.mt-tier.t1 { color: #ffd98a; background: rgba(232,199,102,0.16); border: 1px solid rgba(232,199,102,0.45); }
+.mt-tier.t2 { color: #7fe0cf; background: rgba(0,229,199,0.12); border: 1px solid rgba(0,229,199,0.4); }
+.mt-tier.t3 { color: #9cc3ff; background: rgba(107,155,242,0.12); border: 1px solid rgba(107,155,242,0.35); }
+.mt-tier.t4 { color: #c19bf2; background: rgba(193,155,242,0.1); border: 1px solid rgba(193,155,242,0.3); }
+.mt-tier.t5 { color: #8a97a6; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); }
+.mt-cico {
+  flex-shrink: 0; width: 28px; height: 28px; border-radius: 7px; overflow: hidden; background: #0c1320;
+  border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: #8a97a6;
+}
+.mt-cico img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.1); }
+.mt-cico.sm { width: 24px; height: 24px; border-radius: 6px; }
+.mt-cico.lg { width: 52px; height: 52px; border-radius: 12px; border-color: rgba(0,229,199,0.4); }
+.mt-fnom { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.mt-fnom b { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mt-fnom span { font-size: 10px; color: #5b6b7c; }
+.mt-mov { width: 12px; font-size: 9px; text-align: center; }
+.sube { color: #6fdba8; }
+.baja { color: #ea8a8a; }
+
+/* Tendencias */
+#meta-tend { display: flex; flex-direction: column; gap: 2px; }
+.mt-tnom { flex: 1; font-size: 12px; }
+.mt-tcam { font-size: 10px; font-weight: 600; }
+
+/* Cabecera del campeón */
+.mt-cab { display: flex; align-items: center; gap: 14px; max-width: none; }
+.mt-ident { flex: 1; min-width: 0; }
+.mt-cnom { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; }
+.mt-csub { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #8a97a6; margin-top: 2px; }
+.mt-buscar input {
+  width: 190px; font-family: inherit; font-size: 11px; color: #e7ecf2; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 7px 10px; outline: none;
+}
+.mt-buscar input:focus { border-color: rgba(0,229,199,0.5); }
+
+/* Build */
+.mt-build, .mt-hab { display: flex; flex-wrap: wrap; gap: 18px 26px; }
+.mt-paso { display: flex; flex-direction: column; gap: 6px; }
+.mt-pasot, .mt-subt {
+  font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #5b6b7c;
+}
+.mt-subt { margin: 16px 0 8px; }
+.mt-pasod { font-size: 10px; color: #5b6b7c; }
+.mt-items { display: flex; align-items: center; gap: 5px; }
+.mt-item {
+  width: 34px; height: 34px; border-radius: 7px; overflow: hidden; background: #0c1320;
+  border: 1px solid rgba(232,199,102,0.35); display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #5b6b7c;
+}
+.mt-item img { width: 100%; height: 100%; }
+.mt-flecha { color: #4a5768; font-size: 14px; }
+.mt-situ { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.mt-situt { width: 70px; font-size: 10px; color: #8a97a6; }
+.mt-op { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #8a97a6; margin-right: 6px; }
+.mt-op .mt-item { width: 28px; height: 28px; }
+
+/* Runas y habilidades */
+.mt-runas { display: flex; flex-wrap: wrap; gap: 14px 30px; margin-bottom: 10px; }
+.mt-rama { display: flex; flex-direction: column; gap: 7px; }
+.mt-ramat { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: #c19bf2; }
+.mt-ricos { display: flex; align-items: center; gap: 6px; }
+.mt-rico {
+  width: 30px; height: 30px; border-radius: 50%; overflow: hidden; background: #0c1320;
+  border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 10px;
+}
+.mt-rico img { width: 100%; height: 100%; }
+.mt-rico.clave { width: 40px; height: 40px; border-color: rgba(193,155,242,0.6); }
+.mt-rico.sm { width: 18px; height: 18px; border: none; background: none; }
+.mt-frag { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+.mt-chip { font-size: 10px; color: #8a97a6; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 2px 7px; }
+.mt-hab { margin-top: 14px; }
+.mt-max { display: flex; align-items: center; gap: 5px; height: 34px; }
+.mt-tecla {
+  width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center;
+  font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 14px; color: #7fe0cf;
+  background: rgba(0,229,199,0.08); border: 1px solid rgba(0,229,199,0.35);
+}
+.mt-niveles { display: grid; grid-template-columns: repeat(18, minmax(0, 1fr)); gap: 3px; }
+.mt-nivel {
+  display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 3px 0; border-radius: 5px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+}
+.mt-nivel span { font-size: 8px; color: #4a5768; }
+.mt-nivel b { font-family: 'Rajdhani', sans-serif; font-size: 12px; }
+.mt-nivel.kQ b { color: #7fe0cf; }
+.mt-nivel.kW b { color: #9cc3ff; }
+.mt-nivel.kE b { color: #c19bf2; }
+.mt-nivel.kR { background: rgba(232,199,102,0.1); border-color: rgba(232,199,102,0.35); }
+.mt-nivel.kR b { color: #ffd98a; }
+
+/* Counters */
+.mt-counters { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.mt-ccol { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mt-ccolt { font-size: 11px; font-weight: 600; margin-bottom: 4px; }
+.mt-dif { font-size: 11px; font-weight: 700; }
+
+@media (max-width: 1100px) {
+  .mt-grid { grid-template-columns: 1fr; }
+  .mt-lista { max-height: 300px; }
+}

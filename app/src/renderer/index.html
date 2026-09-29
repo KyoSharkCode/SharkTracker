@@ -86,7 +86,21 @@
 
       <section class="page" id="page-meta">
         <div class="h1">Meta</div>
-        <div class="h1sub">Tier list, builds, runas y counters — todavía no implementado</div>
+        <div id="meta-sub" class="h1sub">Tier list, builds, runas y counters</div>
+        <div id="meta-roles" class="mt-roles"></div>
+        <div class="mt-grid">
+          <div class="mt-izq">
+            <div class="card mt-card">
+              <div class="cardhd"><span class="dot"></span>Tier list</div>
+              <div id="meta-tier"></div>
+            </div>
+            <div class="card mt-card">
+              <div class="cardhd"><span class="dot dot-pos"></span>Tendencias del parche</div>
+              <div id="meta-tend"></div>
+            </div>
+          </div>
+          <div id="meta-ficha" class="mt-der"></div>
+        </div>
       </section>
 
       <section class="page" id="page-ajustes">
@@ -194,6 +208,7 @@
   </div>
 
   <script src="perfil.js"></script>
+  <script src="meta.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

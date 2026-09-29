@@ -14,6 +14,7 @@ function goTo(page) {
 navItems.forEach((item) => item.addEventListener('click', () => {
   goTo(item.dataset.page);
   if (item.dataset.page === 'perfil') window.miPerfil.cargar(); // se refresca si pasaron 2+ min
+  if (item.dataset.page === 'meta') window.metaPagina.cargar();  // se refresca si pasaron 10+ min
 }));
 
 // --- Sesión de Discord ---
