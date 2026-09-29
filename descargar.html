@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- Seguridad (CSP): igual que las demás páginas + api.github.com (versión de la última publicación de la app). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://mvupiohecvoiwuxwjdrt.supabase.co wss://mvupiohecvoiwuxwjdrt.supabase.co https://ddragon.leagueoflegends.com https://raw.communitydragon.org https://cdn.jsdelivr.net https://api.github.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App de escritorio · SharkTracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
+    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
+    --danger:#ff5f3d; --gold:#facc15; --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  body{margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
+    background:radial-gradient(1000px 460px at 15% -6%, rgba(0,229,199,.14), transparent 60%), radial-gradient(1000px 460px at 85% 6%, rgba(192,132,252,.10), transparent 60%), var(--bg);}
+  a{color:inherit;}
+  .wrap{max-width:960px; margin:0 auto; padding:44px 20px 80px;}
+  header{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:34px; padding-bottom:24px; border-bottom:1px solid var(--border);}
+  .logo-slot{display:flex; align-items:center; gap:14px;}
+  .logo-slot img{height:40px; width:auto; display:block;}
+  h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
+     background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .auth-slot{grid-column:3; justify-self:end;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
+  .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .avatar.pending{border-color:var(--gold); color:var(--gold);}
+  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+
+  .hero{position:relative; overflow:hidden; border:1px solid var(--border); border-radius:var(--radius); background:var(--panel); padding:38px 34px; display:grid; grid-template-columns:1fr auto; gap:28px; align-items:center; margin-bottom:40px;}
+  .hero::before{content:''; position:absolute; inset:0; background:radial-gradient(520px 240px at 100% 0%, rgba(0,229,199,.16), transparent 70%); pointer-events:none;}
+  .hero > *{position:relative;}
+  .tag{display:inline-block; font-size:10.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); border:1px solid rgba(250,204,21,.4); border-radius:99px; padding:3px 10px; margin-bottom:12px;}
+  .hero h2{margin:0 0 10px; font-family:'Rajdhani',sans-serif; font-size:30px; font-weight:800; letter-spacing:.02em;}
+  .hero p{margin:0; color:var(--text-dim); font-size:14.5px; line-height:1.6; max-width:520px;}
+  .dl{display:flex; flex-direction:column; align-items:center; gap:10px; min-width:230px;}
+  .dl-btn{display:flex; align-items:center; gap:10px; background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:800; font-size:18px; letter-spacing:.04em; text-transform:uppercase; padding:14px 26px; border-radius:12px; text-decoration:none; box-shadow:0 0 24px var(--accent-glow); transition:transform .15s, box-shadow .15s;}
+  .dl-btn:hover{transform:translateY(-1px); box-shadow:0 0 34px var(--accent-glow);}
+  .dl-btn svg{width:20px; height:20px;}
+  .dl-btn.off{background:#12283a; color:var(--text-faint); box-shadow:none; pointer-events:none;}
+  .dl small{color:var(--text-faint); font-size:12px; text-align:center;}
+
+  .section-title{display:flex; align-items:center; gap:10px; margin:0 0 16px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
+  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
+  section{margin-bottom:40px;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px;}
+  .card{border:1px solid var(--border); border-radius:var(--radius); background:var(--panel-2); padding:20px;}
+  .card h3{margin:0 0 8px; font-size:15px; font-weight:700;}
+  .card p, .card li{color:var(--text-dim); font-size:13.5px; line-height:1.6;}
+  .card p{margin:0;}
+  .card ol{margin:0; padding-left:20px;}
+  .num{display:inline-flex; width:26px; height:26px; border-radius:50%; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:800; font-size:15px; color:var(--accent); border:1px solid rgba(0,229,199,.4); margin-bottom:10px;}
+  kbd{font-family:inherit; font-size:12px; font-weight:700; color:#fff; background:#0d2031; border:1px solid var(--border); border-bottom-width:2px; border-radius:5px; padding:1px 6px;}
+  b{color:#fff;}
+
+  footer{margin-top:60px; padding-top:32px; border-top:1px solid var(--border); text-align:center; color:var(--text-dim); font-size:13px; display:flex; flex-direction:column; align-items:center; gap:12px;}
+  .footer-logo{height:34px; width:auto;}
+  footer .legal{max-width:640px; margin:0 auto; font-size:11px; line-height:1.5; color:var(--text-faint); opacity:.75;}
+
+  @media (max-width:700px){
+    .hero{grid-template-columns:1fr; padding:28px 22px;}
+    .dl{min-width:0;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo-slot"><a href="index.html"><img src="logo/FlaviIconLogo.webp" alt="SharkTracker"></a></div>
+    <h1>App de escritorio</h1>
+    <div class="auth-slot" id="auth-slot"></div>
+  </header>
+
+  <div class="hero">
+    <div>
+      <span class="tag">Early access</span>
+      <h2>SharkTracker para Windows</h2>
+      <p>Overlay en partida (Barón, Dragón Ancestral, oro con Tab y tu rendimiento), pantalla de carga con el rango de los 10 jugadores y tu perfil. Solo para el grupo: se entra con tu Discord de SharkTracker.</p>
+    </div>
+    <div class="dl">
+      <a class="dl-btn off" id="dl-btn" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16"/></svg>
+        <span id="dl-txt">Buscando…</span>
+      </a>
+      <small id="dl-info">Windows 10/11 · 64 bits</small>
+    </div>
+  </div>
+
+  <section>
+    <h2 class="section-title"><span class="bar"></span>Instalar</h2>
+    <div class="grid">
+      <div class="card"><span class="num">1</span><h3>Descarga y abre</h3><p>Abre <b>SharkTracker-Setup.exe</b>. Se instala sola y crea un acceso directo en el escritorio.</p></div>
+      <div class="card"><span class="num">2</span><h3>Aviso de Windows</h3><p>Si sale <b>"Windows protegió tu PC"</b>, pulsa <b>Más información → Ejecutar de todas formas</b>. Pasa porque la app no está firmada; es normal en apps entre amigos.</p></div>
+      <div class="card"><span class="num">3</span><h3>Inicia sesión</h3><p>Entra con <b>Discord</b>. Tu cuenta de LoL tiene que estar vinculada aquí en la web con ese mismo Discord.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title"><span class="bar"></span>En el juego</h2>
+    <div class="grid">
+      <div class="card"><h3>Modo "Sin bordes"</h3><p>En LoL: Configuración → Vídeo → Modo de ventana: <b>Sin bordes</b>. En pantalla completa el overlay no se puede dibujar encima.</p></div>
+      <div class="card"><h3>Atajos</h3><ol><li><kbd>Ctrl</kbd> + <kbd>X</kbd>: muestra u oculta la pantalla de carga.</li><li><kbd>Tab</kbd>: diferencia de oro de cada fila.</li></ol></div>
+      <div class="card"><h3>Actualizaciones</h3><p>Son <b>automáticas</b>: la app descarga las versiones nuevas sola y las instala al cerrarla. En Ajustes → Cuenta ves tu versión.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <img class="footer-logo" src="logo/HorizontalLogo.webp" alt="SharkTracker">
+    <div>hecho por KyoSumiVT</div>
+    <div class="legal">SharkTracker no está respaldado por Riot Games y no refleja las opiniones de Riot Games ni de nadie involucrado oficialmente en la producción o gestión de sus propiedades. Riot Games y todas sus propiedades asociadas son marcas comerciales o marcas registradas de Riot Games, Inc.</div>
+  </footer>
+</div>
+
+<script type="module">
+import { createSupabase } from './assets/supabase.js';
+import { createAuthMenu } from './assets/auth-menu.js';
+import { createNavMenu } from './assets/nav-menu.js';
+import { profileIconUrl } from './assets/lol-data.js';
+createNavMenu({ current: 'app' });
+
+const supabase = createSupabase();
+const authMenu = createAuthMenu({ supabase, profileIconUrl });
+const $ = (id) => document.getElementById(id);
+
+// El instalador vive en GitHub Releases (de ahí también salen las actualizaciones
+// automáticas). Este enlace siempre apunta al de la última versión publicada.
+const REPO = 'KyoSharkCode/SharkTracker';
+const INSTALADOR = `https://github.com/${REPO}/releases/latest/download/SharkTracker-Setup.exe`;
+
+async function version() {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, { headers: { Accept: 'application/vnd.github+json' } });
+    if (res.status === 404) return { publicada: false };
+    if (!res.ok) throw new Error(res.status);
+    const r = await res.json();
+    const exe = (r.assets ?? []).find((a) => a.name === 'SharkTracker-Setup.exe');
+    return { publicada: !!exe, tag: r.tag_name, fecha: r.published_at, mb: exe ? exe.size / 1048576 : null };
+  } catch {
+    return { publicada: null }; // GitHub no respondió: se ofrece el enlace igual
+  }
+}
+
+async function sesion() {
+  const [{ data: { session } }, { data: players }, { data: profiles }] = await Promise.all([
+    supabase.auth.getSession(),
+    supabase.from('players').select('*'),
+    supabase.from('player_profiles').select('*'),
+  ]);
+  authMenu.render(session, players ?? [], profiles ?? []);
+}
+
+async function boton() {
+  const v = await version();
+  const btn = $('dl-btn');
+  if (v.publicada === false) {
+    $('dl-txt').textContent = 'Muy pronto';
+    $('dl-info').textContent = 'Todavía no hay una versión publicada';
+    return;
+  }
+  btn.href = INSTALADOR;
+  btn.classList.remove('off');
+  $('dl-txt').textContent = 'Descargar';
+  if (v.publicada) {
+    const fecha = v.fecha ? new Date(v.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+    $('dl-info').textContent = [String(v.tag).replace(/^v?/, 'v'), fecha, v.mb ? `${Math.round(v.mb)} MB` : null, 'Windows 10/11']
+      .filter(Boolean).join(' · ');
+  }
+}
+
+boton();
+sesion();
+</script>
+</body>
+</html>

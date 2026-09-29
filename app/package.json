@@ -35,7 +35,7 @@
     "win": {
       "target": "nsis",
       "icon": "src/assets/icon.png",
-      "artifactName": "SharkTracker-Setup-${version}.${ext}"
+      "artifactName": "SharkTracker-Setup.${ext}"
     },
     "nsis": {
       "oneClick": true,

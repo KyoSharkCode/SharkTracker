@@ -99,7 +99,8 @@ de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no
 - **Electron 44** (antes 33; Node más nuevo). supabase-js sigue recibiendo `ws` como
   transporte de realtime.
 - **Empaquetado**: electron-builder (campo `build` de package.json): instalador NSIS de un
-  clic por usuario, `SharkTracker-Setup-X.Y.Z.exe`, registra `sharktracker://`.
+  clic por usuario, `SharkTracker-Setup.exe` (nombre fijo, sin versión: así
+  `releases/latest/download/SharkTracker-Setup.exe` siempre es el último), registra `sharktracker://`.
   `npmRebuild: false` (uiohook-napi trae binarios N-API precompilados; quedan fuera del
   asar solos). Sin firma de código: Windows avisa "Windows protegió tu PC" la primera vez.
 - **Actualizaciones**: electron-updater desde **GitHub Releases** (repo público): busca al
@@ -108,6 +109,9 @@ de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no
 - **Publicar una versión**: subir `version` en app/package.json (merge) → pestaña Actions
   del repo → **"App: publicar versión"** → Run workflow (`.github/workflows/app-publicar.yml`,
   arma en windows-latest y crea el Release `vX.Y.Z`). Probar local: `npm run dist`.
+- **Descarga desde la web**: `descargar.html` (menú ☰ → "App de escritorio"). El botón usa
+  el enlace fijo de arriba y muestra versión/fecha/tamaño leyendo la API pública de GitHub
+  (`api.github.com` está en su CSP). Sin versión publicada, el botón dice "Muy pronto".
 - `app/GUIA.md`: guía para los amigos (instalar, primera vez, atajos, actualizaciones).
 
 ```
