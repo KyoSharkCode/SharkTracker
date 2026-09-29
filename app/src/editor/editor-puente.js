@@ -4,4 +4,5 @@ window.overlay = {
   onState: (cb) => { window.__pintarEstado = cb; },
   onTab: (cb) => { window.__tab = cb; },
   onConfig: (cb) => { window.__aplicarConfig = cb; },
+  onCarga: (cb) => { window.__carga = cb; },
 };

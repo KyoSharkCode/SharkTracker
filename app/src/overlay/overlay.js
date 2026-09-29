@@ -190,7 +190,81 @@ function pintarRendimiento() {
   nodo.replaceChildren(cab, ...filas);
 }
 
+// ── Pantalla de carga: los 10 jugadores con rango, winrate y etiquetas ──
+const TIER_ES = {
+  IRON: 'Hierro', BRONZE: 'Bronce', SILVER: 'Plata', GOLD: 'Oro', PLATINUM: 'Platino', EMERALD: 'Esmeralda',
+  DIAMOND: 'Diamante', MASTER: 'Maestro', GRANDMASTER: 'Gran Maestro', CHALLENGER: 'Retador',
+};
+const AVISO_CARGA = {
+  buscando: 'Buscando la partida en Riot…',
+  sin_partida: 'Riot todavía no publica la partida: reintentando…',
+  esperando: 'Un amigo de SharkTracker ya está pidiendo los datos…',
+  riot_ocupado: 'Riot está ocupado: reintentando en unos segundos…',
+  error: 'No se pudieron cargar los datos: reintentando…',
+  sin_sesion: 'Inicia sesión en la app de SharkTracker para ver los rangos.',
+  sin_cuenta: 'Vincula tu cuenta de LoL en la web de SharkTracker para ver los rangos.',
+};
+let carga = null;
+function textoRango(j) {
+  if (j.pendiente) return 'Rango pendiente…';
+  if (!j.rango) return 'Sin clasificar';
+  const r = j.rango;
+  const sinDivision = ['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(r.tier);
+  return `${TIER_ES[r.tier] ?? r.tier}${sinDivision ? '' : ' ' + r.division} · ${r.lp} LP${r.cola === 'Flex' ? ' (Flex)' : ''}`;
+}
+function filaCarga(j, equipo, verRango, verWinrate) {
+  const fila = el('div', 'carga-fila');
+  const quien = el('div', 'carga-quien');
+  quien.append(el('div', 'carga-nombre', j.nombre));
+  if (verRango) quien.append(el('div', `carga-rango${j.pendiente ? ' pendiente' : ''}`, `${j.campeon} · ${textoRango(j)}`));
+  else quien.append(el('div', 'carga-rango', j.campeon));
+  if (ver('cargaEtiquetas')) {
+    const tags = [];
+    if (j.main === true) tags.push(['main', 'Main del campeón']);
+    if (j.main === false) tags.push(['fuera', 'Fuera de su main']);
+    if (j.rango?.racha) tags.push(['racha', 'En racha']);
+    if (j.sharktracker) tags.push(['st', 'SharkTracker']);
+    if (tags.length) {
+      const fila2 = el('div', 'carga-tags');
+      for (const [cls, texto] of tags) fila2.append(el('span', `carga-tag ${cls}`, texto));
+      quien.append(fila2);
+    }
+  }
+  fila.append(ficha({ nombre: j.campeon, corto: iniciales(j.campeon), clave: j.clave }, equipo), quien);
+  const partidas = (j.rango?.victorias ?? 0) + (j.rango?.derrotas ?? 0);
+  if (verWinrate && partidas > 0) {
+    const wr = el('div', 'carga-wr');
+    wr.append(el('div', 'pct', `${Math.round((j.rango.victorias / partidas) * 100)}%`), el('div', 'part', `${partidas} part.`));
+    fila.append(wr);
+  }
+  return fila;
+}
+const iniciales = (nombre = '') => nombre.replace(/['’.]/g, '').split(/\s+/).filter(Boolean)
+  .map((p, _i, a) => (a.length > 1 ? p[0] : p.slice(0, 2))).join('').slice(0, 2).toUpperCase() || '?';
+function pintarCarga() {
+  const nodo = $('carga');
+  mostrar(nodo, !!carga);
+  if (!carga) return;
+  if (carga.ddVersion) versionDD = carga.ddVersion;
+  const cab = el('div', 'carga-cab');
+  cab.append(el('div', 'carga-marca', 'SHARKTRACKER'), el('div', 'carga-cola', carga.cola ?? ''));
+  const partes = [cab];
+  const aviso = carga.estado !== 'ok' ? AVISO_CARGA[carga.estado] : null;
+  if (aviso) partes.push(el('div', 'carga-aviso', aviso));
+  const bloque = (titulo, cls, lista, verRango, verWinrate) => {
+    if (!lista?.length) return;
+    partes.push(el('div', `carga-lado ${cls}`, titulo));
+    const cont = el('div', 'carga-lista');
+    for (const j of lista) cont.append(filaCarga(j, cls, verRango, verWinrate));
+    partes.push(cont);
+  };
+  bloque('Tu equipo', 'aliado', carga.aliados, ver('cargaRangoAliados'), ver('cargaWinrateAliados'));
+  bloque('Rivales', 'enemigo', carga.rivales, ver('cargaRangoRivales'), ver('cargaWinrateRivales'));
+  nodo.replaceChildren(...partes);
+}
+
 window.overlay.onTab((pulsado) => { tab = pulsado; pintarOro(); });
+window.overlay.onCarga?.((datos) => { carga = datos; pintarCarga(); });
 
 // ── Ajustes → Overlay: qué piezas se ven y dónde van ──
 // Posiciones en coordenadas de 1920×1080 (esquina superior izquierda de cada pieza).
@@ -206,6 +280,7 @@ function aplicarConfig(nueva) {
     nodo.style.top = `${pos.y}px`;
   }
   if (ultimoEstado) pintarEstado(ultimoEstado);
+  if (carga) pintarCarga();
 }
 
 let ultimoEstado = null;

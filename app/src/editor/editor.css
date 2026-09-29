@@ -59,7 +59,7 @@ body.editor {
 .tab-medio { position: absolute; left: 50%; top: 70px; bottom: 10px; width: 2px; background: rgba(200,170,110,0.35); }
 
 /* Piezas que se pueden mover */
-#baron, #ancestral, #rendimiento, #avisos { cursor: grab; outline: 2px dashed rgba(0,229,199,0.45); outline-offset: 4px; }
+#baron, #ancestral, #rendimiento, #avisos, #carga { cursor: grab; outline: 2px dashed rgba(0,229,199,0.45); outline-offset: 4px; }
 #avisos { border-radius: 12px; }
 .editor .arrastrando { cursor: grabbing !important; }
 .editor .elegida { outline: 2px solid #00e5c7 !important; }
@@ -86,3 +86,17 @@ body.editor {
 .tab-fila.f3 { top: 261px; }
 .tab-fila.f4 { top: 337px; }
 .tab-fila.f5 { top: 413px; }
+
+/* Esquema de la pantalla de carga: 2 filas de 5 cartas de campeón */
+.carga-silueta { position: absolute; inset: 0; background: linear-gradient(180deg, #10151f, #0a0e16); }
+.carta { position: absolute; width: 230px; height: 420px; box-sizing: border-box; border: 2px solid rgba(200,170,110,0.4); border-radius: 6px; background: linear-gradient(180deg, rgba(60,70,90,0.35), rgba(20,26,36,0.6)); }
+.carta[data-c="0"] { left: 355px; top: 60px; }
+.carta[data-c="1"] { left: 600px; top: 60px; }
+.carta[data-c="2"] { left: 845px; top: 60px; }
+.carta[data-c="3"] { left: 1090px; top: 60px; }
+.carta[data-c="4"] { left: 1335px; top: 60px; }
+.carta[data-c="5"] { left: 355px; top: 560px; }
+.carta[data-c="6"] { left: 600px; top: 560px; }
+.carta[data-c="7"] { left: 845px; top: 560px; }
+.carta[data-c="8"] { left: 1090px; top: 560px; }
+.carta[data-c="9"] { left: 1335px; top: 560px; }

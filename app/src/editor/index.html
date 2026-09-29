@@ -19,6 +19,7 @@
     </div>
     <div class="acciones">
       <button id="btn-tab" class="btn" type="button">Ver Tab</button>
+      <button id="btn-carga" class="btn" type="button">Ver pantalla de carga</button>
       <button id="btn-fondo" class="btn" type="button">Usar mi captura de fondo</button>
       <button id="btn-quitar-fondo" class="btn" type="button" hidden>Quitar captura</button>
     </div>
@@ -43,6 +44,9 @@
           <div class="hud-pieza" data-p="objetos">Objetos</div>
         </div>
 
+        <!-- Esquema de la pantalla de carga (con "Ver pantalla de carga"): 2 filas de 5 cartas -->
+        <div id="carga-silueta" class="carga-silueta" hidden><div class="carta" data-c="0"></div><div class="carta" data-c="1"></div><div class="carta" data-c="2"></div><div class="carta" data-c="3"></div><div class="carta" data-c="4"></div><div class="carta" data-c="5"></div><div class="carta" data-c="6"></div><div class="carta" data-c="7"></div><div class="carta" data-c="8"></div><div class="carta" data-c="9"></div></div>
+
         <!-- Silueta del marcador del Tab (con "Ver Tab") -->
         <div id="tab-silueta" class="tab-silueta" hidden>
           <div class="tab-cab">Marcador (Tab)</div>
@@ -61,6 +65,7 @@
           <div id="oro" class="oro" hidden></div>
         </div>
         <div class="zona zona-derecha">
+          <div id="carga" class="carga" hidden></div>
           <div id="rendimiento" class="rend" hidden></div>
           <div id="avisos" class="columna">
             <div id="anuncio" class="pill aviso" hidden></div>

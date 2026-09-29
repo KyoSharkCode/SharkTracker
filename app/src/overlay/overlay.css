@@ -1,6 +1,6 @@
 /* Overlay en partida — estilo de sharktracker.lol (paleta, tipografía, paneles). */
 :root {
-  --panel: rgba(8,18,29,.9);
+  --panel: rgba(8,18,29,.8);      /* 10 % más transparente que al principio (a pedido de Alex) */
   --borde: #16324a;
   --texto: #ffffff;
   --tenue: #6d8ba3;
@@ -58,7 +58,7 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .aviso {
   width: 262px;
   border-color: color-mix(in srgb, var(--c) 40%, var(--borde));
-  background: linear-gradient(90deg, color-mix(in srgb, var(--c) 14%, rgba(8,18,29,.92)), rgba(8,18,29,.92));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c) 14%, rgba(8,18,29,.82)), rgba(8,18,29,.82));
 }
 .aviso .titulo { font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700; line-height: 1.1; }
 .aviso .titulo.urgente { color: var(--enemigo); }
@@ -95,7 +95,7 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .oro-fila {
   position: absolute; transform: translate(-50%, -50%);
   font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; white-space: nowrap;
-  background: rgba(8,18,29,.72); border-radius: 6px; padding: 2px 8px;
+  background: rgba(8,18,29,.62); border-radius: 6px; padding: 2px 8px;
   text-shadow: 0 1px 3px rgba(0,0,0,.9);
 }
 .oro-fila.aliado { color: var(--aliado); }
@@ -123,3 +123,34 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .rend-fila .valor.arriba { color: var(--aliado); }
 .rend-fila .valor.abajo { color: var(--enemigo); }
 .rend-fila .flecha { font-size: 10px; margin-left: 3px; }
+
+/* ── Pantalla de carga: panel con los 10 jugadores (como en el mockup) ── */
+.carga {
+  position: absolute; left: 1500px; top: 60px; width: 400px;
+  background: var(--panel); border: 1px solid color-mix(in srgb, var(--acento) 25%, var(--borde)); border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35); overflow: hidden;
+}
+.carga-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,.07); }
+.carga-marca { display: flex; align-items: center; gap: 7px; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .12em; color: #9db3c4; }
+.carga-marca::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--acento); }
+.carga-cola { font-size: 10px; color: var(--tenue); white-space: nowrap; }
+.carga-aviso { padding: 7px 12px; font-size: 11px; color: var(--tenue); border-bottom: 1px solid rgba(255,255,255,.05); }
+.carga-lado { padding: 7px 12px 3px; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.carga-lado.aliado { color: var(--aliado); }
+.carga-lado.enemigo { color: var(--enemigo); border-top: 1px solid rgba(255,255,255,.07); margin-top: 3px; }
+.carga-lista { display: flex; flex-direction: column; gap: 4px; padding: 0 10px 8px; }
+.carga-fila { display: flex; align-items: center; gap: 9px; background: rgba(255,255,255,.03); border-radius: 8px; padding: 5px 8px; }
+.carga-fila .ficha { width: 30px; height: 30px; border-radius: 7px; font-size: 11px; }
+.carga-quien { flex: 1; min-width: 0; }
+.carga-nombre { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.carga-rango { font-size: 10px; color: var(--tenue); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.carga-rango.pendiente { font-style: italic; }
+.carga-wr { text-align: right; flex-shrink: 0; }
+.carga-wr .pct { font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700; line-height: 1; }
+.carga-wr .part { font-size: 9px; color: var(--tenue); margin-top: 2px; }
+.carga-tags { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; }
+.carga-tag { font-size: 9px; font-weight: 600; border-radius: 5px; padding: 1px 6px; white-space: nowrap; }
+.carga-tag.main { background: rgba(70,200,140,.14); color: #6fdba8; }
+.carga-tag.fuera { background: rgba(230,180,60,.14); color: #e8c766; }
+.carga-tag.racha { background: rgba(70,200,140,.14); color: #6fdba8; }
+.carga-tag.st { background: color-mix(in srgb, var(--acento) 14%, transparent); color: var(--acento); }

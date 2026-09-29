@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, screen, dialog } = require('electron');
 const path = require('path');
 const https = require('https');
+const { execFile } = require('child_process');
 const cfg = require('./config');
 const auth = require('./auth');
 const { crearEstadoPartida } = require('./game-state');
@@ -182,17 +183,89 @@ ipcMain.handle('lcdata:check', () => liveClientGet('allgamedata'));
 // Detección automática: cada 5 s se mira si hay partida y se avisa a la
 // interfaz SOLO cuando cambia (entra o sale de partida).
 let lastInGame = null;
+let partidaTerminada = false; // acabó una partida y el juego sigue abierto: no es pantalla de carga
 function startGameWatcher() {
   const tick = async () => {
     const { inGame } = await liveClientGet('gamestats', 1200);
     if (inGame !== lastInGame) {
+      if (lastInGame === true && !inGame) partidaTerminada = true;
       lastInGame = inGame;
       mainWindow?.webContents.send('game:status', { inGame });
-      if (inGame) startOverlay(); else stopOverlay();
+      if (inGame) { detenerCarga(); startOverlay(); } else stopOverlay();
+    }
+    // Pantalla de carga: el juego ya está abierto pero la API todavía no da datos.
+    if (!inGame) {
+      const abierto = await juegoAbierto();
+      if (!abierto) {
+        partidaTerminada = false;
+        if (cargaActiva) detenerCarga();
+      } else if (!partidaTerminada && !cargaActiva) {
+        iniciarCarga();
+      }
     }
   };
   tick();
   setInterval(tick, 5000);
+}
+
+// ¿Está abierto el juego? (el proceso de la partida, no el cliente de LoL).
+// Se abre justo al empezar la pantalla de carga.
+function juegoAbierto() {
+  if (process.platform !== 'win32') return Promise.resolve(false);
+  return new Promise((resolve) => {
+    execFile('tasklist', ['/FI', 'IMAGENAME eq League of Legends.exe', '/NH', '/FO', 'CSV'],
+      { windowsHide: true, timeout: 3000 },
+      (err, salida) => resolve(!err && /League of Legends\.exe/i.test(salida ?? '')));
+  });
+}
+
+// ── Pantalla de carga ──
+// Mientras carga la partida se pide el panel a la Edge Function pantalla-carga.
+// Si llega incompleto (Riot ocupado, algún rango pendiente) se vuelve a pedir
+// cada 15 s hasta completarlo o hasta que empiece la partida.
+let cargaActiva = false;
+let cargaTimer = null;
+let cargaInicio = 0;
+let ultimaCarga = null;
+const CARGA_REINTENTO_MS = 15000;
+const CARGA_MAX_MS = 5 * 60 * 1000;
+
+function enviarCarga(datos) {
+  ultimaCarga = datos ? { ...datos, ddVersion } : null;
+  overlayWindow?.webContents.send('overlay:carga', ultimaCarga);
+}
+function iniciarCarga() {
+  cargaActiva = true;
+  cargaInicio = Date.now();
+  cargarVersionDD();
+  if (!overlayWindow) createOverlayWindow();
+  overlayWindow.showInactive();
+  enviarCarga({ estado: 'buscando' });
+  pedirCarga();
+}
+async function pedirCarga() {
+  clearTimeout(cargaTimer);
+  if (!cargaActiva) return;
+  let res;
+  try {
+    res = await auth.getPantallaCarga();
+  } catch (e) {
+    res = { estado: 'error' };
+  }
+  if (!cargaActiva) return; // empezó la partida mientras tanto
+  // Si ya teníamos jugadores y esta vez Riot estaba ocupado, se mantiene lo que había.
+  if (res?.estado !== 'ok' && ultimaCarga?.aliados) res = { ...ultimaCarga, estado: res?.estado ?? 'error' };
+  enviarCarga(res);
+  const terminado = (res?.estado === 'ok' && res.completo) || ['sin_sesion', 'sin_cuenta'].includes(res?.estado);
+  if (!terminado && Date.now() - cargaInicio < CARGA_MAX_MS) {
+    cargaTimer = setTimeout(pedirCarga, res?.estado === 'esperando' ? 5000 : CARGA_REINTENTO_MS);
+  }
+}
+function detenerCarga() {
+  cargaActiva = false;
+  clearTimeout(cargaTimer);
+  enviarCarga(null);
+  if (!lastInGame) overlayWindow?.hide();
 }
 
 // ── Overlay en partida ──
@@ -227,6 +300,10 @@ function createOverlayWindow() {
   // Toda la pantalla, incluida la zona de la barra de tareas (el juego la tapa en "Sin bordes").
   overlayWindow.setBounds(bounds);
   overlayWindow.loadFile(path.join(__dirname, 'overlay', 'index.html'));
+  // Si el panel de carga se pidió antes de que el overlay terminara de abrir, se reenvía.
+  overlayWindow.webContents.on('did-finish-load', () => {
+    if (ultimaCarga) overlayWindow?.webContents.send('overlay:carga', ultimaCarga);
+  });
   overlayWindow.on('closed', () => { overlayWindow = null; });
 }
 
@@ -297,7 +374,7 @@ function stopOverlay() {
   clearInterval(overlayTimer);
   overlayTimer = null;
   estadoPartida = null;
-  overlayWindow?.hide();
+  if (!cargaActiva) overlayWindow?.hide();
 }
 ipcMain.handle('game:getStatus', () => ({ inGame: !!lastInGame }));
 
