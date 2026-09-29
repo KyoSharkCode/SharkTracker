@@ -1,6 +1,6 @@
 /* Overlay en partida — estilo de sharktracker.lol (paleta, tipografía, paneles). */
 :root {
-  --panel: rgba(8,18,29,.9);
+  --panel: rgba(8,18,29,.8);      /* 10 % más transparente que al principio (a pedido de Alex) */
   --borde: #16324a;
   --texto: #ffffff;
   --tenue: #6d8ba3;
@@ -58,7 +58,7 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .aviso {
   width: 262px;
   border-color: color-mix(in srgb, var(--c) 40%, var(--borde));
-  background: linear-gradient(90deg, color-mix(in srgb, var(--c) 14%, rgba(8,18,29,.92)), rgba(8,18,29,.92));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c) 14%, rgba(8,18,29,.82)), rgba(8,18,29,.82));
 }
 .aviso .titulo { font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700; line-height: 1.1; }
 .aviso .titulo.urgente { color: var(--enemigo); }
@@ -95,7 +95,7 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .oro-fila {
   position: absolute; transform: translate(-50%, -50%);
   font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; white-space: nowrap;
-  background: rgba(8,18,29,.72); border-radius: 6px; padding: 2px 8px;
+  background: rgba(8,18,29,.62); border-radius: 6px; padding: 2px 8px;
   text-shadow: 0 1px 3px rgba(0,0,0,.9);
 }
 .oro-fila.aliado { color: var(--aliado); }
