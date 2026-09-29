@@ -140,6 +140,32 @@ function pintarToast(toast) {
   });
 }
 
+// ── Diferencia de oro: solo mientras Tab está pulsado ──
+// Filas en la altura de cada fila del marcador del juego a 1920×1080.
+const FILAS_Y = [352, 428, 501, 577, 653];
+let tab = false;
+let oro = [];
+let aliadoIzquierda = true;   // lado azul a la izquierda del Tab, rojo a la derecha
+function pintarOro() {
+  const nodo = $('oro');
+  mostrar(nodo, tab && oro.length > 0);
+  if (!tab || !oro.length) return;
+  const filas = oro.slice(0, 5).map((f, i) => {
+    const d = f.diferencia;
+    const n = Math.abs(Math.round(d));
+    // La flecha sale del lado que va por delante ("1550 >" = gana la columna izquierda,
+    // "< 1180" = gana la derecha). El color dice quién: azul tu equipo, rojo el rival.
+    const ganaIzquierda = aliadoIzquierda ? d > 0 : d < 0;
+    const texto = n < 50 ? '≈' : ganaIzquierda ? `${n} >` : `< ${n}`;
+    const fila = el('div', `oro-fila ${n < 50 ? 'igual' : d > 0 ? 'aliado' : 'enemigo'}`, texto);
+    fila.style.top = `${FILAS_Y[i]}px`;
+    fila.title = `${f.aliado} vs ${f.enemigo}`;
+    return fila;
+  });
+  nodo.replaceChildren(...filas);
+}
+window.overlay.onTab((pulsado) => { tab = pulsado; pintarOro(); });
+
 window.overlay.onState((estado) => {
   if (estado.ddVersion) versionDD = estado.ddVersion;
   pintarBuff($('baron'), 'baron', 'c-baron', estado.baron);
@@ -147,4 +173,7 @@ window.overlay.onState((estado) => {
   proximos = estado.proximos ?? [];
   pintarAnuncio();
   pintarToast(estado.toast);
+  oro = estado.oro ?? [];
+  aliadoIzquierda = estado.aliadoIzquierda !== false;
+  pintarOro();
 });

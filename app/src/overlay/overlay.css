@@ -88,3 +88,19 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .entrando { animation: entrar .25s cubic-bezier(.2,.7,.2,1) both; }
 .buff.entrando { animation-name: entrar-arriba; }
 .saliendo { animation: salir .25s ease-in both; }
+
+/* ── Diferencia de oro (solo con Tab), entre las dos columnas del marcador ── */
+.oro { position: absolute; left: 960px; top: 0; width: 0; height: 1080px; }
+.oro-fila {
+  position: absolute; transform: translate(-50%, -50%);
+  font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; white-space: nowrap;
+  background: rgba(8,18,29,.72); border-radius: 6px; padding: 2px 8px;
+  text-shadow: 0 1px 3px rgba(0,0,0,.9);
+}
+.oro-fila.aliado { color: var(--aliado); }
+.oro-fila.enemigo { color: var(--enemigo); }
+.oro-fila.igual { color: var(--tenue); }
+/* Con Tab la respuesta tiene que ser inmediata: solo un fundido corto. */
+@keyframes fundir { from { opacity: 0; } to { opacity: 1; } }
+.oro.entrando { animation: fundir .12s ease-out both; }
+.oro.saliendo { animation: fundir .12s ease-in reverse both; }

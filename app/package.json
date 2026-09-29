@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",
+    "uiohook-napi": "1.5.5",
     "ws": "^8.18.0"
   },
   "devDependencies": {

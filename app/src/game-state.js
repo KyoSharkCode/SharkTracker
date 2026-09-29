@@ -7,6 +7,8 @@
 //     (Dragón/Ancestral, Vacuolarvas, Heraldo, Barón).
 //   - Toast de objetivo: 5 s al caer un dragón (y el alma, si es el 4.º),
 //     las Vacuolarvas (cuántas de 3 lleva el equipo) o el Heraldo.
+//   - Diferencia de oro por fila del Tab (valor de los objetos de cada jugador,
+//     que es lo que el propio Tab muestra; el oro sin gastar del rival no se ve).
 //
 // Solo usa información que el juego ya muestra (eventos de la partida y el
 // estado de los jugadores). No depende de Electron: se puede probar en Node.
@@ -237,7 +239,21 @@ function crearEstadoPartida() {
     }
     proximos.sort((a, b) => a.falta - b.falta);
 
-    return { tiempo: t, miLado, baron, ancestral, toast, proximos, dragones: cuenta };
+    // ── Diferencia de oro por fila del Tab ──
+    // Fila i: el i-ésimo de tu equipo contra el i-ésimo del rival (mismo orden
+    // que el marcador del juego). Positivo = va por delante tu equipo.
+    // En el Tab el lado azul SIEMPRE va a la izquierda y el rojo a la derecha.
+    const valorObjetos = (p) => (p.items ?? []).reduce((suma, it) => suma + (it.price ?? 0) * (it.count || 1), 0);
+    const aliados = jugadores.filter((p) => lado(p.team) === miLado);
+    const enemigos = jugadores.filter((p) => lado(p.team) && lado(p.team) !== miLado);
+    const oro = [];
+    for (let i = 0; i < Math.min(aliados.length, enemigos.length); i++) {
+      const a = valorObjetos(aliados[i]);
+      const b = valorObjetos(enemigos[i]);
+      oro.push({ diferencia: a - b, aliado: aliados[i].championName, enemigo: enemigos[i].championName });
+    }
+
+    return { tiempo: t, miLado, baron, ancestral, toast, proximos, dragones: cuenta, oro, aliadoIzquierda: miLado !== 'red' };
   }
 
   return { actualizar };
