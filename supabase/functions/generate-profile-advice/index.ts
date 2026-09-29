@@ -22,13 +22,40 @@ const GEMINI_API_KEY = (Deno.env.get('GEMINI_API_KEY') ?? '').trim();
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+// CORS: solo la web de SharkTracker puede llamar a esta función desde un
+// navegador. (No frena a scripts fuera del navegador: eso lo cubren las
+// comprobaciones de más abajo.) La app de escritorio llama desde el proceso
+// main, que no es un navegador, así que no le afecta.
+const ALLOWED_ORIGINS = [
+  'https://sharktracker.lol',
+  'https://www.sharktracker.lol',
+  'https://soloqreto.vercel.app', // dirección anterior: se puede quitar cuando el dominio funcione
+];
+const esLocal = (origin: string) => /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+function corsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('Origin') ?? '';
+  const permitido = ALLOWED_ORIGINS.includes(origin) || esLocal(origin);
+  return {
+    'Access-Control-Allow-Origin': permitido ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Vary': 'Origin',
+  };
+}
+// Añade los encabezados de CORS a cualquier respuesta (incluidos los errores).
+async function withCors(req: Request, handler: (req: Request) => Promise<Response>): Promise<Response> {
+  let res: Response;
+  try {
+    res = await handler(req);
+  } catch (e) {
+    console.error(e);
+    res = json({ error: 'Error inesperado. Prueba de nuevo en un rato.' }, 500);
+  }
+  for (const [k, v] of Object.entries(corsHeaders(req))) res.headers.set(k, v);
+  return res;
+}
 const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
+  new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 
 const MIN_PARTIDAS = 3;
 
@@ -54,8 +81,10 @@ const BADGE_LABEL: Record<string, string> = {
   rey_temporada: 'Rey de la Temporada',
 };
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+Deno.serve((req) => withCors(req, handle));
+
+async function handle(req: Request): Promise<Response> {
+  if (req.method === 'OPTIONS') return new Response('ok');
   if (req.method !== 'POST') return json({ error: 'Método no permitido' }, 405);
 
   let playerId: string | undefined;
@@ -235,4 +264,4 @@ Responde SOLO con un objeto JSON con esta forma exacta:
     console.error('generate-profile-advice:', e);
     return json({ error: 'Error inesperado. Prueba de nuevo en un rato.' }, 500);
   }
-});
+}
