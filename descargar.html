@@ -141,7 +141,8 @@ async function ultimaVersion() {
     if (res.status === 404) return { publicada: false };
     if (!res.ok) throw new Error(res.status);
     const r = await res.json();
-    const exe = (r.assets ?? []).find((a) => a.name === 'SharkTracker-Setup.exe');
+    // "SharkTracker-Setup.exe" (o "SharkTracker-Setup-0.2.0.exe", como salió la v0.2.0).
+    const exe = (r.assets ?? []).find((a) => /^SharkTracker-Setup.*\.exe$/.test(a.name));
     return exe
       ? { publicada: true, url: exe.browser_download_url, tag: r.tag_name, fecha: r.published_at, mb: exe.size / 1048576 }
       : { publicada: false };
