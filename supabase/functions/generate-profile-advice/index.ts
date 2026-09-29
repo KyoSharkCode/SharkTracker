@@ -68,15 +68,24 @@ Deno.serve(async (req) => {
     if (!player) return json({ error: 'Jugador no encontrado' }, 404);
 
     // Últimas 10 de SoloQ (las mismas que muestra el perfil), sin remakes.
-    const { data: partsRaw } = await supabase
-      .from('match_participants')
-      .select('match_id, champion, role, win, kills, deaths, assists, cs, vision_score, damage_to_champions, extra_stats, matches!inner(duration_seconds, ended_at, queue_id)')
-      .eq('player_id', playerId)
-      .eq('matches.queue_id', 420)
-      .limit(100);
+    // Se parte de la tabla matches para poder ORDENAR por fecha en la base
+    // (ordenar por una tabla enlazada no ordena la lista principal). Se piden
+    // unas cuantas de más por si hay remakes, que se descartan abajo.
+    const { data: partsRaw, error: partsErr } = await supabase
+      .from('matches')
+      .select('match_id, duration_seconds, ended_at, queue_id, match_participants!inner(player_id, champion, role, win, kills, deaths, assists, cs, vision_score, damage_to_champions, extra_stats)')
+      .eq('queue_id', 420)
+      .eq('match_participants.player_id', playerId)
+      .order('ended_at', { ascending: false })
+      .limit(30);
+    if (partsErr) throw partsErr;
     const partidas = (partsRaw ?? [])
-      .filter((m: any) => m.matches && !(!m.win && (m.matches.duration_seconds ?? 0) < 300))
-      .sort((a: any, b: any) => new Date(b.matches.ended_at).getTime() - new Date(a.matches.ended_at).getTime())
+      .map((m: any) => ({
+        match_id: m.match_id,
+        ...m.match_participants[0],
+        matches: { duration_seconds: m.duration_seconds, ended_at: m.ended_at, queue_id: m.queue_id },
+      }))
+      .filter((m: any) => !(!m.win && (m.matches.duration_seconds ?? 0) < 300))
       .slice(0, 10);
 
     if (partidas.length < MIN_PARTIDAS) {
