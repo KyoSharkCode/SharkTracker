@@ -106,7 +106,11 @@ app/
                            e inhibidores por reaparecer, toasts de dragón/alma,
                            Vacuolarvas, Heraldo, torres e inhibidores, diferencia de oro
                            por fila del Tab. Tiempos en TIEMPOS
-    preload-overlay.js   → contextBridge (window.overlay): solo recibe el estado y Tab
+    preload-overlay.js   → contextBridge (window.overlay): recibe el estado, Tab y los ajustes
+    overlay-config.js    → ajustes del overlay (qué se ve y dónde) en userData/overlay.json,
+                           y la captura de fondo opcional del editor
+    preload-editor.js    → contextBridge (window.editor) de la ventana "Reposicionar elementos"
+    editor/              → ventana "Reposicionar elementos" (pantalla emulada del juego)
     overlay/             → ventana transparente sobre el juego (index.html, overlay.css,
                            overlay.js, icons.js). Coordenadas a 1920×1080 escaladas con
                            --s; zona central anclada a la barra de objetivos y zona
@@ -115,7 +119,7 @@ app/
     renderer/
       img/               → logos (copias de /logo; la app empaquetada no ve la raíz del repo)
       index.html         → CSP estricta, barra de título (chip de partida + chip de Discord), login,
-                           sidebar, secciones; Ajustes → Cuentas conectadas
+                           sidebar, secciones; Ajustes → Cuenta y Ajustes → Overlay
       style.css          → estilos del mockup (Login y Ajustes → Cuenta incluidos)
       app.js             → navegación, login/cierre de sesión, chips, panel de prueba
 ```
@@ -193,7 +197,20 @@ visual" y "Overlay — estructuras" del canvas)
      rol/división (o sin sesión) se ven tus números sin comparar, con el aviso arriba.
    - Lógica en `rendimiento.js`; `auth.getReferencia()` lee rango (rank_latest), rol
      principal y promedios al empezar la partida.
-4. Ajustes → Overlay: interruptores reales + editor "Reposicionar elementos".
+4. ✅ (pendiente de probar en Windows) Ajustes → Overlay (pestañas Cuenta / Overlay en Ajustes):
+   - Interruptores reales: diferencia de oro, Barón/Ancestral, anuncios de objetivos,
+     avisos de lo que pasó (toasts) y Tu rendimiento. Se aplican al instante (IPC
+     `overlay:config`), también en partida. "Timers de campamentos", "Tu build" y la
+     tarjeta "Pantalla de carga" se ven como "Próximamente".
+   - "Reposicionar elementos" abre una **ventana aparte** (`editor/`) que emula la
+     pantalla del juego: esquema del HUD de LoL (siluetas propias, sin imágenes de Riot)
+     o una captura propia de fondo (se copia a userData, solo en este PC). Reutiliza
+     overlay.css/icons.js/overlay.js con datos de ejemplo (editor-puente.js imita
+     window.overlay). Se arrastran Barón, Ancestral, Tu rendimiento y la columna de
+     avisos; flechas = 1 px (Shift 10 px); "Ver Tab" muestra la silueta del marcador
+     con el oro (que no se mueve). Guardar / Restablecer / Cancelar (Esc).
+   - Todo en `userData/overlay.json` (overlay-config.js), posiciones en 1920×1080
+     (esquina superior izquierda de cada pieza).
 
 Decisiones:
 - **"Tu build"**: se deja para cuando exista "Meta" (hace falta la build de referencia).

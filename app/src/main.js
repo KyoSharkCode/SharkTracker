@@ -1,9 +1,10 @@
-const { app, BrowserWindow, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, dialog } = require('electron');
 const path = require('path');
 const https = require('https');
 const cfg = require('./config');
 const auth = require('./auth');
 const { crearEstadoPartida } = require('./game-state');
+const ajustesOverlay = require('./overlay-config');
 
 // La Live Client Data API de League usa un certificado autofirmado local,
 // así que hay que decirle a Node que no lo rechace (127.0.0.1:2999, nunca sale de tu PC).
@@ -102,6 +103,8 @@ function createWindow() {
     mainWindow = null;
     overlayWindow?.destroy();
     overlayWindow = null;
+    editorWindow?.destroy();
+    editorWindow = null;
   });
   mainWindow.webContents.on('did-finish-load', () => {
     if (pendingDeepLink) {
@@ -297,6 +300,61 @@ function stopOverlay() {
   overlayWindow?.hide();
 }
 ipcMain.handle('game:getStatus', () => ({ inGame: !!lastInGame }));
+
+// ── Ajustes → Overlay (qué piezas se ven y dónde van) ──
+// Al guardar se avisa a todas las ventanas: el overlay se actualiza al instante,
+// aunque estés en partida.
+function avisarConfig(config) {
+  overlayWindow?.webContents.send('overlay:config', config);
+  mainWindow?.webContents.send('overlay:config', config);
+}
+ipcMain.handle('overlay-config:get', () => ajustesOverlay.leer());
+ipcMain.handle('overlay-config:set', (_e, cambios) => {
+  const config = ajustesOverlay.guardar(cambios);
+  avisarConfig(config);
+  return config;
+});
+ipcMain.handle('overlay-config:fabrica', () => ajustesOverlay.fabrica());
+
+// ── Ventana "Reposicionar elementos" ──
+// Emula la pantalla del juego para acomodar las piezas sin abrir una partida.
+let editorWindow = null;
+ipcMain.on('editor:abrir', () => {
+  if (editorWindow) { editorWindow.focus(); return; }
+  editorWindow = new BrowserWindow({
+    width: 1280,
+    height: 820,
+    minWidth: 960,
+    minHeight: 640,
+    title: 'SharkTracker — Reposicionar elementos',
+    icon: path.join(__dirname, 'assets', 'icon.png'),
+    backgroundColor: '#05070c',
+    autoHideMenuBar: true,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload-editor.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  editorWindow.loadFile(path.join(__dirname, 'editor', 'index.html'));
+  editorWindow.on('closed', () => { editorWindow = null; });
+});
+ipcMain.on('editor:cerrar', () => editorWindow?.close());
+ipcMain.handle('editor:getFondo', () => ajustesOverlay.leerFondo());
+ipcMain.handle('editor:elegirFondo', async () => {
+  const { canceled, filePaths } = await dialog.showOpenDialog(editorWindow, {
+    title: 'Elige una captura de tu partida',
+    properties: ['openFile'],
+    filters: [{ name: 'Imágenes', extensions: ['png', 'jpg', 'jpeg', 'webp'] }],
+  });
+  if (canceled || !filePaths[0]) return { cancelado: true };
+  try {
+    return { fondo: ajustesOverlay.guardarFondo(filePaths[0]) };
+  } catch (e) {
+    return { error: e.message ?? String(e) };
+  }
+});
+ipcMain.handle('editor:quitarFondo', () => { ajustesOverlay.quitarFondo(); return null; });
 
 app.on('will-quit', detenerTab);
 

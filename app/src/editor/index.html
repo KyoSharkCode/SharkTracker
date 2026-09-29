@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<!-- Ventana "Reposicionar elementos". Usa el mismo código de dibujo del overlay
+     (overlay.css, icons.js, overlay.js) con datos de ejemplo. La captura de fondo
+     opcional llega como data: desde el proceso main. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<title>SharkTracker — Reposicionar elementos</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../overlay/overlay.css">
+<link rel="stylesheet" href="editor.css">
+</head>
+<body class="editor">
+  <header class="barra">
+    <div>
+      <div class="titulo">Reposicionar elementos</div>
+      <div class="sub">Arrastra cada pieza con el mouse. Con una pieza seleccionada, las flechas la mueven 1 px (Shift: 10 px).</div>
+    </div>
+    <div class="acciones">
+      <button id="btn-tab" class="btn" type="button">Ver Tab</button>
+      <button id="btn-fondo" class="btn" type="button">Usar mi captura de fondo</button>
+      <button id="btn-quitar-fondo" class="btn" type="button" hidden>Quitar captura</button>
+    </div>
+  </header>
+
+  <main id="caja" class="caja">
+    <div id="marco" class="marco">
+      <!-- Pantalla emulada: 1920×1080, escalada para caber en la ventana -->
+      <div id="escenario" class="escenario">
+        <img id="fondo" class="fondo" alt="" hidden>
+
+        <!-- Esquema del HUD de LoL (solo siluetas, para ver qué tapa qué) -->
+        <div id="hud" class="hud">
+          <div class="hud-pieza" data-p="objetivos">Barra de objetivos</div>
+          <div class="hud-pieza" data-p="marcador">Marcador · KDA · tiempo</div>
+          <div class="hud-pieza hud-suave" data-p="kills">Lista de kills</div>
+          <div class="hud-pieza" data-p="aliados">Aliados</div>
+          <div class="hud-pieza" data-p="minimapa">Minimapa</div>
+          <div class="hud-pieza hud-suave" data-p="chat">Chat</div>
+          <div class="hud-pieza" data-p="stats">Stats</div>
+          <div class="hud-pieza" data-p="habilidades">Campeón · habilidades</div>
+          <div class="hud-pieza" data-p="objetos">Objetos</div>
+        </div>
+
+        <!-- Silueta del marcador del Tab (con "Ver Tab") -->
+        <div id="tab-silueta" class="tab-silueta" hidden>
+          <div class="tab-cab">Marcador (Tab)</div>
+          <div class="tab-fila f1"></div>
+          <div class="tab-fila f2"></div>
+          <div class="tab-fila f3"></div>
+          <div class="tab-fila f4"></div>
+          <div class="tab-fila f5"></div>
+          <div class="tab-medio"></div>
+        </div>
+
+        <!-- Las mismas piezas del overlay -->
+        <div class="zona zona-centro">
+          <div id="baron" class="pill buff" hidden></div>
+          <div id="ancestral" class="pill buff" hidden></div>
+          <div id="oro" class="oro" hidden></div>
+        </div>
+        <div class="zona zona-derecha">
+          <div id="rendimiento" class="rend" hidden></div>
+          <div id="avisos" class="columna">
+            <div id="anuncio" class="pill aviso" hidden></div>
+            <div id="toast" class="pill aviso" hidden></div>
+          </div>
+        </div>
+      </div>
+      <div id="coords" class="coords" hidden></div>
+    </div>
+  </main>
+
+  <footer class="barra barra-baja">
+    <span id="estado" class="sub">La diferencia de oro no se mueve: va alineada con las filas del Tab.</span>
+    <div class="acciones">
+      <button id="btn-restablecer" class="btn" type="button">Restablecer</button>
+      <button id="btn-cancelar" class="btn" type="button">Cancelar</button>
+      <button id="btn-guardar" class="btn btn-pri" type="button">Guardar</button>
+    </div>
+  </footer>
+
+  <script src="../overlay/icons.js"></script>
+  <script src="editor-puente.js"></script>
+  <script src="../overlay/overlay.js"></script>
+  <script src="editor.js"></script>
+</body>
+</html>

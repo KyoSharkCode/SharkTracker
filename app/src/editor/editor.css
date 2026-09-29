@@ -1,0 +1,88 @@
+/* Ventana "Reposicionar elementos" — estilo de la app. */
+html, body { overflow: hidden; }
+body.editor {
+  background: #05070c; color: #e7ecf2; user-select: none;
+  display: flex; flex-direction: column; height: 100vh;
+}
+.barra {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 12px 18px; background: #04060d; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.barra-baja { border-bottom: none; border-top: 1px solid rgba(255,255,255,0.06); }
+.titulo {
+  font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700;
+  background: linear-gradient(90deg,#e7ecf2,#7fe0cf); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.sub { font-size: 11px; color: #5b6b7c; }
+.sub.ok { color: #6fdba8; }
+.sub.bad { color: #f0a487; }
+.acciones { display: flex; gap: 8px; flex-shrink: 0; }
+.btn {
+  font-family: inherit; font-size: 11px; font-weight: 600; color: #8a97a6; cursor: pointer;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 7px 14px;
+}
+.btn:hover { color: #e7ecf2; border-color: rgba(255,255,255,0.25); }
+.btn.on { color: #7fe0cf; border-color: rgba(0,229,199,0.55); background: rgba(0,229,199,0.1); }
+.btn-pri {
+  font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; color: #05070c; border: none;
+  background: linear-gradient(135deg,#00e5c7,#0a8f7f); box-shadow: 0 0 14px rgba(0,229,199,0.3);
+}
+.btn-pri:hover { color: #05070c; filter: brightness(1.08); }
+
+/* ── Pantalla emulada ── */
+.caja { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.marco { position: relative; overflow: hidden; border-radius: 8px; border: 1px solid rgba(0,229,199,0.25); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+.escenario {
+  --s: 1; /* dentro del editor el overlay no se escala solo: lo escala el escenario */
+  position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: top left;
+  background:
+    radial-gradient(ellipse at 30% 40%, rgba(46,92,70,0.55), transparent 60%),
+    radial-gradient(ellipse at 75% 65%, rgba(30,70,80,0.5), transparent 55%),
+    linear-gradient(160deg, #13261f, #0b1716 55%, #0a1220);
+}
+.fondo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+.hud-pieza {
+  position: absolute; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(157,179,196,0.28); background: rgba(3,8,18,0.55); border-radius: 10px;
+  font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: rgba(157,179,196,0.55);
+}
+.hud-suave { border-style: dashed; background: rgba(3,8,18,0.2); }
+.escenario.con-fondo .hud-pieza { background: transparent; }
+
+.tab-silueta {
+  position: absolute; left: 385px; top: 240px; width: 1150px; height: 460px; box-sizing: border-box;
+  border: 2px solid rgba(200,170,110,0.55); border-radius: 6px; background: rgba(6,14,24,0.88);
+}
+.tab-cab { position: absolute; left: 0; right: 0; top: 18px; text-align: center; font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(200,170,110,0.75); }
+.tab-fila { position: absolute; left: 30px; right: 30px; height: 1px; background: rgba(157,179,196,0.15); transform: translateY(38px); }
+.tab-medio { position: absolute; left: 50%; top: 70px; bottom: 10px; width: 2px; background: rgba(200,170,110,0.35); }
+
+/* Piezas que se pueden mover */
+#baron, #ancestral, #rendimiento, #avisos { cursor: grab; outline: 2px dashed rgba(0,229,199,0.45); outline-offset: 4px; }
+#avisos { border-radius: 12px; }
+.editor .arrastrando { cursor: grabbing !important; }
+.editor .elegida { outline: 2px solid #00e5c7 !important; }
+/* En el editor no hace falta animar la entrada de cada pieza */
+.editor .entrando, .editor .saliendo { animation: none !important; }
+
+.coords {
+  position: absolute; pointer-events: none; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700;
+  color: #05070c; background: #00e5c7; border-radius: 6px; padding: 2px 8px; white-space: nowrap;
+}
+
+/* Posiciones del esquema del HUD (1920×1080) */
+.hud-pieza[data-p="objetivos"] { left: 800px; top: 0; width: 320px; height: 52px; }
+.hud-pieza[data-p="marcador"] { left: 1530px; top: 0; width: 390px; height: 30px; }
+.hud-pieza[data-p="kills"] { left: 1560px; top: 240px; width: 350px; height: 230px; }
+.hud-pieza[data-p="aliados"] { left: 1630px; top: 670px; width: 280px; height: 90px; }
+.hud-pieza[data-p="minimapa"] { left: 1610px; top: 765px; width: 310px; height: 315px; }
+.hud-pieza[data-p="chat"] { left: 0; top: 760px; width: 500px; height: 220px; }
+.hud-pieza[data-p="stats"] { left: 560px; top: 985px; width: 120px; height: 95px; }
+.hud-pieza[data-p="habilidades"] { left: 680px; top: 985px; width: 380px; height: 95px; }
+.hud-pieza[data-p="objetos"] { left: 1060px; top: 985px; width: 190px; height: 95px; }
+.tab-fila.f1 { top: 112px; }
+.tab-fila.f2 { top: 188px; }
+.tab-fila.f3 { top: 261px; }
+.tab-fila.f4 { top: 337px; }
+.tab-fila.f5 { top: 413px; }

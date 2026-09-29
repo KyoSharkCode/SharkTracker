@@ -192,16 +192,38 @@ function pintarRendimiento() {
 
 window.overlay.onTab((pulsado) => { tab = pulsado; pintarOro(); });
 
-window.overlay.onState((estado) => {
+// ── Ajustes → Overlay: qué piezas se ven y dónde van ──
+// Posiciones en coordenadas de 1920×1080 (esquina superior izquierda de cada pieza).
+let config = { visible: {} };
+const ver = (pieza) => config.visible?.[pieza] !== false;
+function aplicarConfig(nueva) {
+  if (!nueva) return;
+  config = nueva;
+  for (const [id, pos] of Object.entries(config.posiciones ?? {})) {
+    const nodo = $(id);
+    if (!nodo) continue;
+    nodo.style.left = `${pos.x}px`;
+    nodo.style.top = `${pos.y}px`;
+  }
+  if (ultimoEstado) pintarEstado(ultimoEstado);
+}
+
+let ultimoEstado = null;
+function pintarEstado(estado) {
+  ultimoEstado = estado;
   if (estado.ddVersion) versionDD = estado.ddVersion;
-  pintarBuff($('baron'), 'baron', 'c-baron', estado.baron);
-  pintarBuff($('ancestral'), 'elder', 'c-ancestral', estado.ancestral);
-  proximos = estado.proximos ?? [];
+  pintarBuff($('baron'), 'baron', 'c-baron', ver('buffs') ? estado.baron : null);
+  pintarBuff($('ancestral'), 'elder', 'c-ancestral', ver('buffs') ? estado.ancestral : null);
+  proximos = ver('anuncios') ? (estado.proximos ?? []) : [];
   pintarAnuncio();
-  pintarToast(estado.toast);
-  oro = estado.oro ?? [];
+  pintarToast(ver('toasts') ? estado.toast : null);
+  oro = ver('oro') ? (estado.oro ?? []) : [];
   aliadoIzquierda = estado.aliadoIzquierda !== false;
   pintarOro();
-  rendimiento = estado.rendimiento ?? null;
+  rendimiento = ver('rendimiento') ? (estado.rendimiento ?? null) : null;
   pintarRendimiento();
-});
+}
+
+window.overlay.onState(pintarEstado);
+window.overlay.onConfig?.(aplicarConfig);
+window.overlay.getConfig?.().then(aplicarConfig);
