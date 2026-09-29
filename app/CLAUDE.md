@@ -177,7 +177,11 @@ visual" y "Overlay — estructuras" del canvas)
    por rol. Se ve con Tab, debajo del marcador (y = 716), desde el minuto 5.
    CS/min, oro/min, visión/min y KP; azul = por encima de la referencia, rojo = por debajo.
    - Datos propios (no OP.GG): Edge Function `referencias-elo` (cron cada 10 min, ≤ 11
-     llamadas a Riot por corrida, corta si hay 429) toma 2 jugadores al azar de una
+     llamadas a Riot por corrida). Key **personal** (100 peticiones / 2 min) compartida
+     con la web, que con 7 jugadores gasta ~33 cada 2 min: el recolector empieza 30 s
+     tarde, pide de a una cada 1.5 s y se corta si la key pasa del 60 % (lo lee de las
+     cabeceras de Riot) o si hay 429. Responde 202 y trabaja en segundo plano
+     (EdgeRuntime.waitUntil; el log sale en Logs de la Function). Toma 2 jugadores al azar de una
      división de LAN (rota Bronce…Master+), baja sus partidas de SoloQ y suma los 10
      jugadores en `elo_referencias` (sumas por división + rol + día, sin guardar partidas).
    - **Rotación de 14 días** (≈ un parche): la vista `elo_referencias_promedio` solo mira

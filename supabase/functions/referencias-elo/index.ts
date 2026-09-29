@@ -10,8 +10,15 @@
 // Hierro no se recolecta: solo sirve de referencia la división de ARRIBA de
 // la tuya, y nadie está por debajo de Hierro.
 //
-// Pocas llamadas por corrida (≤ 11) para no quitarle cupo de la key al resto
-// de SharkTracker. Si Riot responde 429 (límite), se corta y sigue la próxima.
+// Cupo de la key: la usa también el resto de SharkTracker, así que este
+// recolector solo gasta lo que sobra:
+//  - Empieza 30 s tarde (los demás cron arrancan en el segundo 0 de cada minuto).
+//  - Pide de a una, con 1.5 s entre peticiones (≤ 11 por corrida).
+//  - Riot dice en cada respuesta cuántas peticiones lleva la key en la ventana
+//    de 2 min: si pasa del 60 %, se corta y sigue en la próxima corrida.
+//  - Si aun así Riot responde 429 (límite), también se corta.
+// Responde al cron al instante y trabaja en segundo plano (el log queda en
+// Supabase → Edge Functions → referencias-elo → Logs).
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -33,15 +40,41 @@ const MAX_PARTIDAS = 8;
 const DIAS = 14;
 const MIN_DURACION = 10 * 60; // se ignoran remakes y rendiciones tempranas
 const TURNO_MS = 10 * 60 * 1000;
+const ESPERA_INICIAL_MS = 30_000;
+const PAUSA_MS = 1_500;
+const CUPO_MAX = 0.6;          // no pasar del 60 % del límite de la key
+const VENTANA_MIN_S = 60;      // se mira la ventana larga (la de 2 min)
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 class LimiteRiot extends Error {}
 
+const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// "20:1,100:120" → { 1: 20, 120: 100 } (valor por ventana en segundos)
+function leerVentanas(texto: string | null): Map<number, number> {
+  const m = new Map<number, number>();
+  for (const parte of (texto ?? '').split(',')) {
+    const [valor, segundos] = parte.split(':').map(Number);
+    if (Number.isFinite(valor) && Number.isFinite(segundos)) m.set(segundos, valor);
+  }
+  return m;
+}
+
+let cupoAgotado = false;
 async function riotFetch(url: string) {
+  if (cupoAgotado) throw new LimiteRiot(`Riot: la key ya va por encima del ${CUPO_MAX * 100} %, se sigue en la próxima corrida`);
+  await esperar(PAUSA_MS);
   const res = await fetch(url, { headers: { 'X-Riot-Token': RIOT_API_KEY } });
   if (res.status === 429) throw new LimiteRiot('Riot: límite de peticiones (429), se sigue en la próxima corrida');
   if (!res.ok) throw new Error(`${url} -> ${res.status}`);
+  // Cuánto lleva gastado la key (de TODO SharkTracker) en cada ventana.
+  const limites = leerVentanas(res.headers.get('X-App-Rate-Limit'));
+  const usadas = leerVentanas(res.headers.get('X-App-Rate-Limit-Count'));
+  for (const [segundos, usado] of usadas) {
+    const limite = limites.get(segundos);
+    if (segundos >= VENTANA_MIN_S && limite && usado / limite >= CUPO_MAX) cupoAgotado = true;
+  }
   return res.json();
 }
 
@@ -68,11 +101,9 @@ async function jugadoresDe(tier: string): Promise<string[]> {
   return (entradas ?? []).map((e: any) => e.puuid).filter(Boolean);
 }
 
-Deno.serve(async (req) => {
-  if (req.headers.get('x-cron-secret') !== CRON_SECRET) {
-    return new Response('Unauthorized', { status: 401 });
-  }
-
+async function recolectar(): Promise<string[]> {
+  cupoAgotado = false;
+  await esperar(ESPERA_INICIAL_MS);
   const tier = TIERS[Math.floor(Date.now() / TURNO_MS) % TIERS.length];
   const log: string[] = [`División: ${tier}`];
   let sumadas = 0;
@@ -138,7 +169,23 @@ Deno.serve(async (req) => {
   }
 
   log.push(`Partidas sumadas: ${sumadas}`);
-  return new Response(JSON.stringify({ ok: true, log }, null, 2), {
+  return log;
+}
+
+// Para que TypeScript conozca el runtime de Supabase (tareas en segundo plano).
+declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
+
+Deno.serve((req) => {
+  if (req.headers.get('x-cron-secret') !== CRON_SECRET) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+  EdgeRuntime.waitUntil(
+    recolectar()
+      .then((log) => console.log(log.join('\n')))
+      .catch((e) => console.error('referencias-elo:', e)),
+  );
+  return new Response(JSON.stringify({ ok: true, enSegundoPlano: true }), {
+    status: 202,
     headers: { 'Content-Type': 'application/json' },
   });
 });
