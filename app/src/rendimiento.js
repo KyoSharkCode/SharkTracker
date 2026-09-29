@@ -33,6 +33,7 @@ function calcularRendimiento({ t, yo, equipo, oroActual, valorObjetos, referenci
   const refRol = rol ? referencia?.porRol?.[rol] : null;
   const hayRef = !!refRol && Number(refRol.muestras) >= MIN_MUESTRAS;
   const aviso = !referencia ? 'Sin referencia por ahora'
+    : !rol ? 'Sin rol detectado: no se puede comparar'
     : !hayRef ? `Reuniendo partidas de ${division}` : null;
 
   const min = Math.max(t / 60, 1);

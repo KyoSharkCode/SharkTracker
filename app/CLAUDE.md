@@ -163,7 +163,8 @@ visual" y "Overlay — estructuras" del canvas)
 
 1. ✅ Ventana del overlay + Barón/Ancestral + anuncios de objetivos + toasts de
    dragón/alma, Vacuolarvas (x de 3, una sola aparición a las 8:00) y Heraldo.
-   Probado en partida real. Atakhan ya no existe en el juego (quitado).
+   Probado en partida real. Atakhan ya no existe en el juego (quitado). **Barón aparece a
+   las 20:00** (visto en partida real; antes estaba a 25:00).
    ✅ Estructuras: toast de torre/inhibidor destruido (qué nivel y carril) y aviso
    1:00 antes de que reaparezca un inhibidor (5:00 tras caer).
 2. ✅ (pendiente de probar en partida real) Diferencia de oro **solo con Tab pulsado**:
@@ -175,7 +176,9 @@ visual" y "Overlay — estructuras" del canvas)
    En el Tab el **lado azul va siempre a la izquierda** y el rojo a la derecha
    (confirmado por Alex): si juegas en rojo, la flecha se invierte (la flecha sale
    de la columna que va por delante); el color sigue siendo azul = tu equipo.
-   **Verificar**: que `price` sea el coste total del objeto.
+   **Verificado en partida real: `items[].price` NO es el coste total** (solo el último
+   paso de la receta). Se usa `gold.total` de DDragon `item.json` (main.js `cargarPrecios`,
+   `estadoPartida.setPrecios`); `price` queda solo de respaldo.
 3. ✅ (pendiente de probar en partida real) "Tu rendimiento" **contra la división de
    ARRIBA de la tuya** (Oro → Platino; Diamante y Master+ → Master+; sin rango → Oro),
    por rol. **Siempre a la vista desde que empieza la partida**, arriba a la derecha
@@ -216,10 +219,10 @@ visual" y "Overlay — estructuras" del canvas)
 
 ✅ (pendiente de probar en una normal/ranked real — la herramienta de práctica y algunas
 partidas contra bots no salen en el "espectador" de Riot)
-- Detección: el proceso `League of Legends.exe` abierto (tasklist) y el reloj de la
-  partida sin arrancar = pantalla de carga. **Ojo: la API local YA responde durante la
-  carga (con `gameTime` 0)**, así que "en partida" = gamestats responde **y** `gameTime > 0`
-  (visto en la primera prueba real). Tras una partida, el juego abierto no cuenta como
+- Detección: el proceso `League of Legends.exe` abierto (tasklist) y la partida sin
+  empezar = pantalla de carga. **Ojo: la API local YA responde durante la carga, y hasta
+  el reloj avanza** (visto en dos pruebas reales), así que "en partida" = existe el evento
+  **`GameStart`** en `/eventdata` (o más de 3 min de reloj, por si faltara el evento). Tras una partida, el juego abierto no cuenta como
   carga hasta que el proceso se cierra (`partidaTerminada`).
 - Datos: Edge Function `pantalla-carga` (**"Verify JWT" ENCENDIDO**: exige sesión de
   Discord y cuenta de LoL vinculada; la key de Riot vive allí). 1 petición al espectador

@@ -186,10 +186,20 @@ let lastInGame = null;
 let partidaTerminada = false; // acabó una partida y el juego sigue abierto: no es pantalla de carga
 function startGameWatcher() {
   const tick = async () => {
-    // La API local ya responde DURANTE la pantalla de carga, con el reloj en 0.
-    // La partida empieza de verdad cuando el reloj avanza.
+    // La API local ya responde DURANTE la pantalla de carga (y hasta el reloj
+    // avanza). La partida empieza de verdad con el evento "GameStart" (cuando
+    // aparecen los campeones en el mapa). Por si faltara el evento, a los 3 min
+    // de reloj también cuenta como empezada.
     const stats = await liveClientGet('gamestats', 1200);
-    const inGame = stats.inGame && (stats.data?.gameTime ?? 0) > 0;
+    let inGame = false;
+    if (stats.inGame) {
+      if ((stats.data?.gameTime ?? 0) > 180) {
+        inGame = true;
+      } else {
+        const ev = await liveClientGet('eventdata', 1200);
+        inGame = !!ev.data?.Events?.some((e) => e.EventName === 'GameStart');
+      }
+    }
     if (inGame !== lastInGame) {
       if (lastInGame === true && !inGame) partidaTerminada = true;
       lastInGame = inGame;
@@ -314,13 +324,30 @@ function createOverlayWindow() {
 // Versión actual de Data Dragon (para los retratos de campeones del overlay).
 // Se pide una vez por sesión de la app.
 let ddVersion = null;
+let preciosItems = null; // itemID → coste total (DDragon), para el oro
 function cargarVersionDD() {
-  if (ddVersion) return;
+  if (ddVersion) { if (!preciosItems) cargarPrecios(); return; }
   https.get('https://ddragon.leagueoflegends.com/api/versions.json', { timeout: 5000 }, (res) => {
     let body = '';
     res.on('data', (c) => (body += c));
-    res.on('end', () => { try { ddVersion = JSON.parse(body)[0] ?? null; } catch { /* sin retratos: se usan iniciales */ } });
+    res.on('end', () => {
+      try { ddVersion = JSON.parse(body)[0] ?? null; } catch { /* sin retratos: se usan iniciales */ }
+      if (ddVersion) cargarPrecios();
+    });
   }).on('error', () => { /* sin retratos: se usan iniciales */ });
+}
+// Coste total de cada objeto: la API del juego solo da el último paso de la receta.
+function cargarPrecios() {
+  https.get(`https://ddragon.leagueoflegends.com/cdn/${ddVersion}/data/en_US/item.json`, { timeout: 8000 }, (res) => {
+    let body = '';
+    res.on('data', (c) => (body += c));
+    res.on('end', () => {
+      try {
+        const items = JSON.parse(body).data ?? {};
+        preciosItems = Object.fromEntries(Object.entries(items).map(([id, it]) => [id, it.gold?.total ?? 0]));
+      } catch { /* se usa el precio de la API del juego */ }
+    });
+  }).on('error', () => { /* se usa el precio de la API del juego */ });
 }
 
 // ── Teclado: Tab (diferencia de oro) y Ctrl + X (panel de la pantalla de carga) ──
@@ -389,6 +416,7 @@ function startOverlay() {
   overlayTimer = setInterval(async () => {
     const res = await liveClientGet('allgamedata');
     if (!res.inGame || !overlayWindow) return;
+    estadoPartida.setPrecios(preciosItems);
     overlayWindow.webContents.send('overlay:state', { ...estadoPartida.actualizar(res.data), ddVersion });
   }, 1000);
 }
