@@ -415,6 +415,7 @@
 
 <script type="module">
 import { createSupabase } from './assets/supabase.js';
+import { getDDragonVersion } from './assets/lol-data.js';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
@@ -455,11 +456,7 @@ const EVENT_META = {
   mision_completada:'🎯', mision_grupal:'👥', reroll_ganado:'🎲', compra:'🛍️', canje:'🎁', insignia:'🏅',
 };
 
-let ddragonVersion = '15.19.1';
-try {
-  const versions = await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json());
-  ddragonVersion = versions[0];
-} catch (e) { console.warn('DDragon version fetch falló, usando fallback', e); }
+const ddragonVersion = await getDDragonVersion('15.19.1');
 
 // Riot manda "FiddleSticks" (S mayúscula) en championName, pero el
 // archivo real en Data Dragon es "Fiddlesticks.png" (s minúscula) — el

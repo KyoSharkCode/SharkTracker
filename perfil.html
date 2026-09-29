@@ -540,6 +540,7 @@
 
 <script type="module">
 import { createSupabase } from './assets/supabase.js';
+import { getDDragonVersion } from './assets/lol-data.js';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
@@ -595,11 +596,7 @@ function esPosibleAutofill(m, primaryRole) {
   return roleLabel(m.role) !== roleLabel(primaryRole);
 }
 
-let ddragonVersion = '15.19.1';
-try {
-  const versions = await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json());
-  ddragonVersion = versions[0];
-} catch (e) { console.warn('DDragon version fetch falló, usando fallback', e); }
+const ddragonVersion = await getDDragonVersion('15.19.1');
 
 const CHAMPION_ID_OVERRIDES = { FiddleSticks: 'Fiddlesticks' };
 const champKey = (name) => { const clean = (name || '').trim(); return CHAMPION_ID_OVERRIDES[clean] || clean; };

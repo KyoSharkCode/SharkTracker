@@ -225,6 +225,7 @@
 
 <script type="module">
 import { createSupabase } from './assets/supabase.js';
+import { getDDragonVersion } from './assets/lol-data.js';
 
 // Segura de tener acá: la anon key está protegida por las políticas RLS.
 const supabase = createSupabase();
@@ -235,8 +236,7 @@ const ROLE_NORMALIZE = { TOP:'TOP', JUNGLE:'JUNGLE', JUNGLA:'JUNGLE', MIDDLE:'MI
 const roleLabel = (r) => r ? (ROLE_NORMALIZE[String(r).trim().toUpperCase()] ?? String(r).toUpperCase()) : null;
 
 let ddragonVersion = '15.19.1';
-const versionReady = fetch('https://ddragon.leagueoflegends.com/api/versions.json')
-  .then(r => r.json()).then(v => { ddragonVersion = v[0]; }).catch(() => {});
+const versionReady = getDDragonVersion(ddragonVersion).then(v => { ddragonVersion = v; });
 const profileIconUrl = (iconId) => iconId ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${iconId}.png` : null;
 const profileUrl = (playerId) => `perfil.html?jugador=${encodeURIComponent(playerId)}`;
 

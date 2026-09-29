@@ -204,6 +204,7 @@
 
 <script type="module">
 import { createSupabase } from './assets/supabase.js';
+import { getDDragonVersion } from './assets/lol-data.js';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
@@ -211,8 +212,7 @@ createNavMenu({ current: location.hash === '#fame-sec' ? 'fama' : 'reto' });
 
 const supabase = createSupabase();
 
-let ddragonVersion = '15.19.1';
-try { ddragonVersion = (await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json()))[0]; } catch {}
+const ddragonVersion = await getDDragonVersion('15.19.1');
 const TIER_ORDER = ['IRON','BRONZE','SILVER','GOLD','PLATINUM','EMERALD','DIAMOND','MASTER','GRANDMASTER','CHALLENGER'];
 const TIER_LABEL = {IRON:'Hierro',BRONZE:'Bronce',SILVER:'Plata',GOLD:'Oro',PLATINUM:'Platino',EMERALD:'Esmeralda',DIAMOND:'Diamante',MASTER:'Maestro',GRANDMASTER:'Gran Maestro',CHALLENGER:'Aspirante'};
 const MINI_CREST_BASE = 'https://raw.communitydragon.org/14.10/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/';

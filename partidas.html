@@ -232,6 +232,7 @@
 
 <script type="module">
 import { createSupabase } from './assets/supabase.js';
+import { getDDragonVersion } from './assets/lol-data.js';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
@@ -240,8 +241,7 @@ import { lolIcon, lolIconSvg, RIOT_EVENT_ICON } from './assets/lol-icons.js';
 
 const supabase = createSupabase();
 
-let V = '15.19.1';
-try { V = (await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json()))[0]; } catch {}
+const V = await getDDragonVersion('15.19.1');
 const DD = 'https://ddragon.leagueoflegends.com/cdn';
 const CHAMPION_ID_OVERRIDES = { FiddleSticks: 'Fiddlesticks' };
 const champImg = (name) => `${DD}/${V}/img/champion/${CHAMPION_ID_OVERRIDES[name] || name}.png`;
