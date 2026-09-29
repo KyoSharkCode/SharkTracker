@@ -106,6 +106,7 @@ async function cargarPerfil() {
       flex: rango('RANKED_FLEX_SR'),
       resumen: res,
       radar: calc.radar(res, refValida),
+      rendimiento: calc.rendimientoPorCola(lista, refValida), // radar por cola (pestañas)
       referencia: refValida ? `${TIER_ES[referencia.tier] ?? referencia.tier}` : null,
       etiquetas: calc.etiquetas(lista),
       maestrias: (maestrias.data ?? []).map((m) => ({ campeon: m.champion, nivel: m.level, puntos: m.points })),

@@ -82,14 +82,30 @@
     cab.hidden = false;
   }
 
-  // ── Radar: tus promedios (últimas 20 SoloQ) vs la división de arriba ──
+  // Pestañas de cola: las comparten el radar y el historial (cambiar una cambia las dos).
+  function pestanas(p) {
+    const tabs = el('div', 'qtabs');
+    for (const t of p.historial) {
+      const b = el('button', `qtab${t.clave === pestana ? ' active' : ''}${t.partidas.length ? '' : ' vacia'}`, t.nombre);
+      b.type = 'button';
+      b.addEventListener('click', () => { pestana = t.clave; pintar(); });
+      tabs.append(b);
+    }
+    return tabs;
+  }
+
+  // ── Radar: tus promedios (últimas 20 de la cola elegida) vs la división de arriba ──
   function pintarRadar(p) {
     const card = el('div', 'card card-radar');
-    card.append(el('div', 'cardhd', `Rendimiento — últimas ${p.resumen?.partidas ?? 0} SoloQ`));
-    if (!p.radar) {
-      card.append(el('div', 'vacio', 'Todavía no hay SoloQ recientes para calcularlo.'));
+    // Copias viejas (antes de las pestañas) solo traían SoloQ.
+    const cola = p.rendimiento?.[pestana] ?? { nombre: 'SoloQ', grieta: true, resumen: p.resumen, radar: p.radar };
+    card.append(el('div', 'cardhd', `Rendimiento — últimas ${cola.resumen?.partidas ?? 0} ${cola.nombre}`));
+    if (p.rendimiento) card.append(pestanas(p));
+    if (!cola.radar) {
+      card.append(el('div', 'vacio', `Sin partidas de ${cola.nombre} en los últimos 30 días.`));
       return card;
     }
+    p = { ...p, resumen: cola.resumen, radar: cola.radar };
     const cx = 110, cy = 100, R = 72;
     const puntos = (esc) => esc.map((e, i) => {
       const ang = -Math.PI / 2 + i * (Math.PI / 2);
@@ -114,7 +130,7 @@
     const fila = (cls, texto) => { const f = el('div', 'ley'); f.append(el('span', `ley-mark ${cls}`), el('span', null, texto)); return f; };
     leyenda.append(fila('tu', 'Tú'));
     if (p.radar.hayRef) leyenda.append(fila('ref', `Prom. ${p.referencia} (${p.jugador.rol ?? 'tu rol'})`));
-    else leyenda.append(el('div', 'ley-nota', 'Sin referencia de la división de arriba todavía'));
+    else leyenda.append(el('div', 'ley-nota', cola.grieta ? 'Sin referencia de la división de arriba todavía' : 'Sin comparación en este modo (los promedios son de la Grieta)'));
     const tabla = el('div', 'radar-tabla');
     for (const e of p.radar.ejes) {
       const r = el('div', 'rt-fila');
@@ -184,14 +200,7 @@
   function pintarHistorial(p) {
     const card = el('div', 'card card-hist');
     card.append(el('div', 'cardhd', 'Historial de partidas — últimas 10 por cola (30 días)'));
-    const tabs = el('div', 'qtabs');
-    for (const t of p.historial) {
-      const b = el('button', `qtab${t.clave === pestana ? ' active' : ''}${t.partidas.length ? '' : ' vacia'}`, t.nombre);
-      b.type = 'button';
-      b.addEventListener('click', () => { pestana = t.clave; pintar(); });
-      tabs.append(b);
-    }
-    card.append(tabs);
+    card.append(pestanas(p));
     const actual = p.historial.find((t) => t.clave === pestana) ?? p.historial[0];
     if (!actual.partidas.length) card.append(el('div', 'vacio', `Sin partidas de ${actual.nombre} en los últimos 30 días.`));
     for (const m of actual.partidas) {

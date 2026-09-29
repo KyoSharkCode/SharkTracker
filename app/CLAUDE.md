@@ -257,7 +257,10 @@ partidas contra bots no salen en el "espectador" de Riot)
   rank_snapshots (SoloQ, 30 días), player_masteries y matches + match_participants
   (150 más recientes; la base guarda 30 días). Íconos y nombres en español de DDragon
   (summoner.json, runesReforged.json, champion.json; una vez por sesión).
-- Cálculos en `perfil-calculos.js` (se prueba en Node): radar de las últimas 20 SoloQ con
+- **El radar sigue la pestaña de cola** (la comparte con el historial: cambiar una cambia
+  las dos). SoloQ/Flex/Normal/Partida Rápida se comparan con la división de arriba; ARAM y
+  Arena, sin comparar. (`rendimientoPorCola`.)
+- Cálculos en `perfil-calculos.js` (se prueba en Node): radar de las últimas 20 partidas con
   los 4 ejes de "Tu rendimiento" (CS/min, oro/min, visión/min, KP) contra la división de
   arriba de tu rol (`auth.getReferencia`, ≥ 30 muestras); KDA, daño/min y WR aparte.
   Etiquetas (últimas 30 SoloQ, sin remakes): buena/mala racha (3+), Tilteado (misma idea
