@@ -29,6 +29,16 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: app/package-lock.json
+      - name: Revisar que la versión sea nueva
+        shell: bash
+        run: |
+          VERSION="v$(node -p "require('./package.json').version")"
+          if gh release view "$VERSION" --json isDraft -q .isDraft 2>/dev/null | grep -qx false; then
+            echo "::error::Ya existe el Release $VERSION publicado. Sube \"version\" en app/package.json (o borra ese Release y su etiqueta) y vuelve a correr."
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm ci
       - name: Armar el instalador y subirlo a un Release en borrador
         run: npx electron-builder --win --publish always
@@ -38,6 +48,11 @@ jobs:
         shell: bash
         run: |
           VERSION="v$(node -p "require('./package.json').version")"
+          # Sin latest.yml las apps instaladas no encuentran la actualización.
+          for f in latest.yml SharkTracker-Setup.exe; do
+            gh release view "$VERSION" --json assets -q '.assets[].name' | grep -qx "$f" \
+              || { echo "::error::Al Release $VERSION le falta $f"; exit 1; }
+          done
           gh release edit "$VERSION" --draft=false --latest --target "$GITHUB_SHA"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
