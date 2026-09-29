@@ -22,12 +22,34 @@ const TIEMPOS = {
 };
 const DURACION_BUFF = { baron: 180, ancestral: 150 };
 const AVISO_ANTES = 90;      // anunciar cuando falta 1:30 o menos
+const AVISO_INHIB = 60;      // inhibidor a punto de reaparecer: avisar a 1:00
+const INHIB_REAPARECE = 5 * 60;
 const TOAST_DURACION = 5;    // segundos
 
 const DRAGON_ES = {
   Fire: 'Infernal', Water: 'Océano', Earth: 'Montaña', Air: 'Nube',
   Hextech: 'Hextech', Chemtech: 'Quimtech', Elder: 'Ancestral',
 };
+
+// Estructuras: el nombre dice de quién es y dónde está.
+//   Turret_T1_L_03_A → torre del equipo 1 (ORDER), carril superior (L), exterior.
+//   Barracks_T2_R1   → inhibidor del equipo 2 (CHAOS), carril inferior (R).
+const CARRIL = { L: 'carril superior', C: 'carril medio', R: 'carril inferior' };
+const NIVEL_TORRE = {
+  L: { '03': 'Exterior', '02': 'Interior', '01': 'De inhibidor' },
+  R: { '03': 'Exterior', '02': 'Interior', '01': 'De inhibidor' },
+  C: { '05': 'Exterior', '04': 'Interior', '03': 'De inhibidor', '02': 'De Nexo', '01': 'De Nexo' },
+};
+function leerEstructura(nombre = '') {
+  const m = /_T([12])_([LCR])_?(\d+)?/.exec(nombre);
+  if (!m) return null;
+  const [, equipo, carril, num] = m;
+  return {
+    dueño: equipo === '1' ? 'blue' : 'red',
+    carril: CARRIL[carril] ?? '',
+    nivel: NIVEL_TORRE[carril]?.[String(num ?? '').padStart(2, '0')] ?? '',
+  };
+}
 
 // Equipo en la API: ORDER = azul, CHAOS = rojo.
 const lado = (team) => (team === 'ORDER' ? 'blue' : team === 'CHAOS' ? 'red' : null);
@@ -66,7 +88,9 @@ function crearEstadoPartida() {
       ?? porNombre.get(datos?.activePlayer?.riotIdGameName) ?? null;
     const miLado = lado(yo?.team);
     const ladoDe = (nombre) => lado(porNombre.get(nombre)?.team);
-    const ficha = (p) => ({ nombre: p.championName, corto: iniciales(p.championName) });
+    const claveCampeon = (p) => (p.rawChampionName ?? '').replace(/^game_character_displayname_/, '')
+      || (p.championName ?? '').replace(/[^A-Za-z]/g, '');
+    const ficha = (p) => ({ nombre: p.championName, corto: iniciales(p.championName), clave: claveCampeon(p) });
 
     // ── Buffs de Barón y Ancestral ──
     function buff(tipo, nombreEvento, filtro = () => true) {
@@ -116,24 +140,25 @@ function crearEstadoPartida() {
       if (cuenta[eq] === 4 && !alma) alma = { equipo: eq, tipo: DRAGON_ES[e.DragonType] ?? e.DragonType, EventTime: e.EventTime };
     }
 
-    // ── Toast del último objetivo tomado (5 s): dragón, Vacuolarvas o Heraldo ──
+    // ── Toast del último objetivo o estructura (5 s) ──
+    // Regla de color: lo hace o lo tiene tu equipo → azul; el enemigo → rojo.
     const esLarva = (e) => /horde|grub|larva/i.test(e.EventName ?? '');
     const larvas = eventos.filter(esLarva);
     const cuentaLarvas = { blue: 0, red: 0 };
+    const esToast = (e) => ['DragonKill', 'HeraldKill', 'TurretKilled', 'InhibKilled'].includes(e.EventName) || esLarva(e);
     let toast = null;
-    const reciente = [...eventos].reverse()
-      .find((e) => (e.EventName === 'DragonKill' || e.EventName === 'HeraldKill' || esLarva(e)) && t - e.EventTime <= TOAST_DURACION);
+    const reciente = [...eventos].reverse().find((e) => esToast(e) && t - e.EventTime <= TOAST_DURACION);
     if (reciente) {
       const eq = ladoDe(reciente.KillerName);
-      const base = { equipo: eq, esMio: eq === miLado, robado: reciente.Stolen === 'True' || reciente.Stolen === true };
+      const base = { id: reciente.EventID, equipo: eq, esMio: eq === miLado, robado: reciente.Stolen === 'True' || reciente.Stolen === true };
       if (reciente.EventName === 'DragonKill') {
         const tipo = DRAGON_ES[reciente.DragonType] ?? reciente.DragonType;
         const esAlma = alma && alma.EventTime === reciente.EventTime;
         const dragones = eq ? cuenta[eq] : 0;
         toast = {
           ...base,
-          letra: 'D',
-          tipo: reciente.DragonType,
+          icono: reciente.DragonType === 'Elder' ? 'elder' : 'dragon',
+          tipo: esAlma ? 'alma' : reciente.DragonType,
           titulo: reciente.DragonType === 'Elder' ? 'Dragón Ancestral tomado'
             : esAlma ? `¡Alma ${tipo}!` : `${tipo} tomado`,
           dragones,
@@ -148,13 +173,32 @@ function crearEstadoPartida() {
         const n = eq ? cuentaLarvas[eq] : 0;
         toast = {
           ...base,
-          letra: 'V',
+          icono: 'grubs',
           tipo: 'larvas',
           titulo: n >= 3 ? 'Vacuolarvas: ¡las 3!' : `Vacuolarvas: ${n} de 3`,
           puntos: { llenos: n, total: 3 },
         };
+      } else if (reciente.EventName === 'HeraldKill') {
+        toast = { ...base, icono: 'herald', tipo: 'heraldo', titulo: 'Heraldo tomado', puntos: null };
       } else {
-        toast = { ...base, letra: 'H', tipo: 'heraldo', titulo: 'Heraldo tomado', puntos: null };
+        // Torre o inhibidor: la tira el equipo contrario al dueño (aunque la tire un súbdito).
+        const esTorre = reciente.EventName === 'TurretKilled';
+        const est = leerEstructura(esTorre ? reciente.TurretKilled : reciente.InhibKilled);
+        const quienTira = est ? (est.dueño === 'blue' ? 'red' : 'blue') : eq;
+        const aliado = quienTira === miLado;
+        toast = {
+          id: reciente.EventID,
+          equipo: quienTira,
+          esMio: aliado,
+          robado: false,
+          icono: esTorre ? 'tower' : 'inhibitor',
+          tipo: 'estructura',
+          titulo: esTorre ? (aliado ? 'Torre destruida' : 'Perdiste una torre')
+            : (aliado ? 'Inhibidor destruido' : 'Perdiste un inhibidor'),
+          detalle: esTorre ? [est?.nivel, est?.carril].filter(Boolean).join(' · ')
+            : [est?.carril ? est.carril[0].toUpperCase() + est.carril.slice(1) : '', 'vuelve en 5:00'].filter(Boolean).join(' · '),
+          puntos: null,
+        };
       }
     }
 
@@ -162,10 +206,10 @@ function crearEstadoPartida() {
     const ultimo = (nombre, filtro = () => true) =>
       [...eventos].reverse().find((e) => e.EventName === nombre && filtro(e));
     const proximos = [];
-    const agregar = (clave, nombre, aparece) => {
+    const agregar = (clave, nombre, aparece, extra = {}, antes = AVISO_ANTES) => {
       if (aparece == null) return;
       const falta = aparece - t;
-      if (falta > 0 && falta <= AVISO_ANTES) proximos.push({ clave, nombre, falta: Math.ceil(falta) });
+      if (falta > 0 && falta <= antes) proximos.push({ clave, nombre, falta: Math.ceil(falta), ...extra });
     };
     // Dragón / Ancestral
     const ultDragon = ultimo('DragonKill');
@@ -180,6 +224,17 @@ function crearEstadoPartida() {
     if (!ultimo('HeraldKill')) agregar('heraldo', 'Heraldo', TIEMPOS.heraldo.primera);
     const ultBaron = ultimo('BaronKill');
     agregar('baron', 'Barón', ultBaron ? ultBaron.EventTime + TIEMPOS.baron.reaparece : TIEMPOS.baron.primera);
+    // Inhibidores a punto de reaparecer (5:00 después de caer; aviso a 1:00).
+    for (const e of eventos.filter((x) => x.EventName === 'InhibKilled')) {
+      const est = leerEstructura(e.InhibKilled);
+      if (!est) continue;
+      // Si vuelve a caer antes de reaparecer, cuenta solo la última vez.
+      const otraVez = eventos.some((x) => x.EventName === 'InhibKilled' && x.InhibKilled === e.InhibKilled && x.EventTime > e.EventTime);
+      if (otraVez) continue;
+      const esMio = est.dueño === miLado;
+      agregar('inhib', esMio ? 'Tu inhibidor' : 'Inhibidor rival', e.EventTime + INHIB_REAPARECE,
+        { esMio, detalle: `${est.carril[0].toUpperCase()}${est.carril.slice(1)} · reaparece` }, AVISO_INHIB);
+    }
     proximos.sort((a, b) => a.falta - b.falta);
 
     return { tiempo: t, miLado, baron, ancestral, toast, proximos, dragones: cuenta };

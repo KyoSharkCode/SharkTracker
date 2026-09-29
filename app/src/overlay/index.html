@@ -2,43 +2,29 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<!-- El overlay solo dibuja lo que le manda la app: no carga nada de internet salvo las fuentes. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'">
+<!-- El overlay solo dibuja lo que le manda la app: fuentes de Google y retratos de campeones de Riot (DDragon). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://ddragon.leagueoflegends.com; base-uri 'none'; form-action 'none'">
 <title>SharkTracker overlay</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Rajdhani:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="overlay.css">
 </head>
 <body>
-  <!-- Dos zonas en coordenadas del mockup (1600×900), escaladas a la pantalla y
-       ANCLADAS: la del centro a la barra de objetivos del juego (arriba al medio) y
-       la de la derecha al borde derecho. Así quedan en su sitio con cualquier
-       resolución o proporción de pantalla. -->
+  <!-- Coordenadas pensadas a 1920×1080; overlay.js calcula la escala (--s) y cada
+       zona se ancla a su lado: la central a la barra de objetivos del juego y la
+       derecha al borde derecho. -->
   <div class="zona zona-centro">
-    <div id="baron" class="toppill objpill" hidden></div>
-    <div id="ancestral" class="toppill objpill" hidden></div>
+    <div id="baron" class="pill buff" hidden></div>
+    <div id="ancestral" class="pill buff" hidden></div>
   </div>
 
   <div class="zona zona-derecha">
-
-    <div id="anuncio" class="toppill anuncio" hidden>
-      <div class="pic"></div>
-      <div>
-        <div class="plabel titulo"></div>
-        <div class="plabel sub">Sin reclamar</div>
-      </div>
+    <div class="columna">
+      <div id="anuncio" class="pill aviso" hidden></div>
+      <div id="toast" class="pill aviso" hidden></div>
     </div>
-    <div id="anuncio-dots" class="dotrow anuncio-dots" hidden></div>
-
-    <div id="toast" class="toppill toast" hidden>
-      <div class="pic"></div>
-      <div>
-        <div class="plabel titulo"></div>
-        <div class="plabel sub"></div>
-      </div>
-    </div>
-    <div id="toast-dots" class="dotrow toast-dots" hidden></div>
   </div>
 
+  <script src="icons.js"></script>
   <script src="overlay.js"></script>
 </body>
 </html>
