@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Tu Tracker</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="titlebar">
+    <div class="tbleft">
+      <div class="logo">K</div>
+      <span class="appname">TU TRACKER <span class="dim">— v0.1</span></span>
+    </div>
+    <div class="winctrl">
+      <button id="btn-min" title="Minimizar">&#8211;</button>
+      <button id="btn-max" title="Maximizar">&#9633;</button>
+      <button id="btn-close" title="Cerrar">&times;</button>
+    </div>
+  </div>
+
+  <div class="body2">
+    <div class="sidebar">
+      <div class="navitem active" data-page="perfil"><span class="navdot"></span>Mi Perfil</div>
+      <div class="navitem disabled" data-page="envivo"><span class="navdot"></span>En Vivo<span class="navauto">auto</span></div>
+      <div class="navitem" data-page="meta"><span class="navdot"></span>Meta</div>
+      <div class="navitem" data-page="ajustes"><span class="navdot"></span>Ajustes</div>
+    </div>
+
+    <div class="main">
+
+      <section class="page active" id="page-perfil">
+        <div class="h1">Mi Perfil</div>
+        <div class="h1sub">Primer paso: comprobar que la app puede hablar con tu cliente de League</div>
+
+        <div class="card">
+          <div class="cardhd"><span class="dot"></span>Detección local (Live Client Data API)</div>
+          <div id="live-status" class="livestatus">Sin comprobar todavía.</div>
+          <button id="btn-check" class="checkbtn">Comprobar ahora</button>
+          <pre id="live-json" class="livejson" hidden></pre>
+        </div>
+      </section>
+
+      <section class="page" id="page-envivo">
+        <div class="h1">En Vivo</div>
+        <div class="h1sub">Se activará sola al entrar a selección de campeones — todavía no implementado</div>
+      </section>
+
+      <section class="page" id="page-meta">
+        <div class="h1">Meta</div>
+        <div class="h1sub">Tier list, builds, runas y counters — todavía no implementado</div>
+      </section>
+
+      <section class="page" id="page-ajustes">
+        <div class="h1">Ajustes</div>
+        <div class="h1sub">Cuenta, overlay, apariencia y notificaciones — todavía no implementado</div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
