@@ -35,7 +35,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 const ALLOWED_ORIGINS = [
   'https://sharktracker.lol',
   'https://www.sharktracker.lol',
-  'https://soloqreto.vercel.app', // dirección anterior: se puede quitar cuando el dominio funcione
+  'https://kyosharkcode.github.io', // GitHub Pages (dirección actual): quitar cuando el dominio funcione
 ];
 const esLocal = (origin: string) => /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
 function corsHeaders(req: Request): Record<string, string> {
