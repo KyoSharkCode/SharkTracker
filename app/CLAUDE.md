@@ -138,7 +138,9 @@ Notas técnicas:
 
 ## Plan del overlay "En partida" (acordado con Alex)
 
-1. ✅ Ventana del overlay + Barón/Ancestral + anuncios de objetivos + toast de dragón.
+1. ✅ Ventana del overlay + Barón/Ancestral + anuncios de objetivos + toasts de
+   dragón/alma, Vacuolarvas (x de 3, una sola aparición a las 8:00) y Heraldo.
+   Probado en partida real. Atakhan ya no existe en el juego (quitado).
 2. Diferencia de oro **solo con Tab pulsado** (librería `uiohook-napi` para escuchar
    la tecla sin quitársela al juego). Valor de objetos = info visible en el Tab.
    Posición del mockup (1920×1080); se calibra con el editor de posiciones.

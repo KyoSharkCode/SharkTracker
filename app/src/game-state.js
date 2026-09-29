@@ -5,7 +5,8 @@
 //   - Barón / Dragón Ancestral: cuánto le queda al buff y quién lo tiene.
 //   - Anuncios: el próximo objetivo épico cuando falta 1:30 o menos
 //     (Dragón/Ancestral, Vacuolarvas, Heraldo, Barón).
-//   - Toast de dragón: 5 s al caer un dragón (y el alma, si es el 4.º).
+//   - Toast de objetivo: 5 s al caer un dragón (y el alma, si es el 4.º),
+//     las Vacuolarvas (cuántas de 3 lleva el equipo) o el Heraldo.
 //
 // Solo usa información que el juego ya muestra (eventos de la partida y el
 // estado de los jugadores). No depende de Electron: se puede probar en Node.
@@ -115,22 +116,46 @@ function crearEstadoPartida() {
       if (cuenta[eq] === 4 && !alma) alma = { equipo: eq, tipo: DRAGON_ES[e.DragonType] ?? e.DragonType, EventTime: e.EventTime };
     }
 
-    // ── Toast del último dragón (5 s) ──
+    // ── Toast del último objetivo tomado (5 s): dragón, Vacuolarvas o Heraldo ──
+    const esLarva = (e) => /horde|grub|larva/i.test(e.EventName ?? '');
+    const larvas = eventos.filter(esLarva);
+    const cuentaLarvas = { blue: 0, red: 0 };
     let toast = null;
-    const ultimoDragon = [...eventos].reverse().find((e) => e.EventName === 'DragonKill');
-    if (ultimoDragon && t - ultimoDragon.EventTime <= TOAST_DURACION) {
-      const eq = ladoDe(ultimoDragon.KillerName);
-      const tipo = DRAGON_ES[ultimoDragon.DragonType] ?? ultimoDragon.DragonType;
-      const esAlma = alma && alma.EventTime === ultimoDragon.EventTime;
-      toast = {
-        titulo: ultimoDragon.DragonType === 'Elder' ? 'Dragón Ancestral tomado'
-          : esAlma ? `¡Alma ${tipo}!` : `${tipo} tomado`,
-        tipo: ultimoDragon.DragonType,
-        equipo: eq,
-        esMio: eq === miLado,
-        robado: ultimoDragon.Stolen === 'True' || ultimoDragon.Stolen === true,
-        dragones: eq ? cuenta[eq] : 0,
-      };
+    const reciente = [...eventos].reverse()
+      .find((e) => (e.EventName === 'DragonKill' || e.EventName === 'HeraldKill' || esLarva(e)) && t - e.EventTime <= TOAST_DURACION);
+    if (reciente) {
+      const eq = ladoDe(reciente.KillerName);
+      const base = { equipo: eq, esMio: eq === miLado, robado: reciente.Stolen === 'True' || reciente.Stolen === true };
+      if (reciente.EventName === 'DragonKill') {
+        const tipo = DRAGON_ES[reciente.DragonType] ?? reciente.DragonType;
+        const esAlma = alma && alma.EventTime === reciente.EventTime;
+        const dragones = eq ? cuenta[eq] : 0;
+        toast = {
+          ...base,
+          letra: 'D',
+          tipo: reciente.DragonType,
+          titulo: reciente.DragonType === 'Elder' ? 'Dragón Ancestral tomado'
+            : esAlma ? `¡Alma ${tipo}!` : `${tipo} tomado`,
+          dragones,
+          puntos: reciente.DragonType === 'Elder' ? null : { llenos: dragones, total: 4 },
+        };
+      } else if (esLarva(reciente)) {
+        for (const e of larvas) {
+          if (e.EventTime > reciente.EventTime) continue;
+          const q = ladoDe(e.KillerName);
+          if (q) cuentaLarvas[q]++;
+        }
+        const n = eq ? cuentaLarvas[eq] : 0;
+        toast = {
+          ...base,
+          letra: 'V',
+          tipo: 'larvas',
+          titulo: n >= 3 ? 'Vacuolarvas: ¡las 3!' : `Vacuolarvas: ${n} de 3`,
+          puntos: { llenos: n, total: 3 },
+        };
+      } else {
+        toast = { ...base, letra: 'H', tipo: 'heraldo', titulo: 'Heraldo tomado', puntos: null };
+      }
     }
 
     // ── Próximos objetivos ──
@@ -151,7 +176,7 @@ function crearEstadoPartida() {
     } else {
       agregar('dragon', 'Dragón', ultDragon ? ultDragon.EventTime + TIEMPOS.dragon.reaparece : TIEMPOS.dragon.primera);
     }
-    if (!ultimo('HordeKill')) agregar('larvas', 'Vacuolarvas', TIEMPOS.larvas.primera);
+    if (!larvas.length) agregar('larvas', 'Vacuolarvas', TIEMPOS.larvas.primera);
     if (!ultimo('HeraldKill')) agregar('heraldo', 'Heraldo', TIEMPOS.heraldo.primera);
     const ultBaron = ultimo('BaronKill');
     agregar('baron', 'Barón', ultBaron ? ultBaron.EventTime + TIEMPOS.baron.reaparece : TIEMPOS.baron.primera);

@@ -55,21 +55,23 @@ function pintarAnuncio() {
   $('anuncio-dots').replaceChildren(...dots);
 }
 
-// ── Toast de dragón ──
+// ── Toast de objetivo tomado (dragón, Vacuolarvas, Heraldo) ──
 function pintarToast(toast) {
   $('toast').hidden = !toast;
-  $('toast-dots').hidden = !toast || toast.tipo === 'Elder';
+  $('toast-dots').hidden = !toast?.puntos;
   if (!toast) return;
   const nodo = $('toast');
   nodo.className = `toppill toast c-${toast.tipo}`;
   $('toast-dots').className = `dotrow toast-dots c-${toast.tipo}`;
-  nodo.querySelector('.pic').textContent = 'D';
+  nodo.querySelector('.pic').textContent = toast.letra ?? 'D';
   nodo.querySelector('.titulo').textContent = toast.titulo + (toast.robado ? ' (robado)' : '');
   const sub = nodo.querySelector('.sub');
   sub.textContent = toast.equipo ? (toast.esMio ? 'Tu equipo' : 'Equipo rival') : '';
   sub.className = `plabel sub ${toast.esMio ? 'mio' : 'rival'}`;
-  const dots = [0, 1, 2, 3].map((j) => el('span', j < toast.dragones ? 'rdot on' : 'rdot'));
-  $('toast-dots').replaceChildren(...dots);
+  if (toast.puntos) {
+    const dots = Array.from({ length: toast.puntos.total }, (_, j) => el('span', j < toast.puntos.llenos ? 'rdot on' : 'rdot'));
+    $('toast-dots').replaceChildren(...dots);
+  }
 }
 
 window.overlay.onState((estado) => {
