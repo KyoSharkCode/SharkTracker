@@ -87,7 +87,7 @@ deep link) y nombre/logo de SharkTracker. En curso: **overlay "En partida"**.
 
 ```
 app/
-  package.json           → Electron (dev) + @supabase/supabase-js 2.117.2 + ws
+  package.json           → Electron (dev) + @supabase/supabase-js 2.117.2 + ws + uiohook-napi
   package-lock.json      → versiones exactas (npm install las respeta)
   CLAUDE.md              → este archivo
   src/
@@ -103,8 +103,9 @@ app/
     game-state.js        → "cerebro" del overlay (sin Electron, se prueba en Node):
                            buff de Barón/Ancestral y titulares, anuncios de objetivos
                            e inhibidores por reaparecer, toasts de dragón/alma,
-                           Vacuolarvas, Heraldo, torres e inhibidores. Tiempos en TIEMPOS
-    preload-overlay.js   → contextBridge (window.overlay): solo recibe el estado
+                           Vacuolarvas, Heraldo, torres e inhibidores, diferencia de oro
+                           por fila del Tab. Tiempos en TIEMPOS
+    preload-overlay.js   → contextBridge (window.overlay): solo recibe el estado y Tab
     overlay/             → ventana transparente sobre el juego (index.html, overlay.css,
                            overlay.js, icons.js). Coordenadas a 1920×1080 escaladas con
                            --s; zona central anclada a la barra de objetivos y zona
@@ -160,9 +161,14 @@ visual" y "Overlay — estructuras" del canvas)
    Probado en partida real. Atakhan ya no existe en el juego (quitado).
    ✅ Estructuras: toast de torre/inhibidor destruido (qué nivel y carril) y aviso
    1:00 antes de que reaparezca un inhibidor (5:00 tras caer).
-2. Diferencia de oro **solo con Tab pulsado** (librería `uiohook-napi` para escuchar
-   la tecla sin quitársela al juego). Valor de objetos = info visible en el Tab.
-   Posición del mockup (1920×1080); se calibra con el editor de posiciones.
+2. ✅ (pendiente de probar en partida real) Diferencia de oro **solo con Tab pulsado**:
+   `uiohook-napi` en el proceso main escucha SOLO la tecla Tab mientras hay partida.
+   Oro = suma de `items[].price × count` (lo visible en el Tab). Fila i = i-ésimo
+   aliado vs i-ésimo enemigo (orden de `allPlayers`). "1550 >" azul = va por delante
+   tu equipo; "< 1180" rojo = el rival. Filas a y = 352/428/501/577/653 (1920×1080),
+   medidas sobre una captura real del Tab.
+   **Verificar**: que `price` sea el coste total del objeto y que el Tab ponga tu
+   equipo a la izquierda también cuando juegas en el lado rojo.
 3. "Tu rendimiento": por ahora contra **el promedio propio en SharkTracker**; en la
    Fase 2 se cambia la fuente a promedios por elo (Alex quiere datos tipo OP.GG;
    ojo: OP.GG no tiene API pública oficial, revisar cómo obtenerlos).
@@ -177,8 +183,9 @@ Decisiones:
 
 ## Pendiente fuera de la app
 
-- Dominio `sharktracker.lol` (GitHub Pages) activo con HTTPS: falta cambiar la Site
-  URL de Supabase y correr `supabase/migrations/20260929000000_dominio_sharktracker.sql`.
+- ✅ Dominio `sharktracker.lol` (GitHub Pages, HTTPS) activo; Site URL de Supabase y
+  SQL de Discord aplicados. Cuando haya un rato: quitar `kyosharkcode.github.io` de la
+  lista de CORS de las 3 Edge Functions (ya redirige al dominio).
 - Actualizar Electron (el de la v33 trae Node 20 y supabase-js avisa que lo dejará).
 
 ## Estilo de comunicación de Alex

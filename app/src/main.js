@@ -239,9 +239,40 @@ function cargarVersionDD() {
   }).on('error', () => { /* sin retratos: se usan iniciales */ });
 }
 
+// ── Tecla Tab (diferencia de oro) ──
+// uiohook-napi "escucha" el teclado sin quitarle la tecla al juego (como el
+// pulsar-para-hablar de Discord). Solo se enciende durante la partida y solo
+// se mira la tecla Tab: el resto de teclas se ignoran y no se guardan.
+let hook = null;
+let tabPulsado = false;
+function iniciarTab() {
+  try {
+    if (!hook) {
+      const { uIOhook, UiohookKey } = require('uiohook-napi');
+      const avisar = (pulsado) => {
+        if (pulsado === tabPulsado) return;
+        tabPulsado = pulsado;
+        overlayWindow?.webContents.send('overlay:tab', pulsado);
+      };
+      uIOhook.on('keydown', (e) => { if (e.keycode === UiohookKey.Tab) avisar(true); });
+      uIOhook.on('keyup', (e) => { if (e.keycode === UiohookKey.Tab) avisar(false); });
+      hook = uIOhook;
+    }
+    hook.start();
+  } catch (e) {
+    console.error('No se pudo activar la detección de Tab (la diferencia de oro no se mostrará):', e);
+    hook = null;
+  }
+}
+function detenerTab() {
+  try { hook?.stop(); } catch { /* ya estaba detenido */ }
+  tabPulsado = false;
+}
+
 function startOverlay() {
   cargarVersionDD();
   if (!overlayWindow) createOverlayWindow();
+  iniciarTab();
   estadoPartida = crearEstadoPartida();
   overlayWindow.showInactive();
   clearInterval(overlayTimer);
@@ -254,12 +285,15 @@ function startOverlay() {
 }
 
 function stopOverlay() {
+  detenerTab();
   clearInterval(overlayTimer);
   overlayTimer = null;
   estadoPartida = null;
   overlayWindow?.hide();
 }
 ipcMain.handle('game:getStatus', () => ({ inGame: !!lastInGame }));
+
+app.on('will-quit', detenerTab);
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
