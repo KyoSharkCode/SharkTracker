@@ -11,7 +11,10 @@ function goTo(page) {
   navItems.forEach((n) => n.classList.toggle('active', n.dataset.page === page));
   document.querySelectorAll('.page').forEach((p) => p.classList.toggle('active', p.id === 'page-' + page));
 }
-navItems.forEach((item) => item.addEventListener('click', () => goTo(item.dataset.page)));
+navItems.forEach((item) => item.addEventListener('click', () => {
+  goTo(item.dataset.page);
+  if (item.dataset.page === 'perfil') window.miPerfil.cargar(); // se refresca si pasaron 2+ min
+}));
 
 // --- Sesión de Discord ---
 // Ícono de invocador de LoL sin depender del número de parche.
@@ -38,6 +41,7 @@ function renderAuth(state) {
 
   setDiscordButton(false);
   setLoginStatus(null);
+  window.miPerfil.cargar();
 
   // Barra de título
   const { discord, player } = state;
@@ -90,6 +94,7 @@ $('btn-discord').addEventListener('click', async () => {
 });
 
 $('btn-signout').addEventListener('click', async () => {
+  window.miPerfil.limpiar();
   renderAuth(await window.sharkTracker.auth.signOut());
   goTo('perfil');
 });

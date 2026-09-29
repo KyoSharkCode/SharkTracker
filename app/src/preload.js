@@ -12,6 +12,12 @@ contextBridge.exposeInMainWorld('sharkTracker', {
   getGameStatus: () => ipcRenderer.invoke('game:getStatus'),
   onGameStatus: (callback) => ipcRenderer.on('game:status', (_e, status) => callback(status)),
 
+  // Mi Perfil
+  perfil: {
+    get: () => ipcRenderer.invoke('perfil:get'),
+    cache: () => ipcRenderer.invoke('perfil:cache'),
+  },
+
   // Ajustes → Overlay
   overlayConfig: {
     get: () => ipcRenderer.invoke('overlay-config:get'),

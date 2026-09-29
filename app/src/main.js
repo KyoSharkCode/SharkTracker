@@ -430,6 +430,11 @@ function stopOverlay() {
 }
 ipcMain.handle('game:getStatus', () => ({ inGame: !!lastInGame }));
 
+// ── Mi Perfil (datos de SharkTracker + copia local para "sin conexión") ──
+const perfil = require('./perfil');
+ipcMain.handle('perfil:get', () => perfil.cargarPerfil());
+ipcMain.handle('perfil:cache', () => perfil.leerCache());
+
 // ── Ajustes → Overlay (qué piezas se ven y dónde van) ──
 // Al guardar se avisa a todas las ventanas: el overlay se actualiza al instante,
 // aunque estés en partida.
