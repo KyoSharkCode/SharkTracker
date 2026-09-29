@@ -26,6 +26,12 @@ contextBridge.exposeInMainWorld('sharkTracker', {
     cache: () => ipcRenderer.invoke('perfil:cache'),
   },
 
+  // Meta
+  meta: {
+    tier: () => ipcRenderer.invoke('meta:tier'),
+    campeon: (championId, posicion) => ipcRenderer.invoke('meta:campeon', championId, posicion),
+  },
+
   // Ajustes → Overlay
   overlayConfig: {
     get: () => ipcRenderer.invoke('overlay-config:get'),

@@ -465,6 +465,11 @@ const perfil = require('./perfil');
 ipcMain.handle('perfil:get', () => perfil.cargarPerfil());
 ipcMain.handle('perfil:cache', () => perfil.leerCache());
 
+// ── Meta (tier list de Supabase + ficha de cada campeón vía la Edge Function "meta") ──
+const meta = require('./meta');
+ipcMain.handle('meta:tier', () => meta.cargarTier());
+ipcMain.handle('meta:campeon', (_e, championId, posicion) => meta.cargarCampeon(championId, posicion));
+
 // ── Ajustes → Overlay (qué piezas se ven y dónde van) ──
 // Al guardar se avisa a todas las ventanas: el overlay se actualiza al instante,
 // aunque estés en partida.

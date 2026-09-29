@@ -86,8 +86,8 @@ tono oscuro con acento turquesa `#00e5c7`) al construir cada pantalla real.
 Discord, overlay en partida (Barón/Ancestral, avisos, oro con Tab, Tu rendimiento),
 pantalla de carga (con Ctrl + X), Ajustes → Overlay con editor y Mi Perfil.
 **Fase 2 en curso** (plan acordado): Bloque 0 puesta a punto ✅ · Bloque 1 early access ✅
-(instalador + actualizaciones automáticas) · Bloque 2 Meta (probar el MCP de OP.GG desde
-Supabase; plan B recolector propio por parche) · Bloque 3 En Vivo (LCU; en ranked NO revelar
+(instalador + actualizaciones automáticas) · Bloque 2 Meta (v0.3.0, datos del MCP de OP.GG
+guardados en Supabase; ver sección "Meta") · Bloque 3 En Vivo (LCU; en ranked NO revelar
 nombres ocultos en selección) · Bloque 4 Ajustes Apariencia/Notificaciones · Bloque 5 motor
 de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no pública).
 
@@ -183,6 +183,31 @@ Notas técnicas:
 - El overlay solo usa información que el juego ya muestra (regla de Riot/Vanguard).
 - Los buffs se aproximan: titulares = vivos del equipo al detectar el evento,
   y se pierden al morir (ChampionKill). Barón 180 s, Ancestral 150 s.
+
+## Meta (Fase 2, bloque 2 — v0.3.0)
+
+Fuente: MCP público de OP.GG (`https://mcp-api.op.gg/mcp`, JSON-RPC; responde en un formato
+propio "class X: campos" + `X(valores)` que traduce `leerOpgg`). **La app nunca llama a OP.GG**:
+- Edge Function `meta-tier` (cron `meta-tier-cada-6h`, Verify JWT APAGADO + x-cron-secret):
+  `lol_list_lane_meta_champions` con position "all" (1 consulta = 5 roles) → tabla `meta_tier`
+  (champion_id sacado de DDragon por nombre en inglés). Anota el parche en `meta_estado`.
+  La tier list de OP.GG NO tiene filtro de elo (usa el suyo por defecto).
+- Edge Function `meta` (Verify JWT encendido, solo cuentas vinculadas): body
+  `{champion_id, posicion}` → `lol_get_champion_analysis` en **Esmeralda+** (`tier: emerald_plus`)
+  → ficha normalizada (inicio, core, botas, 4.º/5.º/6.º, runas, hechizos, subir primero, orden
+  por nivel, counters). Caché en `meta_campeon`: 24 h o hasta que cambie el parche; si OP.GG no
+  responde, devuelve la guardada. OP.GG pide el campeón en MAYÚSCULAS ("LEE_SIN"): se prueban
+  nombre en snake, id de DDragon en mayúsculas y nombre sin guiones.
+- Winrates = victorias ÷ partidas (OP.GG redondea los suyos a 2 decimales).
+- App: `src/meta.js` (main; catálogos es_MX de campeones, objetos, runas y hechizos) +
+  `renderer/meta.js`. Rol por defecto = rol principal de la web; campeón por defecto = tu más
+  jugado (maestrías) si se juega en ese rol (role_rate ≥ 15 %), si no el #1. Tier 1–5 de OP.GG
+  se muestra como S+/S/A/B/C. Tendencias = puestos ganados/perdidos vs el parche anterior
+  (`rank_prev_patch`, solo campeones con 1000+ partidas). Los counters muestran tu winrate
+  contra ese campeón y la diferencia con tu winrate medio en el rol.
+- `supabase/functions/meta-prueba`: función TEMPORAL para explorar el MCP; se borra cuando
+  Meta esté validado.
+- Pendiente para después con estos datos: "Tu build" en partida y counters en En Vivo.
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)
