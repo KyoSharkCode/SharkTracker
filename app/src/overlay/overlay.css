@@ -154,3 +154,9 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .carga-tag.fuera { background: rgba(230,180,60,.14); color: #e8c766; }
 .carga-tag.racha { background: rgba(70,200,140,.14); color: #6fdba8; }
 .carga-tag.st { background: color-mix(in srgb, var(--acento) 14%, transparent); color: var(--acento); }
+/* Atajo Ctrl + X: recordatorio en la cabecera y versión mini cuando el panel está oculto */
+.carga-der { text-align: right; }
+.carga-atajo { font-size: 9px; color: var(--tenue); opacity: .8; margin-top: 1px; white-space: nowrap; }
+.carga.mini { width: auto; }
+.carga.mini .carga-cab { border-bottom: none; gap: 14px; }
+.carga.mini .carga-atajo { margin-top: 0; }

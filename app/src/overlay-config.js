@@ -10,6 +10,7 @@ const path = require('path');
 const PIEZAS = [
   'oro', 'buffs', 'anuncios', 'toasts', 'rendimiento',
   // Pantalla de carga
+  'carga', // el panel entero (se alterna con Ctrl + X durante la carga)
   'cargaRangoAliados', 'cargaWinrateAliados', 'cargaRangoRivales', 'cargaWinrateRivales', 'cargaEtiquetas',
 ];
 

@@ -186,14 +186,17 @@ let lastInGame = null;
 let partidaTerminada = false; // acabó una partida y el juego sigue abierto: no es pantalla de carga
 function startGameWatcher() {
   const tick = async () => {
-    const { inGame } = await liveClientGet('gamestats', 1200);
+    // La API local ya responde DURANTE la pantalla de carga, con el reloj en 0.
+    // La partida empieza de verdad cuando el reloj avanza.
+    const stats = await liveClientGet('gamestats', 1200);
+    const inGame = stats.inGame && (stats.data?.gameTime ?? 0) > 0;
     if (inGame !== lastInGame) {
       if (lastInGame === true && !inGame) partidaTerminada = true;
       lastInGame = inGame;
       mainWindow?.webContents.send('game:status', { inGame });
       if (inGame) { detenerCarga(); startOverlay(); } else stopOverlay();
     }
-    // Pantalla de carga: el juego ya está abierto pero la API todavía no da datos.
+    // Pantalla de carga: el juego ya está abierto pero el reloj de la partida no arrancó.
     if (!inGame) {
       const abierto = await juegoAbierto();
       if (!abierto) {
@@ -240,6 +243,7 @@ function iniciarCarga() {
   cargarVersionDD();
   if (!overlayWindow) createOverlayWindow();
   overlayWindow.showInactive();
+  iniciarTeclado(); // para el atajo Ctrl + X
   enviarCarga({ estado: 'buscando' });
   pedirCarga();
 }
@@ -265,7 +269,7 @@ function detenerCarga() {
   cargaActiva = false;
   clearTimeout(cargaTimer);
   enviarCarga(null);
-  if (!lastInGame) overlayWindow?.hide();
+  if (!lastInGame) { overlayWindow?.hide(); detenerTeclado(); }
 }
 
 // ── Overlay en partida ──
@@ -319,40 +323,60 @@ function cargarVersionDD() {
   }).on('error', () => { /* sin retratos: se usan iniciales */ });
 }
 
-// ── Tecla Tab (diferencia de oro) ──
-// uiohook-napi "escucha" el teclado sin quitarle la tecla al juego (como el
-// pulsar-para-hablar de Discord). Solo se enciende durante la partida y solo
-// se mira la tecla Tab: el resto de teclas se ignoran y no se guardan.
+// ── Teclado: Tab (diferencia de oro) y Ctrl + X (panel de la pantalla de carga) ──
+// uiohook-napi "escucha" el teclado sin quitarle las teclas al juego (como el
+// pulsar-para-hablar de Discord). Solo se enciende durante la pantalla de carga
+// y la partida, y solo mira esas dos combinaciones: el resto de teclas se ignoran
+// y no se guardan.
 let hook = null;
+let hookEncendido = false;
 let tabPulsado = false;
-function iniciarTab() {
+let xPulsada = false;
+function iniciarTeclado() {
   try {
     if (!hook) {
       const { uIOhook, UiohookKey } = require('uiohook-napi');
-      const avisar = (pulsado) => {
+      const avisarTab = (pulsado) => {
         if (pulsado === tabPulsado) return;
         tabPulsado = pulsado;
         overlayWindow?.webContents.send('overlay:tab', pulsado);
       };
-      uIOhook.on('keydown', (e) => { if (e.keycode === UiohookKey.Tab) avisar(true); });
-      uIOhook.on('keyup', (e) => { if (e.keycode === UiohookKey.Tab) avisar(false); });
+      uIOhook.on('keydown', (e) => {
+        if (e.keycode === UiohookKey.Tab) avisarTab(true);
+        // Ctrl + X: mostrar/ocultar el panel de carga (una vez por pulsación, aunque se mantenga).
+        if (e.keycode === UiohookKey.X && e.ctrlKey && !xPulsada) {
+          xPulsada = true;
+          if (cargaActiva) alternarPanelCarga();
+        }
+      });
+      uIOhook.on('keyup', (e) => {
+        if (e.keycode === UiohookKey.Tab) avisarTab(false);
+        if (e.keycode === UiohookKey.X) xPulsada = false;
+      });
       hook = uIOhook;
     }
-    hook.start();
+    if (!hookEncendido) { hook.start(); hookEncendido = true; }
   } catch (e) {
-    console.error('No se pudo activar la detección de Tab (la diferencia de oro no se mostrará):', e);
+    console.error('No se pudo activar la lectura de Tab / Ctrl+X (el oro y el atajo del panel de carga no funcionarán):', e);
     hook = null;
   }
 }
-function detenerTab() {
-  try { hook?.stop(); } catch { /* ya estaba detenido */ }
+function detenerTeclado() {
+  try { if (hookEncendido) hook?.stop(); } catch { /* ya estaba detenido */ }
+  hookEncendido = false;
   tabPulsado = false;
+  xPulsada = false;
+}
+// Guarda la decisión (visible u oculto) para las próximas partidas.
+function alternarPanelCarga() {
+  const visible = ajustesOverlay.leer().visible.carga !== false;
+  avisarConfig(ajustesOverlay.guardar({ visible: { carga: !visible } }));
 }
 
 function startOverlay() {
   cargarVersionDD();
   if (!overlayWindow) createOverlayWindow();
-  iniciarTab();
+  iniciarTeclado();
   estadoPartida = crearEstadoPartida();
   // "Tu rendimiento": promedios de la división de arriba (una vez por partida).
   const partida = estadoPartida;
@@ -370,7 +394,7 @@ function startOverlay() {
 }
 
 function stopOverlay() {
-  detenerTab();
+  if (!cargaActiva) detenerTeclado();
   clearInterval(overlayTimer);
   overlayTimer = null;
   estadoPartida = null;
@@ -433,7 +457,7 @@ ipcMain.handle('editor:elegirFondo', async () => {
 });
 ipcMain.handle('editor:quitarFondo', () => { ajustesOverlay.quitarFondo(); return null; });
 
-app.on('will-quit', detenerTab);
+app.on('will-quit', detenerTeclado);
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
