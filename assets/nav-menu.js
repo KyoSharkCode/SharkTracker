@@ -83,7 +83,7 @@ export function createNavMenu({ current = null, slotSelector = '.logo-slot' } = 
   panel.id = 'nav-panel';
   panel.setAttribute('aria-label', 'Secciones del sitio');
   panel.innerHTML = `
-    <div class="nav-top"><img src="logo/FlaviIconLogo.png" alt=""><b>SharkTracker</b>
+    <div class="nav-top"><img src="logo/FlaviIconLogo.webp" alt=""><b>SharkTracker</b>
       <button class="nav-close" type="button" aria-label="Cerrar menú">×</button></div>
     <div class="nav-list">
       ${ITEMS.map(it => {
