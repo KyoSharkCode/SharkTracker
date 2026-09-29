@@ -224,12 +224,11 @@
   </section>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createSupabase } from './assets/supabase.js';
+import { getDDragonVersion } from './assets/lol-data.js';
 
 // Segura de tener acá: la anon key está protegida por las políticas RLS.
-const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createSupabase();
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -237,8 +236,7 @@ const ROLE_NORMALIZE = { TOP:'TOP', JUNGLE:'JUNGLE', JUNGLA:'JUNGLE', MIDDLE:'MI
 const roleLabel = (r) => r ? (ROLE_NORMALIZE[String(r).trim().toUpperCase()] ?? String(r).toUpperCase()) : null;
 
 let ddragonVersion = '15.19.1';
-const versionReady = fetch('https://ddragon.leagueoflegends.com/api/versions.json')
-  .then(r => r.json()).then(v => { ddragonVersion = v[0]; }).catch(() => {});
+const versionReady = getDDragonVersion(ddragonVersion).then(v => { ddragonVersion = v; });
 const profileIconUrl = (iconId) => iconId ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${iconId}.png` : null;
 const profileUrl = (playerId) => `perfil.html?jugador=${encodeURIComponent(playerId)}`;
 

@@ -343,22 +343,17 @@
 </div>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createSupabase } from './assets/supabase.js';
+import { getDDragonVersion } from './assets/lol-data.js';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { prizeIconSvg, PRIZE_ICONS, injectCosmeticsCss } from './assets/cosmetics.js';
 injectCosmeticsCss();
 createNavMenu({ current: null });
 
-const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createSupabase();
 
-let ddragonVersion = '15.19.1';
-try {
-  const versions = await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json());
-  ddragonVersion = versions[0];
-} catch {}
+const ddragonVersion = await getDDragonVersion('15.19.1');
 const profileIconUrl = (iconId) => iconId ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${iconId}.png` : null;
 const ICON_ONERROR = `this.onerror=null;this.src='${profileIconUrl(1)}';`;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

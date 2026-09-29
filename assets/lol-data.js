@@ -7,6 +7,31 @@
 
 export const DD = 'https://ddragon.leagueoflegends.com/cdn';
 export let V = '15.19.1';
+
+// Parche actual de Data Dragon (define qué imágenes pedir). Se recuerda
+// 1 hora en el navegador del visitante: el parche cambia cada ~2 semanas,
+// no hace falta descargar la lista de versiones en cada visita. Todas las
+// páginas usan esta función (antes cada una lo pedía por su cuenta).
+const DD_VERSION_KEY = 'ddragon-version';
+const DD_VERSION_TTL_MS = 60 * 60 * 1000;
+let ddVersionPromise = null;
+export function getDDragonVersion(fallback = V) {
+  ddVersionPromise ??= (async () => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(DD_VERSION_KEY) ?? 'null');
+      if (saved?.v && Date.now() - saved.t < DD_VERSION_TTL_MS) return saved.v;
+    } catch {}
+    try {
+      const v = (await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json()))[0];
+      if (v) {
+        try { localStorage.setItem(DD_VERSION_KEY, JSON.stringify({ v, t: Date.now() })); } catch {}
+        return v;
+      }
+    } catch (e) { console.warn('DDragon: no se pudo obtener la versión, se usa la de respaldo', e); }
+    return null;
+  })();
+  return ddVersionPromise.then(v => v ?? fallback);
+}
 const CHAMPION_ID_OVERRIDES = { FiddleSticks: 'Fiddlesticks' };
 export const champKey = (n) => CHAMPION_ID_OVERRIDES[(n || '').trim()] || (n || '').trim();
 export const champImg = (n) => `${DD}/${V}/img/champion/${champKey(n)}.png`;
@@ -37,7 +62,7 @@ export const QUEUES = {
 export const champNames = {};
 export const champNums = {};   // id de Data Dragon → clave numérica (para Meraki)
 export async function loadCatalogs() {
-  try { V = (await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json()))[0] || V; } catch {}
+  V = await getDDragonVersion(V);
   try {
     const c = await fetch(`${DD}/${V}/data/es_ES/champion.json`).then(r => r.json());
     Object.values(c.data ?? {}).forEach(x => { champNames[x.id] = x.name; champNums[x.id] = Number(x.key); });

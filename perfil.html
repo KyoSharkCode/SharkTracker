@@ -539,7 +539,8 @@
 </div>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createSupabase } from './assets/supabase.js';
+import { getDDragonVersion } from './assets/lol-data.js';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
@@ -549,9 +550,7 @@ import { injectCosmeticsCss, decorateAvatar, applyBanner, nameHtml } from './ass
 injectCosmeticsCss();
 createNavMenu({ current: null });
 
-const SUPABASE_URL = 'https://mvupiohecvoiwuxwjdrt.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXBpb2hlY3ZvaXd1eHdqZHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDI1NTcsImV4cCI6MjEwNTU3ODU1N30.6vNCdX63tpyGnGII15Mjznq7BwhafH9KmnI-Os2SO4M';
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createSupabase();
 
 const TIER_LABEL = {IRON:'Hierro',BRONZE:'Bronce',SILVER:'Plata',GOLD:'Oro',PLATINUM:'Platino',EMERALD:'Esmeralda',DIAMOND:'Diamante',MASTER:'Maestro',GRANDMASTER:'Gran Maestro',CHALLENGER:'Aspirante'};
 const MINI_CREST_BASE = 'https://raw.communitydragon.org/14.10/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/';
@@ -597,11 +596,7 @@ function esPosibleAutofill(m, primaryRole) {
   return roleLabel(m.role) !== roleLabel(primaryRole);
 }
 
-let ddragonVersion = '15.19.1';
-try {
-  const versions = await fetch('https://ddragon.leagueoflegends.com/api/versions.json').then(r => r.json());
-  ddragonVersion = versions[0];
-} catch (e) { console.warn('DDragon version fetch falló, usando fallback', e); }
+const ddragonVersion = await getDDragonVersion('15.19.1');
 
 const CHAMPION_ID_OVERRIDES = { FiddleSticks: 'Fiddlesticks' };
 const champKey = (name) => { const clean = (name || '').trim(); return CHAMPION_ID_OVERRIDES[clean] || clean; };
@@ -720,9 +715,16 @@ async function init() {
     clearTimeout(refreshTimer); refreshTimer = setTimeout(refreshAll, 600);
   };
   const channel = supabase.channel('perfil-live');
-  ['players', 'player_profiles', 'player_cosmetics', 'rank_snapshots', 'live_status', 'stream_status', 'weekly_badges',
-   'matches', 'match_participants', 'player_masteries', 'daily_first_win_state']
+  // Tablas generales: afectan a este perfil aunque cambien por otro jugador
+  // (posición en el ranking, nombres, insignias, primera victoria del día).
+  ['players', 'rank_snapshots', 'weekly_badges', 'daily_first_win_state']
     .forEach(table => channel.on('postgres_changes', { event: '*', schema: 'public', table }, scheduleRefresh));
+  // Tablas de cada jugador: solo interesan los cambios de ESTE jugador
+  // (antes una partida de cualquiera recargaba el perfil entero).
+  const pid = viewState.player?.id;
+  const soloEste = pid ? { filter: `player_id=eq.${pid}` } : {};
+  ['player_profiles', 'player_cosmetics', 'live_status', 'stream_status', 'match_participants', 'player_masteries']
+    .forEach(table => channel.on('postgres_changes', { event: '*', schema: 'public', table, ...soloEste }, scheduleRefresh));
   channel.subscribe();
 }
 
@@ -741,7 +743,8 @@ async function loadAll() {
          { data: streamStatus }, { data: weeklyBadges }, { data: firstWin }] = await Promise.all([
     supabase.from('players').select('*'),
     supabase.from('player_profiles').select('*'),
-    supabase.from('rank_snapshots').select('*').eq('queue_type', 'RANKED_SOLO_5x5').order('recorded_at', { ascending: false }),
+    // Vista rank_latest: solo el último rango de cada jugador (no 30 días de historial).
+    supabase.from('rank_latest').select('*').eq('queue_type', 'RANKED_SOLO_5x5'),
     supabase.from('live_status').select('*'),
     supabase.from('stream_status').select('*'),
     supabase.from('weekly_badges').select('*'),
