@@ -50,9 +50,9 @@ Nunca subas archivos `.env` ni claves al repositorio (ya están excluidos en `.g
 
 ---
 
-## Tu Tracker (app de escritorio)
+## SharkTracker para escritorio
 
-La carpeta `app/` contiene **Tu Tracker**, una app de escritorio (Electron) estilo Porofessor que usa este mismo backend de Supabase. Tiene su propio `CLAUDE.md` con el contexto y el alcance. Para probarla: `cd app`, `npm install` y `npm start`.
+La carpeta `app/` contiene **la app de escritorio de SharkTracker** (Electron), estilo Porofessor, que usa este mismo backend de Supabase. Tiene su propio `CLAUDE.md` con el contexto y el alcance. Para probarla: `cd app`, `npm install` y `npm start`.
 
 ## Estructura del repositorio
 
@@ -63,7 +63,7 @@ assets/
   lol-data.js             Datos de LoL compartidos (Data Dragon, rangos, roles, esc())
   auth-menu.js, nav-menu.js, cosmetics.js, missions-widget.js, rank-history.js, …
 logo/                     Logos
-app/                      Tu Tracker (app de escritorio, Electron)
+app/                      App de escritorio (Electron)
 supabase/
   functions/<nombre>/     Edge Functions (una carpeta por función, con su index.ts)
   migrations/             Cambios de la base de datos, en orden de fecha

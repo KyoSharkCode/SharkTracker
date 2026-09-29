@@ -2,7 +2,7 @@
 //
 // Flujo PKCE:
 //   1. signIn() pide a Supabase la URL de Discord y la abre en el navegador.
-//   2. Tras autorizar, Discord → Supabase → tutracker://auth-callback?code=…
+//   2. Tras autorizar, Discord → Supabase → sharktracker://auth-callback?code=…
 //   3. main.js recibe ese enlace y llama a handleCallback(), que canjea el
 //      código (de un solo uso) por la sesión.
 // La sesión se guarda cifrada en la carpeta de datos de la app (safeStorage
@@ -68,7 +68,7 @@ async function signIn() {
   await shell.openExternal(data.url);
 }
 
-// Recibe tutracker://auth-callback?code=… y lo canjea por la sesión.
+// Recibe sharktracker://auth-callback?code=… y lo canjea por la sesión.
 async function handleCallback(url) {
   const u = new URL(url);
   const query = u.searchParams;

@@ -11,7 +11,11 @@ const liveClientAgent = new https.Agent({ rejectUnauthorized: false });
 let mainWindow;
 let pendingDeepLink = null; // enlace que llegó antes de que la ventana estuviera lista
 
-// ── Enlace tutracker:// (vuelta del login de Discord) ──
+// Nombre e identificador de la app en Windows (barra de tareas, notificaciones).
+app.setName('SharkTracker');
+if (process.platform === 'win32') app.setAppUserModelId('lol.sharktracker.app');
+
+// ── Enlace sharktracker:// (vuelta del login de Discord) ──
 // Windows abre el enlace lanzando OTRA copia de la app. Con el candado de
 // instancia única, esa segunda copia se cierra y le pasa el enlace a la que
 // ya está abierta (evento 'second-instance').
@@ -81,6 +85,8 @@ function createWindow() {
     minWidth: 960,
     minHeight: 600,
     frame: false, // dibujamos nuestra propia barra de título, como en el mockup
+    title: 'SharkTracker',
+    icon: path.join(__dirname, 'assets', 'icon.png'),
     backgroundColor: '#05070c',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),

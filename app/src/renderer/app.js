@@ -1,9 +1,9 @@
 const $ = (id) => document.getElementById(id);
 
 // --- Controles de ventana ---
-$('btn-min').addEventListener('click', () => window.tuTracker.minimize());
-$('btn-max').addEventListener('click', () => window.tuTracker.maximize());
-$('btn-close').addEventListener('click', () => window.tuTracker.close());
+$('btn-min').addEventListener('click', () => window.sharkTracker.minimize());
+$('btn-max').addEventListener('click', () => window.sharkTracker.maximize());
+$('btn-close').addEventListener('click', () => window.sharkTracker.close());
 
 // --- Navegación entre páginas ---
 const navItems = document.querySelectorAll('.navitem:not(.disabled)');
@@ -82,7 +82,7 @@ function renderAuth(state) {
 $('btn-discord').addEventListener('click', async () => {
   setDiscordButton(true);
   setLoginStatus('Se abrió Discord en tu navegador. Autoriza el acceso y vuelve aquí: la app se abrirá sola.');
-  const res = await window.tuTracker.auth.signIn();
+  const res = await window.sharkTracker.auth.signIn();
   if (!res.ok) {
     setDiscordButton(false);
     setLoginStatus(`No se pudo abrir el inicio de sesión: ${res.error}`, true);
@@ -90,20 +90,20 @@ $('btn-discord').addEventListener('click', async () => {
 });
 
 $('btn-signout').addEventListener('click', async () => {
-  renderAuth(await window.tuTracker.auth.signOut());
+  renderAuth(await window.sharkTracker.auth.signOut());
   goTo('perfil');
 });
 
 $('discord-chip').addEventListener('click', () => goTo('ajustes'));
 
-window.tuTracker.auth.onChanged(renderAuth);
-window.tuTracker.auth.onError((message) => {
+window.sharkTracker.auth.onChanged(renderAuth);
+window.sharkTracker.auth.onError((message) => {
   setDiscordButton(false);
   setLoginStatus(message, true);
 });
 
 // Estado inicial: ¿ya había una sesión guardada?
-window.tuTracker.auth.getState()
+window.sharkTracker.auth.getState()
   .then(renderAuth)
   .catch(() => renderAuth({ loggedIn: false }));
 
@@ -112,8 +112,8 @@ function renderGameStatus({ inGame }) {
   $('game-chip').classList.toggle('ingame', inGame);
   $('game-chip-text').textContent = inGame ? 'En partida' : 'Sin partida';
 }
-window.tuTracker.onGameStatus(renderGameStatus);
-window.tuTracker.getGameStatus().then(renderGameStatus);
+window.sharkTracker.onGameStatus(renderGameStatus);
+window.sharkTracker.getGameStatus().then(renderGameStatus);
 
 // --- Panel de prueba: Live Client Data API ---
 const statusEl = $('live-status');
@@ -126,7 +126,7 @@ async function checkLiveGame() {
   statusEl.className = 'livestatus';
   jsonEl.hidden = true;
 
-  const result = await window.tuTracker.checkLiveGame();
+  const result = await window.sharkTracker.checkLiveGame();
 
   if (result.inGame) {
     statusEl.textContent = '✓ Conectado — hay una partida en curso y la app puede leer sus datos.';

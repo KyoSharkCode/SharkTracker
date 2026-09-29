@@ -10,6 +10,6 @@ module.exports = {
 
   // Enlace con el que Discord/Supabase devuelven a la app tras el login.
   // Tiene que estar en Supabase → Authentication → URL Configuration → Redirect URLs.
-  PROTOCOL: 'tutracker',
-  AUTH_REDIRECT: 'tutracker://auth-callback',
+  PROTOCOL: 'sharktracker',
+  AUTH_REDIRECT: 'sharktracker://auth-callback',
 };

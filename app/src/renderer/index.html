@@ -2,7 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Tu Tracker</title>
+<!-- Qué puede cargar la ventana: solo los archivos de la app, las fuentes de Google
+     y las imágenes de Discord (avatar) y CommunityDragon (ícono de invocador).
+     Todo lo demás (Supabase, Riot, la API local de LoL) lo hace el proceso main. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://cdn.discordapp.com https://media.discordapp.net https://raw.communitydragon.org; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>SharkTracker</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -10,8 +14,8 @@
 
   <div class="titlebar">
     <div class="tbleft">
-      <div class="logo">K</div>
-      <span class="appname">TU TRACKER <span class="dim">— v0.1</span></span>
+      <img class="logo" src="img/icon.webp" alt="">
+      <span class="appname">SHARKTRACKER <span class="dim">— v0.1</span></span>
     </div>
     <div class="tbright">
       <span id="game-chip" class="gamechip" title="Detección automática del cliente de LoL"><span class="gd"></span><span id="game-chip-text">Buscando LoL…</span></span>
@@ -35,13 +39,12 @@
     <div class="glow glow3"></div>
 
     <div class="centerwrap">
-      <div class="bigmark">K</div>
-      <div class="wordmark">TU TRACKER</div>
+      <img class="mainlogo" src="img/main-logo.webp" alt="SharkTracker">
       <div class="wordsub">tu compañero personal para League of Legends</div>
 
       <div class="logincard">
         <div class="logintitle">Conecta tu cuenta de Discord</div>
-        <div class="logindesc">La usamos para identificarte y enlazar tu progreso con <b>SharkTracker</b> — mismo login, mismos datos, en la app y en la web.</div>
+        <div class="logindesc">La usamos para identificarte y enlazar tu progreso con la web de <b>SharkTracker</b> — mismo login, mismos datos, en la app y en la web.</div>
         <button id="btn-discord" class="discordbtn" type="button"><span class="discordglyph">D</span><span id="btn-discord-text">Continuar con Discord</span></button>
         <div id="login-status" class="loginstatus" hidden></div>
 
@@ -52,7 +55,7 @@
         </div>
       </div>
 
-      <div class="linkedchip"><span class="pd"></span>Se vincula con tu cuenta de SharkTracker si ya tienes una</div>
+      <div class="linkedchip"><span class="pd"></span>Se vincula con tu cuenta de sharktracker.lol si ya tienes una</div>
 
       <div class="privacynote">Solo pedimos tu <b>identificador y avatar de Discord</b> para iniciar sesión — no publicamos nada en tus servidores ni leemos tus mensajes.</div>
     </div>

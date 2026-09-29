@@ -21,13 +21,7 @@ html, body {
   -webkit-app-region: drag;
 }
 .tbleft { display: flex; align-items: center; gap: 9px; }
-.logo {
-  width: 22px; height: 22px; border-radius: 6px;
-  background: linear-gradient(135deg,#00e5c7,#0a8f7f);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 11px;
-  color: #05070c;
-}
+.logo { width: 26px; height: 26px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(0,229,199,0.35)); }
 .appname { font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; }
 .dim { color: #5b6b7c; font-weight: 500; }
 .winctrl { display: flex; gap: 4px; -webkit-app-region: no-drag; }
@@ -152,14 +146,8 @@ html, body {
 .glow3 { width: 320px; height: 320px; background: radial-gradient(circle, rgba(88,101,242,0.14), transparent 70%); top: 40%; left: 50%; margin: -160px 0 0 -160px; animation: drift 16s ease-in-out infinite; }
 
 .centerwrap { position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-.bigmark {
-  width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg,#00e5c7,#0a8f7f);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 28px; color: #05070c;
-  box-shadow: 0 0 30px rgba(0,229,199,0.45); margin-bottom: 18px;
-}
-.wordmark { font-family: 'Rajdhani', sans-serif; font-size: 24px; font-weight: 700; color: #e7ecf2; letter-spacing: 0.02em; margin-bottom: 3px; }
-.wordsub { font-size: 11px; color: #5b6b7c; margin-bottom: 38px; }
+.mainlogo { width: 300px; max-width: 70vw; height: auto; filter: drop-shadow(0 0 34px rgba(0,229,199,0.25)); margin-bottom: 6px; }
+.wordsub { font-size: 11px; color: #5b6b7c; margin-bottom: 30px; }
 
 .logincard {
   width: 400px; max-width: 100%;
