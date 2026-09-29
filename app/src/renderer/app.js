@@ -182,3 +182,26 @@ interruptores.forEach((sw) => sw.addEventListener('click', async () => {
 window.sharkTracker.overlayConfig.onChanged(renderOverlayConfig);
 window.sharkTracker.overlayConfig.get().then(renderOverlayConfig);
 $('btn-reposicionar').addEventListener('click', () => window.sharkTracker.overlayConfig.abrirEditor());
+
+// --- Versión (sale de package.json) y actualizaciones automáticas ---
+window.sharkTracker.app.version().then((v) => {
+  $('app-version').textContent = `— v${v.split('.').slice(0, 2).join('.')}`;
+  $('acerca-version').textContent = v;
+});
+function renderActualizacion(e) {
+  const txt = $('acerca-update');
+  const textos = {
+    desarrollo: 'Modo desarrollo (npm start): las actualizaciones solo funcionan en la app instalada.',
+    buscando: 'Buscando actualizaciones…',
+    al_dia: 'Estás al día ✓',
+    descargando: `Descargando la versión ${e.version ?? 'nueva'}… ${e.porcentaje ?? 0}%`,
+    lista: `La versión ${e.version} está lista: se instala al cerrar la app, o ahora mismo:`,
+    error: 'No se pudo buscar actualizaciones (sin conexión). Se vuelve a intentar más tarde.',
+  };
+  txt.textContent = textos[e?.estado] ?? '';
+  txt.className = `accsub${e?.estado === 'al_dia' ? ' ok' : e?.estado === 'lista' ? ' nueva' : ''}`;
+  $('btn-actualizar').hidden = e?.estado !== 'lista';
+}
+window.sharkTracker.app.onActualizacion(renderActualizacion);
+window.sharkTracker.app.estadoActualizacion().then(renderActualizacion);
+$('btn-actualizar').addEventListener('click', () => window.sharkTracker.app.instalarActualizacion());

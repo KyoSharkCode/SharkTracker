@@ -1,19 +1,63 @@
 {
   "name": "sharktracker-app",
   "productName": "SharkTracker",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "SharkTracker para escritorio: compañero personal para League of Legends",
+  "author": "KyoSumiVT",
   "main": "src/main.js",
   "private": true,
+  "repository": "github:KyoSharkCode/SharkTracker",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder --win --publish never"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",
     "uiohook-napi": "1.5.5",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "electron-updater": "6.8.9"
   },
   "devDependencies": {
-    "electron": "^33.0.0"
+    "electron": "44.5.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "lol.sharktracker.app",
+    "productName": "SharkTracker",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "npmRebuild": false,
+    "win": {
+      "target": "nsis",
+      "icon": "src/assets/icon.png",
+      "artifactName": "SharkTracker-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "shortcutName": "SharkTracker"
+    },
+    "protocols": [
+      {
+        "name": "SharkTracker",
+        "schemes": [
+          "sharktracker"
+        ]
+      }
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "KyoSharkCode",
+        "repo": "SharkTracker",
+        "releaseType": "release"
+      }
+    ]
   }
 }

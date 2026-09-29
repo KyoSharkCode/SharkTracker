@@ -1,0 +1,32 @@
+# Publica una versión nueva de la app de escritorio (SharkTracker para Windows).
+#
+# Cómo se usa: pestaña "Actions" del repo → "App: publicar versión" → "Run workflow".
+# Toma la versión de app/package.json, arma el instalador en una máquina Windows
+# de GitHub y lo sube como Release "vX.Y.Z". Las apps instaladas lo detectan y se
+# actualizan solas. (No toca la web: GitHub Pages sigue igual.)
+name: "App: publicar versión"
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write   # para crear el Release y subir el instalador
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - name: Armar el instalador y publicarlo en Releases
+        run: npx electron-builder --win --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
