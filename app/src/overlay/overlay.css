@@ -3,8 +3,11 @@
 html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: transparent; font-family: 'Inter', sans-serif; user-select: none; }
 [hidden] { display: none !important; }
 
-/* Posiciones en coordenadas del mockup (1600×900); overlay.js escala el escenario. */
-.stage { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; transform-origin: 0 0; }
+/* Posiciones en coordenadas del mockup (1600×900). overlay.js calcula --s (escala)
+   y cada zona se ancla a su lado de la pantalla. */
+.zona { position: absolute; top: 0; width: 1600px; height: 900px; }
+.zona-centro { left: 50%; transform-origin: top center; transform: translateX(-50%) scale(var(--s, 1)); }
+.zona-derecha { right: 0; transform-origin: top right; transform: scale(var(--s, 1)); }
 
 .toppill {
   position: absolute; display: flex; align-items: center; gap: 8px;

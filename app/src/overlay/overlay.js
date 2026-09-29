@@ -2,9 +2,10 @@
 const $ = (id) => document.getElementById(id);
 
 // ── Escalado: el diseño está hecho a 1600×900 y se ajusta a tu pantalla ──
+// (las zonas se anclan al centro y al borde derecho en overlay.css)
 function escalar() {
   const s = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
-  $('stage').style.transform = `scale(${s})`;
+  document.documentElement.style.setProperty('--s', String(s));
 }
 window.addEventListener('resize', escalar);
 escalar();

@@ -9,10 +9,16 @@
 <link rel="stylesheet" href="overlay.css">
 </head>
 <body>
-  <!-- Escenario de 1600×900 (el tamaño del mockup) que se escala a la pantalla. -->
-  <div id="stage" class="stage">
+  <!-- Dos zonas en coordenadas del mockup (1600×900), escaladas a la pantalla y
+       ANCLADAS: la del centro a la barra de objetivos del juego (arriba al medio) y
+       la de la derecha al borde derecho. Así quedan en su sitio con cualquier
+       resolución o proporción de pantalla. -->
+  <div class="zona zona-centro">
     <div id="baron" class="toppill objpill" hidden></div>
     <div id="ancestral" class="toppill objpill" hidden></div>
+  </div>
+
+  <div class="zona zona-derecha">
 
     <div id="anuncio" class="toppill anuncio" hidden>
       <div class="pic"></div>

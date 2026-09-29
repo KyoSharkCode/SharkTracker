@@ -221,6 +221,8 @@ function createOverlayWindow() {
   });
   overlayWindow.setIgnoreMouseEvents(true);
   overlayWindow.setAlwaysOnTop(true, 'screen-saver');
+  // Toda la pantalla, incluida la zona de la barra de tareas (el juego la tapa en "Sin bordes").
+  overlayWindow.setBounds(bounds);
   overlayWindow.loadFile(path.join(__dirname, 'overlay', 'index.html'));
   overlayWindow.on('closed', () => { overlayWindow = null; });
 }
