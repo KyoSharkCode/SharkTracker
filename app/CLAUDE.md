@@ -349,6 +349,14 @@ Decisiones:
   que leer el minimapa por captura de pantalla → se hace después, reutilizando la
   captura del motor de clips. Revisar la política de Riot antes de publicarlo.
 
+## Key de Riot y PUUID
+
+Riot cifra los PUUID **por key**: al pasar de la key de desarrollo a la personal
+(30/09/2026) los guardados en `players.puuid` dejaron de valer (Riot responde **400**).
+`sync-riot-data` lo cura solo: si la liga responde 400 con un PUUID guardado, lo vuelve a
+sacar con el Riot ID (account-v1) y lo guarda. Las demás Functions leen `players.puuid`, así
+que se arreglan en cuanto corre (cada minuto). Si algún día se cambia la key, pasa lo mismo.
+
 ## Pendiente fuera de la app
 
 - ✅ Dominio `sharktracker.lol` (GitHub Pages, HTTPS) activo; Site URL de Supabase y

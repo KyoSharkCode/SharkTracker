@@ -113,19 +113,32 @@ Deno.serve(async (req) => {
     try {
       let puuid: string | null = player.puuid;
 
-      // Resolver PUUID + ícono solo una vez, la primera corrida.
-      if (!puuid) {
+      // Resolver PUUID + ícono con el Riot ID (la primera corrida, o si la key cambió).
+      const resolverPuuid = async () => {
         const acc = await riotFetch(
           `https://${REGION_API}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/` +
           `${encodeURIComponent(player.riot_game_name)}/${encodeURIComponent(player.riot_tag_line)}`
         );
-        puuid = acc.puuid;
-        const summ = await riotFetch(`https://${REGION_GAME}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}`);
-        const { error: upErr } = await supabase.from('players').update({ puuid, icon_id: summ.profileIconId }).eq('id', player.id);
+        const summ = await riotFetch(`https://${REGION_GAME}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${acc.puuid}`);
+        const { error: upErr } = await supabase.from('players').update({ puuid: acc.puuid, icon_id: summ.profileIconId }).eq('id', player.id);
         if (upErr) throw upErr;
-      }
+        return acc.puuid as string;
+      };
+      if (!puuid) puuid = await resolverPuuid();
 
-      const entries = await riotFetch(`https://${REGION_GAME}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}`);
+      const urlLiga = (id: string) => `https://${REGION_GAME}.api.riotgames.com/lol/league/v4/entries/by-puuid/${id}`;
+      let entries;
+      try {
+        entries = await riotFetch(urlLiga(puuid));
+      } catch (e) {
+        // Riot cifra los PUUID por key: al cambiar de key (p. ej. de la de desarrollo a
+        // la personal) los guardados dejan de valer y Riot responde 400. Se vuelve a
+        // sacar con el Riot ID y se guarda el nuevo (lo usan también las demás Functions).
+        if (!String(e).endsWith('-> 400') || !player.puuid) throw e;
+        console.log(`[sync-riot-data] PUUID de ${player.riot_game_name} no vale con la key actual: se vuelve a buscar`);
+        puuid = await resolverPuuid();
+        entries = await riotFetch(urlLiga(puuid));
+      }
 
       for (const entry of entries) {
         const tier = entry.tier as string;
