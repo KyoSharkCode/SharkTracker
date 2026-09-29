@@ -23,7 +23,7 @@ const TIEMPOS = {
   ancestral: { reaparece: 6 * 60 },          // tras el alma, y tras cada Ancestral
   larvas:    { primera: 8 * 60 },             // Vacuolarvas
   heraldo:   { primera: 15 * 60 },
-  baron:     { primera: 25 * 60, reaparece: 6 * 60 },
+  baron:     { primera: 20 * 60, reaparece: 6 * 60 },   // 20:00 visto en partida real (antes 25:00)
 };
 const DURACION_BUFF = { baron: 180, ancestral: 150 };
 const AVISO_ANTES = 90;      // anunciar cuando falta 1:30 o menos
@@ -74,6 +74,10 @@ function crearEstadoPartida() {
   // Promedios de referencia (llegan de Supabase al empezar la partida).
   let referencia = null;
   const setReferencia = (ref) => { referencia = ref; };
+  // Coste TOTAL de cada objeto (DDragon item.json → gold.total). El "price" de la
+  // API del juego es solo el último paso de la receta, no lo que vale el objeto.
+  let precios = null;
+  const setPrecios = (mapa) => { precios = mapa; };
 
   function actualizar(datos) {
     const t = datos?.gameData?.gameTime ?? 0;
@@ -249,7 +253,8 @@ function crearEstadoPartida() {
     // Fila i: el i-ésimo de tu equipo contra el i-ésimo del rival (mismo orden
     // que el marcador del juego). Positivo = va por delante tu equipo.
     // En el Tab el lado azul SIEMPRE va a la izquierda y el rojo a la derecha.
-    const valorObjetos = (p) => (p.items ?? []).reduce((suma, it) => suma + (it.price ?? 0) * (it.count || 1), 0);
+    const valorObjetos = (p) => (p.items ?? []).reduce(
+      (suma, it) => suma + (precios?.[it.itemID] ?? it.price ?? 0) * (it.count || 1), 0);
     const aliados = jugadores.filter((p) => lado(p.team) === miLado);
     const enemigos = jugadores.filter((p) => lado(p.team) && lado(p.team) !== miLado);
     const oro = [];
@@ -261,12 +266,13 @@ function crearEstadoPartida() {
 
     const rendimiento = calcularRendimiento({
       t, yo, equipo: aliados, oroActual: datos?.activePlayer?.currentGold, valorObjetos, referencia,
+      modo: datos?.gameData?.gameMode,
     });
 
     return { tiempo: t, miLado, baron, ancestral, toast, proximos, dragones: cuenta, oro, rendimiento, aliadoIzquierda: miLado !== 'red' };
   }
 
-  return { actualizar, setReferencia };
+  return { actualizar, setReferencia, setPrecios };
 }
 
 module.exports = { crearEstadoPartida, TIEMPOS, DURACION_BUFF, iniciales };

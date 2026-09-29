@@ -26,13 +26,19 @@ function tierObjetivo(tier) {
 // aparece cuando hay referencia y desde el minuto 5.
 // referencia: { tier, rolPrincipal, porRol: { MIDDLE: {muestras, cs_min, oro_min, vision_min, kp}, … } } o null.
 // yo: tu fila de allPlayers; equipo: los 5 de tu equipo; oroActual: activePlayer.currentGold.
-function calcularRendimiento({ t, yo, equipo, oroActual, valorObjetos, referencia }) {
+// modo: gameData.gameMode ("CLASSIC" = Grieta del Invocador). En ARAM, Arena, etc.
+// los promedios de la Grieta no sirven: se muestran tus números sin comparar.
+function calcularRendimiento({ t, yo, equipo, oroActual, valorObjetos, referencia, modo }) {
   if (!yo) return null;
+  const esGrieta = !modo || modo === 'CLASSIC';
+  if (!esGrieta) referencia = null;
   const rol = ROL_ES[yo.position] ? yo.position : referencia?.rolPrincipal;
   const division = referencia ? (TIER_ES[referencia.tier] ?? referencia.tier) : null;
   const refRol = rol ? referencia?.porRol?.[rol] : null;
   const hayRef = !!refRol && Number(refRol.muestras) >= MIN_MUESTRAS;
-  const aviso = !referencia ? 'Sin referencia por ahora'
+  const aviso = !esGrieta ? 'Sin comparación en este modo'
+    : !referencia ? 'Sin referencia por ahora'
+    : !rol ? 'Sin rol detectado: no se puede comparar'
     : !hayRef ? `Reuniendo partidas de ${division}` : null;
 
   const min = Math.max(t / 60, 1);
