@@ -54,7 +54,6 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 
 /* Colores de cada objetivo / dragón */
 .c-baron { --c: #c19bf2; --bg: rgba(150,90,220,0.25); }
-.c-atakhan { --c: #e37a7a; --bg: rgba(200,70,70,0.22); }
 .c-heraldo { --c: #b78cf0; --bg: rgba(140,90,220,0.22); }
 .c-larvas { --c: #b58cf0; --bg: rgba(120,80,200,0.22); }
 .c-dragon, .c-Fire { --c: #f0a15e; --bg: rgba(220,120,60,0.2); }

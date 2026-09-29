@@ -35,7 +35,7 @@ function pintarBuff(nodo, letra, buff) {
 }
 
 // ── Anuncios: rotan cada 4 s si hay varios objetivos próximos ──
-const LETRA = { dragon: 'D', ancestral: 'A', larvas: 'V', heraldo: 'H', atakhan: 'K', baron: 'B' };
+const LETRA = { dragon: 'D', ancestral: 'A', larvas: 'V', heraldo: 'H', baron: 'B' };
 let anuncioIdx = 0;
 let proximos = [];
 setInterval(() => { anuncioIdx++; pintarAnuncio(); }, 4000);

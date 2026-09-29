@@ -3,7 +3,8 @@
 // Recibe lo que devuelve la Live Client Data API (/liveclientdata/allgamedata)
 // cada segundo y calcula lo que el overlay tiene que dibujar:
 //   - Barón / Dragón Ancestral: cuánto le queda al buff y quién lo tiene.
-//   - Anuncios: el próximo objetivo épico cuando falta 1:30 o menos.
+//   - Anuncios: el próximo objetivo épico cuando falta 1:30 o menos
+//     (Dragón/Ancestral, Vacuolarvas, Heraldo, Barón).
 //   - Toast de dragón: 5 s al caer un dragón (y el alma, si es el 4.º).
 //
 // Solo usa información que el juego ya muestra (eventos de la partida y el
@@ -16,7 +17,6 @@ const TIEMPOS = {
   ancestral: { reaparece: 6 * 60 },          // tras el alma, y tras cada Ancestral
   larvas:    { primera: 8 * 60 },             // Vacuolarvas
   heraldo:   { primera: 15 * 60 },
-  atakhan:   { primera: 20 * 60 },
   baron:     { primera: 25 * 60, reaparece: 6 * 60 },
 };
 const DURACION_BUFF = { baron: 180, ancestral: 150 };
@@ -153,7 +153,6 @@ function crearEstadoPartida() {
     }
     if (!ultimo('HordeKill')) agregar('larvas', 'Vacuolarvas', TIEMPOS.larvas.primera);
     if (!ultimo('HeraldKill')) agregar('heraldo', 'Heraldo', TIEMPOS.heraldo.primera);
-    if (!ultimo('AtakhanKill')) agregar('atakhan', 'Atakhan', TIEMPOS.atakhan.primera);
     const ultBaron = ultimo('BaronKill');
     agregar('baron', 'Barón', ultBaron ? ultBaron.EventTime + TIEMPOS.baron.reaparece : TIEMPOS.baron.primera);
     proximos.sort((a, b) => a.falta - b.falta);
