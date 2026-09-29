@@ -98,7 +98,13 @@ async function cargarCampeon(championId, posicion) {
   const { data: { session } } = await cliente.auth.getSession();
   if (!session) return { estado: 'sin_sesion' };
   const { data, error } = await cliente.functions.invoke('meta', { body: { champion_id: championId, posicion } });
-  if (error) return { estado: 'error' };
+  if (error) {
+    // Motivo real (código HTTP + respuesta de la función) para poder diagnosticar.
+    const res = error.context;
+    let detalle = error.message;
+    try { if (res?.text) detalle = `${res.status} ${(await res.text()).slice(0, 200)}`; } catch { /* sin detalle */ }
+    return { estado: 'error', detalle };
+  }
   return data;
 }
 

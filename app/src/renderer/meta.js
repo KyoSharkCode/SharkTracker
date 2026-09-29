@@ -81,9 +81,12 @@
     pintarTodo();
   }
 
+  // DDragon y OP.GG numeran el parche a la antigua (16.19); en el juego se ve con el año (26.19).
+  const parcheJuego = (p) => String(p).replace(/^(\d+)(?=\.)/, (m) => (Number(m) >= 15 ? String(Number(m) + 10) : m));
+
   function pintarSub() {
     const partes = ['Datos de OP.GG'];
-    if (datos.parche) partes.push(`parche ${datos.parche}`);
+    if (datos.parche) partes.push(`parche ${parcheJuego(datos.parche)}`);
     partes.push('builds y counters en Esmeralda+');
     if (datos.actualizado) partes.push(`tier list actualizada ${haceCuanto(datos.actualizado)}`);
     byId('meta-sub').textContent = partes.join(' · ');
@@ -174,7 +177,8 @@
       pintarFicha(id, r);
     } else {
       pintarFicha(id, null, r?.estado === 'opgg_caido'
-        ? 'OP.GG no respondió. Prueba de nuevo en un rato.' : 'No se pudo cargar la ficha de este campeón.');
+        ? 'OP.GG no respondió. Prueba de nuevo en un rato.'
+        : `No se pudo cargar la ficha de este campeón.${r?.detalle ? ` (${r.detalle})` : r?.estado ? ` (${r.estado})` : ''}`);
     }
   }
 
