@@ -207,8 +207,7 @@ propio "class X: campos" + `X(valores)` que traduce `leerOpgg`). **La app nunca 
   se muestra como S+/S/A/B/C. Tendencias = puestos ganados/perdidos vs el parche anterior
   (`rank_prev_patch`, solo campeones con 1000+ partidas). Los counters muestran tu winrate
   contra ese campeón y la diferencia con tu winrate medio en el rol.
-- `supabase/functions/meta-prueba`: función TEMPORAL para explorar el MCP; se borra cuando
-  Meta esté validado.
+- Meta validado por Alex (30/09/2026) con datos reales; la función de prueba `meta-prueba` se borró.
 - Pendiente para después con estos datos: "Tu build" en partida y counters en En Vivo.
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
