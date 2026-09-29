@@ -162,17 +162,35 @@
   }
 
   // ── Maestrías ──
+  // Podio: #1 al centro (más alto, borde dorado), #2 y #3 a los lados. Cada carta
+  // con el arte de carga del campeón (DDragon), nivel, puntos y barra vs el #1.
   function pintarMaestrias(p) {
     const card = el('div', 'card card-maestria');
     card.append(el('div', 'cardhd', 'Top 3 maestrías'));
-    if (!p.maestrias.length) card.append(el('div', 'vacio', 'Sin maestrías guardadas todavía.'));
-    for (const m of p.maestrias) {
-      const fila = el('div', 'masteryrow');
-      const txt = el('div');
-      txt.append(el('div', 'masterynm', nombreCampeon(p, m.campeon)), el('div', 'masterypts', `${miles(m.puntos)} pts`));
-      fila.append(imagen(urlCampeon(p, m.campeon), 'masteryic', iniciales(nombreCampeon(p, m.campeon))), txt, el('div', 'masteryrank', `M${m.nivel}`));
-      card.append(fila);
+    if (!p.maestrias.length) {
+      card.append(el('div', 'vacio', 'Sin maestrías guardadas todavía.'));
+      return card;
     }
+    const maxPuntos = Math.max(...p.maestrias.map((m) => m.puntos), 1);
+    const podio = el('div', 'podio');
+    const orden = [p.maestrias[1], p.maestrias[0], p.maestrias[2]].filter(Boolean);
+    for (const m of orden) {
+      const puesto = p.maestrias.indexOf(m) + 1;
+      const nombre = nombreCampeon(p, m.campeon);
+      const carta = el('div', `pcarta puesto-${puesto}`);
+      carta.append(imagen(`https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${m.campeon}_0.jpg`, 'pcarta-arte', iniciales(nombre)));
+      const info = el('div', 'pcarta-info');
+      const barra = el('div', 'pcarta-barra');
+      const relleno = el('span');
+      relleno.style.width = `${Math.round((m.puntos / maxPuntos) * 100)}%`;
+      barra.append(relleno);
+      carta.append(el('div', 'pcarta-puesto', `#${puesto}`));
+      info.append(el('div', 'pcarta-nivel', `M${m.nivel}`),
+        el('div', 'pcarta-nombre', nombre), el('div', 'pcarta-pts', `${miles(m.puntos)} pts`), barra);
+      carta.append(info);
+      podio.append(carta);
+    }
+    card.append(podio);
     return card;
   }
 
