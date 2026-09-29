@@ -198,6 +198,8 @@ propio "class X: campos" + `X(valores)` que traduce `leerOpgg`). **La app nunca 
   por nivel, counters). Caché en `meta_campeon`: 24 h o hasta que cambie el parche; si OP.GG no
   responde, devuelve la guardada. OP.GG pide el campeón en MAYÚSCULAS ("LEE_SIN"): se prueban
   nombre en snake, id de DDragon en mayúsculas y nombre sin guiones.
+- Parche: DDragon/OP.GG dicen "16.19"; en el juego se ve con el año ("26.19" = +10). La app
+  muestra el del juego; en la base se guarda el de DDragon.
 - Winrates = victorias ÷ partidas (OP.GG redondea los suyos a 2 decimales).
 - App: `src/meta.js` (main; catálogos es_MX de campeones, objetos, runas y hechizos) +
   `renderer/meta.js`. Rol por defecto = rol principal de la web; campeón por defecto = tu más

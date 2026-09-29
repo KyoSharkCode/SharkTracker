@@ -81,9 +81,12 @@
     pintarTodo();
   }
 
+  // DDragon y OP.GG numeran el parche a la antigua (16.19); en el juego se ve con el año (26.19).
+  const parcheJuego = (p) => String(p).replace(/^(\d+)(?=\.)/, (m) => (Number(m) >= 15 ? String(Number(m) + 10) : m));
+
   function pintarSub() {
     const partes = ['Datos de OP.GG'];
-    if (datos.parche) partes.push(`parche ${datos.parche}`);
+    if (datos.parche) partes.push(`parche ${parcheJuego(datos.parche)}`);
     partes.push('builds y counters en Esmeralda+');
     if (datos.actualizado) partes.push(`tier list actualizada ${haceCuanto(datos.actualizado)}`);
     byId('meta-sub').textContent = partes.join(' · ');
