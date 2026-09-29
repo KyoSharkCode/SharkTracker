@@ -128,6 +128,16 @@ async function getReferencia() {
   return { tier, rolPrincipal: ROL_WEB[player.primary_role] ?? null, porRol };
 }
 
+// Pantalla de carga: rangos de los 10 jugadores (Edge Function pantalla-carga,
+// que guarda la key de Riot). Devuelve { estado, completo, cola, aliados, rivales }.
+async function getPantallaCarga() {
+  const { data: { session } } = await client().auth.getSession();
+  if (!session) return { estado: 'sin_sesion' };
+  const { data, error } = await client().functions.invoke('pantalla-carga', { body: {} });
+  if (error) return { estado: 'error' };
+  return data;
+}
+
 // Cierra la sesión SOLO en esta app (la web de SharkTracker sigue con la suya).
 async function signOut() {
   await client().auth.signOut({ scope: 'local' });
@@ -141,4 +151,4 @@ function onChange(callback) {
   });
 }
 
-module.exports = { signIn, handleCallback, getState, getReferencia, signOut, onChange, client };
+module.exports = { signIn, handleCallback, getState, getReferencia, getPantallaCarga, signOut, onChange, client };

@@ -54,7 +54,7 @@ vez haciendo una app de escritorio).
 - Ventana flotante + navegación entre secciones (ya hecho, ver abajo).
 - "En partida": overlay real vía Live Client Data API — oro, timers, indicador
   Barón/Ancestral, objetivos, build propia, rendimiento propio.
-- "Pantalla de carga": rango/LP propio y rival vía la key de Riot de SharkTracker.
+- ✅ "Pantalla de carga": rango/LP propio y rival vía la key de Riot de SharkTracker.
 - "Mi Perfil" completo, incluido el estado "sin conexión" (tira del backend
   de SharkTracker/Supabase).
 - "Ajustes → Overlay": toggles reales + reposicionar elementos.
@@ -211,6 +211,28 @@ visual" y "Overlay — estructuras" del canvas)
      con el oro (que no se mueve). Guardar / Restablecer / Cancelar (Esc).
    - Todo en `userData/overlay.json` (overlay-config.js), posiciones en 1920×1080
      (esquina superior izquierda de cada pieza).
+
+## Pantalla de carga (acordado con Alex)
+
+✅ (pendiente de probar en una normal/ranked real — la herramienta de práctica y algunas
+partidas contra bots no salen en el "espectador" de Riot)
+- Detección: el proceso `League of Legends.exe` abierto (tasklist) y la API local todavía
+  sin datos = pantalla de carga. Tras una partida, el juego abierto no cuenta como carga
+  hasta que el proceso se cierra (`partidaTerminada`).
+- Datos: Edge Function `pantalla-carga` (**"Verify JWT" ENCENDIDO**: exige sesión de
+  Discord y cuenta de LoL vinculada; la key de Riot vive allí). 1 petición al espectador
+  (los 10 jugadores) + liga por jugador (rango, LP, V/D, racha) + maestría top 3 (etiqueta
+  "Main del campeón" / "Fuera de su main"). Los de SharkTracker salen de la base (0 peticiones).
+- Cupo (la key es la personal, compartida con la web): lo esencial hasta el 85 % de la
+  ventana de 2 min, la maestría solo por debajo del 60 %; rivales primero. Lo que falte
+  queda "Rango pendiente…" y la app reintenta cada 15 s (hasta 5 min). Caché: panel por
+  partida 10 min (`carga_partidas`, con "bloqueo" para que en una premade se arme una sola
+  vez) y rango por jugador 30 min (`carga_rangos`); limpieza cada hora.
+- Winrate con ese campeón concreto y "Autorrelleno" (del mockup) NO: costarían ~200
+  peticiones o necesitan la selección de campeones (LCU). Se muestra el winrate de la temporada.
+- Overlay: panel `#carga` arriba a la derecha (x 1500, y 60; 400 px), movible en el editor
+  ("Ver pantalla de carga"). Interruptores en Ajustes → Overlay (rango/winrate de cada
+  equipo y etiquetas; "Counters del rival" próximamente).
 
 Decisiones:
 - **"Tu build"**: se deja para cuando exista "Meta" (hace falta la build de referencia).

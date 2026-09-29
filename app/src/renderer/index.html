@@ -150,21 +150,21 @@
             </div>
 
             <div class="card card-carga">
-              <div class="cardhd"><span class="dot dot-carga"></span>Pantalla de carga <span class="prox">Próximamente</span></div>
-              <div class="cardsub">Se dibujará sobre la pantalla de carga de la partida</div>
-              <div class="swrow pronto"><div class="swnm">Rango y LP — tu equipo</div><span class="sw off"></span></div>
-              <div class="swrow pronto"><div class="swnm">Winrate y partidas — tu equipo</div><span class="sw off"></span></div>
-              <div class="swrow pronto"><div class="swnm">Rango y LP — rivales</div><span class="sw off"></span></div>
-              <div class="swrow pronto"><div class="swnm">Winrate y partidas — rivales</div><span class="sw off"></span></div>
-              <div class="swrow pronto"><div><div class="swnm">Etiquetas de main</div><div class="swsub">"Main del campeón" / "Fuera de su main"</div></div><span class="sw off"></span></div>
-              <div class="swrow pronto"><div><div class="swnm">Counters del rival</div><div class="swsub">Se revela junto con su pick</div></div><span class="sw off"></span></div>
+              <div class="cardhd"><span class="dot dot-carga"></span>Pantalla de carga</div>
+              <div class="cardsub">Panel a la derecha mientras carga la partida (necesita sesión y cuenta de LoL vinculada)</div>
+              <div class="swrow"><div class="swnm">Rango y LP — tu equipo</div><button class="sw" type="button" role="switch" data-pieza="cargaRangoAliados"></button></div>
+              <div class="swrow"><div class="swnm">Winrate y partidas — tu equipo</div><button class="sw" type="button" role="switch" data-pieza="cargaWinrateAliados"></button></div>
+              <div class="swrow"><div class="swnm">Rango y LP — rivales</div><button class="sw" type="button" role="switch" data-pieza="cargaRangoRivales"></button></div>
+              <div class="swrow"><div class="swnm">Winrate y partidas — rivales</div><button class="sw" type="button" role="switch" data-pieza="cargaWinrateRivales"></button></div>
+              <div class="swrow"><div><div class="swnm">Etiquetas</div><div class="swsub">"Main del campeón" / "Fuera de su main", "En racha"</div></div><button class="sw" type="button" role="switch" data-pieza="cargaEtiquetas"></button></div>
+              <div class="swrow pronto"><div><div class="swnm">Counters del rival <span class="prox">Próximamente</span></div><div class="swsub">Se revela junto con su pick</div></div><span class="sw off"></span></div>
             </div>
 
             <div class="card card-pos">
               <div class="cardhd"><span class="dot dot-pos"></span>Posición de los elementos</div>
               <div class="cardsub">Acomoda cada pieza sobre una pantalla que emula el juego</div>
               <div class="previewbox">
-                <span>Se abre una ventana con el HUD de LoL de fondo (o una captura tuya): arrastra las piezas y guarda.</span>
+                <span>Se abre una ventana con el HUD de LoL de fondo (o una captura tuya): arrastra las piezas —también el panel de la pantalla de carga— y guarda.</span>
                 <button id="btn-reposicionar" class="checkbtn" type="button">Reposicionar elementos</button>
               </div>
             </div>
