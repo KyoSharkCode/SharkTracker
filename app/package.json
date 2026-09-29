@@ -1,0 +1,13 @@
+{
+  "name": "tu-tracker-app",
+  "version": "0.1.0",
+  "description": "Tracker personal estilo Porofessor para League of Legends",
+  "main": "src/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^33.0.0"
+  }
+}
