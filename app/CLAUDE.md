@@ -82,8 +82,8 @@ tono oscuro con acento turquesa `#00e5c7`) al construir cada pantalla real.
 
 ## Estado actual del código
 
-Esqueleto **validado en Windows** (29/09/2026) + **login con Discord**
-implementado (pendiente de probar en Windows).
+Validado en Windows (29/09/2026): esqueleto, **login con Discord** (PKCE +
+deep link) y nombre/logo de SharkTracker. En curso: **overlay "En partida"**.
 
 ```
 app/
@@ -100,6 +100,13 @@ app/
                            de partida (cada 5 s, avisa solo al cambiar)
     preload.js           → contextBridge (window.sharkTracker): ventana, checkLiveGame,
                            estado de partida, auth
+    game-state.js        → "cerebro" del overlay (sin Electron, se prueba en Node):
+                           buff de Barón/Ancestral y titulares, anuncios de objetivos,
+                           toast de dragón/alma. Tiempos de aparición en TIEMPOS
+    preload-overlay.js   → contextBridge (window.overlay): solo recibe el estado
+    overlay/             → ventana transparente sobre el juego (index.html, overlay.css,
+                           overlay.js). Diseño en coordenadas 1600×900 del mockup,
+                           escalado a la pantalla
     assets/icon.png      → ícono de la ventana (logo del tiburón)
     renderer/
       img/               → logos (copias de /logo; la app empaquetada no ve la raíz del repo)
@@ -121,12 +128,37 @@ Notas técnicas:
 - Live Client Data API: `activePlayer.summonerName` trae el Riot ID completo
   (`Nombre#TAG`); los bots no tienen `#tag` (ignorarlos al buscar rangos).
 - Íconos de invocador sin versión de parche: CommunityDragon `latest`.
+- Overlay: ventana transparente, `focusable: false`, `setIgnoreMouseEvents(true)`,
+  `alwaysOnTop 'screen-saver'`. Se muestra cuando la detección ve partida y lee
+  `allgamedata` cada 1 s. **LoL debe estar en modo "Sin bordes"** (en pantalla
+  completa exclusiva no se puede dibujar encima).
+- El overlay solo usa información que el juego ya muestra (regla de Riot/Vanguard).
+- Los buffs se aproximan: titulares = vivos del equipo al detectar el evento,
+  y se pierden al morir (ChampionKill). Barón 180 s, Ancestral 150 s.
 
-## Siguiente paso pendiente
+## Plan del overlay "En partida" (acordado con Alex)
 
-1. Alex agrega `sharktracker://auth-callback` en Supabase → Authentication →
-   URL Configuration → Redirect URLs, y prueba el login en Windows.
-2. Después: "En partida" (overlay real con la Live Client Data API).
+1. ✅ Ventana del overlay + Barón/Ancestral + anuncios de objetivos + toast de dragón.
+2. Diferencia de oro **solo con Tab pulsado** (librería `uiohook-napi` para escuchar
+   la tecla sin quitársela al juego). Valor de objetos = info visible en el Tab.
+   Posición del mockup (1920×1080); se calibra con el editor de posiciones.
+3. "Tu rendimiento": por ahora contra **el promedio propio en SharkTracker**; en la
+   Fase 2 se cambia la fuente a promedios por elo (Alex quiere datos tipo OP.GG;
+   ojo: OP.GG no tiene API pública oficial, revisar cómo obtenerlos).
+4. Ajustes → Overlay: interruptores reales + editor "Reposicionar elementos".
+
+Decisiones:
+- **"Tu build"**: se deja para cuando exista "Meta" (hace falta la build de referencia).
+- **Timers de campamentos**: SÍ se quieren, solo de campamentos cuya muerte se vio
+  (como Blitz/Porofessor/Itero). La API local no tiene eventos de campamentos: hay
+  que leer el minimapa por captura de pantalla → se hace después, reutilizando la
+  captura del motor de clips. Revisar la política de Riot antes de publicarlo.
+
+## Pendiente fuera de la app
+
+- Dominio `sharktracker.lol` (GitHub Pages): cuando cargue con HTTPS, cambiar la
+  Site URL de Supabase y correr `supabase/migrations/20260929000000_dominio_sharktracker.sql`.
+- Actualizar Electron (el de la v33 trae Node 20 y supabase-js avisa que lo dejará).
 
 ## Estilo de comunicación de Alex
 

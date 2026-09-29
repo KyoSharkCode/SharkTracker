@@ -1,8 +1,9 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const path = require('path');
 const https = require('https');
 const cfg = require('./config');
 const auth = require('./auth');
+const { crearEstadoPartida } = require('./game-state');
 
 // La Live Client Data API de League usa un certificado autofirmado local,
 // así que hay que decirle a Node que no lo rechace (127.0.0.1:2999, nunca sale de tu PC).
@@ -96,6 +97,12 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+  // Al cerrar la ventana principal se cierra también el overlay (si no, la app seguiría viva).
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+    overlayWindow?.destroy();
+    overlayWindow = null;
+  });
   mainWindow.webContents.on('did-finish-load', () => {
     if (pendingDeepLink) {
       const link = pendingDeepLink;
@@ -178,10 +185,64 @@ function startGameWatcher() {
     if (inGame !== lastInGame) {
       lastInGame = inGame;
       mainWindow?.webContents.send('game:status', { inGame });
+      if (inGame) startOverlay(); else stopOverlay();
     }
   };
   tick();
   setInterval(tick, 5000);
+}
+
+// ── Overlay en partida ──
+// Ventana transparente del tamaño de la pantalla, siempre encima del juego y
+// sin recibir clics (pasan al juego). League tiene que estar en modo
+// "Sin bordes": en pantalla completa exclusiva Windows no deja dibujar encima.
+let overlayWindow = null;
+let overlayTimer = null;
+let estadoPartida = null;
+
+function createOverlayWindow() {
+  const { bounds } = screen.getPrimaryDisplay();
+  overlayWindow = new BrowserWindow({
+    ...bounds,
+    transparent: true,
+    backgroundColor: '#00000000',
+    frame: false,
+    resizable: false,
+    movable: false,
+    focusable: false,     // nunca le quita el foco al juego
+    skipTaskbar: true,
+    hasShadow: false,
+    show: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload-overlay.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  overlayWindow.setIgnoreMouseEvents(true);
+  overlayWindow.setAlwaysOnTop(true, 'screen-saver');
+  overlayWindow.loadFile(path.join(__dirname, 'overlay', 'index.html'));
+  overlayWindow.on('closed', () => { overlayWindow = null; });
+}
+
+function startOverlay() {
+  if (!overlayWindow) createOverlayWindow();
+  estadoPartida = crearEstadoPartida();
+  overlayWindow.showInactive();
+  clearInterval(overlayTimer);
+  // Cada segundo: leer la partida, calcular qué mostrar y mandárselo al overlay.
+  overlayTimer = setInterval(async () => {
+    const res = await liveClientGet('allgamedata');
+    if (!res.inGame || !overlayWindow) return;
+    overlayWindow.webContents.send('overlay:state', estadoPartida.actualizar(res.data));
+  }, 1000);
+}
+
+function stopOverlay() {
+  clearInterval(overlayTimer);
+  overlayTimer = null;
+  estadoPartida = null;
+  overlayWindow?.hide();
 }
 ipcMain.handle('game:getStatus', () => ({ inGame: !!lastInGame }));
 
