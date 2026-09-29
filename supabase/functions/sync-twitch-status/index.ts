@@ -113,6 +113,14 @@ async function handle(): Promise<Response> {
   // Diagnóstico: a quién se consultó y cuántos directos devolvió Twitch.
   log.push(`consultados: ${[...usernameToPlayerId.keys()].join(', ')} · Twitch devolvió ${(streams ?? []).length} en vivo`);
 
+  // Estado guardado de todos de una vez: solo se escribe lo que cambió
+  // (cada escritura hace recargar las páginas abiertas).
+  const { data: prevRows } = await supabase
+    .from('stream_status').select('player_id, is_live, title, game_name, viewer_count, started_at, thumbnail_url');
+  const prevByPlayer = new Map((prevRows ?? []).map((r: any) => [r.player_id, r]));
+  const mismaFecha = (a: string | null, b: string | null) =>
+    (a === null || b === null) ? a === b : new Date(a).getTime() === new Date(b).getTime();
+
   const liveUsernames = new Set<string>();
 
   for (const stream of streams ?? []) {
@@ -121,7 +129,7 @@ async function handle(): Promise<Response> {
     const playerId = usernameToPlayerId.get(username);
     if (!playerId) continue;
 
-    const { error: upErr } = await supabase.from('stream_status').upsert({
+    const fila = {
       player_id: playerId,
       is_live: true,
       title: stream.title,
@@ -129,20 +137,31 @@ async function handle(): Promise<Response> {
       viewer_count: stream.viewer_count,
       started_at: stream.started_at,
       thumbnail_url: (stream.thumbnail_url as string).replace('{width}', '440').replace('{height}', '248'),
-      updated_at: new Date().toISOString(),
-    });
+    };
+    const prev: any = prevByPlayer.get(playerId);
+    const sinCambios = prev && prev.is_live && prev.title === fila.title && prev.game_name === fila.game_name
+      && prev.viewer_count === fila.viewer_count && prev.thumbnail_url === fila.thumbnail_url
+      && mismaFecha(prev.started_at, fila.started_at);
+    let upErr = null;
+    if (!sinCambios) {
+      ({ error: upErr } = await supabase.from('stream_status').upsert({ ...fila, updated_at: new Date().toISOString() }));
+    }
     log.push(`${username}: en vivo (${stream.viewer_count} viewers, ${stream.game_name})` + (upErr ? ` · ERROR al guardar: ${upErr.message}` : ''));
   }
 
   // Todos los que tienen usuario configurado pero NO aparecieron en la
-  // respuesta de Twitch están fuera de vivo — se actualizan también.
+  // respuesta de Twitch están fuera de vivo — se actualizan solo si antes
+  // figuraban en vivo (o todavía no tenían fila).
   for (const [username, playerId] of usernameToPlayerId) {
     if (liveUsernames.has(username)) continue;
-    await supabase.from('stream_status').upsert({
+    const prev: any = prevByPlayer.get(playerId);
+    if (prev && !prev.is_live) continue;
+    const { error: offErr } = await supabase.from('stream_status').upsert({
       player_id: playerId, is_live: false, title: null, game_name: null,
       viewer_count: null, started_at: null, thumbnail_url: null,
       updated_at: new Date().toISOString(),
     });
+    if (offErr) log.push(`${username}: ERROR al guardar: ${offErr.message}`);
   }
 
   return new Response(JSON.stringify({ ok: true, log }, null, 2), {

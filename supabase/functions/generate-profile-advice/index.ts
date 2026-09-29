@@ -68,15 +68,24 @@ Deno.serve(async (req) => {
     if (!player) return json({ error: 'Jugador no encontrado' }, 404);
 
     // Últimas 10 de SoloQ (las mismas que muestra el perfil), sin remakes.
-    const { data: partsRaw } = await supabase
-      .from('match_participants')
-      .select('match_id, champion, role, win, kills, deaths, assists, cs, vision_score, damage_to_champions, extra_stats, matches!inner(duration_seconds, ended_at, queue_id)')
-      .eq('player_id', playerId)
-      .eq('matches.queue_id', 420)
-      .limit(100);
+    // Se parte de la tabla matches para poder ORDENAR por fecha en la base
+    // (ordenar por una tabla enlazada no ordena la lista principal). Se piden
+    // unas cuantas de más por si hay remakes, que se descartan abajo.
+    const { data: partsRaw, error: partsErr } = await supabase
+      .from('matches')
+      .select('match_id, duration_seconds, ended_at, queue_id, match_participants!inner(player_id, champion, role, win, kills, deaths, assists, cs, vision_score, damage_to_champions, extra_stats)')
+      .eq('queue_id', 420)
+      .eq('match_participants.player_id', playerId)
+      .order('ended_at', { ascending: false })
+      .limit(30);
+    if (partsErr) throw partsErr;
     const partidas = (partsRaw ?? [])
-      .filter((m: any) => m.matches && !(!m.win && (m.matches.duration_seconds ?? 0) < 300))
-      .sort((a: any, b: any) => new Date(b.matches.ended_at).getTime() - new Date(a.matches.ended_at).getTime())
+      .map((m: any) => ({
+        match_id: m.match_id,
+        ...m.match_participants[0],
+        matches: { duration_seconds: m.duration_seconds, ended_at: m.ended_at, queue_id: m.queue_id },
+      }))
+      .filter((m: any) => !(!m.win && (m.matches.duration_seconds ?? 0) < 300))
       .slice(0, 10);
 
     if (partidas.length < MIN_PARTIDAS) {
@@ -185,9 +194,10 @@ Responde SOLO con un objeto JSON con esta forma exacta:
 "mejores_campeones" tiene de 1 a 3 elementos. "consejos" tiene de 3 a 5 elementos, cada uno de 1-2 frases, concretos y basados en los números.`;
 
     const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent';
-    const res = await fetch(`${url}?key=${encodeURIComponent(GEMINI_API_KEY)}`, {
+    const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      // La clave va en un header (no en la URL) para que no quede escrita en logs.
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.7, maxOutputTokens: 900, responseMimeType: 'application/json' },
@@ -195,7 +205,8 @@ Responde SOLO con un objeto JSON con esta forma exacta:
     });
     if (!res.ok) {
       const detalle = await res.text().catch(() => '');
-      return json({ error: `Gemini -> ${res.status}`, detalle: detalle.slice(0, 300) }, 502);
+      console.error(`Gemini -> ${res.status}: ${detalle.slice(0, 500)}`);
+      return json({ error: `La IA respondió ${res.status}. Prueba de nuevo en un rato.` }, 502);
     }
     const data = await res.json();
     const texto: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
@@ -220,6 +231,8 @@ Responde SOLO con un objeto JSON con esta forma exacta:
 
     return json({ status: 'ok', cached: false, advice, generated_at: generatedAt, last_match_id: lastMatchId });
   } catch (e) {
-    return json({ error: e instanceof Error ? e.message : String(e) }, 500);
+    // El detalle técnico queda en los logs de Supabase, no se le muestra al visitante.
+    console.error('generate-profile-advice:', e);
+    return json({ error: 'Error inesperado. Prueba de nuevo en un rato.' }, 500);
   }
 });

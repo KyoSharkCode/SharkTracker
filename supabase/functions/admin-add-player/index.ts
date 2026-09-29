@@ -82,7 +82,8 @@ Deno.serve(async (req) => {
   }).select('id, riot_game_name, riot_tag_line, icon_id').single();
   if (error) {
     if (error.code === '23505') return json({ error: 'Ese Riot ID ya está en el roster.' }, 409);
-    return json({ error: error.message }, 500);
+    console.error('admin-add-player:', error);
+    return json({ error: 'No se pudo guardar la cuenta. Prueba de nuevo en un rato.' }, 500);
   }
   return json({ player, found_in_lan: iconId !== null });
 });

@@ -15,6 +15,7 @@ const CRON_SECRET = Deno.env.get('CRON_SECRET')!;
 
 const REGION_API = 'americas';
 const MATCH_HISTORY_COUNT = 10;
+const HISTORY_DAYS = 30; // igual que cleanup_old_history()
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -89,21 +90,34 @@ Deno.serve(async (req) => {
   // juntos, el detalle de esa partida se pide a Riot una sola vez.
   const matchCache = new Map<string, any>();
   const log: string[] = [];
+  // Inserta un evento y lo anota en el log (o anota el error si falló).
+  const evento = async (row: Record<string, unknown>, texto: string) => {
+    const { error } = await supabase.from('events').insert(row);
+    log.push(error ? `ERROR evento (${texto}): ${error.message}` : texto);
+  };
   const diaInicio = inicioDiaMadridUTC(new Date());
   // Nombres de rol oficiales del sitio: TOP / JUNGLE / MID / ADC / SUPPORT.
   const mapaRoles: Record<string, string> = { TOP: 'TOP', JUNGLE: 'JUNGLE', MIDDLE: 'MID', BOTTOM: 'ADC', UTILITY: 'SUPPORT' };
 
   for (const player of players ?? []) {
     try {
+      // Solo partidas de los últimos 30 días (lo mismo que conserva la limpieza
+      // diaria). Si no, las de un jugador inactivo se borraban cada noche y se
+      // volvían a "descubrir" al rato, repitiendo sus logros en el feed.
+      const desde = Math.floor((Date.now() - HISTORY_DAYS * 86400000) / 1000);
       const ids: string[] = await riotFetch(
-        `https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/by-puuid/${player.puuid}/ids?start=0&count=${MATCH_HISTORY_COUNT}`
+        `https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/by-puuid/${player.puuid}/ids?startTime=${desde}&start=0&count=${MATCH_HISTORY_COUNT}`
       );
 
+      // Si ya están guardadas, no se vuelven a pedir ni reinsertar (una sola consulta).
+      const { data: existentes, error: existErr } = ids.length
+        ? await supabase.from('matches').select('match_id').in('match_id', ids)
+        : { data: [], error: null };
+      if (existErr) throw existErr;
+      const yaGuardadas = new Set((existentes ?? []).map((m: any) => m.match_id));
+
       for (const matchId of ids) {
-        // Si ya está guardada, no se vuelve a pedir ni reinsertar.
-        const { data: existing } = await supabase
-          .from('matches').select('match_id').eq('match_id', matchId).maybeSingle();
-        if (existing) continue;
+        if (yaGuardadas.has(matchId)) continue;
 
         if (!matchCache.has(matchId)) {
           const detail = await riotFetch(`https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/${matchId}`);
@@ -155,16 +169,9 @@ Deno.serve(async (req) => {
         const endedAtMs = info.gameEndTimestamp ?? (info.gameCreation + info.gameDuration * 1000);
         const endedAtIso = new Date(endedAtMs).toISOString();
 
-        await supabase.from('matches').insert({
-          match_id: matchId,
-          queue_id: info.queueId,
-          queue_type: QUEUE_NAMES[info.queueId] ?? 'Modo Destacado',
-          game_mode: info.gameMode,
-          patch: (info.gameVersion ?? '').split('.').slice(0, 2).join('.'),
-          duration_seconds: info.gameDuration,
-          ended_at: endedAtIso,
-          teams,
-        });
+        // Los logros y la primera victoria se aplican solo DESPUÉS de guardar
+        // bien la partida (ver abajo), para no avisar de algo que no quedó guardado.
+        const efectos: (() => Promise<void>)[] = [];
 
         const rows = [];
         for (const pp of info.participants ?? []) {
@@ -189,50 +196,48 @@ Deno.serve(async (req) => {
           // para partidas genuinamente NUEVAS, cada logro se dispara
           // una única vez, sin necesidad de guardar estado aparte.
           if (pp.deaths === 0 && (pp.kills > 0 || pp.assists > 0)) {
-            await supabase.from('events').insert({
+            efectos.push(() => evento({
               type: 'logro_partida', category: `perfecta:${matchId}`,
               player_id: playerId, detail: `${pp.championName} · ${pp.kills}/${pp.deaths}/${pp.assists}`,
-            });
-            log.push(`${nombreCorto}: Partida Perfecta (${pp.championName})`);
+            }, `${nombreCorto}: Partida Perfecta (${pp.championName})`));
           }
           if ((pp.challenges?.flawlessAces ?? 0) > 0) {
-            await supabase.from('events').insert({
+            efectos.push(() => evento({
               type: 'logro_partida', category: `ace:${matchId}`,
               player_id: playerId, detail: `${pp.championName} aniquiló al equipo rival sin bajas propias`,
-            });
-            log.push(`${nombreCorto}: Ace Perfecto (${pp.championName})`);
+            }, `${nombreCorto}: Ace Perfecto (${pp.championName})`));
           }
           if ((pp.nexusKills ?? 0) > 0) {
-            await supabase.from('events').insert({
+            efectos.push(() => evento({
               type: 'logro_partida', category: `terminador:${matchId}`,
               player_id: playerId, detail: `${pp.championName} dio el golpe final al Nexus`,
-            });
-            log.push(`${nombreCorto}: Terminador (${pp.championName})`);
+            }, `${nombreCorto}: Terminador (${pp.championName})`));
           }
 
           // ── Primera victoria del día (SoloQ, día = 6AM España) ──
-          if (pp.win && info.queueId === 420 && endedAtMs >= diaInicio.getTime()) {
-            const { data: estado } = await supabase.from('daily_first_win_state').select('*').limit(1).maybeSingle();
+          if (pp.win && info.queueId === 420 && endedAtMs >= diaInicio.getTime()) efectos.push(async () => {
+            const { data: estado, error: estErr } = await supabase.from('daily_first_win_state').select('*').limit(1).maybeSingle();
+            if (estErr) { log.push(`ERROR primera victoria (${nombreCorto}): ${estErr.message}`); return; }
             const mismoDia = estado?.day_start && new Date(estado.day_start).getTime() === diaInicio.getTime();
             const wonAtActual = mismoDia && estado?.won_at ? new Date(estado.won_at).getTime() : null;
             if (!mismoDia || wonAtActual === null || endedAtMs < wonAtActual) {
               const jugadorAnterior = mismoDia ? estado?.player_id ?? null : null;
-              await supabase.from('daily_first_win_state').update({
+              const { error: fwErr } = await supabase.from('daily_first_win_state').update({
                 day_start: diaInicio.toISOString(), player_id: playerId, won_at: endedAtIso,
                 champion: pp.championName, kills: pp.kills, deaths: pp.deaths, assists: pp.assists,
                 summoner_spells: [pp.summoner1Id, pp.summoner2Id],
                 team: pp.teamId === 100 ? 'blue' : 'red',
                 duration_seconds: info.gameDuration,
               }).eq('singleton', true);
+              if (fwErr) { log.push(`ERROR primera victoria (${nombreCorto}): ${fwErr.message}`); return; }
               if (jugadorAnterior !== playerId) {
-                await supabase.from('events').insert({
+                await evento({
                   type: 'primera_victoria_dia', category: 'primera_victoria_dia',
                   player_id: playerId, previous_player_id: jugadorAnterior, detail: null,
-                });
-                log.push(`${nombreCorto}: primera victoria del día`);
+                }, `${nombreCorto}: primera victoria del día`);
               }
             }
-          }
+          });
 
           rows.push({
             match_id: matchId,
@@ -273,9 +278,35 @@ Deno.serve(async (req) => {
             },
           });
         }
-        if (rows.length) {
-          await supabase.from('match_participants').upsert(rows, { onConflict: 'match_id,player_id' });
+        // ── Guardado: partida + jugadores del grupo. Si algo falla, se deshace
+        // para que la próxima corrida la vuelva a intentar (antes quedaba
+        // guardada "a medias", sin jugadores, y nunca se reintentaba).
+        const { error: matchErr } = await supabase.from('matches').insert({
+          match_id: matchId,
+          queue_id: info.queueId,
+          queue_type: QUEUE_NAMES[info.queueId] ?? 'Modo Destacado',
+          game_mode: info.gameMode,
+          patch: (info.gameVersion ?? '').split('.').slice(0, 2).join('.'),
+          duration_seconds: info.gameDuration,
+          ended_at: endedAtIso,
+          teams,
+        });
+        if (matchErr) {
+          log.push(`ERROR al guardar ${matchId}: ${matchErr.message}`);
+          continue;
         }
+        if (rows.length) {
+          const { error: rowsErr } = await supabase.from('match_participants').upsert(rows, { onConflict: 'match_id,player_id' });
+          if (rowsErr) {
+            await supabase.from('matches').delete().eq('match_id', matchId);
+            log.push(`ERROR al guardar jugadores de ${matchId} (se reintentará): ${rowsErr.message}`);
+            continue;
+          }
+        }
+        yaGuardadas.add(matchId);
+
+        // Ya está todo guardado: ahora sí, logros y primera victoria.
+        for (const efecto of efectos) await efecto();
 
         log.push(`Nueva partida ${matchId} (${QUEUE_NAMES[info.queueId] ?? info.queueId}) — ${rows.length} jugador(es) del grupo`);
       }
@@ -284,15 +315,21 @@ Deno.serve(async (req) => {
       // Se recalcula SIEMPRE (haya o no partidas nuevas esta corrida)
       // sobre las últimas 10 de SoloQ, para que la ventana se mueva
       // sola con el tiempo — mismo criterio que ya usan los badges.
-      const { data: todasSolo } = await supabase
-        .from('match_participants')
-        .select('id, champion, role, win, lp_change, extra_stats, matches!inner(ended_at, queue_id)')
-        .eq('player_id', player.id)
-        .eq('matches.queue_id', 420);
+      // Se parte de matches para que la base ordene por fecha y devuelva
+      // solo esas 10 (antes se descargaba todo el mes y se recortaba acá).
+      const { data: ultimasSolo, error: soloErr } = await supabase
+        .from('matches')
+        .select('ended_at, match_participants!inner(id, player_id, champion, role, win, lp_change, extra_stats)')
+        .eq('queue_id', 420)
+        .eq('match_participants.player_id', player.id)
+        .order('ended_at', { ascending: false })
+        .limit(10);
+      if (soloErr) throw soloErr;
 
-      const recientesSolo = (todasSolo ?? [])
-        .sort((a: any, b: any) => new Date(b.matches.ended_at).getTime() - new Date(a.matches.ended_at).getTime())
-        .slice(0, 10);
+      const recientesSolo: any[] = (ultimasSolo ?? []).map((m: any) => ({
+        ...m.match_participants[0],
+        matches: { ended_at: m.ended_at },
+      }));
 
       // Reintento de lp_change — si una partida se procesó ANTES de que
       // sync-riot-data alcanzara a registrar el cambio de rango posterior,
