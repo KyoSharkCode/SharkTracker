@@ -7,6 +7,10 @@
   "scripts": {
     "start": "electron ."
   },
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.2",
+    "ws": "^8.18.0"
+  },
   "devDependencies": {
     "electron": "^33.0.0"
   }
