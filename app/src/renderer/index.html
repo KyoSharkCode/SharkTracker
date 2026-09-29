@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <!-- Qué puede cargar la ventana: solo los archivos de la app, las fuentes de Google
-     y las imágenes de Discord (avatar) y CommunityDragon (ícono de invocador).
+     y las imágenes de Discord (avatar), CommunityDragon (ícono de invocador) y DDragon
+     (campeones, runas y hechizos de Mi Perfil).
      Todo lo demás (Supabase, Riot, la API local de LoL) lo hace el proceso main. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://cdn.discordapp.com https://media.discordapp.net https://raw.communitydragon.org; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://cdn.discordapp.com https://media.discordapp.net https://raw.communitydragon.org https://ddragon.leagueoflegends.com; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>SharkTracker</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="style.css">
@@ -73,14 +74,9 @@
 
       <section class="page active" id="page-perfil">
         <div class="h1">Mi Perfil</div>
-        <div class="h1sub">Primer paso: comprobar que la app puede hablar con tu cliente de League</div>
-
-        <div class="card">
-          <div class="cardhd"><span class="dot"></span>Detección local (Live Client Data API)</div>
-          <div id="live-status" class="livestatus">Sin comprobar todavía.</div>
-          <button id="btn-check" class="checkbtn">Comprobar ahora</button>
-          <pre id="live-json" class="livejson" hidden></pre>
-        </div>
+        <div id="perfil-sub" class="h1sub">Cargando tu perfil…</div>
+        <div id="perfil-cab" class="profhead" hidden></div>
+        <div id="perfil-cuerpo"></div>
       </section>
 
       <section class="page" id="page-envivo">
@@ -132,6 +128,14 @@
             <button id="btn-signout" class="dangerbtn" type="button">Cerrar sesión</button>
           </div>
         </div>
+
+        <!-- Diagnóstico: ¿la app puede leer la partida? (antes estaba en Mi Perfil) -->
+        <div class="card card-diag">
+          <div class="cardhd"><span class="dot"></span>Diagnóstico: conexión con el juego (Live Client Data API)</div>
+          <div id="live-status" class="livestatus">Sin comprobar todavía.</div>
+          <button id="btn-check" class="checkbtn">Comprobar ahora</button>
+          <pre id="live-json" class="livejson" hidden></pre>
+        </div>
         </div>
 
         <!-- Ajustes → Overlay: interruptores reales + editor de posiciones -->
@@ -176,6 +180,7 @@
     </div>
   </div>
 
+  <script src="perfil.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

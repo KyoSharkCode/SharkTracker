@@ -55,9 +55,9 @@ vez haciendo una app de escritorio).
 - "En partida": overlay real vía Live Client Data API — oro, timers, indicador
   Barón/Ancestral, objetivos, build propia, rendimiento propio.
 - ✅ "Pantalla de carga": rango/LP propio y rival vía la key de Riot de SharkTracker.
-- "Mi Perfil" completo, incluido el estado "sin conexión" (tira del backend
+- ✅ "Mi Perfil" completo, incluido el estado "sin conexión" (tira del backend
   de SharkTracker/Supabase).
-- "Ajustes → Overlay": toggles reales + reposicionar elementos.
+- ✅ "Ajustes → Overlay": toggles reales + reposicionar elementos.
 
 **Se deja para después (no construir todavía):**
 - "En Vivo" (selección de campeones) — necesita integrarse con el LCU API
@@ -101,6 +101,8 @@ app/
     preload.js           → contextBridge (window.sharkTracker): ventana, checkLiveGame,
                            estado de partida, auth
     rendimiento.js       → "Tu rendimiento": división objetivo y comparación con la referencia
+    perfil.js            → Mi Perfil: lee SharkTracker, íconos de DDragon, copia local (sin conexión)
+    perfil-calculos.js   → Mi Perfil: radar, etiquetas, historial de elo y de partidas
     game-state.js        → "cerebro" del overlay (sin Electron, se prueba en Node):
                            buff de Barón/Ancestral y titulares, anuncios de objetivos
                            e inhibidores por reaparecer, toasts de dragón/alma,
@@ -121,7 +123,8 @@ app/
       index.html         → CSP estricta, barra de título (chip de partida + chip de Discord), login,
                            sidebar, secciones; Ajustes → Cuenta y Ajustes → Overlay
       style.css          → estilos del mockup (Login y Ajustes → Cuenta incluidos)
-      app.js             → navegación, login/cierre de sesión, chips, panel de prueba
+      app.js             → navegación, login/cierre de sesión, chips, Ajustes, diagnóstico
+      perfil.js          → dibuja Mi Perfil (y su estado "sin conexión")
 ```
 
 Para correrla: abrir el repo en VS Code, y en la terminal `cd app`,
@@ -246,6 +249,27 @@ partidas contra bots no salen en el "espectador" de Riot)
   a 1671 (5 por fila, 254 px + 42), filas en y 68–528 y 591–1051. Movible en el editor
   ("Ver pantalla de carga"). Interruptores en Ajustes → Overlay (rango/winrate de cada
   equipo y etiquetas; "Counters del rival" próximamente).
+
+## Mi Perfil (mockup "La cara de la app" + su estado "sin conexión")
+
+✅ (pendiente de probar en Windows con datos reales)
+- `perfil.js` (main) lee con tu sesión (RLS: lectura pública) players, rank_latest,
+  rank_snapshots (SoloQ, 30 días), player_masteries y matches + match_participants
+  (150 más recientes; la base guarda 30 días). Íconos y nombres en español de DDragon
+  (summoner.json, runesReforged.json, champion.json; una vez por sesión).
+- Cálculos en `perfil-calculos.js` (se prueba en Node): radar de las últimas 20 SoloQ con
+  los 4 ejes de "Tu rendimiento" (CS/min, oro/min, visión/min, KP) contra la división de
+  arriba de tu rol (`auth.getReferencia`, ≥ 30 muestras); KDA, daño/min y WR aparte.
+  Etiquetas (últimas 30 SoloQ, sin remakes): buena/mala racha (3+), Tilteado (misma idea
+  que la web), mejor en lado azul/rojo (4+ por lado, 10+ pts), amante (5+ con un campeón),
+  bueno/malo con (4+ partidas, ≥ 60 % / ≤ 40 %). Historial de elo = elo_score de
+  rank_snapshots. Historial por cola: SoloQ, Flex, Normal, Partida Rápida, ARAM, Arena
+  (últimas 10; remake < 5 min; LP y Égida de extra_stats).
+- "Sin conexión": copia en `userData/perfil.json`; si falla SharkTracker se ve tu identidad
+  y último rango guardado + el aviso del mockup con "Reintentar conexión". Se recarga al
+  iniciar sesión y al volver a Mi Perfil (si pasaron 2+ min), o con "Actualizar".
+- El panel de prueba "Comprobar ahora" pasó a Ajustes → Cuenta ("Diagnóstico").
+- "Nivel" del mockup no está (la base no lo guarda); "Autorrelleno" tampoco (LCU).
 
 Decisiones:
 - **"Tu build"**: se deja para cuando exista "Meta" (hace falta la build de referencia).
