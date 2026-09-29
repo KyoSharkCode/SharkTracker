@@ -97,6 +97,14 @@
         <div class="h1">Ajustes</div>
         <div class="h1sub">Cuenta, overlay, apariencia y notificaciones de la app</div>
 
+        <div class="stabs">
+          <button class="stab active" type="button" data-stab="cuenta">Cuenta</button>
+          <button class="stab" type="button" data-stab="overlay">Overlay</button>
+          <button class="stab disabled" type="button" disabled title="Próximamente">Apariencia</button>
+          <button class="stab disabled" type="button" disabled title="Próximamente">Notificaciones</button>
+        </div>
+
+        <div class="subpage active" id="stab-cuenta">
         <div class="card card-discord">
           <div class="cardhd"><span class="dot dot-discord"></span>Cuentas conectadas</div>
           <div class="cardsub">Se usan para identificarte y enlazar tus datos con SharkTracker</div>
@@ -122,6 +130,44 @@
           <div class="dangerrow">
             <span class="dangertxt">Cierra la sesión solo en esta app (la web sigue igual).</span>
             <button id="btn-signout" class="dangerbtn" type="button">Cerrar sesión</button>
+          </div>
+        </div>
+        </div>
+
+        <!-- Ajustes → Overlay: interruptores reales + editor de posiciones -->
+        <div class="subpage" id="stab-overlay">
+          <div class="ovgrid">
+            <div class="card card-ov">
+              <div class="cardhd"><span class="dot"></span>En partida</div>
+              <div class="cardsub">Se dibuja sobre el juego mientras juegas. Los cambios se aplican al instante.</div>
+              <div class="swrow"><div><div class="swnm">Diferencia de oro</div><div class="swsub">Solo visible con Tab presionado</div></div><button class="sw" type="button" role="switch" data-pieza="oro"></button></div>
+              <div class="swrow"><div><div class="swnm">Indicador de Barón / Ancestral</div><div class="swsub">Tiempo, dueño e íconos de quién lo tiene</div></div><button class="sw" type="button" role="switch" data-pieza="buffs"></button></div>
+              <div class="swrow"><div><div class="swnm">Anuncios de objetivos</div><div class="swsub">Dragón, Vacuolarvas, Heraldo, Barón e inhibidores por reaparecer</div></div><button class="sw" type="button" role="switch" data-pieza="anuncios"></button></div>
+              <div class="swrow"><div><div class="swnm">Avisos de lo que pasó</div><div class="swsub">Dragón y alma, Vacuolarvas, Heraldo, torres e inhibidores</div></div><button class="sw" type="button" role="switch" data-pieza="toasts"></button></div>
+              <div class="swrow"><div><div class="swnm">Tu rendimiento</div><div class="swsub">Oro/min, CS/min, visión y particip. vs la división de arriba</div></div><button class="sw" type="button" role="switch" data-pieza="rendimiento"></button></div>
+              <div class="swrow pronto"><div><div class="swnm">Timers de campamentos <span class="prox">Próximamente</span></div><div class="swsub">Sobre el minimapa, por visión</div></div><span class="sw off"></span></div>
+              <div class="swrow pronto"><div><div class="swnm">Tu build <span class="prox">Próximamente</span></div><div class="swsub">Próximo componente + objeto final</div></div><span class="sw off"></span></div>
+            </div>
+
+            <div class="card card-carga">
+              <div class="cardhd"><span class="dot dot-carga"></span>Pantalla de carga <span class="prox">Próximamente</span></div>
+              <div class="cardsub">Se dibujará sobre la pantalla de carga de la partida</div>
+              <div class="swrow pronto"><div class="swnm">Rango y LP — tu equipo</div><span class="sw off"></span></div>
+              <div class="swrow pronto"><div class="swnm">Winrate y partidas — tu equipo</div><span class="sw off"></span></div>
+              <div class="swrow pronto"><div class="swnm">Rango y LP — rivales</div><span class="sw off"></span></div>
+              <div class="swrow pronto"><div class="swnm">Winrate y partidas — rivales</div><span class="sw off"></span></div>
+              <div class="swrow pronto"><div><div class="swnm">Etiquetas de main</div><div class="swsub">"Main del campeón" / "Fuera de su main"</div></div><span class="sw off"></span></div>
+              <div class="swrow pronto"><div><div class="swnm">Counters del rival</div><div class="swsub">Se revela junto con su pick</div></div><span class="sw off"></span></div>
+            </div>
+
+            <div class="card card-pos">
+              <div class="cardhd"><span class="dot dot-pos"></span>Posición de los elementos</div>
+              <div class="cardsub">Acomoda cada pieza sobre una pantalla que emula el juego</div>
+              <div class="previewbox">
+                <span>Se abre una ventana con el HUD de LoL de fondo (o una captura tuya): arrastra las piezas y guarda.</span>
+                <button id="btn-reposicionar" class="checkbtn" type="button">Reposicionar elementos</button>
+              </div>
+            </div>
           </div>
         </div>
       </section>

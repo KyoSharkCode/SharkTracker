@@ -154,3 +154,26 @@ async function checkLiveGame() {
 }
 
 checkBtn.addEventListener('click', checkLiveGame);
+
+// --- Ajustes: pestañas (Cuenta / Overlay) ---
+document.querySelectorAll('.stab:not(.disabled)').forEach((tab) => tab.addEventListener('click', () => {
+  document.querySelectorAll('.stab').forEach((t) => t.classList.toggle('active', t === tab));
+  document.querySelectorAll('.subpage').forEach((p) => p.classList.toggle('active', p.id === 'stab-' + tab.dataset.stab));
+}));
+
+// --- Ajustes → Overlay: interruptores (se guardan en este PC y se aplican al instante) ---
+const interruptores = document.querySelectorAll('.sw[data-pieza]');
+function renderOverlayConfig(config) {
+  interruptores.forEach((sw) => {
+    const on = config?.visible?.[sw.dataset.pieza] !== false;
+    sw.classList.toggle('on', on);
+    sw.setAttribute('aria-checked', String(on));
+  });
+}
+interruptores.forEach((sw) => sw.addEventListener('click', async () => {
+  const on = !sw.classList.contains('on');
+  renderOverlayConfig(await window.sharkTracker.overlayConfig.set({ visible: { [sw.dataset.pieza]: on } }));
+}));
+window.sharkTracker.overlayConfig.onChanged(renderOverlayConfig);
+window.sharkTracker.overlayConfig.get().then(renderOverlayConfig);
+$('btn-reposicionar').addEventListener('click', () => window.sharkTracker.overlayConfig.abrirEditor());

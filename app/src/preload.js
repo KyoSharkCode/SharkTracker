@@ -12,6 +12,14 @@ contextBridge.exposeInMainWorld('sharkTracker', {
   getGameStatus: () => ipcRenderer.invoke('game:getStatus'),
   onGameStatus: (callback) => ipcRenderer.on('game:status', (_e, status) => callback(status)),
 
+  // Ajustes → Overlay
+  overlayConfig: {
+    get: () => ipcRenderer.invoke('overlay-config:get'),
+    set: (cambios) => ipcRenderer.invoke('overlay-config:set', cambios),
+    onChanged: (callback) => ipcRenderer.on('overlay:config', (_e, config) => callback(config)),
+    abrirEditor: () => ipcRenderer.send('editor:abrir'),
+  },
+
   // Sesión de Discord
   auth: {
     getState: () => ipcRenderer.invoke('auth:getState'),
