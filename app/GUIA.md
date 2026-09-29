@@ -4,9 +4,9 @@ App de SharkTracker para League of Legends: overlay en partida, pantalla de carg
 los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
 
 ## Instalar
-1. Entra en **Releases** del repo (https://github.com/KyoSharkCode/SharkTracker/releases)
-   y descarga el último **`SharkTracker-Setup-X.Y.Z.exe`**.
-2. Ábrelo. Como la app no está firmada, Windows puede mostrar **"Windows protegió tu PC"**:
+1. Entra en **https://sharktracker.lol/descargar.html** (menú ☰ → "App de escritorio")
+   y pulsa **Descargar**.
+2. Abre **`SharkTracker-Setup.exe`**. Como la app no está firmada, Windows puede mostrar **"Windows protegió tu PC"**:
    pulsa **"Más información" → "Ejecutar de todas formas"**. Es normal en apps entre amigos.
 3. Se instala sola y crea un acceso directo en el escritorio.
 

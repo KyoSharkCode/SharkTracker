@@ -25,6 +25,8 @@ const ITEMS = [
     icon: 'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1m1 2v10h14V7zm8.5 1.5L9 12l4.5 3.5zm-1 0v7l-4.5-3.5z' },
   { key: 'stats', label: 'Estadísticas', href: 'estadisticas.html', desc: 'Campeones, roles, dúos y récords',
     icon: 'M3 3h2v16h16v2H3zM7 13l4-4 3 3 5-6 1.5 1.3-6.4 7.6-3.1-3.1L8.4 14.4z' },
+  { key: 'app', label: 'App de escritorio', href: 'descargar.html', desc: 'Overlay y pantalla de carga (Windows)',
+    icon: 'M3 4h18a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-7v2h3v2H7v-2h3v-2H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1m1 2v9h16V6z' },
 ];
 
 const CSS = `

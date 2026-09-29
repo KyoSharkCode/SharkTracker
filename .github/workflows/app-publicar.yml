@@ -4,6 +4,10 @@
 # Toma la versión de app/package.json, arma el instalador en una máquina Windows
 # de GitHub y lo sube como Release "vX.Y.Z". Las apps instaladas lo detectan y se
 # actualizan solas. (No toca la web: GitHub Pages sigue igual.)
+#
+# En dos pasos: electron-builder sube todo a un Release en BORRADOR (GitHub no deja
+# crear uno ya publicado si la etiqueta vX.Y.Z todavía no existe) y después se publica
+# el borrador, lo que crea la etiqueta en el commit que se armó.
 name: "App: publicar versión"
 
 on:
@@ -19,14 +23,21 @@ jobs:
       run:
         working-directory: app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: app/package-lock.json
       - run: npm ci
-      - name: Armar el instalador y publicarlo en Releases
+      - name: Armar el instalador y subirlo a un Release en borrador
         run: npx electron-builder --win --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publicar el Release
+        shell: bash
+        run: |
+          VERSION="v$(node -p "require('./package.json').version")"
+          gh release edit "$VERSION" --draft=false --latest --target "$GITHUB_SHA"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

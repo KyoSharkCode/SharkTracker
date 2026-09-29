@@ -99,7 +99,8 @@ de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no
 - **Electron 44** (antes 33; Node más nuevo). supabase-js sigue recibiendo `ws` como
   transporte de realtime.
 - **Empaquetado**: electron-builder (campo `build` de package.json): instalador NSIS de un
-  clic por usuario, `SharkTracker-Setup-X.Y.Z.exe`, registra `sharktracker://`.
+  clic por usuario, `SharkTracker-Setup.exe` (nombre fijo, sin versión: así
+  `releases/latest/download/SharkTracker-Setup.exe` siempre es el último), registra `sharktracker://`.
   `npmRebuild: false` (uiohook-napi trae binarios N-API precompilados; quedan fuera del
   asar solos). Sin firma de código: Windows avisa "Windows protegió tu PC" la primera vez.
 - **Actualizaciones**: electron-updater desde **GitHub Releases** (repo público): busca al
@@ -107,7 +108,15 @@ de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no
   Solo en la app instalada (con `npm start` no).
 - **Publicar una versión**: subir `version` en app/package.json (merge) → pestaña Actions
   del repo → **"App: publicar versión"** → Run workflow (`.github/workflows/app-publicar.yml`,
-  arma en windows-latest y crea el Release `vX.Y.Z`). Probar local: `npm run dist`.
+  arma en windows-latest, sube a un Release en borrador y lo publica como `vX.Y.Z`; GitHub
+  no deja crear un Release ya publicado sin etiqueta). Probar local: `npm run dist`.
+- **Descarga desde la web**: `descargar.html` (menú ☰ → "App de escritorio"). El botón usa
+  el enlace de descarga de la última publicación y muestra versión/fecha/tamaño leyendo la API pública de GitHub
+  (`api.github.com` está en su CSP). Sin versión publicada, el botón dice "Muy pronto".
+  Solo para miembros: sin sesión el botón lleva a login.html; con sesión pero sin cuenta de
+  LoL vinculada, no descarga. La guía y el enlace del instalador solo aparecen a miembros.
+  Ojo: es un candado de la web; el Release de GitHub es público (repo público). El candado
+  real es la app, que exige Discord + cuenta vinculada.
 - `app/GUIA.md`: guía para los amigos (instalar, primera vez, atajos, actualizaciones).
 
 ```
