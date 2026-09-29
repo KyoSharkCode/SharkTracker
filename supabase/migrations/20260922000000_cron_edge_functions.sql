@@ -17,13 +17,13 @@ create extension if not exists pg_net;
 --
 -- select vault.create_secret(
 --   '<pegar acá el CRON_SECRET nuevo>',
---   'cron_secret',
+--   'CRON_SECRET',
 --   'Header x-cron-secret para las Edge Functions disparadas por cron'
 -- );
 --
 -- Si ya existe y estás ROTANDO el valor:
 -- select vault.update_secret(
---   (select id from vault.secrets where name = 'cron_secret'),
+--   (select id from vault.secrets where name = 'CRON_SECRET'),
 --   '<CRON_SECRET nuevo>'
 -- );
 
@@ -35,7 +35,7 @@ select cron.schedule(
     url := 'https://mvupiohecvoiwuxwjdrt.supabase.co/functions/v1/sync-riot-data',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'cron_secret')
+      'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'CRON_SECRET')
     ),
     body := '{}'::jsonb
   ) as request_id;
@@ -50,7 +50,7 @@ select cron.schedule(
     url := 'https://mvupiohecvoiwuxwjdrt.supabase.co/functions/v1/sync-matches',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'cron_secret')
+      'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'CRON_SECRET')
     ),
     body := '{}'::jsonb
   ) as request_id;
@@ -65,7 +65,7 @@ select cron.schedule(
     url := 'https://mvupiohecvoiwuxwjdrt.supabase.co/functions/v1/sync-live-status',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'cron_secret')
+      'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'CRON_SECRET')
     ),
     body := '{}'::jsonb
   ) as request_id;
@@ -80,7 +80,7 @@ select cron.schedule(
     url := 'https://mvupiohecvoiwuxwjdrt.supabase.co/functions/v1/sync-twitch-status',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'cron_secret')
+      'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'CRON_SECRET')
     ),
     body := '{}'::jsonb
   ) as request_id;

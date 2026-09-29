@@ -1,4 +1,7 @@
 // Cron: cada 10 min (ver cron job "referencias-elo-cada-10min").
+// Candado propio: esta función tiene "Verify JWT" APAGADO (la llama pg_cron,
+// que no manda sesión) y en su lugar exige la cabecera x-cron-secret.
+// Si queda encendido, Supabase responde 401 antes de que corra el código.
 // Recolector de referencias por elo para "Tu rendimiento" de la app.
 //
 // En cada corrida:
