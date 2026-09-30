@@ -572,3 +572,55 @@ span.sw { cursor: default; opacity: 0.6; }
   .mt-grid { grid-template-columns: 1fr; }
   .mt-lista { max-height: 300px; }
 }
+
+/* ---- En Vivo ---- */
+.navlive { display: none; margin-left: auto; align-items: center; gap: 4px; font-size: 7px; font-weight: 700; letter-spacing: 0.05em; color: #4fd68c; }
+.navlive .pd, .ev-st.live .pd { width: 5px; height: 5px; border-radius: 50%; background: #4fd68c; box-shadow: 0 0 5px rgba(79,214,140,0.9); animation: evpulso 1.8s ease-in-out infinite; }
+.navitem.live .navlive { display: flex; }
+.navitem.live .navauto { display: none; }
+@keyframes evpulso { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+.cardhd .dot-err { background: #ea8a8a; }
+
+.ev-estado { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 14px; }
+.ev-st { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 600; color: #8a97a6; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 5px 13px; }
+.ev-st.live { color: #4fd68c; background: rgba(79,214,140,0.1); border-color: rgba(79,214,140,0.35); }
+.ev-st.gold { color: #f0dba8; background: rgba(232,199,102,0.1); border-color: rgba(232,199,102,0.35); }
+.ev-st.champ { color: #7fe0cf; background: rgba(0,229,199,0.1); border-color: rgba(0,229,199,0.35); padding-left: 5px; }
+.ev-stic { width: 18px; height: 18px; border-radius: 5px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 7px; background: #0c1320; }
+.ev-stic img { width: 100%; height: 100%; }
+
+.ev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; align-items: start; }
+.ev-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+.ev-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ev-colt { font-size: 9px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #5b6b7c; margin-bottom: 2px; }
+.ev-chip { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; padding: 5px 8px; min-width: 0; }
+.ev-chip.dest { background: rgba(232,199,102,0.1); border-color: rgba(232,199,102,0.45); }
+.ev-chipn { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-chipd { margin-left: auto; font-size: 9px; color: #8a97a6; white-space: nowrap; }
+.ev-vacio { border-style: dashed; color: #4a5768; }
+
+.ev-acciones { display: flex; gap: 8px; margin-top: 12px; }
+.ev-btn {
+  font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; color: #05070c;
+  background: linear-gradient(135deg,#00e5c7,#0a8f7f); border: none; border-radius: 8px; padding: 7px 16px; cursor: pointer;
+}
+.ev-btn:hover { filter: brightness(1.08); }
+.ev-btn:disabled { opacity: 0.6; cursor: default; }
+.ev-aviso { font-size: 10px; margin-top: 7px; line-height: 1.5; }
+.ev-aviso.ok { color: #6fdba8; }
+.ev-aviso.mal { color: #f0a487; }
+.ev-hech { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
+.ev-hech .ev-btn { margin-left: auto; }
+
+.ev-fila { display: flex; align-items: center; gap: 9px; padding: 6px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.ev-fila:last-child { border-bottom: none; }
+.ev-fila.pend { opacity: 0.6; }
+.ev-fila.rival { background: rgba(232,199,102,0.06); border-radius: 8px; }
+.ev-tag { margin-left: auto; font-size: 9px; font-weight: 700; color: #7fe0cf; background: rgba(0,229,199,0.1); border: 1px solid rgba(0,229,199,0.35); border-radius: 6px; padding: 2px 7px; }
+.ev-bans { display: flex; gap: 7px; margin-bottom: 10px; min-height: 24px; align-items: center; }
+.ev-ban { position: relative; opacity: 0.6; }
+.ev-ban::after { content: ""; position: absolute; inset: 0; background: linear-gradient(45deg, transparent 46%, #ea8a8a 48%, #ea8a8a 52%, transparent 54%); }
+.ev-pend { display: flex; align-items: center; gap: 7px; margin-top: 8px; }
+.ev-pendic { width: 26px; height: 26px; border-radius: 50%; border: 1px dashed rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 11px; color: #4a5768; }
+
+@media (max-width: 1100px) { .ev-grid { grid-template-columns: 1fr; } }

@@ -32,6 +32,16 @@ contextBridge.exposeInMainWorld('sharkTracker', {
     campeon: (championId, posicion) => ipcRenderer.invoke('meta:campeon', championId, posicion),
   },
 
+  // En Vivo (selección de campeones)
+  envivo: {
+    estado: () => ipcRenderer.invoke('envivo:estado'),
+    onEstado: (callback) => ipcRenderer.on('envivo:estado', (_e, estado) => callback(estado)),
+    amigos: () => ipcRenderer.invoke('envivo:amigos'),
+    importarRunas: (datos) => ipcRenderer.invoke('envivo:runas', datos),
+    importarBuild: (datos) => ipcRenderer.invoke('envivo:build', datos),
+    ponerHechizos: (ids) => ipcRenderer.invoke('envivo:hechizos', ids),
+  },
+
   // Ajustes → Overlay
   overlayConfig: {
     get: () => ipcRenderer.invoke('overlay-config:get'),

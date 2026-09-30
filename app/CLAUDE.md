@@ -87,7 +87,7 @@ Discord, overlay en partida (Barón/Ancestral, avisos, oro con Tab, Tu rendimien
 pantalla de carga (con Ctrl + X), Ajustes → Overlay con editor y Mi Perfil.
 **Fase 2 en curso** (plan acordado): Bloque 0 puesta a punto ✅ · Bloque 1 early access ✅
 (instalador + actualizaciones automáticas) · Bloque 2 Meta (v0.3.0, datos del MCP de OP.GG
-guardados en Supabase; ver sección "Meta") · Bloque 3 En Vivo (LCU; en ranked NO revelar
+guardados en Supabase; ver sección "Meta") ✅ · Bloque 3 En Vivo (LCU; en ranked NO revelar
 nombres ocultos en selección) · Bloque 4 Ajustes Apariencia/Notificaciones · Bloque 5 motor
 de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no pública).
 
@@ -209,6 +209,34 @@ propio "class X: campos" + `X(valores)` que traduce `leerOpgg`). **La app nunca 
   contra ese campeón y la diferencia con tu winrate medio en el rol.
 - Meta validado por Alex (30/09/2026) con datos reales; la función de prueba `meta-prueba` se borró.
 - Pendiente para después con estos datos: "Tu build" en partida y counters en En Vivo.
+
+## En Vivo (Fase 2, bloque 3 — v0.4.0, partes A + B)
+
+Regla de Alex: **el usuario decide SIEMPRE**. Nada se importa ni se cambia en el cliente sin
+que pulse un botón.
+
+- `src/lcu.js` (main): API local del cliente de LoL (LCU). Puerto y contraseña salen de la
+  línea de comandos de `LeagueClientUx.exe` (PowerShell `Get-CimInstance`) o del `lockfile` en
+  `C:\Riot Games\League of Legends`. Sondeo: fase del cliente cada 3 s (5 s sin cliente); en
+  selección, `/lol-champ-select/v1/session` cada 1 s. Solo avisa a la ventana si algo cambió.
+- Privacidad: el nombre de un aliado solo se pasa si el cliente lo marca visible
+  (`nameVisibilityType === 'VISIBLE'`); en ranked suele estar oculto → no se muestra. Los
+  amigos de SharkTracker se reconocen por Riot ID (solo si es visible) con su rango de la base
+  (0 peticiones a Riot).
+- Botones (`lcu.js`):
+  - **Importar runas**: borra las páginas "SharkTracker · …" y crea una nueva (current: true).
+    Tus páginas no se tocan; si no hay hueco, avisa que borres una.
+  - **Importar build**: set de objetos "SharkTracker · Campeón Rol" en
+    `/lol-item-sets/v1/item-sets/{summonerId}/sets` (reemplaza el anterior de SharkTracker).
+  - **Poner hechizos**: `PATCH my-selection`; si ya llevas Destello en D o F, se queda en esa tecla.
+- `renderer/envivo.js`: salta sola a En Vivo al entrar a selección (el nav muestra "ON").
+  Antes de fijar: picks (tus más jugados en el rol, meta del rol, y "le ganan a" tu rival de
+  línea) y bans (los que le cuestan a tu campeón en mente, y los más baneados sin incluir tus
+  campeones). Al fijar: runas, hechizos y build de tu campeón (ficha de Meta) con los botones.
+  Rol de los rivales: el cliente no lo da → se estima con el role_rate de la tier list.
+  Colas sin roles (ARAM, Arena, URF): sin recomendaciones de Meta.
+- Pendiente (parte C): build adaptativa según el equipo rival (reglas: tipo de daño,
+  curación → antisanación, tanques, control → Mercurio, burst) + guía de matchup de OP.GG.
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)

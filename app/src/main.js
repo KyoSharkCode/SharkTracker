@@ -54,6 +54,7 @@ if (!gotLock) {
     const link = findDeepLink(process.argv);
     if (link) handleDeepLink(link);
     startGameWatcher();
+    lcu.iniciar((estado) => mainWindow?.webContents.send('envivo:estado', estado));
   });
 }
 
@@ -469,6 +470,15 @@ ipcMain.handle('perfil:cache', () => perfil.leerCache());
 const meta = require('./meta');
 ipcMain.handle('meta:tier', () => meta.cargarTier());
 ipcMain.handle('meta:campeon', (_e, championId, posicion) => meta.cargarCampeon(championId, posicion));
+
+// ── En Vivo (selección de campeones, vía la API local del cliente de LoL) ──
+// Las acciones (runas, build, hechizos) solo se hacen cuando el usuario pulsa su botón.
+const lcu = require('./lcu');
+ipcMain.handle('envivo:estado', () => lcu.estado());
+ipcMain.handle('envivo:amigos', () => meta.cargarAmigos().catch(() => []));
+ipcMain.handle('envivo:runas', (_e, datos) => lcu.importarRunas(datos));
+ipcMain.handle('envivo:build', (_e, datos) => lcu.importarBuild(datos));
+ipcMain.handle('envivo:hechizos', (_e, ids) => lcu.ponerHechizos(ids));
 
 // ── Ajustes → Overlay (qué piezas se ven y dónde van) ──
 // Al guardar se avisa a todas las ventanas: el overlay se actualiza al instante,
