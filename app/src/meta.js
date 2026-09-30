@@ -108,4 +108,18 @@ async function cargarCampeon(championId, posicion) {
   return data;
 }
 
-module.exports = { cargarTier, cargarCampeon };
+// Amigos de SharkTracker (para En Vivo): Riot ID + rango de SoloQ, de la base (0 peticiones a Riot).
+async function cargarAmigos() {
+  const cliente = auth.client();
+  const [jugadores, rangos] = await Promise.all([
+    cliente.from('players').select('id, riot_game_name, riot_tag_line'),
+    cliente.from('rank_latest').select('player_id, tier, division, lp').eq('queue_type', 'RANKED_SOLO_5x5'),
+  ]);
+  const rango = new Map((rangos.data ?? []).map((r) => [r.player_id, r]));
+  return (jugadores.data ?? []).map((j) => ({
+    riotId: `${j.riot_game_name}#${j.riot_tag_line}`.toLowerCase(),
+    rango: rango.get(j.id) ?? null,
+  }));
+}
+
+module.exports = { cargarTier, cargarCampeon, cargarAmigos };

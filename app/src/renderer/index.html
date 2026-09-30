@@ -65,7 +65,7 @@
   <div id="app-body" class="body2" hidden>
     <div class="sidebar">
       <div class="navitem active" data-page="perfil"><span class="navdot"></span>Mi Perfil</div>
-      <div class="navitem disabled" data-page="envivo"><span class="navdot"></span>En Vivo<span class="navauto">auto</span></div>
+      <div class="navitem" data-page="envivo"><span class="navdot"></span>En Vivo<span class="navauto">auto</span><span class="navlive"><span class="pd"></span>ON</span></div>
       <div class="navitem" data-page="meta"><span class="navdot"></span>Meta</div>
       <div class="navitem" data-page="ajustes"><span class="navdot"></span>Ajustes</div>
     </div>
@@ -81,7 +81,8 @@
 
       <section class="page" id="page-envivo">
         <div class="h1">En Vivo</div>
-        <div class="h1sub">Se activará sola al entrar a selección de campeones — todavía no implementado</div>
+        <div id="envivo-sub" class="h1sub">Buscando el cliente de League of Legends…</div>
+        <div id="envivo-cuerpo"></div>
       </section>
 
       <section class="page" id="page-meta">
@@ -209,6 +210,7 @@
 
   <script src="perfil.js"></script>
   <script src="meta.js"></script>
+  <script src="envivo.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
