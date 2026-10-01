@@ -104,7 +104,8 @@ de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no
   `npmRebuild: false` (uiohook-napi trae binarios N-API precompilados; quedan fuera del
   asar solos). Sin firma de código: Windows avisa "Windows protegió tu PC" la primera vez.
 - **Actualizaciones**: electron-updater desde **GitHub Releases** (repo público): busca al
-  abrir y cada 4 h, descarga sola, instala al cerrar o con "Reiniciar y actualizar".
+  abrir y cada 4 h, descarga sola, instala al cerrar o con "Reiniciar y actualizar". Cuando la
+  versión nueva está descargada, la barra de título muestra "vX.Y.Z lista · Reiniciar" (`#update-chip`).
   Solo en la app instalada (con `npm start` no).
 - **Publicar una versión**: subir `version` en app/package.json (merge) → pestaña Actions
   del repo → **"App: publicar versión"** → Run workflow (`.github/workflows/app-publicar.yml`,

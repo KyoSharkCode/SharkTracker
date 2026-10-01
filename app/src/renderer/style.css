@@ -123,6 +123,16 @@ html, body {
 .gamechip.ingame { color: #6fdba8; border-color: rgba(79,214,140,0.35); background: rgba(79,214,140,0.08); }
 .gamechip.ingame .gd { background: #4fd68c; animation: pulseGlow 1.8s ease-in-out infinite; }
 
+/* Aviso "actualización lista" (barra de título) */
+.updatechip {
+  -webkit-app-region: no-drag; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  font: inherit; font-size: 10px; font-weight: 700; color: #00e5c7;
+  border: 1px solid rgba(0,229,199,0.4); border-radius: 20px; padding: 4px 10px; background: rgba(0,229,199,0.08);
+}
+.updatechip:hover { background: rgba(0,229,199,0.16); }
+.updatechip .ud { width: 6px; height: 6px; border-radius: 50%; background: #00e5c7; animation: pulseGlow 1.8s ease-in-out infinite; }
+
 /* Ficha de Discord (sesión iniciada) */
 .discordchip {
   -webkit-app-region: no-drag;
