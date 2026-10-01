@@ -92,6 +92,17 @@ async function diagnostico(nombre: string): Promise<Response> {
         `https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/by-puuid/${j.puuid}/ids?startTime=${desde}&start=0&count=${MATCH_HISTORY_COUNT}`));
       await intento('ids_sin_filtro', () => riotFetch(
         `https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/by-puuid/${j.puuid}/ids?start=0&count=${MATCH_HISTORY_COUNT}`));
+      // ARAM: Caos (cola 2400): ¿la lista con filtro de cola sí la trae?
+      await intento('ids_cola_2400', () => riotFetch(
+        `https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/by-puuid/${j.puuid}/ids?queue=2400&start=0&count=${MATCH_HISTORY_COUNT}`));
+      await intento('ids_cola_450', () => riotFetch(
+        `https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/by-puuid/${j.puuid}/ids?queue=450&start=0&count=${MATCH_HISTORY_COUNT}`));
+      // ¿Se puede pedir por id la última partida que vimos en la pantalla de carga?
+      const { data: ultimaCarga } = await supabase.from('carga_partidas').select('game_id').order('updated_at', { ascending: false }).limit(1).maybeSingle();
+      if (ultimaCarga) await intento('ultima_carga_por_id', async () => {
+        const md = await riotFetch(`https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/${REGION_PARTIDA}_${ultimaCarga.game_id}`);
+        return { match_id: `${REGION_PARTIDA}_${ultimaCarga.game_id}`, cola: md.info?.queueId, esta_el: (md.info?.participants ?? []).some((p: any) => p.puuid === j.puuid) };
+      });
       const todos = [...new Set([...(Array.isArray(r.ids_30_dias) ? r.ids_30_dias : []), ...(Array.isArray(r.ids_sin_filtro) ? r.ids_sin_filtro : [])])];
       const { data: guardadas } = todos.length ? await supabase.from('matches').select('match_id').in('match_id', todos) : { data: [] };
       const { data: conEl } = todos.length ? await supabase.from('match_participants').select('match_id').eq('player_id', j.id).in('match_id', todos) : { data: [] };
