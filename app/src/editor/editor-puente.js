@@ -5,4 +5,5 @@ window.overlay = {
   onTab: (cb) => { window.__tab = cb; },
   onConfig: (cb) => { window.__aplicarConfig = cb; },
   onCarga: (cb) => { window.__carga = cb; },
+  onBuild: (cb) => { window.__build = cb; },
 };

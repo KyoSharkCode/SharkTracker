@@ -54,7 +54,11 @@ if (!gotLock) {
     const link = findDeepLink(process.argv);
     if (link) handleDeepLink(link);
     startGameWatcher();
-    lcu.iniciar((estado) => mainWindow?.webContents.send('envivo:estado', estado));
+    lcu.iniciar((estado) => {
+      // Se recuerda la última selección (campeón y rol) para la build en partida.
+      if (estado?.fase === 'ChampSelect' && estado.yo?.campeon) ultimaSeleccion = estado;
+      mainWindow?.webContents.send('envivo:estado', estado);
+    });
   });
 }
 
@@ -382,7 +386,7 @@ function cargarPrecios() {
   }).on('error', () => { /* se usa el precio de la API del juego */ });
 }
 
-// ── Teclado: Tab (diferencia de oro) y Ctrl + X (panel de la pantalla de carga) ──
+// ── Teclado: Tab (diferencia de oro) y Ctrl + X (panel de carga / build en partida) ──
 // uiohook-napi "escucha" el teclado sin quitarle las teclas al juego (como el
 // pulsar-para-hablar de Discord). Solo se enciende durante la pantalla de carga
 // y la partida, y solo mira esas dos combinaciones: el resto de teclas se ignoran
@@ -402,10 +406,12 @@ function iniciarTeclado() {
       };
       uIOhook.on('keydown', (e) => {
         if (e.keycode === UiohookKey.Tab) avisarTab(true);
-        // Ctrl + X: mostrar/ocultar el panel de carga (una vez por pulsación, aunque se mantenga).
+        // Ctrl + X (una vez por pulsación, aunque se mantenga): en la carga, el panel de
+        // rangos; en partida, la build completa.
         if (e.keycode === UiohookKey.X && e.ctrlKey && !xPulsada) {
           xPulsada = true;
           if (cargaActiva) alternarPanelCarga();
+          else if (overlayTimer) alternarBuild();
         }
       });
       uIOhook.on('keyup', (e) => {
@@ -437,6 +443,7 @@ function startOverlay() {
   if (!overlayWindow) createOverlayWindow();
   iniciarTeclado();
   estadoPartida = crearEstadoPartida();
+  reiniciarBuild();
   // "Tu rendimiento": promedios de la división de arriba (una vez por partida).
   const partida = estadoPartida;
   auth.getReferencia()
@@ -449,7 +456,14 @@ function startOverlay() {
     const res = await liveClientGet('allgamedata');
     if (!res.inGame || !overlayWindow) return;
     estadoPartida.setPrecios(preciosItems);
-    overlayWindow.webContents.send('overlay:state', { ...estadoPartida.actualizar(res.data), ddVersion });
+    const yo = jugadorPropio(res.data);
+    if (yo && !buildPreparando && (!buildPartida || buildPartida.estado === 'error') && Date.now() - buildIntento > 30000) {
+      prepararBuild(res.data, yo);
+    }
+    overlayWindow.webContents.send('overlay:state', {
+      ...estadoPartida.actualizar(res.data), ddVersion,
+      misObjetos: (yo?.items ?? []).map((i) => i.itemID), // para marcar lo ya comprado en la build
+    });
   }, 1000);
 }
 
@@ -460,6 +474,7 @@ function limpiarOverlay() {
 
 function stopOverlay() {
   if (!cargaActiva) detenerTeclado();
+  reiniciarBuild();
   clearInterval(overlayTimer);
   overlayTimer = null;
   estadoPartida = null;
@@ -477,6 +492,7 @@ ipcMain.handle('perfil:cache', () => perfil.leerCache());
 const meta = require('./meta');
 ipcMain.handle('meta:tier', () => meta.cargarTier());
 ipcMain.handle('meta:campeon', (_e, championId, posicion) => meta.cargarCampeon(championId, posicion));
+ipcMain.handle('meta:adaptar', (_e, ficha, miCampeon, rivales) => meta.adaptarBuild(ficha, miCampeon, rivales).catch(() => null));
 
 // ── En Vivo (selección de campeones, vía la API local del cliente de LoL) ──
 // Las acciones (runas, build, hechizos) solo se hacen cuando el usuario pulsa su botón.
@@ -486,6 +502,73 @@ ipcMain.handle('envivo:amigos', () => meta.cargarAmigos().catch(() => []));
 ipcMain.handle('envivo:runas', (_e, datos) => lcu.importarRunas(datos));
 ipcMain.handle('envivo:build', (_e, datos) => lcu.importarBuild(datos));
 ipcMain.handle('envivo:hechizos', (_e, ids) => lcu.ponerHechizos(ids));
+
+// ── Build en partida (Ctrl + X): la build completa en orden, adaptada a los rivales ──
+// Se arma una vez por partida con la ficha de Meta de tu campeón y los 5 rivales
+// (Live Client Data API). Solo en la Grieta: las builds de OP.GG son de ranked.
+const POS_PARTIDA = { TOP: 'top', JUNGLE: 'jungle', MIDDLE: 'mid', BOTTOM: 'adc', UTILITY: 'support' };
+let ultimaSeleccion = null;   // último estado de selección de campeones (lcu.js)
+let buildPartida = null;      // lo que dibuja el overlay
+let buildPreparando = false;
+let buildIntento = 0;
+let buildVisible = false;     // Ctrl + X; empieza oculta en cada partida
+
+function jugadorPropio(datos) {
+  const a = datos?.activePlayer ?? {};
+  const nombres = [a.riotId, a.summonerName, a.riotIdGameName].filter(Boolean);
+  return (datos?.allPlayers ?? []).find((p) => [p.riotId, p.summonerName, p.riotIdGameName].some((n) => n && nombres.includes(n))) ?? null;
+}
+function enviarBuild() {
+  overlayWindow?.webContents.send('overlay:build', { datos: buildPartida, visible: buildVisible });
+}
+function reiniciarBuild() {
+  buildPartida = null;
+  buildVisible = false;
+  buildIntento = 0;
+  enviarBuild();
+}
+function alternarBuild() {
+  buildVisible = !buildVisible;
+  enviarBuild();
+}
+async function prepararBuild(datos, yo) {
+  buildPreparando = true;
+  buildIntento = Date.now();
+  const fijar = (d) => { buildPartida = d; enviarBuild(); };
+  try {
+    if ((datos?.gameData?.mapNumber ?? 11) !== 11) return fijar({ estado: 'sin_modo' });
+    const cat = await meta.cargarCatalogos();
+    const porClave = Object.fromEntries(Object.entries(cat.campeones).map(([key, c]) => [c.id.toLowerCase(), Number(key)]));
+    const idDe = (p) => porClave[(p.rawChampionName ?? '').replace(/^game_character_displayname_/, '').toLowerCase()];
+    const miCampeon = idDe(yo);
+    if (!miCampeon) return fijar({ estado: 'error' });
+    const rolSeleccion = ultimaSeleccion?.yo?.campeon === miCampeon ? ultimaSeleccion.yo.rol : null;
+    const rol = POS_PARTIDA[yo.position] ?? rolSeleccion ?? (await meta.rolDeCampeon(miCampeon));
+    if (!rol) return fijar({ estado: 'error' });
+    const rivales = (datos.allPlayers ?? []).filter((p) => p.team !== yo.team).map(idDe).filter(Boolean);
+    const ficha = await meta.cargarCampeon(miCampeon, rol);
+    if (ficha?.estado === 'sin_sesion') return fijar({ estado: 'sin_sesion' });
+    if (ficha?.estado !== 'ok') return fijar({ estado: 'error' });
+    const a = await meta.adaptarBuild(ficha.datos, miCampeon, rivales);
+    const objeto = (id) => ({ id, nombre: cat.objetos[id]?.nombre ?? '', img: cat.objetos[id]?.img ?? null });
+    fijar({
+      estado: 'ok',
+      campeon: cat.campeones[miCampeon]?.nombre ?? '',
+      rol,
+      resumen: a.resumen,
+      pasos: a.orden.map((p) => ({ titulo: p.titulo, adaptado: !!p.adaptado, items: p.items.map(objeto) })),
+      motivos: [
+        ...a.sugerencias.map((x) => ({ ...objeto(x.item), motivo: x.motivo })),
+        ...(a.botas ? [{ ...objeto(a.botas.item), motivo: a.botas.motivo }] : []),
+      ],
+    });
+  } catch (e) {
+    console.error('[build en partida]', e);
+    fijar({ estado: 'error' });
+  } finally {
+    buildPreparando = false;
+  }
+}
 
 // ── Ajustes → Overlay (qué piezas se ven y dónde van) ──
 // Al guardar se avisa a todas las ventanas: el overlay se actualiza al instante,
