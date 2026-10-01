@@ -985,6 +985,7 @@ function drawRewards() {
     ${iconSel(it?.icon ?? 'moneda', 'data-f="icon"')}
     <input class="in num" type="number" min="0" data-f="price" value="${it?.price ?? 1800}" title="Precio en 🦷">
     <input class="in num" type="number" min="0" data-f="stock" value="${it?.stock ?? ''}" placeholder="Stock ∞" title="Unidades (vacío = sin límite)">
+    <label class="rw-check" title="Se puede canjear varias veces en total, pero cada jugador solo una vez"><input type="checkbox" data-f="uno" ${it?.uno_por_persona ? 'checked' : ''}> 1 por persona</label>
     ${it ? `<label class="rw-check"><input type="checkbox" data-f="active" ${it.active ? 'checked' : ''}> Visible</label>` : ''}
     <button class="btn ok" data-save-prize type="button">${it ? 'Guardar' : 'Crear'}</button>${it ? '' : '<button class="btn ghost" data-cancel-prize type="button">Cancelar</button>'}</div>`;
   $('rw-prizes').innerHTML = (rw.newPrize ? prizeRow(null) : '') + (prizes.map(prizeRow).join('') || (rw.newPrize ? '' : '<div class="empty">No hay premios reales. Crea uno con “+ Nuevo premio”.</div>'));
@@ -1029,7 +1030,7 @@ document.querySelector('#rw-status').closest('section').addEventListener('click'
     const stock = v('stock').value === '' ? null : parseInt(v('stock').value, 10);
     const isNew = row.dataset.prize === 'new';
     const okk = await run('admin_save_item', { p_id: isNew ? null : row.dataset.prize, p_name: v('name').value, p_description: v('desc').value, p_price: parseInt(v('price').value, 10),
-      p_active: isNew ? true : v('active').checked, p_stock: stock, p_icon: v('icon').value }, isNew ? '🎁 Premio creado' : 'Premio guardado');
+      p_active: isNew ? true : v('active').checked, p_stock: stock, p_icon: v('icon').value, p_uno_por_persona: v('uno').checked }, isNew ? '🎁 Premio creado' : 'Premio guardado');
     if (okk && isNew) { rw.newPrize = false; drawRewards(); }
     return;
   }

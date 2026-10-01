@@ -296,6 +296,8 @@ function preview(it) {
 function buyArea(it) {
   const owned = it.kind !== 'premio' && st.inv.has(it.id);
   const soldOut = it.kind === 'premio' && it.stock != null && it.stock <= 0;
+  // "1 por persona": ya lo canjeaste (un canje rechazado no cuenta).
+  const claimed = it.kind === 'premio' && it.uno_por_persona && st.claims?.some(c => c.item_id === it.id && c.status !== 'rechazado');
   const missing = Math.max(0, it.price - st.balance);
   const err = st.errors[it.id] ? `<div class="err">${esc(st.errors[it.id])}</div>` : '';
   if (st.confirm === it.id) {
@@ -305,11 +307,13 @@ function buyArea(it) {
   }
   let action;
   if (owned) action = `<span class="owned">✓ Ya es tuyo</span>`;
+  else if (claimed) action = `<span class="owned">✓ Ya lo canjeaste</span>`;
   else if (soldOut) action = `<button class="btn ghost" disabled type="button">Agotado</button>`;
   else if (!canBuy()) action = `<button class="btn ghost" disabled type="button">${!st.settings?.enabled ? 'Pronto' : 'Inicia sesión'}</button>`;
   else if (missing > 0) action = `<button class="btn ghost" disabled type="button" title="Te faltan ${fmt(missing)} 🦷">Te faltan ${fmt(missing)}</button>`;
   else action = `<button class="btn ok" data-buy="${it.id}" type="button">${it.kind === 'premio' ? 'Canjear' : 'Comprar'}</button>`;
-  return `<div class="buy"><span class="price">🦷 ${fmt(it.price)}</span>${it.kind === 'premio' && it.stock != null ? `<span class="stock">${it.stock > 0 ? `Quedan ${it.stock}` : ''}</span>` : ''}${action}</div>${err}`;
+  const limits = it.kind === 'premio' ? [it.stock != null && it.stock > 0 ? `Quedan ${it.stock}` : '', it.uno_por_persona ? '1 por persona' : ''].filter(Boolean).join(' · ') : '';
+  return `<div class="buy"><span class="price">🦷 ${fmt(it.price)}</span>${limits ? `<span class="stock">${limits}</span>` : ''}${action}</div>${err}`;
 }
 
 function itemCard(it) {
