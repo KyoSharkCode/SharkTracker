@@ -36,6 +36,7 @@ const AVISO_INHIB = 60;      // inhibidor a punto de reaparecer: avisar a 1:00
 const INHIB_REAPARECE = { 11: 5 * 60, 12: 4 * 60 };
 const MAPA = { grieta: 11, aram: 12, arena: 30 };
 const TOAST_DURACION = 5;    // segundos
+const LARVAS_TANDA = 15;     // s sin otra Vacuolarva del rival = terminaron el grupo
 
 const DRAGON_ES = {
   Fire: 'Infernal', Water: 'Océano', Earth: 'Montaña', Air: 'Nube',
@@ -170,11 +171,29 @@ function crearEstadoPartida() {
     // Regla de color: lo hace o lo tiene tu equipo → azul; el enemigo → rojo.
     const esLarva = (e) => /horde|grub|larva/i.test(e.EventName ?? '');
     const larvas = eventos.filter(esLarva);
+    // Vacuolarvas del rival: la API avisa de cada una aunque no tengas visión (eso sería
+    // información que el juego no te da). Solo se muestran como el juego las anuncia:
+    // cuando terminan el grupo (las 3, o 15 s sin matar otra) y de golpe, no una a una.
+    // Las de tu equipo sí van una a una (tu equipo las ve).
+    const larvasVisibles = [];
+    let tanda = [];
+    const cerrarTanda = (cuando) => {
+      if (tanda.length) larvasVisibles.push({ ...tanda[tanda.length - 1], EventID: `larvas-rival-${tanda[0].EventID}`, EventTime: cuando, cantidad: tanda.length });
+      tanda = [];
+    };
+    for (const e of larvas) {
+      if (ladoDe(e.KillerName) === miLado || !ladoDe(e.KillerName)) { larvasVisibles.push({ ...e, cantidad: 1 }); continue; }
+      if (tanda.length && e.EventTime - tanda[tanda.length - 1].EventTime > LARVAS_TANDA) cerrarTanda(tanda[tanda.length - 1].EventTime + LARVAS_TANDA);
+      tanda.push(e);
+      if (tanda.length >= 3) cerrarTanda(e.EventTime);
+    }
+    if (tanda.length && t - tanda[tanda.length - 1].EventTime > LARVAS_TANDA) cerrarTanda(tanda[tanda.length - 1].EventTime + LARVAS_TANDA);
     const cuentaLarvas = { blue: 0, red: 0 };
-    const esToast = (e) => (esGrieta && (['DragonKill', 'HeraldKill'].includes(e.EventName) || esLarva(e)))
+    const esToast = (e) => (esGrieta && ['DragonKill', 'HeraldKill'].includes(e.EventName))
       || (hayEstructuras && ['TurretKilled', 'InhibKilled'].includes(e.EventName));
     let toast = null;
-    const reciente = [...eventos].reverse().find((e) => esToast(e) && t - e.EventTime <= TOAST_DURACION);
+    const candidatos = [...eventos.filter(esToast), ...(esGrieta ? larvasVisibles : [])].sort((a, b) => a.EventTime - b.EventTime);
+    const reciente = [...candidatos].reverse().find((e) => e.EventTime <= t && t - e.EventTime <= TOAST_DURACION);
     if (reciente) {
       const eq = ladoDe(reciente.KillerName);
       const base = { id: reciente.EventID, equipo: eq, esMio: eq === miLado, robado: reciente.Stolen === 'True' || reciente.Stolen === true };
@@ -192,10 +211,10 @@ function crearEstadoPartida() {
           puntos: reciente.DragonType === 'Elder' ? null : { llenos: dragones, total: 4 },
         };
       } else if (esLarva(reciente)) {
-        for (const e of larvas) {
+        for (const e of larvasVisibles) {
           if (e.EventTime > reciente.EventTime) continue;
           const q = ladoDe(e.KillerName);
-          if (q) cuentaLarvas[q]++;
+          if (q) cuentaLarvas[q] += e.cantidad;
         }
         const n = eq ? cuentaLarvas[eq] : 0;
         toast = {

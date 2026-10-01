@@ -21,6 +21,9 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
 - **Pantalla de carga**: rango, winrate y etiquetas de los 10. **Ctrl + X** lo oculta o lo muestra.
 - **Ctrl + X en partida**: tu build completa en orden, arriba a la izquierda (lo que ya
   compraste sale con ✓; lo marcado con ⭐ está adaptado a los rivales). Solo en la Grieta.
+- **Junto al minimapa**: el siguiente objeto de tu build (o el componente que toca) y el oro que te falta.
+- **Con un segundo monitor**: la página **En Vivo** de la app muestra durante toda la partida a los 10
+  jugadores (como en la pantalla de carga) y tu build, sin tener que pulsar Ctrl + X.
 - **Tab**: diferencia de oro por fila (la flecha apunta a quien tiene más oro).
 - Arriba a la derecha, **Tu rendimiento** contra la división de arriba de la tuya.
 - **Ajustes → Overlay**: apagar piezas y moverlas ("Reposicionar elementos").

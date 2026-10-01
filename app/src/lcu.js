@@ -168,22 +168,35 @@ function iniciar(callback) {
 
 // ── Acciones (siempre con un botón del usuario) ──
 
-// Página de runas "SharkTracker · Campeón": borra la anterior de SharkTracker (tus páginas no se tocan).
+// Página de runas "SharkTracker · Campeón": borra la anterior de SharkTracker. Si no hay hueco
+// para otra página, reemplaza la que tienes seleccionada en el cliente (o, si esa no se puede
+// borrar, tu primera página propia) y avisa cuál fue.
 async function importarRunas({ nombre, principal, secundaria, runas }) {
   if (!conexion) return { ok: false, error: 'El cliente de LoL no está abierto.' };
   const paginas = await pedir('GET', '/lol-perks/v1/pages');
-  for (const p of Array.isArray(paginas.data) ? paginas.data : []) {
+  const lista = Array.isArray(paginas.data) ? paginas.data : [];
+  const quedan = [];
+  for (const p of lista) {
     if (String(p.name ?? '').startsWith(PREFIJO) && p.isDeletable !== false) await pedir('DELETE', `/lol-perks/v1/pages/${p.id}`);
+    else quedan.push(p);
   }
-  const r = await pedir('POST', '/lol-perks/v1/pages', {
+  const pagina = {
     name: `${PREFIJO} · ${nombre}`.slice(0, 25), primaryStyleId: principal, subStyleId: secundaria,
     selectedPerkIds: runas, current: true,
-  });
+  };
+  let r = await pedir('POST', '/lol-perks/v1/pages', pagina);
   if (r.status >= 200 && r.status < 300) return { ok: true };
-  const msg = String(r.data?.message ?? '');
-  return { ok: false, error: /max|limit|full/i.test(msg)
-    ? 'No hay espacio para otra página de runas: borra una en el cliente y vuelve a intentarlo.'
-    : `El cliente no aceptó la página (${r.status || 'sin respuesta'}).` };
+  if (!/max|limit|full/i.test(String(r.data?.message ?? ''))) {
+    return { ok: false, error: `El cliente no aceptó la página (${r.status || 'sin respuesta'}).` };
+  }
+  // Sin hueco: se reemplaza la página seleccionada (si se puede) o tu primera página propia.
+  const propias = quedan.filter((p) => p.isDeletable !== false && p.isEditable !== false);
+  const victima = propias.find((p) => p.current) ?? propias[0];
+  if (!victima) return { ok: false, error: 'No hay espacio para otra página de runas y ninguna se puede reemplazar.' };
+  await pedir('DELETE', `/lol-perks/v1/pages/${victima.id}`);
+  r = await pedir('POST', '/lol-perks/v1/pages', pagina);
+  if (r.status >= 200 && r.status < 300) return { ok: true, reemplazada: victima.name };
+  return { ok: false, error: `Se borró "${victima.name}" pero el cliente no aceptó la nueva página (${r.status || 'sin respuesta'}).` };
 }
 
 // Set de objetos "SharkTracker · Campeón" (se ve en la tienda del juego). Reemplaza el anterior de SharkTracker.

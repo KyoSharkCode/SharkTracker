@@ -262,6 +262,25 @@ que pulse un botón.
   partida (`position`), si no el de la última selección (lcu) con ese campeón, si no el rol
   donde más se juega (`meta_tier.role_rate`). Interruptor "Tu build" en Ajustes → Overlay.
 
+## Feedback de la v0.5 (v0.6.0)
+
+- **Vacuolarvas del rival**: la API avisa de cada una aunque no haya visión (Riot/Vanguard: solo
+  info que el juego te da). La API no dice qué ves, así que las del rival solo se muestran cuando
+  terminan el grupo (las 3, o `LARVAS_TANDA` = 15 s sin otra), de golpe, como el anuncio del juego.
+  Las de tu equipo siguen una a una.
+- **Importar runas sin hueco**: reemplaza la página seleccionada en el cliente (si no se puede
+  borrar, tu primera página propia) y el aviso dice cuál. Solo hay UNA página de runas por
+  campeón/rol (la más usada en OP.GG Esmeralda+); no hay selector de alternativas todavía.
+- **Siguiente compra** (`siguienteCompra` en build-adaptada.js): primer objeto de la build que no
+  tienes, coste restante descontando componentes que ya llevas (receta `desde` de DDragon) y, si
+  no te alcanza, el componente más caro que te falta; oro = `activePlayer.currentGold`. Pieza
+  `#siguiente` del overlay (x 1395, y 1000; 240 px, a la izquierda del minimapa), interruptor
+  "Siguiente compra" y movible en el editor.
+- **Partida en la app** (segundo monitor): main.js `avisarPartidaApp` manda a la ventana
+  (`partida:datos`) el panel de carga, la build, lo comprado y la siguiente compra, desde la carga
+  hasta que termina la partida. `renderer/envivo.js` los dibuja en En Vivo (salta sola al empezar
+  la carga).
+
 ## Overlay por mapa (feedback de partidas en ARAM, 01/10/2026)
 
 - `game-state.js` mira `gameData.mapNumber` (11 Grieta/URF, 12 ARAM, 30 Arena; si falta, `gameMode`):

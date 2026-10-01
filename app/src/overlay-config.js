@@ -10,6 +10,7 @@ const path = require('path');
 const PIEZAS = [
   'oro', 'buffs', 'anuncios', 'toasts', 'rendimiento',
   'build', // build completa en partida (se muestra u oculta con Ctrl + X)
+  'siguiente', // siguiente compra de la build, junto al minimapa
   // Pantalla de carga
   'carga', // el panel entero (se alterna con Ctrl + X durante la carga)
   'cargaRangoAliados', 'cargaWinrateAliados', 'cargaRangoRivales', 'cargaWinrateRivales', 'cargaEtiquetas',
@@ -23,6 +24,7 @@ const POSICIONES_FABRICA = {
   avisos:      { x: 1648, y: 280 },  // columna de anuncio + toast (262 px de ancho)
   carga:       { x: 1500, y: 60 },   // panel de la pantalla de carga (400 px de ancho)
   build:       { x: 16,   y: 16 },   // build en partida, arriba a la izquierda (430 px de ancho)
+  siguiente:   { x: 1395, y: 1000 }, // siguiente compra, a la izquierda del minimapa (240 px de ancho)
 };
 
 const archivo = () => path.join(app.getPath('userData'), 'overlay.json');
