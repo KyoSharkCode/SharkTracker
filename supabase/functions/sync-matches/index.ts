@@ -71,10 +71,52 @@ function inicioDiaMadridUTC(fecha: Date): Date {
   return new Date(inicioMuro.getTime() - offsetMin * 60000);
 }
 
+async function diagnostico(nombre: string): Promise<Response> {
+  const { data: jugadores } = await supabase.from('players')
+    .select('id, riot_game_name, riot_tag_line, puuid').ilike('riot_game_name', `${nombre}%`);
+  const salida: any[] = [];
+  for (const j of jugadores ?? []) {
+    const r: any = { jugador: `${j.riot_game_name}#${j.riot_tag_line}`, puuid_inicio: j.puuid?.slice(0, 12) ?? null };
+    const intento = async (clave: string, fn: () => Promise<any>) => {
+      try { r[clave] = await fn(); } catch (e) { r[clave] = `ERROR: ${e instanceof Error ? e.message.replace(RIOT_API_KEY, '***') : e}`; }
+    };
+    if (j.puuid) {
+      // ¿De qué cuenta es el PUUID guardado?
+      await intento('cuenta_del_puuid', async () => {
+        const a = await riotFetch(`https://${REGION_API}.api.riotgames.com/riot/account/v1/accounts/by-puuid/${j.puuid}`);
+        return `${a.gameName}#${a.tagLine}`;
+      });
+      const desde = Math.floor((Date.now() - HISTORY_DAYS * 86400000) / 1000);
+      await intento('ids_30_dias', () => riotFetch(
+        `https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/by-puuid/${j.puuid}/ids?startTime=${desde}&start=0&count=${MATCH_HISTORY_COUNT}`));
+      await intento('ids_sin_filtro', () => riotFetch(
+        `https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/by-puuid/${j.puuid}/ids?start=0&count=${MATCH_HISTORY_COUNT}`));
+      const todos = [...new Set([...(Array.isArray(r.ids_30_dias) ? r.ids_30_dias : []), ...(Array.isArray(r.ids_sin_filtro) ? r.ids_sin_filtro : [])])];
+      const { data: guardadas } = todos.length ? await supabase.from('matches').select('match_id').in('match_id', todos) : { data: [] };
+      const { data: conEl } = todos.length ? await supabase.from('match_participants').select('match_id').eq('player_id', j.id).in('match_id', todos) : { data: [] };
+      r.guardadas = (guardadas ?? []).map((m: any) => m.match_id);
+      r.con_el = (conEl ?? []).map((m: any) => m.match_id);
+    }
+    // ¿Qué cuenta corresponde HOY a su Riot ID?
+    await intento('puuid_de_su_riot_id', async () => {
+      const a = await riotFetch(`https://${REGION_API}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(j.riot_game_name.trim())}/${encodeURIComponent(j.riot_tag_line.trim())}`);
+      return { inicio: a.puuid.slice(0, 12), igual_al_guardado: a.puuid === j.puuid };
+    });
+    salida.push(r);
+  }
+  return new Response(JSON.stringify(salida.length ? salida : { error: `No hay jugadores que empiecen por "${nombre}"` }, null, 2),
+    { headers: { 'Content-Type': 'application/json' } });
+}
+
 Deno.serve(async (req) => {
   if (req.headers.get('x-cron-secret') !== CRON_SECRET) {
     return new Response('Unauthorized', { status: 401 });
   }
+
+  // Modo diagnóstico (a mano, desde el SQL Editor): body {"diagnostico": "nombre"}.
+  // No guarda nada: dice qué cuenta es el PUUID guardado y qué partidas lista Riot.
+  const cuerpo = await req.json().catch(() => ({}));
+  if (cuerpo?.diagnostico) return diagnostico(String(cuerpo.diagnostico));
 
   const { data: players, error } = await supabase
     .from('players')
