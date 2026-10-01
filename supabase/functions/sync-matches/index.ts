@@ -120,15 +120,27 @@ Deno.serve(async (req) => {
         `https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/by-puuid/${player.puuid}/ids?startTime=${desde}&start=0&count=${MATCH_HISTORY_COUNT}`
       );
 
-      // Si ya están guardadas, no se vuelven a pedir ni reinsertar (una sola consulta).
-      const { data: existentes, error: existErr } = ids.length
-        ? await supabase.from('matches').select('match_id').in('match_id', ids)
-        : { data: [], error: null };
+      // Qué partidas ya están guardadas, y en cuáles ya está ESTE jugador. Una partida
+      // con amigos se guarda una sola vez para todos: si al guardarla no se reconoció
+      // a este jugador (p. ej. su PUUID estaba desactualizado), quedaba fuera para
+      // siempre. Ahora se le añade.
+      const [{ data: existentes, error: existErr }, { data: mias, error: miasErr }] = ids.length
+        ? await Promise.all([
+          supabase.from('matches').select('match_id').in('match_id', ids),
+          supabase.from('match_participants').select('match_id').eq('player_id', player.id).in('match_id', ids),
+        ])
+        : [{ data: [], error: null }, { data: [], error: null }];
       if (existErr) throw existErr;
+      if (miasErr) throw miasErr;
       const yaGuardadas = new Set((existentes ?? []).map((m: any) => m.match_id));
+      const conEl = new Set((mias ?? []).map((m: any) => m.match_id));
+      const pendientes = ids.filter((id) => !conEl.has(id)).length;
+      if (!ids.length) log.push(`${player.riot_game_name}: Riot no devuelve partidas suyas en los últimos ${HISTORY_DAYS} días`);
+      else if (pendientes) log.push(`${player.riot_game_name}: ${ids.length} partidas recientes en Riot, ${pendientes} por guardar`);
 
       for (const matchId of ids) {
-        if (yaGuardadas.has(matchId)) continue;
+        if (conEl.has(matchId)) continue;
+        const soloFaltaEl = yaGuardadas.has(matchId);
 
         if (!matchCache.has(matchId)) {
           const detail = await riotFetch(`https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/${matchId}`);
@@ -289,10 +301,16 @@ Deno.serve(async (req) => {
             },
           });
         }
+        if (!rows.some((r: any) => r.player_id === player.id)) {
+          // Riot dice que jugó esta partida, pero su PUUID no aparece en ella:
+          // el PUUID guardado no es el de su cuenta (o es de otra key).
+          log.push(`AVISO ${player.riot_game_name}: no aparece en ${matchId} con el PUUID guardado; revisa su PUUID / Riot ID`);
+          if (soloFaltaEl) continue;
+        }
         // ── Guardado: partida + jugadores del grupo. Si algo falla, se deshace
         // para que la próxima corrida la vuelva a intentar (antes quedaba
         // guardada "a medias", sin jugadores, y nunca se reintentaba).
-        const { error: matchErr } = await supabase.from('matches').insert({
+        const { error: matchErr } = soloFaltaEl ? { error: null } : await supabase.from('matches').insert({
           match_id: matchId,
           queue_id: info.queueId,
           queue_type: QUEUE_NAMES[info.queueId] ?? 'Modo Destacado',
@@ -309,12 +327,18 @@ Deno.serve(async (req) => {
         if (rows.length) {
           const { error: rowsErr } = await supabase.from('match_participants').upsert(rows, { onConflict: 'match_id,player_id' });
           if (rowsErr) {
-            await supabase.from('matches').delete().eq('match_id', matchId);
+            if (!soloFaltaEl) await supabase.from('matches').delete().eq('match_id', matchId);
             log.push(`ERROR al guardar jugadores de ${matchId} (se reintentará): ${rowsErr.message}`);
             continue;
           }
         }
         yaGuardadas.add(matchId);
+        conEl.add(matchId);
+        if (soloFaltaEl) {
+          // Partida vieja que se rellena: sin logros ni avisos (ya pasaron).
+          log.push(`Partida ${matchId} ya estaba guardada sin ${player.riot_game_name}: se le añadió`);
+          continue;
+        }
 
         // Ya está todo guardado: ahora sí, logros y primera victoria.
         for (const efecto of efectos) await efecto();
