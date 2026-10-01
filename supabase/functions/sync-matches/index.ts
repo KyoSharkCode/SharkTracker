@@ -25,8 +25,12 @@ const QUEUE_NAMES: Record<number, string> = {
   430: 'LoL Classic', 450: 'ARAM', 2400: 'ARAM', 700: 'Clash', 1700: 'Arena', 1710: 'Arena', 1720: 'Arena',
 };
 
+class LimiteRiot extends Error {}
+
 async function riotFetch(url: string) {
   const res = await fetch(url, { headers: { 'X-Riot-Token': RIOT_API_KEY } });
+  // Límite de la key: no tiene sentido seguir con los demás jugadores en esta corrida.
+  if (res.status === 429) throw new LimiteRiot('Riot: límite de peticiones (429), se sigue en la próxima corrida');
   if (!res.ok) throw new Error(`${url} -> ${res.status}`);
   return res.json();
 }
@@ -89,7 +93,9 @@ Deno.serve(async (req) => {
   // Caché compartida DENTRO de esta corrida — si dos del grupo jugaron
   // juntos, el detalle de esa partida se pide a Riot una sola vez.
   const matchCache = new Map<string, any>();
-  const log: string[] = [];
+  // Cada línea se escribe también en Supabase → Edge Functions → sync-matches → Logs.
+  const lineas: string[] = [];
+  const log = { push: (texto: string) => { lineas.push(texto); console.log(`[sync-matches] ${texto}`); } };
   // Inserta un evento y lo anota en el log (o anota el error si falló).
   const evento = async (row: Record<string, unknown>, texto: string) => {
     const { error } = await supabase.from('events').insert(row);
@@ -99,7 +105,12 @@ Deno.serve(async (req) => {
   // Nombres de rol oficiales del sitio: TOP / JUNGLE / MID / ADC / SUPPORT.
   const mapaRoles: Record<string, string> = { TOP: 'TOP', JUNGLE: 'JUNGLE', MIDDLE: 'MID', BOTTOM: 'ADC', UTILITY: 'SUPPORT' };
 
-  for (const player of players ?? []) {
+  // Orden al azar en cada corrida: si Riot corta por límite, el que se queda sin
+  // turno no es siempre el mismo (antes, los últimos de la lista podían no avanzar nunca).
+  const turno = [...(players ?? [])].sort(() => Math.random() - 0.5);
+  let cortado = false;
+  for (const player of turno) {
+    if (cortado) break;
     try {
       // Solo partidas de los últimos 30 días (lo mismo que conserva la limpieza
       // diaria). Si no, las de un jugador inactivo se borraban cada noche y se
@@ -388,11 +399,12 @@ Deno.serve(async (req) => {
         }
       }
     } catch (e) {
+      if (e instanceof LimiteRiot) { cortado = true; log.push(e.message); continue; }
       log.push(`ERROR ${player.riot_game_name}: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 
-  return new Response(JSON.stringify({ ok: true, log }, null, 2), {
+  return new Response(JSON.stringify({ ok: true, log: lineas }, null, 2), {
     headers: { 'Content-Type': 'application/json' },
   });
 });
