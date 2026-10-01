@@ -21,13 +21,13 @@
   const TIERS = { 1: ['S+', 't1'], 2: ['S', 't2'], 3: ['A', 't3'], 4: ['B', 't4'], 5: ['C', 't5'] };
   const COLAS = {
     420: 'SoloQ', 440: 'Flex', 400: 'Normal (reclutamiento)', 430: 'Normal', 490: 'Partida Rápida',
-    450: 'ARAM', 700: 'Clash', 1700: 'Arena', 1710: 'Arena', 1720: 'Arena', 900: 'URF', 1900: 'URF', 0: 'Personalizada',
+    450: 'ARAM', 2400: 'ARAM', 700: 'Clash', 1700: 'Arena', 1710: 'Arena', 1720: 'Arena', 900: 'URF', 1900: 'URF', 0: 'Personalizada',
   };
   const TIER_ES = {
     IRON: 'Hierro', BRONZE: 'Bronce', SILVER: 'Plata', GOLD: 'Oro', PLATINUM: 'Platino', EMERALD: 'Esmeralda',
     DIAMOND: 'Diamante', MASTER: 'Maestro', GRANDMASTER: 'Gran Maestro', CHALLENGER: 'Retador',
   };
-  const SIN_ROLES = new Set([450, 1700, 1710, 1720, 900, 1900]);
+  const SIN_ROLES = new Set([450, 2400, 1700, 1710, 1720, 900, 1900]);
   const FASES = {
     None: 'en el cliente', Lobby: 'en la sala', Matchmaking: 'buscando partida', ReadyCheck: 'partida encontrada',
     GameStart: 'cargando la partida', InProgress: 'en partida', WaitingForStats: 'fin de partida',

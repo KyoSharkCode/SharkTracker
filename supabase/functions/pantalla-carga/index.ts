@@ -35,8 +35,11 @@ const BLOQUEO_MS = 30 * 1000;
 
 const COLAS: Record<number, string> = {
   420: 'Clasificatoria Solo/Duo', 440: 'Clasificatoria Flex', 400: 'Normal (reclutamiento)', 430: 'Normal',
-  490: 'Partida Rápida', 450: 'ARAM', 700: 'Clash', 1700: 'Arena', 1710: 'Arena',
+  490: 'Partida Rápida', 450: 'ARAM', 2400: 'ARAM', 700: 'Clash', 1700: 'Arena', 1710: 'Arena', 1720: 'Arena',
 };
+// Colas con campeón al azar o sin roles fijos: "Main del campeón" / "Fuera de su main"
+// no dicen nada, así que ni se muestran ni se gasta la key pidiendo maestrías.
+const SIN_MAINS = new Set([450, 2400, 1700, 1710, 1720, 900, 1900]);
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -130,6 +133,7 @@ async function armarPanel(req: Request): Promise<Response> {
   // ── 4) Los 10 jugadores ──
   const dict = await campeones();
   const esFlex = partida.gameQueueConfigId === 440;
+  const sinMains = SIN_MAINS.has(partida.gameQueueConfigId);
   const jugadores = (partida.participants ?? []).map((p: any) => ({
     puuid: p.puuid as string | null,
     equipo: p.teamId === 100 ? 'blue' : 'red',
@@ -192,9 +196,9 @@ async function armarPanel(req: Request): Promise<Response> {
     if (!(e instanceof Ocupado)) throw e;
   }
 
-  // Extra: maestría (top 3) solo si la key va holgada.
+  // Extra: maestría (top 3) solo si la key va holgada (y si la cola tiene mains).
   try {
-    for (const j of orden) {
+    for (const j of sinMains ? [] : orden) {
       const d = j.puuid ? info.get(j.puuid) : null;
       if (!d || d.sharktracker || Array.isArray(d.maestria)) continue;
       const top = await riot(`https://${REGION_GAME}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${j.puuid}/top?count=3`, CUPO_EXTRA) ?? [];
@@ -216,7 +220,8 @@ async function armarPanel(req: Request): Promise<Response> {
       const d = j.puuid ? info.get(j.puuid) : null;
       const rango = d ? (esFlex ? d.flex ?? d.solo : d.solo ?? d.flex) : null;
       let main: boolean | null = null;
-      if (d?.sharktracker && d.mainsNombres?.length) main = d.mainsNombres.includes(j.clave);
+      if (sinMains) main = null;
+      else if (d?.sharktracker && d.mainsNombres?.length) main = d.mainsNombres.includes(j.clave);
       else if (Array.isArray(d?.maestria) && d.maestria.length) main = d.maestria.includes(j.championId);
       return {
         puuid: j.puuid, equipo: j.equipo, nombre: j.nombre, campeon: j.campeon, clave: j.clave,
