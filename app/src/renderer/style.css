@@ -652,3 +652,15 @@ span.sw { cursor: default; opacity: 0.6; }
 .ev-pendic { width: 26px; height: 26px; border-radius: 50%; border: 1px dashed rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 11px; color: #4a5768; }
 
 @media (max-width: 1100px) { .ev-grid { grid-template-columns: 1fr; } }
+
+/* Contra tu rival de línea */
+.ev-vs { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.ev-vsx { font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; color: #5b6b7c; }
+.ev-vsdatos { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.ev-chip { font-size: 10px; font-weight: 600; border-radius: 6px; padding: 2px 8px; background: rgba(255,255,255,0.05); color: #cfe0ee; }
+.ev-chip.tu { background: rgba(76,157,255,0.14); color: #4c9dff; }
+.ev-chip.rival { background: rgba(255,95,109,0.14); color: #ff5f6d; }
+.ev-tip { font-size: 11px; line-height: 1.5; color: #cfe0ee; background: rgba(255,255,255,0.03); border-radius: 8px; padding: 6px 9px; margin-bottom: 6px; }
+.ev-tip .mt-subt { margin-top: 0; }
+.ev-runa { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
+.ev-runa .ev-btn { margin-left: auto; }

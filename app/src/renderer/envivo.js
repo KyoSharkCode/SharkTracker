@@ -217,7 +217,7 @@
       avisos[tipo] = { cargando: true };
       pintar(true);
       const r = await accion();
-      const texto = r?.reemplazada ? `✓ Página de runas creada en lugar de "${r.reemplazada}" (no había hueco).` : TEXTO_OK[tipo];
+      const texto = r?.reemplazada ? `✓ Página de runas creada en lugar de "${r.reemplazada}" (no había hueco).` : (TEXTO_OK[tipo] ?? TEXTO_OK.runas);
       avisos[tipo] = r?.ok ? { ok: true, texto } : { ok: false, texto: r?.error ?? 'No se pudo.' };
       pintar(true);
     });
@@ -229,6 +229,85 @@
     build: '✓ Set de objetos creado: lo verás en la tienda del juego.',
     buildAdaptada: '✓ Set adaptado creado: arriba del todo verás "Contra este equipo".',
   };
+
+  // ── Contra tu rival de línea (guía de enfrentamiento de OP.GG, todos los elos) ──
+  // Quién gana la línea, el consejo de OP.GG, lo que más funciona contra él y hasta 3
+  // páginas de runas para elegir (cada una con su botón).
+  const matchups = new Map(); // `${id}:${rol}:${rival}` → datos | 'cargando' | 'error'
+  function matchup(id, rol, rival) {
+    if (!id || !rol || !rival) return null;
+    const k = `${id}:${rol}:${rival}`;
+    const m = matchups.get(k);
+    if (m === undefined) {
+      matchups.set(k, 'cargando');
+      window.sharkTracker.meta.matchup(id, rol, rival).then((r) => { matchups.set(k, r?.estado === 'ok' ? r.datos : 'error'); pintar(true); });
+      return null;
+    }
+    return m;
+  }
+  function cardMatchup(id, rol) {
+    const rival = rivalDeLinea();
+    if (!rival) return null;
+    const c = tarjeta(`Contra ${campeon(rival).nombre}`, 'dot-err');
+    const m = matchup(id, rol, rival);
+    if (m === null || m === 'cargando') { c.append(el('div', 'mt-vacio', 'Cargando el enfrentamiento…')); return c; }
+    if (m === 'error') { c.append(el('div', 'mt-vacio', 'OP.GG no tiene datos de este enfrentamiento.')); return c; }
+    const cab = el('div', 'ev-vs');
+    cab.append(iconoCampeon(id, 'mt-cico'), el('span', 'ev-vsx', 'vs'), iconoCampeon(rival, 'mt-cico'));
+    const info = el('div', 'mt-fnom');
+    info.append(el('b', null, m.winrate != null ? `Tu winrate contra él: ${pct(m.winrate)}` : 'Enfrentamiento'),
+      el('span', null, `${m.partidas.toLocaleString('es')} partidas · todos los elos`));
+    cab.append(info);
+    c.append(cab);
+    const datos = el('div', 'ev-vsdatos');
+    const linea = (t, quien) => {
+      const s = el('span', `ev-chip ${quien === 'tu' ? 'tu' : quien === 'rival' ? 'rival' : ''}`, t);
+      datos.append(s);
+    };
+    if (m.ventaja) linea(m.ventaja === 'tu' ? 'Tú ganas la línea' : 'Él gana la línea', m.ventaja);
+    if (m.solo_kills) linea(m.solo_kills === 'tu' ? 'Tú matas más en solitario' : 'Él mata más en solitario', m.solo_kills);
+    if (m.estilo) linea(`Juega ${m.estilo}`, null);
+    if (datos.childNodes.length) c.append(datos);
+    if (m.consejo) {
+      const tip = el('div', 'ev-tip');
+      tip.append(el('div', 'mt-subt', 'Consejo de OP.GG (en inglés)'), el('div', null, m.consejo));
+      c.append(tip);
+    }
+    // Lo que más se usa contra él.
+    const fila = (titulo, g) => {
+      if (!g) return;
+      const f = el('div', 'mt-situ');
+      f.append(el('span', 'mt-situt', titulo));
+      const ic = el('div', 'mt-items');
+      for (const it of g.ids) ic.append(titulo === 'Hechizos' ? icono(cat().hechizos[it]?.img, 'mt-item', '?', cat().hechizos[it]?.nombre ?? '') : iconoObjeto(it));
+      f.append(ic, el('span', 'mt-pasod', `${pct(g.pickrate, 0)} lo usa · ${pct(g.winrate)} WR`));
+      c.append(f);
+    };
+    c.append(el('div', 'mt-subt', 'Contra él se usa'));
+    fila('Hechizos', m.hechizos?.[0]);
+    fila('Botas', m.botas?.[0]);
+    fila('Inicio', m.inicio);
+    fila('Core', m.core?.[0]);
+    if (m.maximizar) c.append(el('div', 'mt-pasod', `Subir primero: ${m.maximizar.orden.join(' > ')}`));
+    // Páginas de runas para elegir.
+    if (m.runas?.length) {
+      c.append(el('div', 'mt-subt', 'Runas contra él (elige una)'));
+      m.runas.forEach((ru, i) => {
+        const f = el('div', 'ev-runa');
+        const clave = cat().runas[ru.runas_principales[0]];
+        f.append(icono(clave?.img, 'mt-rico clave', '?', clave?.nombre ?? ''), icono(cat().runas[ru.secundaria]?.img, 'mt-rico sm', '?', cat().runas[ru.secundaria]?.nombre ?? ''));
+        const t = el('div', 'mt-fnom');
+        t.append(el('b', null, clave?.nombre ?? 'Runas'), el('span', null, `${cat().runas[ru.principal]?.nombre ?? ''} + ${cat().runas[ru.secundaria]?.nombre ?? ''} · ${pct(ru.pickrate, 0)} · ${pct(ru.winrate)} WR`));
+        f.append(t, boton('Importar', `runasVs${i}`, () => api().importarRunas({
+          nombre: `${campeon(id).nombre} vs ${campeon(rival).nombre}`, principal: ru.principal, secundaria: ru.secundaria,
+          runas: [...ru.runas_principales, ...ru.runas_secundarias, ...(ru.fragmentos ?? [])],
+        })));
+        c.append(f);
+        const a = aviso(`runasVs${i}`); if (a) c.append(a);
+      });
+    }
+    return c;
+  }
 
   function cardRunas(id, rol, f) {
     const c = tarjeta('Runas y hechizos', 'dot-carga');
@@ -548,6 +627,8 @@
     } else if (estado.yo?.bloqueado && estado.yo.campeon) {
       miF = ficha(estado.yo.campeon, rol);
       arriba.append(cardRunas(estado.yo.campeon, rol, miF), cardBuild(estado.yo.campeon, rol, miF));
+      const vs = cardMatchup(estado.yo.campeon, rol);
+      if (vs) arriba.append(vs);
     } else {
       arriba.append(cardPicks(rol), cardBans(rol));
     }

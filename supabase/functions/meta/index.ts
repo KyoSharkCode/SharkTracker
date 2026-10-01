@@ -5,6 +5,13 @@
 // situacionales), runas, hechizos, orden de habilidades y counters, en
 // Esmeralda+, sacados del MCP público de OP.GG.
 //
+// Con rival_id (body { champion_id, posicion, rival_id }) devuelve el
+// enfrentamiento contra ese campeón (lol_get_lane_matchup_guide): quién tiene
+// ventaja en línea, consejo de OP.GG (en inglés: la herramienta solo acepta
+// en_US / ko_KR), hechizos, botas, objetos, inicio y varias páginas de runas.
+// Todos los elos (esa herramienta no filtra por elo). Misma caché, con
+// elo = "vs_<rival_id>".
+//
 // "Verify JWT" va ENCENDIDO (default) y solo responde a cuentas vinculadas
 // en SharkTracker.
 //
@@ -66,7 +73,10 @@ async function llamarOpgg(tool: string, args: Record<string, unknown>) {
   await rpc('notifications/initialized', undefined, true);
   const r = await rpc('tools/call', { name: tool, arguments: args });
   if (r?.isError) throw new Error(`OP.GG ${tool}: ${r.content?.[0]?.text?.slice(0, 300)}`);
-  return leerOpgg(r?.content?.[0]?.text ?? '');
+  const texto = r?.content?.[0]?.text ?? '';
+  // Algunas herramientas (la guía de enfrentamiento) responden JSON normal.
+  if (/^\s*[{[]/.test(texto)) return JSON.parse(texto);
+  return leerOpgg(texto);
 }
 
 // OP.GG responde en un formato propio: primero "class X: campo1,campo2" y
@@ -145,6 +155,38 @@ const counters = (lista: any) => (Array.isArray(lista) ? lista : []).map((c: any
   champion_id: c.champion_id, partidas: c.play ?? 0, winrate: c.play ? c.win / c.play : c.my_win_rate ?? null,
 }));
 
+// Enfrentamiento contra un rival (lol_get_lane_matchup_guide).
+const ESTILO: Record<string, string> = { even: 'parejo', aggressive: 'agresivo', passive: 'pasivo', defensive: 'defensivo' };
+function armarMatchup(g: any, parche: string | null) {
+  const d = g?.data ?? {};
+  const mio = String(g?.my_champion ?? '').toLowerCase();
+  const quien = (nombre: unknown) => (nombre ? (String(nombre).toLowerCase() === mio ? 'tu' : 'rival') : null);
+  const hechizos = Array.isArray(d.summoner_spells) ? d.summoner_spells : [];
+  const partidas = hechizos.reduce((s: number, h: any) => s + (h.play ?? 0), 0);
+  const victorias = hechizos.reduce((s: number, h: any) => s + (h.win ?? 0), 0);
+  const pagina = (ru: any) => ({
+    principal: ru.primary_page_id, runas_principales: ru.primary_rune_ids ?? [],
+    secundaria: ru.secondary_page_id, runas_secundarias: ru.secondary_rune_ids ?? [],
+    fragmentos: ru.stat_mod_ids ?? [], partidas: ru.play ?? 0, winrate: wr(ru), pickrate: ru.pick_rate ?? null,
+  });
+  const maestria = Array.isArray(d.skill_masteries) ? d.skill_masteries[0] : d.skill_masteries;
+  return {
+    parche,
+    partidas,
+    winrate: partidas ? victorias / partidas : null,           // tu winrate contra él
+    ventaja: quien(d.lane_advantage_champion),                 // quién gana la línea
+    solo_kills: quien(d.lane_solo_kill_advantage_champion),    // quién mata más en solitario
+    estilo: d.recommended_play_style ? ESTILO[d.recommended_play_style] ?? d.recommended_play_style : null,
+    consejo: typeof d.opponent_champion_tip === 'string' ? d.opponent_champion_tip : null,
+    hechizos: grupos(d.summoner_spells).slice(0, 2),
+    botas: grupos(d.boots).slice(0, 3),
+    core: grupos(d.core_items).slice(0, 3),
+    inicio: grupo(Array.isArray(d.starter_items) ? d.starter_items[0] : d.starter_items),
+    runas: (Array.isArray(d.runes) ? d.runes : []).filter((r: any) => r?.primary_page_id).slice(0, 3).map(pagina),
+    maximizar: maestria?.ids?.length ? { orden: maestria.ids, winrate: wr(maestria) } : null,
+  };
+}
+
 function armarFicha(r: any, parche: string | null) {
   const d = r?.data ?? {};
   const s = d.summary?.average_stats ?? {};
@@ -193,12 +235,15 @@ Deno.serve(async (req) => {
     const championId = Number(body?.champion_id);
     const posicion = String(body?.posicion ?? '');
     if (!Number.isInteger(championId) || !POSICIONES.includes(posicion)) return json({ error: 'Faltan champion_id o posicion' }, 400);
+    const rivalId = body?.rival_id == null ? null : Number(body.rival_id);
+    if (rivalId !== null && !Number.isInteger(rivalId)) return json({ error: 'rival_id inválido' }, 400);
+    const elo = rivalId === null ? ELO : `vs_${rivalId}`;
 
     // ── 2) Caché: vale 24 h y mientras no cambie el parche ──
     const [{ data: estado }, { data: guardada }] = await Promise.all([
       supabase.from('meta_estado').select('parche').eq('id', 1).maybeSingle(),
       supabase.from('meta_campeon').select('datos, parche, actualizado')
-        .eq('champion_id', championId).eq('posicion', posicion).eq('elo', ELO).maybeSingle(),
+        .eq('champion_id', championId).eq('posicion', posicion).eq('elo', elo).maybeSingle(),
     ]);
     const parche = estado?.parche ?? null;
     const fresca = guardada && (!parche || guardada.parche === parche)
@@ -209,6 +254,24 @@ Deno.serve(async (req) => {
     try {
       let respuesta: any = null;
       let ultimoError: unknown = null;
+      if (rivalId !== null) {
+        // ── Enfrentamiento: se prueban las formas del nombre de los dos campeones ──
+        const [mios, suyos] = await Promise.all([nombresOpgg(championId), nombresOpgg(rivalId)]);
+        if (!mios.length || !suyos.length) throw new Error('Campeón que no está en DDragon');
+        buscar: for (const m of mios) {
+          for (const r of suyos) {
+            try {
+              respuesta = await llamarOpgg('lol_get_lane_matchup_guide', { lang: 'en_US', position: posicion, my_champion: m, opponent_champion: r });
+              break buscar;
+            } catch (e) { ultimoError = e; }
+          }
+        }
+        if (!respuesta) throw ultimoError ?? new Error('OP.GG no tiene ese enfrentamiento');
+        const datos = armarMatchup(respuesta, parche);
+        const actualizado = new Date().toISOString();
+        await supabase.from('meta_campeon').upsert({ champion_id: championId, posicion, elo, parche, datos, actualizado });
+        return json({ estado: 'ok', datos, actualizado });
+      }
       for (const nombre of await nombresOpgg(championId)) {
         try {
           respuesta = await llamarOpgg('lol_get_champion_analysis', {
