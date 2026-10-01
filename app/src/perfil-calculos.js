@@ -22,7 +22,7 @@ const PESTANAS = [
   { clave: 'normal', nombre: 'Normal', colas: [400, 430] },
   { clave: 'rapida', nombre: 'Partida Rápida', colas: [490] },
   { clave: 'aram', nombre: 'ARAM', colas: [450, 2400] },  // 2400 = ARAM de temporada (Caos)
-  { clave: 'arena', nombre: 'Arena', colas: [1700, 1710, 1720] },
+  { clave: 'arena', nombre: 'Arena', colas: [1700, 1710, 1720, 1750] },
 ];
 
 // Fila de la base → partida plana y cómoda de usar.

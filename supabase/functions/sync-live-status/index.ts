@@ -15,7 +15,7 @@ const DDRAGON_TTL_MS = 60 * 60 * 1000; // revisar si hay parche nuevo como mucho
 // Mismo mapeo que sync-matches, para nombrar el modo de juego en vivo.
 const QUEUE_NAMES: Record<number, string> = {
   490: 'Partida Rápida', 420: 'Solo/Duo', 400: 'Reclutamiento', 440: 'Flex',
-  430: 'LoL Classic', 450: 'ARAM', 700: 'Clash', 1700: 'Arena', 1710: 'Arena', 1720: 'Arena',
+  430: 'LoL Classic', 450: 'ARAM', 2400: 'ARAM', 700: 'Clash', 1700: 'Arena', 1710: 'Arena', 1720: 'Arena', 1750: 'Arena',
 };
 
 async function getChampionDict(): Promise<Map<number, string>> {

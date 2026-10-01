@@ -35,11 +35,11 @@ const BLOQUEO_MS = 30 * 1000;
 
 const COLAS: Record<number, string> = {
   420: 'Clasificatoria Solo/Duo', 440: 'Clasificatoria Flex', 400: 'Normal (reclutamiento)', 430: 'Normal',
-  490: 'Partida Rápida', 450: 'ARAM', 2400: 'ARAM', 700: 'Clash', 1700: 'Arena', 1710: 'Arena', 1720: 'Arena',
+  490: 'Partida Rápida', 450: 'ARAM', 2400: 'ARAM', 700: 'Clash', 1700: 'Arena', 1710: 'Arena', 1720: 'Arena', 1750: 'Arena',
 };
 // Colas con campeón al azar o sin roles fijos: "Main del campeón" / "Fuera de su main"
 // no dicen nada, así que ni se muestran ni se gasta la key pidiendo maestrías.
-const SIN_MAINS = new Set([450, 2400, 1700, 1710, 1720, 900, 1900]);
+const SIN_MAINS = new Set([450, 2400, 1700, 1710, 1720, 1750, 900, 1900]);
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
