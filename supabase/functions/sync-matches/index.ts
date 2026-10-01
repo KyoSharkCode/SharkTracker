@@ -14,6 +14,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const CRON_SECRET = Deno.env.get('CRON_SECRET')!;
 
 const REGION_API = 'americas';
+const REGION_PARTIDA = 'LA1'; // prefijo de los match_id (servidor la1)
 const MATCH_HISTORY_COUNT = 10;
 const HISTORY_DAYS = 30; // igual que cleanup_old_history()
 
@@ -151,6 +152,36 @@ Deno.serve(async (req) => {
   // turno no es siempre el mismo (antes, los últimos de la lista podían no avanzar nunca).
   const turno = [...(players ?? [])].sort(() => Math.random() - 0.5);
   let cortado = false;
+
+  // Riot a veces deja de actualizar la lista de partidas de una cuenta (a una
+  // se le quedó congelada semanas aunque seguía jugando). Por eso también se
+  // piden por su id las partidas que vimos EN VIVO (sync-live-status) o en la
+  // pantalla de carga de la app en los últimos 2 días y que aún no están guardadas.
+  const extraPorJugador = new Map<string, string[]>();
+  try {
+    const hace = new Date(Date.now() - 2 * 86400000).toISOString();
+    const [{ data: vivas }, { data: cargas }] = await Promise.all([
+      supabase.from('live_games').select('game_id').gte('updated_at', hace),
+      supabase.from('carga_partidas').select('game_id').gte('updated_at', hace),
+    ]);
+    const vistas = [...new Set([...(vivas ?? []), ...(cargas ?? [])].map((x: any) => `${REGION_PARTIDA}_${x.game_id}`))];
+    const { data: ya } = vistas.length ? await supabase.from('matches').select('match_id').in('match_id', vistas) : { data: [] };
+    const guardadasYa = new Set((ya ?? []).map((m: any) => m.match_id));
+    for (const matchId of vistas.filter((id) => !guardadasYa.has(id))) {
+      const res = await fetch(`https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/${matchId}`, { headers: { 'X-Riot-Token': RIOT_API_KEY } });
+      if (res.status === 429) throw new LimiteRiot('Riot: límite de peticiones (429), se sigue en la próxima corrida');
+      if (!res.ok) continue; // 404: sigue en curso o Riot aún no la publica
+      const detalle = await res.json();
+      matchCache.set(matchId, detalle);
+      for (const p of detalle.info?.participants ?? []) {
+        const pid = puuidToPlayerId.get(p.puuid);
+        if (pid) extraPorJugador.set(pid, [...(extraPorJugador.get(pid) ?? []), matchId]);
+      }
+    }
+  } catch (e) {
+    if (e instanceof LimiteRiot) cortado = true;
+    log.push(`ERROR partidas vistas en vivo: ${e instanceof Error ? e.message : String(e)}`);
+  }
   for (const player of turno) {
     if (cortado) break;
     try {
@@ -158,9 +189,12 @@ Deno.serve(async (req) => {
       // diaria). Si no, las de un jugador inactivo se borraban cada noche y se
       // volvían a "descubrir" al rato, repitiendo sus logros en el feed.
       const desde = Math.floor((Date.now() - HISTORY_DAYS * 86400000) / 1000);
-      const ids: string[] = await riotFetch(
+      const deRiot: string[] = await riotFetch(
         `https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/by-puuid/${player.puuid}/ids?startTime=${desde}&start=0&count=${MATCH_HISTORY_COUNT}`
       );
+      const extra = (extraPorJugador.get(player.id) ?? []).filter((id) => !deRiot.includes(id));
+      if (extra.length) log.push(`${player.riot_game_name}: ${extra.length} partida(s) vistas en vivo que Riot no lista en su historial`);
+      const ids = [...deRiot, ...extra];
 
       // Qué partidas ya están guardadas, y en cuáles ya está ESTE jugador. Una partida
       // con amigos se guarda una sola vez para todos: si al guardarla no se reconoció
