@@ -17,6 +17,12 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
 3. En League of Legends: Configuración → Vídeo → Modo de ventana: **"Sin bordes"**.
    En pantalla completa el overlay no se puede dibujar encima del juego.
 
+## En selección de campeones
+- **En Vivo** se abre sola: picks y bans recomendados; al fijar, runas, hechizos y build con
+  botones para importarlos (nada se cambia sin que pulses el botón).
+- **Contra tu rival de línea**: quién gana la línea, un consejo de OP.GG y hasta 3 páginas de
+  runas para elegir.
+
 ## Durante la partida
 - **Pantalla de carga**: rango, winrate y etiquetas de los 10. **Ctrl + X** lo oculta o lo muestra.
 - **Ctrl + X en partida**: tu build completa en orden, arriba a la izquierda (lo que ya

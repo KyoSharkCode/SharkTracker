@@ -237,7 +237,14 @@ que pulse un botón.
   Rol de los rivales: el cliente no lo da → se estima con el role_rate de la tier list.
   Colas sin roles (ARAM, Arena, URF): sin recomendaciones de Meta.
 - ✅ Parte C (v0.5.0): build adaptada al equipo rival. Ver "Build adaptada y build en partida".
-  Pendiente: guía de matchup de línea de OP.GG.
+- ✅ "Contra {rival}" (v0.6.0): guía de enfrentamiento de OP.GG (`lol_get_lane_matchup_guide`)
+  contra tu rival de línea. La pide la función `meta` con `rival_id` (caché en `meta_campeon` con
+  elo = `vs_<rival_id>`). Esa herramienta solo acepta `lang` en_US / ko_KR (el consejo llega en
+  inglés) y no filtra por elo (todos los elos). Trae: quién gana la línea y quién mata más en
+  solitario, estilo recomendado, consejo, hechizos/botas/inicio/core, orden de habilidades y
+  **varias páginas de runas** (hasta 3, cada una con su botón "Importar"): es el selector de runas
+  alternativas (`lol_get_champion_analysis` solo da una página).
+  Bloque 3 cerrado.
 
 ## Build adaptada y build en partida (Fase 2, bloque 3 parte C — v0.5.0)
 

@@ -117,6 +117,16 @@ async function cargarCampeon(championId, posicion) {
   return data;
 }
 
+// Enfrentamiento contra tu rival de línea (misma función "meta" con rival_id).
+async function cargarMatchup(championId, posicion, rivalId) {
+  const cliente = auth.client();
+  const { data: { session } } = await cliente.auth.getSession();
+  if (!session) return { estado: 'sin_sesion' };
+  const { data, error } = await cliente.functions.invoke('meta', { body: { champion_id: championId, posicion, rival_id: rivalId } });
+  if (error) return { estado: 'error' };
+  return data;
+}
+
 // Amigos de SharkTracker (para En Vivo): Riot ID + rango de SoloQ, de la base (0 peticiones a Riot).
 async function cargarAmigos() {
   const cliente = auth.client();
@@ -144,4 +154,4 @@ async function rolDeCampeon(championId) {
   return data?.posicion ?? null;
 }
 
-module.exports = { cargarTier, cargarCampeon, cargarAmigos, cargarCatalogos, adaptarBuild, rolDeCampeon };
+module.exports = { cargarTier, cargarCampeon, cargarMatchup, cargarAmigos, cargarCatalogos, adaptarBuild, rolDeCampeon };
