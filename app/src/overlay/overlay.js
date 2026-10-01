@@ -274,6 +274,101 @@ function pintarCarga() {
   nodo.replaceChildren(...partes);
 }
 
+// ── Build en partida (Ctrl + X): la build completa en orden, arriba a la izquierda ──
+// Lo ya comprado se marca con ✓; lo adaptado a los rivales lleva ⭐ y su motivo abajo.
+const AVISO_BUILD = {
+  sin_modo: 'En este modo no hay build de Meta (solo en la Grieta).',
+  sin_sesion: 'Inicia sesión en la app de SharkTracker para ver tu build.',
+  error: 'No se pudo cargar tu build: reintentando…',
+};
+const ROL_BUILD = { top: 'Top', jungle: 'Jungla', mid: 'Mid', adc: 'ADC', support: 'Support' };
+let build = { datos: null, visible: false };
+let misObjetos = new Set();
+let pistaHasta = 0;
+let pistaTimer = null;
+function iconoItem(o, comprado) {
+  const c = el('div', `build-item${comprado ? ' comprado' : ''}`);
+  c.title = o.nombre ?? '';
+  if (o.img) {
+    const img = el('img');
+    img.alt = '';
+    img.addEventListener('error', () => img.remove());
+    img.src = o.img;
+    c.append(img);
+  }
+  if (comprado) c.append(el('span', 'build-check', '✓'));
+  return c;
+}
+function pintarBuild() {
+  const nodo = $('build');
+  const d = build.datos;
+  const activo = ver('build');
+  mostrar(nodo, activo && build.visible);
+  // Pista "Ctrl + X: tu build" unos segundos cuando la build está lista y oculta.
+  const pista = $('build-pista');
+  pista.style.left = nodo.style.left;
+  pista.style.top = nodo.style.top;
+  mostrar(pista, activo && !build.visible && d?.estado === 'ok' && Date.now() < pistaHasta);
+  if (!activo || !build.visible) return;
+  const cab = el('div', 'carga-cab');
+  const izq = el('div');
+  izq.append(el('div', 'carga-marca', 'SHARKTRACKER · BUILD'));
+  if (d?.estado === 'ok') izq.append(el('div', 'build-quien', `${d.campeon}${d.rol ? ' · ' + (ROL_BUILD[d.rol] ?? d.rol) : ''}`));
+  cab.append(izq, el('div', 'carga-atajo', 'Ctrl + X ocultar'));
+  const partes = [cab];
+  if (!d || d.estado !== 'ok') {
+    partes.push(el('div', 'carga-aviso', d ? AVISO_BUILD[d.estado] ?? AVISO_BUILD.error : 'Preparando tu build…'));
+    nodo.replaceChildren(...partes);
+    return;
+  }
+  if (d.resumen) partes.push(el('div', 'build-resumen', `Rivales: ${d.resumen}`));
+  const inicio = d.pasos.find((p) => p.titulo === 'Inicio');
+  if (inicio?.items.length) {
+    const fila = el('div', 'build-inicio');
+    fila.append(el('span', 'build-paso', 'Inicio'));
+    for (const o of inicio.items) fila.append(iconoItem(o, false));
+    partes.push(fila);
+  }
+  // Orden completo, numerado: core, botas y 4.º–6.º.
+  const orden = el('div', 'build-orden');
+  let n = 0;
+  for (const p of d.pasos.filter((x) => x.titulo !== 'Inicio')) {
+    for (const o of p.items) {
+      n++;
+      const celda = el('div', `build-celda${p.adaptado ? ' adaptado' : ''}`);
+      celda.append(el('div', 'build-num', p.adaptado ? `${n} ⭐` : String(n)), iconoItem(o, misObjetos.has(Number(o.id))));
+      celda.append(el('div', 'build-nombre', o.nombre));
+      orden.append(celda);
+    }
+  }
+  partes.push(orden);
+  if (d.motivos?.length) {
+    const lista = el('div', 'build-motivos');
+    for (const m of d.motivos) {
+      const fila = el('div', 'build-motivo');
+      fila.append(el('span', 'build-mnombre', `⭐ ${m.nombre}`), el('span', null, ` — ${m.motivo}`));
+      lista.append(fila);
+    }
+    partes.push(lista);
+  }
+  nodo.replaceChildren(...partes);
+}
+function pintarPista() {
+  const nodo = $('build-pista');
+  nodo.replaceChildren(el('span', 'carga-marca', 'SHARKTRACKER'), el('span', 'carga-atajo', 'Ctrl + X: tu build'));
+}
+window.overlay.onBuild?.((nuevo) => {
+  const antes = build.datos?.estado;
+  build = nuevo ?? { datos: null, visible: false };
+  if (build.datos?.estado === 'ok' && antes !== 'ok') {
+    pistaHasta = Date.now() + 12000;
+    pintarPista();
+    clearTimeout(pistaTimer);
+    pistaTimer = setTimeout(pintarBuild, 12100);
+  }
+  pintarBuild();
+});
+
 window.overlay.onTab((pulsado) => { tab = pulsado; pintarOro(); });
 window.overlay.onCarga?.((datos) => { carga = datos; pintarCarga(); });
 
@@ -292,6 +387,7 @@ function aplicarConfig(nueva) {
   }
   if (ultimoEstado) pintarEstado(ultimoEstado);
   if (carga) pintarCarga();
+  pintarBuild();
 }
 
 let ultimoEstado = null;
@@ -308,6 +404,14 @@ function pintarEstado(estado) {
   pintarOro();
   rendimiento = ver('rendimiento') ? (estado.rendimiento ?? null) : null;
   pintarRendimiento();
+  // Objetos comprados: solo se redibuja la build si cambian.
+  const objetos = (estado.misObjetos ?? []).map(Number);
+  const firma = objetos.slice().sort().join(',');
+  if (firma !== misObjetos._firma) {
+    misObjetos = new Set(objetos);
+    misObjetos._firma = firma;
+    if (build.visible) pintarBuild();
+  }
 }
 
 window.overlay.onState(pintarEstado);

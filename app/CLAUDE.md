@@ -235,8 +235,32 @@ que pulse un botón.
   campeones). Al fijar: runas, hechizos y build de tu campeón (ficha de Meta) con los botones.
   Rol de los rivales: el cliente no lo da → se estima con el role_rate de la tier list.
   Colas sin roles (ARAM, Arena, URF): sin recomendaciones de Meta.
-- Pendiente (parte C): build adaptativa según el equipo rival (reglas: tipo de daño,
-  curación → antisanación, tanques, control → Mercurio, burst) + guía de matchup de OP.GG.
+- ✅ Parte C (v0.5.0): build adaptada al equipo rival. Ver "Build adaptada y build en partida".
+  Pendiente: guía de matchup de línea de OP.GG.
+
+## Build adaptada y build en partida (Fase 2, bloque 3 parte C — v0.5.0)
+
+- `src/build-adaptada.js` (main, sin Electron, se prueba en Node): parte de la ficha de Meta y
+  de los campeones rivales. Perfil del rival: tipo de daño por `info.attack`/`info.magic` de
+  DDragon (diferencia < 2 = mixto, cuenta 0,5 y 0,5), tanques/asesinos por el primer tag, y
+  listas escritas a mano de los que se curan (`CURAN`) y de mucho control (`CONTROL`).
+  Reglas: se curan → Heridas Graves; 3+ físico → armadura; 3+ mágico → resistencia mágica;
+  2+ tanques → penetración; 2+ asesinos → defensivo; botas: Mercurios (3+ mágico o 2+ de
+  control) o Botas de acero (3+ físico). El objeto sale primero de los situacionales de OP.GG
+  (⭐ en En Vivo), luego de `PREFERIDOS` (por tipo de tu campeón: ad/ap/tanque, deducido de los
+  objetos de su build) y si no, del catálogo (etiquetas de DDragon: objetos terminados de la
+  Grieta, `final`; Heridas Graves = la descripción lo dice). Máximo 3 sugerencias + botas.
+- En Vivo: sección "Contra este equipo" en la tarjeta de build (se recalcula al fijar cada
+  rival) y botón **"Importar build adaptada"** (set con un bloque "Contra este equipo" al
+  principio; reemplaza el set anterior de SharkTracker, como "Importar build").
+- **Build en partida**: en partida, **Ctrl + X** muestra/oculta la build completa en orden
+  (inicio, core, botas, 4.º–6.º con lo adaptado ⭐ y su motivo), panel `#build` en la zona
+  izquierda del overlay (x 16, y 16; 430 px; movible en el editor). Empieza oculta en cada
+  partida; al estar lista sale 12 s la pista "Ctrl + X: tu build". Lo comprado sale con ✓
+  (`misObjetos` en `overlay:state`). main.js `prepararBuild`: una vez por partida (reintento a
+  los 30 s si falla), solo en la Grieta (mapa 11). Campeón por `rawChampionName`; rol: el de la
+  partida (`position`), si no el de la última selección (lcu) con ese campeón, si no el rol
+  donde más se juega (`meta_tier.role_rate`). Interruptor "Tu build" en Ajustes → Overlay.
 
 ## Overlay por mapa (feedback de partidas en ARAM, 01/10/2026)
 
@@ -311,8 +335,8 @@ visual" y "Overlay — estructuras" del canvas)
      principal y promedios al empezar la partida.
 4. ✅ Ajustes → Overlay (pestañas Cuenta / Overlay en Ajustes):
    - Interruptores reales: diferencia de oro, Barón/Ancestral, anuncios de objetivos,
-     avisos de lo que pasó (toasts) y Tu rendimiento. Se aplican al instante (IPC
-     `overlay:config`), también en partida. "Timers de campamentos", "Tu build" y la
+     avisos de lo que pasó (toasts), Tu rendimiento y Tu build (Ctrl + X). Se aplican al instante (IPC
+     `overlay:config`), también en partida. "Timers de campamentos" y la
      tarjeta "Pantalla de carga" se ven como "Próximamente".
    - "Reposicionar elementos" abre una **ventana aparte** (`editor/`) que emula la
      pantalla del juego: esquema del HUD de LoL (siluetas propias, sin imágenes de Riot)

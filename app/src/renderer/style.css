@@ -606,6 +606,13 @@ span.sw { cursor: default; opacity: 0.6; }
 }
 .ev-btn:hover { filter: brightness(1.08); }
 .ev-btn:disabled { opacity: 0.6; cursor: default; }
+/* Build adaptada: "Contra este equipo" */
+.ev-adapt-res { font-size: 11px; color: #cfe0ee; margin: 2px 0 6px; line-height: 1.4; }
+.ev-adapt { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
+.ev-adapt .mt-item { width: 30px; height: 30px; border: 1px solid #facc15; }
+.ev-adapt-t { font-size: 12px; font-weight: 600; color: #facc15; }
+.mt-op.ev-estrella { color: #facc15; }
+.mt-op.ev-estrella .mt-item { outline: 1px solid #facc15; }
 .ev-aviso { font-size: 10px; margin-top: 7px; line-height: 1.5; }
 .ev-aviso.ok { color: #6fdba8; }
 .ev-aviso.mal { color: #f0a487; }

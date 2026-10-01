@@ -5,6 +5,8 @@
 //   le ganan a tu rival de línea) y bans recomendados.
 // - Al fijar: runas, hechizos y build de tu campeón, con botones para
 //   importarlos al cliente. SIEMPRE decide el usuario: nada se importa solo.
+// - "Contra este equipo": la build adaptada a los rivales que ya fijaron
+//   (reglas en src/build-adaptada.js), con su propio botón de importar.
 // - Aliados y rivales. En ranked no se muestran los nombres ocultos.
 (() => {
   const byId = (id) => document.getElementById(id);
@@ -45,6 +47,7 @@
   let metaEn = 0;
   let amigos = new Map();      // riotId en minúsculas → rango
   const fichas = new Map();    // `${id}:${rol}` → ficha | 'cargando' | 'error'
+  const adaptadas = new Map(); // `${id}:${rol}:${rivales}` → build adaptada | 'cargando'
   let avisos = {};             // resultado de los botones (runas / hechizos / build)
   let campeonAvisos = null;
 
@@ -99,6 +102,20 @@
       return null;
     }
     return typeof f === 'object' ? f : null;
+  }
+
+  // Build adaptada a los rivales que ya fijaron (se recalcula cuando fija otro).
+  function adaptada(id, rol, f) {
+    const rivales = (estado.rivales ?? []).map((r) => r.campeon).filter(Boolean);
+    if (!f || !rivales.length) return null;
+    const k = `${id}:${rol}:${[...rivales].sort().join(',')}`;
+    const a = adaptadas.get(k);
+    if (a === undefined) {
+      adaptadas.set(k, 'cargando');
+      window.sharkTracker.meta.adaptar(f, id, rivales).then((r) => { adaptadas.set(k, r ?? 'error'); pintar(true); });
+      return null;
+    }
+    return typeof a === 'object' ? a : null;
   }
 
   // ── Roles ──
@@ -209,6 +226,7 @@
     runas: '✓ Página de runas creada y seleccionada en el cliente.',
     hechizos: '✓ Hechizos puestos (tu Destello se queda en su tecla).',
     build: '✓ Set de objetos creado: lo verás en la tienda del juego.',
+    buildAdaptada: '✓ Set adaptado creado: arriba del todo verás "Contra este equipo".',
   };
 
   function cardRunas(id, rol, f) {
@@ -265,6 +283,8 @@
     };
     paso('Inicio', f.inicio); paso('Core', f.core); paso('Botas', f.botas);
     c.append(orden);
+    const a = adaptada(id, rol, f);
+    const estrella = new Set(a?.estrella ?? []);
     const situ = [['4.º', f.cuarto], ['5.º', f.quinto], ['6.º', f.sexto]].filter(([, l]) => l?.length);
     if (situ.length) {
       c.append(el('div', 'mt-subt', 'Situacionales — según la partida'));
@@ -273,27 +293,54 @@
         fl.append(el('span', 'mt-situt', `${t} objeto`));
         for (const g of lista.slice(0, 3)) {
           const op = el('div', 'mt-op');
-          op.append(iconoObjeto(g.ids[0]), el('span', null, pct(g.winrate)));
+          const encaja = estrella.has(Number(g.ids[0]));
+          if (encaja) { op.classList.add('ev-estrella'); op.title = 'Encaja con este equipo rival'; }
+          op.append(iconoObjeto(g.ids[0]), el('span', null, `${encaja ? '⭐ ' : ''}${pct(g.winrate)}`));
           fl.append(op);
         }
         c.append(fl);
       }
     }
+    // ── Contra este equipo ──
+    const rivalesFijados = (estado.rivales ?? []).filter((r) => r.campeon).length;
+    const cambios = a ? [...a.sugerencias.map((s) => ({ item: s.item, titulo: s.titulo, motivo: s.motivo, deOpgg: s.deOpgg })),
+      ...(a.botas ? [{ item: a.botas.item, titulo: 'Botas', motivo: a.botas.motivo, deOpgg: false }] : [])] : [];
+    c.append(el('div', 'mt-subt', 'Contra este equipo'));
+    if (!rivalesFijados) c.append(el('div', 'mt-pasod', 'Aparece cuando los rivales fijen su campeón.'));
+    else if (!a) c.append(el('div', 'mt-pasod', 'Analizando a los rivales…'));
+    else {
+      if (a.resumen) c.append(el('div', 'ev-adapt-res', `${a.resumen}${rivalesFijados < 5 ? ` (${rivalesFijados} de 5 rivales)` : ''}`));
+      if (!cambios.length) c.append(el('div', 'mt-pasod', 'La build de OP.GG ya encaja con este equipo.'));
+      for (const x of cambios) {
+        const fl = el('div', 'ev-adapt');
+        const txt = el('div');
+        txt.append(el('div', 'ev-adapt-t', `${x.titulo}: ${cat().objetos[x.item]?.nombre ?? x.item}`),
+          el('div', 'mt-pasod', `${x.motivo}${x.deOpgg ? ' · de los situacionales de OP.GG' : ''}`));
+        fl.append(iconoObjeto(x.item), txt);
+        c.append(fl);
+      }
+    }
+
+    const bloquesBase = [
+      { titulo: 'Inicio', items: f.inicio?.ids ?? [] },
+      { titulo: 'Core', items: f.core?.ids ?? [] },
+      { titulo: 'Botas', items: f.botas?.ids ?? [] },
+      { titulo: '4.º objeto (elige uno)', items: (f.cuarto ?? []).map((g) => g.ids[0]) },
+      { titulo: '5.º objeto (elige uno)', items: (f.quinto ?? []).map((g) => g.ids[0]) },
+      { titulo: '6.º objeto (elige uno)', items: (f.sexto ?? []).map((g) => g.ids[0]) },
+    ];
+    const titulo = `${campeon(id).nombre} ${ROL_ES[rol] ?? ''}`.trim();
     const acc = el('div', 'ev-acciones');
-    acc.append(boton('Importar build', 'build', () => api().importarBuild({
-      championId: id,
-      titulo: `${campeon(id).nombre} ${ROL_ES[rol] ?? ''}`.trim(),
-      bloques: [
-        { titulo: 'Inicio', items: f.inicio?.ids ?? [] },
-        { titulo: 'Core', items: f.core?.ids ?? [] },
-        { titulo: 'Botas', items: f.botas?.ids ?? [] },
-        { titulo: '4.º objeto (elige uno)', items: (f.cuarto ?? []).map((g) => g.ids[0]) },
-        { titulo: '5.º objeto (elige uno)', items: (f.quinto ?? []).map((g) => g.ids[0]) },
-        { titulo: '6.º objeto (elige uno)', items: (f.sexto ?? []).map((g) => g.ids[0]) },
-      ],
-    })));
+    acc.append(boton('Importar build', 'build', () => api().importarBuild({ championId: id, titulo, bloques: bloquesBase })));
+    if (cambios.length) {
+      acc.append(boton('Importar build adaptada', 'buildAdaptada', () => api().importarBuild({
+        championId: id,
+        titulo: `${titulo} (adaptada)`,
+        bloques: [{ titulo: 'Contra este equipo', items: cambios.map((x) => x.item) }, ...bloquesBase],
+      })));
+    }
     c.append(acc);
-    const a = aviso('build'); if (a) c.append(a);
+    for (const t of ['build', 'buildAdaptada']) { const av = aviso(t); if (av) c.append(av); }
     return c;
   }
 

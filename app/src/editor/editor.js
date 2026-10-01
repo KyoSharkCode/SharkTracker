@@ -3,7 +3,7 @@
 // Arrastras cada pieza; al guardar, el overlay se actualiza al instante.
 (() => {
   const byId = (id) => document.getElementById(id);
-  const PIEZAS = { baron: 'Barón', ancestral: 'Ancestral', rendimiento: 'Tu rendimiento', avisos: 'Avisos', carga: 'Pantalla de carga' };
+  const PIEZAS = { baron: 'Barón', ancestral: 'Ancestral', rendimiento: 'Tu rendimiento', avisos: 'Avisos', carga: 'Pantalla de carga', build: 'Build (Ctrl + X)' };
   const escenario = byId('escenario');
   const marco = byId('marco');
   const caja = byId('caja');
@@ -67,9 +67,23 @@
     window.__aplicarConfig({ visible: {}, posiciones });
   }
 
+  // Build en partida de ejemplo (en el editor no hay íconos de objetos: solo cuadros).
+  const obj = (nombre) => ({ id: 0, nombre, img: null });
+  const EJEMPLO_BUILD = { visible: true, datos: { estado: 'ok', campeon: 'Ahri', rol: 'mid',
+    resumen: '3,5 de daño físico · 1 tanque · se cura: Soraka',
+    pasos: [
+      { titulo: 'Inicio', items: [obj('Anillo de Doran'), obj('Poción de vida')] },
+      { titulo: 'Core', items: [obj('Ecos de Luden'), obj('Sombrero mortal de Rabadon')] },
+      { titulo: 'Botas', items: [obj('Botas de hechicero')] },
+      { titulo: '4.º', adaptado: true, items: [obj('Morellonomicon')] },
+      { titulo: '5.º', adaptado: true, items: [obj('Reloj de arena de Zhonya')] },
+      { titulo: '6.º', items: [obj('Bastón del vacío')] }],
+    motivos: [{ nombre: 'Morellonomicon', motivo: 'Soraka se cura mucho' }, { nombre: 'Reloj de arena de Zhonya', motivo: '3,5 rivales hacen daño físico' }] } };
+
   window.editor.getConfig().then((config) => {
     aplicarPosiciones(config.posiciones);
     window.__pintarEstado(EJEMPLO);
+    window.__build(EJEMPLO_BUILD);
   });
 
   // ── Arrastrar ──
@@ -151,6 +165,7 @@
     byId('btn-tab').disabled = cargaVisible;
     window.__pintarEstado(cargaVisible ? {} : EJEMPLO);
     window.__carga(cargaVisible ? EJEMPLO_CARGA : null);
+    window.__build(cargaVisible ? null : EJEMPLO_BUILD); // la build es de la partida, no de la carga
     byId('avisos').hidden = cargaVisible; // en la pantalla de carga no hay avisos
     byId('hud').hidden = cargaVisible;
     byId('carga-silueta').hidden = !cargaVisible || !!byId('fondo').src;

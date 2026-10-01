@@ -160,3 +160,30 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .carga.mini { width: auto; }
 .carga.mini .carga-cab { border-bottom: none; gap: 14px; }
 .carga.mini .carga-atajo { margin-top: 0; }
+
+/* ── Build en partida (Ctrl + X): arriba a la izquierda ── */
+.zona-izquierda { left: 0; transform-origin: top left; transform: scale(var(--s, 1)); }
+.build {
+  position: absolute; left: 16px; top: 16px; width: 430px;
+  background: var(--panel); border: 1px solid color-mix(in srgb, var(--acento) 25%, var(--borde)); border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35); overflow: hidden;
+}
+.build-pista { position: absolute; left: 16px; top: 16px; gap: 12px; padding: 7px 12px; }
+.build-quien { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; margin-top: 2px; }
+.build-resumen { padding: 7px 12px; font-size: 11px; color: #cfe0ee; border-bottom: 1px solid rgba(255,255,255,.05); }
+.build-inicio { display: flex; align-items: center; gap: 6px; padding: 8px 12px 0; }
+.build-paso { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--tenue); margin-right: 4px; }
+.build-inicio .build-item { width: 28px; height: 28px; }
+.build-orden { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 6px; padding: 10px 12px; }
+.build-celda { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; }
+.build-num { font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; color: var(--tenue); line-height: 1; }
+.build-celda.adaptado .build-num { color: var(--dorado); }
+.build-item { position: relative; width: 44px; height: 44px; border-radius: 8px; overflow: hidden; background: #0d1c2b; border: 1.5px solid var(--borde); flex-shrink: 0; }
+.build-celda.adaptado .build-item { border-color: var(--dorado); }
+.build-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.build-item.comprado img { opacity: .4; }
+.build-check { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: var(--acento); text-shadow: 0 1px 3px rgba(0,0,0,.9); }
+.build-nombre { font-size: 9px; color: var(--tenue); text-align: center; line-height: 1.15; max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.build-motivos { padding: 7px 12px 9px; border-top: 1px solid rgba(255,255,255,.07); display: flex; flex-direction: column; gap: 3px; }
+.build-motivo { font-size: 11px; color: var(--tenue); line-height: 1.3; }
+.build-mnombre { color: var(--dorado); font-weight: 600; }

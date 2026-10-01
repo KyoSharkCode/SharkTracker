@@ -8,6 +8,7 @@
 
 const https = require('https');
 const auth = require('./auth');
+const { adaptar } = require('./build-adaptada');
 
 const DD = 'https://ddragon.leagueoflegends.com/cdn';
 // players.primary_role (web) → posición de OP.GG.
@@ -35,11 +36,18 @@ async function cargarCatalogos() {
   ]);
   const c = {};
   for (const x of Object.values(campeones.data ?? {})) {
-    c[x.key] = { id: x.id, nombre: x.name, img: `${DD}/${version}/img/champion/${x.id}.png` };
+    c[x.key] = { id: x.id, nombre: x.name, img: `${DD}/${version}/img/champion/${x.id}.png`, tags: x.tags ?? [], info: x.info ?? {} };
   }
   const o = {};
   for (const [id, x] of Object.entries(objetos.data ?? {})) {
-    o[id] = { nombre: x.name, img: `${DD}/${version}/img/item/${id}.png` };
+    o[id] = {
+      nombre: x.name, img: `${DD}/${version}/img/item/${id}.png`,
+      tags: x.tags ?? [], oro: x.gold?.total ?? 0,
+      // Objeto terminado que se compra en la Grieta (para buscar alternativas en el catálogo).
+      final: !x.into?.length && x.gold?.purchasable !== false && x.maps?.['11'] !== false && x.inStore !== false
+        && !x.requiredChampion && !x.requiredAlly && (x.gold?.total ?? 0) >= 2200,
+      heridas: /heridas graves|grievous/i.test(x.description ?? ''),
+    };
   }
   const r = {};
   for (const estilo of runas ?? []) {
@@ -122,4 +130,17 @@ async function cargarAmigos() {
   }));
 }
 
-module.exports = { cargarTier, cargarCampeon, cargarAmigos };
+// Build adaptada al equipo rival (ver build-adaptada.js). rivales: ids numéricos de campeón.
+async function adaptarBuild(ficha, miCampeon, rivales) {
+  if (!ficha) return null;
+  return adaptar(ficha, miCampeon, rivales, await cargarCatalogos());
+}
+
+// Rol en el que más se juega un campeón (si la partida no lo dice).
+async function rolDeCampeon(championId) {
+  const { data } = await auth.client().from('meta_tier').select('posicion')
+    .eq('champion_id', championId).order('role_rate', { ascending: false }).limit(1).maybeSingle();
+  return data?.posicion ?? null;
+}
+
+module.exports = { cargarTier, cargarCampeon, cargarAmigos, cargarCatalogos, adaptarBuild, rolDeCampeon };
