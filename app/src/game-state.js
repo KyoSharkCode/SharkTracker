@@ -11,6 +11,10 @@
 //     que es lo que el propio Tab muestra; el oro sin gastar del rival no se ve).
 //   - Tu rendimiento contra la división de arriba de la tuya (rendimiento.js).
 //
+// Cada mapa tiene lo suyo: Barón, dragones, Heraldo y Vacuolarvas solo existen
+// en la Grieta (mapa 11). En ARAM (mapa 12) quedan torres e inhibidores; en
+// Arena (mapa 30) no hay objetivos ni estructuras, ni filas de Tab que comparar.
+//
 // Solo usa información que el juego ya muestra (eventos de la partida y el
 // estado de los jugadores). No depende de Electron: se puede probar en Node.
 
@@ -28,7 +32,9 @@ const TIEMPOS = {
 const DURACION_BUFF = { baron: 180, ancestral: 150 };
 const AVISO_ANTES = 90;      // anunciar cuando falta 1:30 o menos
 const AVISO_INHIB = 60;      // inhibidor a punto de reaparecer: avisar a 1:00
-const INHIB_REAPARECE = 5 * 60;
+// Inhibidores: 5:00 en la Grieta, 4:00 en el Abismo de los Lamentos (ARAM).
+const INHIB_REAPARECE = { 11: 5 * 60, 12: 4 * 60 };
+const MAPA = { grieta: 11, aram: 12, arena: 30 };
 const TOAST_DURACION = 5;    // segundos
 
 const DRAGON_ES = {
@@ -81,6 +87,14 @@ function crearEstadoPartida() {
 
   function actualizar(datos) {
     const t = datos?.gameData?.gameTime ?? 0;
+    // Mapa: 11 Grieta (también URF), 12 ARAM, 30 Arena. Si la API no lo dice, se mira el modo.
+    const modo = datos?.gameData?.gameMode;
+    const mapa = datos?.gameData?.mapNumber
+      ?? (modo === 'ARAM' ? MAPA.aram : modo === 'CHERRY' ? MAPA.arena : MAPA.grieta);
+    const esGrieta = mapa === MAPA.grieta;
+    const hayEstructuras = mapa === MAPA.grieta || mapa === MAPA.aram;
+    const inhibReaparece = INHIB_REAPARECE[mapa] ?? INHIB_REAPARECE[MAPA.grieta];
+    const relojInhib = `${Math.floor(inhibReaparece / 60)}:${String(inhibReaparece % 60).padStart(2, '0')}`;
     const jugadores = datos?.allPlayers ?? [];
     const eventos = datos?.events?.Events ?? [];
 
@@ -138,8 +152,8 @@ function crearEstadoPartida() {
         titulares,
       };
     }
-    const baron = buff('baron', 'BaronKill');
-    const ancestral = buff('ancestral', 'DragonKill', (e) => e.DragonType === 'Elder');
+    const baron = esGrieta ? buff('baron', 'BaronKill') : null;
+    const ancestral = esGrieta ? buff('ancestral', 'DragonKill', (e) => e.DragonType === 'Elder') : null;
 
     // ── Dragones por equipo (para el alma y el toast) ──
     const dragonesElementales = eventos.filter((e) => e.EventName === 'DragonKill' && e.DragonType !== 'Elder');
@@ -157,7 +171,8 @@ function crearEstadoPartida() {
     const esLarva = (e) => /horde|grub|larva/i.test(e.EventName ?? '');
     const larvas = eventos.filter(esLarva);
     const cuentaLarvas = { blue: 0, red: 0 };
-    const esToast = (e) => ['DragonKill', 'HeraldKill', 'TurretKilled', 'InhibKilled'].includes(e.EventName) || esLarva(e);
+    const esToast = (e) => (esGrieta && (['DragonKill', 'HeraldKill'].includes(e.EventName) || esLarva(e)))
+      || (hayEstructuras && ['TurretKilled', 'InhibKilled'].includes(e.EventName));
     let toast = null;
     const reciente = [...eventos].reverse().find((e) => esToast(e) && t - e.EventTime <= TOAST_DURACION);
     if (reciente) {
@@ -196,6 +211,7 @@ function crearEstadoPartida() {
         // Torre o inhibidor: la tira el equipo contrario al dueño (aunque la tire un súbdito).
         const esTorre = reciente.EventName === 'TurretKilled';
         const est = leerEstructura(esTorre ? reciente.TurretKilled : reciente.InhibKilled);
+        if (est && !esGrieta) { est.carril = ''; est.nivel = ''; } // ARAM: un solo carril
         const quienTira = est ? (est.dueño === 'blue' ? 'red' : 'blue') : eq;
         const aliado = quienTira === miLado;
         toast = {
@@ -208,7 +224,7 @@ function crearEstadoPartida() {
           titulo: esTorre ? (aliado ? 'Torre destruida' : 'Perdiste una torre')
             : (aliado ? 'Inhibidor destruido' : 'Perdiste un inhibidor'),
           detalle: esTorre ? [est?.nivel, est?.carril].filter(Boolean).join(' · ')
-            : [est?.carril ? est.carril[0].toUpperCase() + est.carril.slice(1) : '', 'vuelve en 5:00'].filter(Boolean).join(' · '),
+            : [est?.carril ? est.carril[0].toUpperCase() + est.carril.slice(1) : '', `vuelve en ${relojInhib}`].filter(Boolean).join(' · '),
           puntos: null,
         };
       }
@@ -223,29 +239,33 @@ function crearEstadoPartida() {
       const falta = aparece - t;
       if (falta > 0 && falta <= antes) proximos.push({ clave, nombre, falta: Math.ceil(falta), ...extra });
     };
-    // Dragón / Ancestral
-    const ultDragon = ultimo('DragonKill');
-    if (alma) {
-      const ultAncestral = ultimo('DragonKill', (e) => e.DragonType === 'Elder');
-      const base = Math.max(alma.EventTime, ultAncestral?.EventTime ?? 0);
-      agregar('ancestral', 'Dragón Ancestral', base + TIEMPOS.ancestral.reaparece);
-    } else {
-      agregar('dragon', 'Dragón', ultDragon ? ultDragon.EventTime + TIEMPOS.dragon.reaparece : TIEMPOS.dragon.primera);
+    // Objetivos épicos: solo en la Grieta.
+    if (esGrieta) {
+      // Dragón / Ancestral
+      const ultDragon = ultimo('DragonKill');
+      if (alma) {
+        const ultAncestral = ultimo('DragonKill', (e) => e.DragonType === 'Elder');
+        const base = Math.max(alma.EventTime, ultAncestral?.EventTime ?? 0);
+        agregar('ancestral', 'Dragón Ancestral', base + TIEMPOS.ancestral.reaparece);
+      } else {
+        agregar('dragon', 'Dragón', ultDragon ? ultDragon.EventTime + TIEMPOS.dragon.reaparece : TIEMPOS.dragon.primera);
+      }
+      if (!larvas.length) agregar('larvas', 'Vacuolarvas', TIEMPOS.larvas.primera);
+      if (!ultimo('HeraldKill')) agregar('heraldo', 'Heraldo', TIEMPOS.heraldo.primera);
+      const ultBaron = ultimo('BaronKill');
+      agregar('baron', 'Barón', ultBaron ? ultBaron.EventTime + TIEMPOS.baron.reaparece : TIEMPOS.baron.primera);
     }
-    if (!larvas.length) agregar('larvas', 'Vacuolarvas', TIEMPOS.larvas.primera);
-    if (!ultimo('HeraldKill')) agregar('heraldo', 'Heraldo', TIEMPOS.heraldo.primera);
-    const ultBaron = ultimo('BaronKill');
-    agregar('baron', 'Barón', ultBaron ? ultBaron.EventTime + TIEMPOS.baron.reaparece : TIEMPOS.baron.primera);
-    // Inhibidores a punto de reaparecer (5:00 después de caer; aviso a 1:00).
-    for (const e of eventos.filter((x) => x.EventName === 'InhibKilled')) {
+    // Inhibidores a punto de reaparecer (Grieta 5:00 / ARAM 4:00 después de caer; aviso a 1:00).
+    for (const e of hayEstructuras ? eventos.filter((x) => x.EventName === 'InhibKilled') : []) {
       const est = leerEstructura(e.InhibKilled);
       if (!est) continue;
+      if (!esGrieta) est.carril = '';
       // Si vuelve a caer antes de reaparecer, cuenta solo la última vez.
       const otraVez = eventos.some((x) => x.EventName === 'InhibKilled' && x.InhibKilled === e.InhibKilled && x.EventTime > e.EventTime);
       if (otraVez) continue;
       const esMio = est.dueño === miLado;
-      agregar('inhib', esMio ? 'Tu inhibidor' : 'Inhibidor rival', e.EventTime + INHIB_REAPARECE,
-        { esMio, detalle: `${est.carril[0].toUpperCase()}${est.carril.slice(1)} · reaparece` }, AVISO_INHIB);
+      agregar('inhib', esMio ? 'Tu inhibidor' : 'Inhibidor rival', e.EventTime + inhibReaparece,
+        { esMio, detalle: est.carril ? `${est.carril[0].toUpperCase()}${est.carril.slice(1)} · reaparece` : 'Reaparece' }, AVISO_INHIB);
     }
     proximos.sort((a, b) => a.falta - b.falta);
 
@@ -258,7 +278,8 @@ function crearEstadoPartida() {
     const aliados = jugadores.filter((p) => lado(p.team) === miLado);
     const enemigos = jugadores.filter((p) => lado(p.team) && lado(p.team) !== miLado);
     const oro = [];
-    for (let i = 0; i < Math.min(aliados.length, enemigos.length); i++) {
+    // En Arena no hay dos equipos de 5 en el Tab: no se compara.
+    for (let i = 0; mapa !== MAPA.arena && i < Math.min(aliados.length, enemigos.length); i++) {
       const a = valorObjetos(aliados[i]);
       const b = valorObjetos(enemigos[i]);
       oro.push({ diferencia: a - b, aliado: aliados[i].championName, enemigo: enemigos[i].championName });
@@ -269,10 +290,10 @@ function crearEstadoPartida() {
       modo: datos?.gameData?.gameMode,
     });
 
-    return { tiempo: t, miLado, baron, ancestral, toast, proximos, dragones: cuenta, oro, rendimiento, aliadoIzquierda: miLado !== 'red' };
+    return { tiempo: t, mapa, miLado, baron, ancestral, toast, proximos, dragones: cuenta, oro, rendimiento, aliadoIzquierda: miLado !== 'red' };
   }
 
   return { actualizar, setReferencia, setPrecios };
 }
 
-module.exports = { crearEstadoPartida, TIEMPOS, DURACION_BUFF, iniciales };
+module.exports = { crearEstadoPartida, TIEMPOS, DURACION_BUFF, INHIB_REAPARECE, iniciales };

@@ -283,6 +283,7 @@ function iniciarCarga() {
   cargaInicio = Date.now();
   cargarVersionDD();
   if (!overlayWindow) createOverlayWindow();
+  limpiarOverlay(); // que no quede nada de la partida anterior (p. ej. "Tu rendimiento")
   overlayWindow.showInactive();
   iniciarTeclado(); // para el atajo Ctrl + X
   enviarCarga({ estado: 'buscando' });
@@ -452,11 +453,17 @@ function startOverlay() {
   }, 1000);
 }
 
+// Borra lo que dibuja el overlay de la partida (buffs, anuncios, oro, Tu rendimiento).
+function limpiarOverlay() {
+  overlayWindow?.webContents.send('overlay:state', {});
+}
+
 function stopOverlay() {
   if (!cargaActiva) detenerTeclado();
   clearInterval(overlayTimer);
   overlayTimer = null;
   estadoPartida = null;
+  limpiarOverlay();
   if (!cargaActiva) overlayWindow?.hide();
 }
 ipcMain.handle('game:getStatus', () => ({ inGame: !!lastInGame }));

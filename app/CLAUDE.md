@@ -238,6 +238,20 @@ que pulse un botón.
 - Pendiente (parte C): build adaptativa según el equipo rival (reglas: tipo de daño,
   curación → antisanación, tanques, control → Mercurio, burst) + guía de matchup de OP.GG.
 
+## Overlay por mapa (feedback de partidas en ARAM, 01/10/2026)
+
+- `game-state.js` mira `gameData.mapNumber` (11 Grieta/URF, 12 ARAM, 30 Arena; si falta, `gameMode`):
+  - Barón, dragones, Ancestral, Heraldo y Vacuolarvas (anuncios, buffs y toasts): solo en la Grieta.
+  - Torres e inhibidores: Grieta y ARAM. El inhibidor reaparece a los 5:00 en la Grieta y a los
+    4:00 en ARAM (`INHIB_REAPARECE`; si en partida real sale desfasado, se ajusta ahí).
+  - Arena: sin objetivos, sin estructuras y sin diferencia de oro en el Tab.
+  - Los "packs de vida" de ARAM no salen en la API del juego: no se pueden anunciar.
+- Al terminar una partida y al empezar cada pantalla de carga se limpia el overlay
+  (`limpiarOverlay`): antes "Tu rendimiento" de la partida anterior aparecía en la siguiente carga.
+- Pantalla de carga: en ARAM / Arena / URF no hay "Main del campeón" ni "Fuera de su main"
+  (y no se piden maestrías a Riot).
+- ARAM de temporada (cola 2400) cuenta como ARAM en Mi Perfil, En Vivo y la pantalla de carga.
+
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)
 
