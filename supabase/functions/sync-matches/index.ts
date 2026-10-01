@@ -183,10 +183,14 @@ Deno.serve(async (req) => {
     const vistas = [...new Set([...(vivas ?? []), ...(cargas ?? [])].map((x: any) => `${REGION_PARTIDA}_${x.game_id}`))];
     const { data: ya } = vistas.length ? await supabase.from('matches').select('match_id').in('match_id', vistas) : { data: [] };
     const guardadasYa = new Set((ya ?? []).map((m: any) => m.match_id));
+    let bloqueadas = 0;
     for (const matchId of vistas.filter((id) => !guardadasYa.has(id))) {
       const res = await fetch(`https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/${matchId}`, { headers: { 'X-Riot-Token': RIOT_API_KEY } });
       if (res.status === 429) throw new LimiteRiot('Riot: límite de peticiones (429), se sigue en la próxima corrida');
-      if (!res.ok) { // 404: sigue en curso o Riot no la publica
+      // 404: sigue en curso. 403: Riot no da las partidas de algunos modos
+      // (p. ej. ARAM: Caos) a ninguna key; se cuentan y se anota una sola línea.
+      if (res.status === 403) { bloqueadas++; continue; }
+      if (!res.ok) {
         if (res.status !== 404) log.push(`Partida vista en vivo ${matchId}: Riot respondió ${res.status}`);
         continue;
       }
@@ -197,6 +201,7 @@ Deno.serve(async (req) => {
         if (pid) extraPorJugador.set(pid, [...(extraPorJugador.get(pid) ?? []), matchId]);
       }
     }
+    if (bloqueadas) log.push(`${bloqueadas} partida(s) vistas en vivo que Riot no publica (403, modo sin datos en la API)`);
   } catch (e) {
     if (e instanceof LimiteRiot) cortado = true;
     log.push(`ERROR partidas vistas en vivo: ${e instanceof Error ? e.message : String(e)}`);
