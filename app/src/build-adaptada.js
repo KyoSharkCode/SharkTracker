@@ -183,4 +183,38 @@ function adaptar(ficha, miCampeon, rivales, cat) {
   };
 }
 
-module.exports = { adaptar };
+// ── Siguiente compra (junto al minimapa) ──
+// orden: ids de la build sin el inicio (core, botas, 4.º–6.º). misObjetos: ids que llevas.
+// Devuelve el primer objeto de la build que te falta, cuánto te cuesta todavía (descontando
+// los componentes que ya tienes) y el componente que conviene comprar ahora.
+function siguienteCompra(orden, misObjetos, oro, objetos) {
+  const inventario = new Map();
+  for (const id of misObjetos) inventario.set(Number(id), (inventario.get(Number(id)) ?? 0) + 1);
+  const usar = (inv, id) => { const n = inv.get(id) ?? 0; if (n) inv.set(id, n - 1); return n > 0; };
+  // Coste que falta de un objeto: 0 si ya lo tienes; si no, su receta + lo que falte de cada componente.
+  const falta = (inv, id) => {
+    if (usar(inv, id)) return 0;
+    const o = objetos[id];
+    if (!o) return 0;
+    const comps = o.desde ?? [];
+    const receta = Math.max(0, o.oro - comps.reduce((s, c) => s + (objetos[c]?.oro ?? 0), 0));
+    return receta + comps.reduce((s, c) => s + falta(inv, c), 0);
+  };
+  const tengo = new Map(inventario);
+  const objetivo = orden.map(Number).find((id) => !usar(tengo, id));
+  if (!objetivo || !objetos[objetivo]) return null;
+  const inv = new Map(inventario);
+  const coste = falta(inv, objetivo);
+  const info = (id, c) => ({ id, nombre: objetos[id]?.nombre ?? '', img: objetos[id]?.img ?? null, coste: c, falta: Math.max(0, c - Math.floor(oro ?? 0)) });
+  // Si no te alcanza para el objeto entero: el componente más caro que todavía te falta.
+  let componente = null;
+  if ((oro ?? 0) < coste) {
+    const inv2 = new Map(inventario);
+    const opciones = (objetos[objetivo].desde ?? []).map((c) => [c, falta(inv2, c)]).filter(([, f]) => f > 0)
+      .sort((a, b) => b[1] - a[1]);
+    if (opciones.length) componente = info(opciones[0][0], opciones[0][1]);
+  }
+  return { objetivo: info(objetivo, coste), componente };
+}
+
+module.exports = { adaptar, siguienteCompra };

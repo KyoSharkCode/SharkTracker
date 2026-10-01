@@ -43,6 +43,7 @@ async function cargarCatalogos() {
     o[id] = {
       nombre: x.name, img: `${DD}/${version}/img/item/${id}.png`,
       tags: x.tags ?? [], oro: x.gold?.total ?? 0,
+      desde: (x.from ?? []).map(Number), // receta: componentes
       // Objeto terminado que se compra en la Grieta (para buscar alternativas en el catálogo).
       final: !x.into?.length && x.gold?.purchasable !== false && x.maps?.['11'] !== false && x.inStore !== false
         && !x.requiredChampion && !x.requiredAlly && (x.gold?.total ?? 0) >= 2200,

@@ -123,6 +123,16 @@ html, body {
 .gamechip.ingame { color: #6fdba8; border-color: rgba(79,214,140,0.35); background: rgba(79,214,140,0.08); }
 .gamechip.ingame .gd { background: #4fd68c; animation: pulseGlow 1.8s ease-in-out infinite; }
 
+/* Aviso "actualización lista" (barra de título) */
+.updatechip {
+  -webkit-app-region: no-drag; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  font: inherit; font-size: 10px; font-weight: 700; color: #00e5c7;
+  border: 1px solid rgba(0,229,199,0.4); border-radius: 20px; padding: 4px 10px; background: rgba(0,229,199,0.08);
+}
+.updatechip:hover { background: rgba(0,229,199,0.16); }
+.updatechip .ud { width: 6px; height: 6px; border-radius: 50%; background: #00e5c7; animation: pulseGlow 1.8s ease-in-out infinite; }
+
 /* Ficha de Discord (sesión iniciada) */
 .discordchip {
   -webkit-app-region: no-drag;
@@ -614,6 +624,17 @@ span.sw { cursor: default; opacity: 0.6; }
 .mt-op.ev-estrella { color: #facc15; }
 .mt-op.ev-estrella .mt-item { outline: 1px solid #facc15; }
 .ev-aviso { font-size: 10px; margin-top: 7px; line-height: 1.5; }
+/* Partida en curso (vista para un segundo monitor) */
+.ev-tags { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; }
+.ev-tag { font-size: 9px; font-weight: 600; border-radius: 5px; padding: 1px 6px; white-space: nowrap; }
+.ev-tag.main { background: rgba(70,200,140,.14); color: #6fdba8; }
+.ev-tag.fuera { background: rgba(230,180,60,.14); color: #e8c766; }
+.ev-tag.st { background: rgba(0,229,199,.14); color: #00e5c7; }
+.ev-wr { margin-left: auto; font-size: 11px; font-weight: 600; color: #cfe0ee; white-space: nowrap; }
+.ev-sig { font-size: 12px; font-weight: 600; color: #facc15; margin: 8px 0 4px; }
+.mt-item.ev-comprado { position: relative; }
+.mt-item.ev-comprado img { opacity: .35; }
+.mt-item.ev-comprado::after { content: "✓"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #00e5c7; font-weight: 700; font-size: 18px; }
 .ev-aviso.ok { color: #6fdba8; }
 .ev-aviso.mal { color: #f0a487; }
 .ev-hech { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); }

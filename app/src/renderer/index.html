@@ -19,6 +19,8 @@
       <span class="appname">SHARKTRACKER <span id="app-version" class="dim"></span></span>
     </div>
     <div class="tbright">
+      <!-- Aviso de actualización descargada: un clic reinicia la app con la versión nueva -->
+      <button id="update-chip" class="updatechip" type="button" title="Reiniciar y actualizar ahora" hidden><span class="ud"></span><span id="update-chip-text"></span></button>
       <span id="game-chip" class="gamechip" title="Detección automática del cliente de LoL"><span class="gd"></span><span id="game-chip-text">Buscando LoL…</span></span>
       <button id="discord-chip" class="discordchip" type="button" title="Ver tu cuenta" hidden>
         <img id="discord-chip-avatar" class="dcavatar" alt="">
@@ -179,6 +181,7 @@
               <div class="swrow"><div><div class="swnm">Tu rendimiento</div><div class="swsub">Oro/min, CS/min, visión y particip. vs la división de arriba</div></div><button class="sw" type="button" role="switch" data-pieza="rendimiento"></button></div>
               <div class="swrow pronto"><div><div class="swnm">Timers de campamentos <span class="prox">Próximamente</span></div><div class="swsub">Sobre el minimapa, por visión</div></div><span class="sw off"></span></div>
               <div class="swrow"><div><div class="swnm">Tu build</div><div class="swsub">Build completa en orden, adaptada a los rivales. En partida: <b>Ctrl + X</b> para mostrarla u ocultarla</div></div><button class="sw" type="button" role="switch" data-pieza="build"></button></div>
+              <div class="swrow"><div><div class="swnm">Siguiente compra</div><div class="swsub">Junto al minimapa: el próximo objeto de tu build y el oro que te falta</div></div><button class="sw" type="button" role="switch" data-pieza="siguiente"></button></div>
             </div>
 
             <div class="card card-carga">

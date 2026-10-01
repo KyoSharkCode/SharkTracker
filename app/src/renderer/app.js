@@ -204,7 +204,11 @@ function renderActualizacion(e) {
   txt.textContent = textos[e?.estado] ?? '';
   txt.className = `accsub${e?.estado === 'al_dia' ? ' ok' : e?.estado === 'lista' ? ' nueva' : ''}`;
   $('btn-actualizar').hidden = e?.estado !== 'lista';
+  // Barra de título: aviso visible cuando la versión nueva ya está descargada.
+  $('update-chip').hidden = e?.estado !== 'lista';
+  $('update-chip-text').textContent = e?.estado === 'lista' ? `v${e.version} lista · Reiniciar` : '';
 }
 window.sharkTracker.app.onActualizacion(renderActualizacion);
 window.sharkTracker.app.estadoActualizacion().then(renderActualizacion);
 $('btn-actualizar').addEventListener('click', () => window.sharkTracker.app.instalarActualizacion());
+$('update-chip').addEventListener('click', () => window.sharkTracker.app.instalarActualizacion());

@@ -369,6 +369,31 @@ window.overlay.onBuild?.((nuevo) => {
   pintarBuild();
 });
 
+// ── Siguiente compra (abajo a la derecha, a la izquierda del minimapa) ──
+// El objeto de tu build que toca y, si aún no te alcanza, el componente que conviene comprar.
+let siguiente = null;
+function filaCompra(o, etiqueta) {
+  const fila = el('div', 'sig-fila');
+  fila.append(iconoItem(o, false));
+  const txt = el('div', 'sig-txt');
+  txt.append(el('div', 'sig-etq', etiqueta), el('div', 'sig-nombre', o.nombre));
+  const oro = el('div', `sig-oro${o.falta ? '' : ' listo'}`, o.falta ? `faltan ${o.falta}` : '¡ya puedes!');
+  fila.append(txt, oro);
+  return fila;
+}
+function pintarSiguiente() {
+  const nodo = $('siguiente');
+  mostrar(nodo, !!siguiente);
+  if (!siguiente) return;
+  const firma = JSON.stringify(siguiente);
+  if (nodo._firma === firma) return;
+  nodo._firma = firma;
+  const partes = [];
+  if (siguiente.componente) partes.push(filaCompra(siguiente.componente, 'Siguiente'));
+  partes.push(filaCompra(siguiente.objetivo, siguiente.componente ? 'Para' : 'Siguiente objeto'));
+  nodo.replaceChildren(...partes);
+}
+
 window.overlay.onTab((pulsado) => { tab = pulsado; pintarOro(); });
 window.overlay.onCarga?.((datos) => { carga = datos; pintarCarga(); });
 
@@ -404,6 +429,8 @@ function pintarEstado(estado) {
   pintarOro();
   rendimiento = ver('rendimiento') ? (estado.rendimiento ?? null) : null;
   pintarRendimiento();
+  siguiente = ver('siguiente') ? (estado.siguiente ?? null) : null;
+  pintarSiguiente();
   // Objetos comprados: solo se redibuja la build si cambian.
   const objetos = (estado.misObjetos ?? []).map(Number);
   const firma = objetos.slice().sort().join(',');

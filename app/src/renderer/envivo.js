@@ -217,7 +217,8 @@
       avisos[tipo] = { cargando: true };
       pintar(true);
       const r = await accion();
-      avisos[tipo] = r?.ok ? { ok: true, texto: TEXTO_OK[tipo] } : { ok: false, texto: r?.error ?? 'No se pudo.' };
+      const texto = r?.reemplazada ? `✓ Página de runas creada en lugar de "${r.reemplazada}" (no había hueco).` : TEXTO_OK[tipo];
+      avisos[tipo] = r?.ok ? { ok: true, texto } : { ok: false, texto: r?.error ?? 'No se pudo.' };
       pintar(true);
     });
     return b;
@@ -416,6 +417,86 @@
     n.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} restantes`;
   }
 
+  // ── Partida en curso (para verla en la app, p. ej. en otro monitor) ──
+  // Lo de la pantalla de carga (aliados y rivales) + tu build con lo ya comprado, hasta que
+  // termina la partida. Los datos llegan del proceso main (los mismos del overlay).
+  let partida = { carga: null, build: null, misObjetos: [], siguiente: null };
+  const hayPartida = () => !!(partida.carga?.aliados?.length || partida.build);
+  function textoRango(j) {
+    if (j.pendiente) return 'Rango pendiente…';
+    if (!j.rango) return 'Sin clasificar';
+    const r = j.rango;
+    const sinDivision = ['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(r.tier);
+    return `${TIER_ES[r.tier] ?? r.tier}${sinDivision ? '' : ' ' + r.division} · ${r.lp} LP${r.cola === 'Flex' ? ' (Flex)' : ''}`;
+  }
+  function cardEquipo(titulo, dot, lista) {
+    const c = tarjeta(titulo, dot);
+    const v = partida.carga?.ddVersion;
+    for (const j of lista ?? []) {
+      const f = el('div', 'ev-fila');
+      f.append(icono(v && j.clave ? `https://ddragon.leagueoflegends.com/cdn/${v}/img/champion/${j.clave}.png` : null, 'mt-cico', (j.campeon ?? '?').slice(0, 2).toUpperCase(), j.campeon));
+      const t = el('div', 'mt-fnom');
+      t.append(el('b', null, j.nombre), el('span', null, `${j.campeon} · ${textoRango(j)}`));
+      const tags = [];
+      if (j.main === true) tags.push(['main', 'Main']);
+      if (j.main === false) tags.push(['fuera', 'Fuera de su main']);
+      if (j.rango?.racha) tags.push(['main', 'En racha']);
+      if (j.sharktracker) tags.push(['st', 'SharkTracker']);
+      if (tags.length) {
+        const fila = el('div', 'ev-tags');
+        for (const [cls, txt] of tags) fila.append(el('span', `ev-tag ${cls}`, txt));
+        t.append(fila);
+      }
+      f.append(t);
+      const n = (j.rango?.victorias ?? 0) + (j.rango?.derrotas ?? 0);
+      if (n) f.append(el('span', 'ev-wr', `${Math.round(j.rango.victorias / n * 100)}% · ${n}`));
+      c.append(f);
+    }
+    if (!lista?.length) c.append(el('div', 'mt-vacio', 'Cargando…'));
+    return c;
+  }
+  function cardBuildPartida() {
+    const d = partida.build;
+    const c = tarjeta(d?.estado === 'ok' ? `Tu build · ${d.campeon}` : 'Tu build', 'dot-pos');
+    if (!d || d.estado !== 'ok') {
+      const AVISO = { sin_modo: 'En este modo no hay build de Meta (solo en la Grieta).', sin_sesion: 'Inicia sesión para ver tu build.', error: 'No se pudo cargar tu build: reintentando…' };
+      c.append(el('div', 'mt-vacio', d ? AVISO[d.estado] ?? AVISO.error : 'Preparando tu build…'));
+      return c;
+    }
+    if (d.resumen) c.append(el('div', 'ev-adapt-res', `Rivales: ${d.resumen}`));
+    const tengo = new Set((partida.misObjetos ?? []).map(Number));
+    const orden = el('div', 'mt-build');
+    for (const p of d.pasos) {
+      const col = el('div', 'mt-paso');
+      const iconos = el('div', 'mt-items');
+      p.items.forEach((o, i) => {
+        if (i) iconos.append(el('span', 'mt-flecha', '›'));
+        const ic = icono(o.img, `mt-item${tengo.has(Number(o.id)) && p.titulo !== 'Inicio' ? ' ev-comprado' : ''}`, '?', o.nombre);
+        iconos.append(ic);
+      });
+      col.append(el('div', 'mt-pasot', `${p.titulo}${p.adaptado ? ' ⭐' : ''}`), iconos);
+      orden.append(col);
+    }
+    c.append(orden);
+    const s = partida.siguiente;
+    if (s) {
+      const linea = s.componente
+        ? `Siguiente: ${s.componente.nombre} (${s.componente.falta ? `faltan ${s.componente.falta}` : '¡ya puedes!'}) → ${s.objetivo.nombre}`
+        : `Siguiente: ${s.objetivo.nombre} (${s.objetivo.falta ? `faltan ${s.objetivo.falta}` : '¡ya puedes!'})`;
+      c.append(el('div', 'ev-sig', linea));
+    }
+    for (const m of d.motivos ?? []) c.append(el('div', 'mt-pasod', `⭐ ${m.nombre} — ${m.motivo}`));
+    return c;
+  }
+  function pintarPartida(caja, sub) {
+    sub.textContent = `Partida en curso${partida.carga?.cola ? ` · ${partida.carga.cola}` : ''}`;
+    const arriba = el('div', 'ev-grid');
+    arriba.append(cardBuildPartida());
+    const abajo = el('div', 'ev-grid');
+    abajo.append(cardEquipo('Tu equipo', 'dot-pos', partida.carga?.aliados), cardEquipo('Rivales', 'dot-err', partida.carga?.rivales));
+    caja.append(arriba, abajo);
+  }
+
   function pintar(forzar = false) {
     const k = JSON.stringify({ ...estado, segundos: undefined });
     if (!forzar && k === clave) { actualizarReloj(); return; }
@@ -424,12 +505,14 @@
     const caja = byId('envivo-cuerpo');
     caja.replaceChildren();
     const nav = document.querySelector('.navitem[data-page="envivo"]');
-    nav?.classList.toggle('live', estado.fase === 'ChampSelect');
+    nav?.classList.toggle('live', estado.fase === 'ChampSelect' || hayPartida());
 
+    if (!estado.conectado && hayPartida()) { pintarPartida(caja, sub); return; }
     if (!estado.conectado) {
       sub.textContent = 'Abre el cliente de League of Legends: En Vivo se activa sola al entrar a selección de campeones.';
       return;
     }
+    if (estado.fase !== 'ChampSelect' && hayPartida()) { pintarPartida(caja, sub); return; }
     if (estado.fase !== 'ChampSelect') {
       sub.textContent = `Cliente conectado · ${FASES[estado.fase] ?? 'en el cliente'}. Se activa sola al entrar a selección de campeones.`;
       return;
@@ -492,6 +575,14 @@
     if (iniciado) return;
     iniciado = true;
     api().onEstado(recibir);
+    api().onPartida((datos) => {
+      const empieza = !hayPartida() && !!datos?.carga?.aliados?.length;
+      partida = datos ?? partida;
+      // Al empezar la carga de una partida, la app salta sola a En Vivo (como en la selección).
+      if (empieza) document.querySelector('.navitem[data-page="envivo"]')?.click();
+      pintar(true);
+    });
+    api().partida().then((d) => { if (d) { partida = d; pintar(true); } });
     api().amigos().then((lista) => { amigos = new Map((lista ?? []).map((a) => [a.riotId, a.rango])); pintar(true); });
     await cargarMeta();
     recibir(await api().estado());

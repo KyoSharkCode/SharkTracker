@@ -5,6 +5,7 @@ const { execFile } = require('child_process');
 const cfg = require('./config');
 const auth = require('./auth');
 const { crearEstadoPartida } = require('./game-state');
+const { siguienteCompra } = require('./build-adaptada');
 const ajustesOverlay = require('./overlay-config');
 
 // La Live Client Data API de League usa un certificado autofirmado local,
@@ -281,9 +282,12 @@ const CARGA_MAX_MS = 5 * 60 * 1000;
 function enviarCarga(datos) {
   ultimaCarga = datos ? { ...datos, ddVersion } : null;
   overlayWindow?.webContents.send('overlay:carga', ultimaCarga);
+  // La app la sigue mostrando durante la partida (útil con un segundo monitor).
+  if (ultimaCarga?.aliados?.length) avisarPartidaApp({ carga: ultimaCarga });
 }
 function iniciarCarga() {
   cargaActiva = true;
+  reiniciarPartidaApp();
   cargaInicio = Date.now();
   cargarVersionDD();
   if (!overlayWindow) createOverlayWindow();
@@ -460,10 +464,12 @@ function startOverlay() {
     if (yo && !buildPreparando && (!buildPartida || buildPartida.estado === 'error') && Date.now() - buildIntento > 30000) {
       prepararBuild(res.data, yo);
     }
-    overlayWindow.webContents.send('overlay:state', {
-      ...estadoPartida.actualizar(res.data), ddVersion,
-      misObjetos: (yo?.items ?? []).map((i) => i.itemID), // para marcar lo ya comprado en la build
-    });
+    const misObjetos = (yo?.items ?? []).map((i) => i.itemID); // para marcar lo ya comprado en la build
+    // Siguiente compra según la build (junto al minimapa).
+    const siguiente = buildPartida?.estado === 'ok' && objetosBuild
+      ? siguienteCompra(buildOrden, misObjetos, res.data?.activePlayer?.currentGold, objetosBuild) : null;
+    overlayWindow.webContents.send('overlay:state', { ...estadoPartida.actualizar(res.data), ddVersion, misObjetos, siguiente });
+    avisarPartidaApp({ misObjetos, siguiente });
   }, 1000);
 }
 
@@ -475,6 +481,7 @@ function limpiarOverlay() {
 function stopOverlay() {
   if (!cargaActiva) detenerTeclado();
   reiniciarBuild();
+  reiniciarPartidaApp(); // terminó la partida: la app deja de mostrarla
   clearInterval(overlayTimer);
   overlayTimer = null;
   estadoPartida = null;
@@ -503,6 +510,22 @@ ipcMain.handle('envivo:runas', (_e, datos) => lcu.importarRunas(datos));
 ipcMain.handle('envivo:build', (_e, datos) => lcu.importarBuild(datos));
 ipcMain.handle('envivo:hechizos', (_e, ids) => lcu.ponerHechizos(ids));
 
+// ── Partida en la ventana de la app (para un segundo monitor) ──
+// Lo de la pantalla de carga (aliados y rivales con rango) + tu build y la siguiente compra,
+// desde la carga hasta que termina la partida. Solo se avisa a la ventana si algo cambió.
+const PARTIDA_VACIA = { carga: null, build: null, misObjetos: [], siguiente: null };
+let partidaApp = PARTIDA_VACIA;
+let firmaPartidaApp = '';
+function avisarPartidaApp(cambios) {
+  partidaApp = { ...partidaApp, ...cambios };
+  const firma = JSON.stringify(partidaApp);
+  if (firma === firmaPartidaApp) return;
+  firmaPartidaApp = firma;
+  mainWindow?.webContents.send('partida:datos', partidaApp);
+}
+function reiniciarPartidaApp() { partidaApp = PARTIDA_VACIA; avisarPartidaApp({}); }
+ipcMain.handle('partida:datos', () => partidaApp);
+
 // ── Build en partida (Ctrl + X): la build completa en orden, adaptada a los rivales ──
 // Se arma una vez por partida con la ficha de Meta de tu campeón y los 5 rivales
 // (Live Client Data API). Solo en la Grieta: las builds de OP.GG son de ranked.
@@ -512,6 +535,8 @@ let buildPartida = null;      // lo que dibuja el overlay
 let buildPreparando = false;
 let buildIntento = 0;
 let buildVisible = false;     // Ctrl + X; empieza oculta en cada partida
+let buildOrden = [];          // ids de la build sin el inicio (para "siguiente compra")
+let objetosBuild = null;      // catálogo de objetos (recetas y precios)
 
 function jugadorPropio(datos) {
   const a = datos?.activePlayer ?? {};
@@ -520,9 +545,11 @@ function jugadorPropio(datos) {
 }
 function enviarBuild() {
   overlayWindow?.webContents.send('overlay:build', { datos: buildPartida, visible: buildVisible });
+  avisarPartidaApp({ build: buildPartida });
 }
 function reiniciarBuild() {
   buildPartida = null;
+  buildOrden = [];
   buildVisible = false;
   buildIntento = 0;
   enviarBuild();
@@ -550,6 +577,8 @@ async function prepararBuild(datos, yo) {
     if (ficha?.estado === 'sin_sesion') return fijar({ estado: 'sin_sesion' });
     if (ficha?.estado !== 'ok') return fijar({ estado: 'error' });
     const a = await meta.adaptarBuild(ficha.datos, miCampeon, rivales);
+    objetosBuild = cat.objetos;
+    buildOrden = a.orden.filter((p) => p.titulo !== 'Inicio').flatMap((p) => p.items);
     const objeto = (id) => ({ id, nombre: cat.objetos[id]?.nombre ?? '', img: cat.objetos[id]?.img ?? null });
     fijar({
       estado: 'ok',

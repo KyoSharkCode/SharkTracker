@@ -41,6 +41,9 @@ contextBridge.exposeInMainWorld('sharkTracker', {
     importarRunas: (datos) => ipcRenderer.invoke('envivo:runas', datos),
     importarBuild: (datos) => ipcRenderer.invoke('envivo:build', datos),
     ponerHechizos: (ids) => ipcRenderer.invoke('envivo:hechizos', ids),
+    // Partida en curso: panel de carga + build (para verla en la app, p. ej. en otro monitor).
+    partida: () => ipcRenderer.invoke('partida:datos'),
+    onPartida: (callback) => ipcRenderer.on('partida:datos', (_e, datos) => callback(datos)),
   },
 
   // Ajustes → Overlay
