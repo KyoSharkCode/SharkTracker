@@ -59,11 +59,11 @@ Deno.serve(async (req) => {
         else if (/position|lane|role/.test(n)) args[k] = posicion;
         else if (/game_mode|mode/.test(n)) args[k] = 'ranked';
         else if (/tier/.test(n)) args[k] = 'emerald_plus';
-        else if (/lang|locale/.test(n)) args[k] = v?.enum?.find((x: string) => /es/i.test(x)) ?? v?.enum?.[0] ?? 'es_ES';
+        else if (/lang|locale/.test(n)) args[k] = 'en_US'; // OP.GG solo acepta en_US o ko_KR aquí
         else if (/desired_output_fields/.test(n)) args[k] = ['data'];
       }
       salida.guia_args = args;
-      salida.guia = texto(await rpc('tools/call', { name: 'lol_get_lane_matchup_guide', arguments: args }));
+      salida.guia = texto(await rpc("tools/call", { name: "lol_get_lane_matchup_guide", arguments: args }), 15000);
     }
 
     // 3) ¿Trae OP.GG varias páginas de runas? (se piden como lista)
