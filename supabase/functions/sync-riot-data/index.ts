@@ -87,7 +87,9 @@ Deno.serve(async (req) => {
   const { data: players, error } = await supabase.from('players').select('*');
   if (error) return new Response(error.message, { status: 500 });
 
-  const log: string[] = [];
+  // Cada línea se escribe también en Supabase → Edge Functions → sync-riot-data → Logs.
+  const lineas: string[] = [];
+  const log = { push: (texto: string) => { lineas.push(texto); console.log(`[sync-riot-data] ${texto}`); } };
 
   // Último rango guardado de cada jugador y cola, en UNA consulta (vista
   // rank_latest). Antes se descargaban todos los snapshots de 30 días.
@@ -115,10 +117,18 @@ Deno.serve(async (req) => {
 
       // Resolver PUUID + ícono con el Riot ID (la primera corrida, o si la key cambió).
       const resolverPuuid = async () => {
-        const acc = await riotFetch(
-          `https://${REGION_API}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/` +
-          `${encodeURIComponent(player.riot_game_name)}/${encodeURIComponent(player.riot_tag_line)}`
-        );
+        let acc;
+        try {
+          acc = await riotFetch(
+            `https://${REGION_API}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/` +
+            `${encodeURIComponent(player.riot_game_name.trim())}/${encodeURIComponent(player.riot_tag_line.trim())}`
+          );
+        } catch (e) {
+          if (String(e).endsWith('-> 404')) {
+            throw new Error(`Riot no encuentra el Riot ID ${player.riot_game_name}#${player.riot_tag_line}: ¿cambió de nombre o de #tag? Actualízalo en la tabla players (o en Admin).`);
+          }
+          throw e;
+        }
         const summ = await riotFetch(`https://${REGION_GAME}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${acc.puuid}`);
         const { error: upErr } = await supabase.from('players').update({ puuid: acc.puuid, icon_id: summ.profileIconId }).eq('id', player.id);
         if (upErr) throw upErr;
@@ -271,7 +281,7 @@ Deno.serve(async (req) => {
     if (posErr) log.push(`ERROR posiciones: ${posErr.message}`);
   }
 
-  return new Response(JSON.stringify({ ok: true, log }, null, 2), {
+  return new Response(JSON.stringify({ ok: true, log: lineas }, null, 2), {
     headers: { 'Content-Type': 'application/json' },
   });
 });

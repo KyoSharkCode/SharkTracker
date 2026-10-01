@@ -400,6 +400,11 @@ Deno.serve(async (req) => {
       }
     } catch (e) {
       if (e instanceof LimiteRiot) { cortado = true; log.push(e.message); continue; }
+      if (String(e).includes('/by-puuid/') && String(e).endsWith('-> 400')) {
+        // PUUID de otra key (lo renueva sync-riot-data; si no puede, lo dice en sus Logs).
+        log.push(`${player.riot_game_name}: su PUUID guardado no vale con la key actual; se salta hasta que sync-riot-data lo renueve`);
+        continue;
+      }
       log.push(`ERROR ${player.riot_game_name}: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
