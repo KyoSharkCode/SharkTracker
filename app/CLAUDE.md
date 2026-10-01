@@ -111,6 +111,8 @@ de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no
   del repo → **"App: publicar versión"** → Run workflow (`.github/workflows/app-publicar.yml`,
   arma en windows-latest, sube a un Release en borrador y lo publica como `vX.Y.Z`; GitHub
   no deja crear un Release ya publicado sin etiqueta). Probar local: `npm run dist`.
+  **Notas del parche**: al publicar, agregar la versión arriba del todo en `NOTAS` de
+  `descargar.html` (sección "Notas del parche", visible para todos).
 - **Descarga desde la web**: `descargar.html` (menú ☰ → "App de escritorio"). El botón usa
   el enlace de descarga de la última publicación y muestra versión/fecha/tamaño leyendo la API pública de GitHub
   (`api.github.com` está en su CSP). Sin versión publicada, el botón dice "Muy pronto".

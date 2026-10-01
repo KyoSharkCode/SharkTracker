@@ -77,6 +77,22 @@
   .lb-prev{left:16px;} .lb-next{right:16px;}
   @media (max-width:700px){ .shots{grid-template-columns:1fr;} .lb-nav{display:none;} }
 
+  /* Notas del parche: una tarjeta plegable por versión (la última, abierta) */
+  .notas{display:flex; flex-direction:column; gap:10px;}
+  .nota{border:1px solid var(--border); border-radius:var(--radius); background:var(--panel-2); overflow:hidden;}
+  .nota summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:12px; padding:16px 20px;}
+  .nota summary::-webkit-details-marker{display:none;}
+  .nota summary::after{content:'›'; margin-left:auto; color:var(--text-faint); font-size:20px; transition:transform .15s;}
+  .nota[open] summary::after{transform:rotate(90deg);}
+  .nota .ver{font-family:'Rajdhani',sans-serif; font-weight:800; font-size:20px; letter-spacing:.03em;}
+  .nota .tit{color:var(--text-dim); font-size:13.5px;}
+  .nota .nueva{font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#032018; background:var(--accent); border-radius:99px; padding:2px 9px;}
+  .nota-cuerpo{padding:0 20px 18px; border-top:1px solid var(--border);}
+  .nota-cuerpo h4{margin:14px 0 6px; font-size:11.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--accent);}
+  .nota-cuerpo h4.arreglos{color:var(--gold);}
+  .nota-cuerpo ul{margin:0; padding-left:20px;}
+  .nota-cuerpo li{color:var(--text-dim); font-size:13.5px; line-height:1.6; margin-bottom:3px;}
+
   footer{margin-top:60px; padding-top:32px; border-top:1px solid var(--border); text-align:center; color:var(--text-dim); font-size:13px; display:flex; flex-direction:column; align-items:center; gap:12px;}
   .footer-logo{height:34px; width:auto;}
   footer .legal{max-width:640px; margin:0 auto; font-size:11px; line-height:1.5; color:var(--text-faint); opacity:.75;}
@@ -99,7 +115,7 @@
     <div>
       <span class="tag">Early access</span>
       <h2>SharkTracker para Windows</h2>
-      <p>Overlay en partida (Barón, Dragón Ancestral, oro con Tab y tu rendimiento), pantalla de carga con el rango de los 10 jugadores y tu perfil. Solo para el grupo: se entra con tu Discord de SharkTracker.</p>
+      <p>Overlay en partida (objetivos, oro con Tab, tu rendimiento y tu build), pantalla de carga con el rango de los 10 jugadores, Meta, En Vivo en la selección de campeones y tu perfil. Solo para el grupo: se entra con tu Discord de SharkTracker.</p>
     </div>
     <div class="dl">
       <a class="dl-btn off" id="dl-btn" href="#">
@@ -113,6 +129,11 @@
   <section>
     <h2 class="section-title"><span class="bar"></span>Vista previa</h2>
     <div class="shots" id="shots"></div>
+  </section>
+
+  <section>
+    <h2 class="section-title"><span class="bar"></span>Notas del parche</h2>
+    <div class="notas" id="notas"></div>
   </section>
 
   <div id="guia" hidden>
@@ -129,7 +150,7 @@
     <h2 class="section-title"><span class="bar"></span>En el juego</h2>
     <div class="grid">
       <div class="card"><h3>Modo "Sin bordes"</h3><p>En LoL: Configuración → Vídeo → Modo de ventana: <b>Sin bordes</b>. En pantalla completa el overlay no se puede dibujar encima.</p></div>
-      <div class="card"><h3>Atajos</h3><ol><li><kbd>Ctrl</kbd> + <kbd>X</kbd>: muestra u oculta la pantalla de carga.</li><li><kbd>Tab</kbd>: diferencia de oro de cada fila.</li></ol></div>
+      <div class="card"><h3>Atajos</h3><ol><li><kbd>Ctrl</kbd> + <kbd>X</kbd>: en la carga, muestra u oculta los rangos; en partida, tu build completa.</li><li><kbd>Tab</kbd>: diferencia de oro de cada fila.</li></ol></div>
       <div class="card"><h3>Actualizaciones</h3><p>Son <b>automáticas</b>: la app descarga las versiones nuevas sola y las instala al cerrarla. En Ajustes → Cuenta ves tu versión.</p></div>
     </div>
   </section>
@@ -212,6 +233,64 @@ async function init() {
   });
 }
 init();
+
+// Notas del parche de la app. Al publicar una versión nueva, se agrega arriba del todo.
+// Cada versión: { version, titulo, nuevo: [...], arreglos: [...] } (texto plano).
+const NOTAS = [
+  { version: '0.6.0', titulo: 'Contra tu rival de línea', nuevo: [
+      'En Vivo: tarjeta "Contra…" tu rival de línea con tu winrate contra él, quién gana la línea, quién mata más en solitario, el estilo recomendado y un consejo de OP.GG.',
+      'Hasta 3 páginas de runas para elegir contra tu rival, cada una con su botón Importar.',
+      'Siguiente compra: junto al minimapa, el próximo objeto de tu build (o el componente que toca) y el oro que te falta.',
+      'Segundo monitor: durante toda la partida, En Vivo muestra a los 10 jugadores (como en la pantalla de carga) y tu build con lo ya comprado.',
+      'Aviso "actualización lista" en la barra de título: un clic y la app se reinicia actualizada.',
+    ], arreglos: [
+      'Vacuolarvas del rival: ya no se avisan una a una sin visión; salen cuando terminan el grupo, como el anuncio del juego.',
+      'Importar runas con las páginas llenas: reemplaza la página que tienes seleccionada y te dice cuál.',
+    ] },
+  { version: '0.5.0', titulo: 'Build adaptada', nuevo: [
+      'En Vivo: "Contra este equipo" ajusta la build a los rivales (curaciones, daño físico o mágico, tanques, asesinos y control) y explica por qué.',
+      'Botón "Importar build adaptada" y ⭐ en los objetos situacionales que encajan con la partida.',
+      'En partida, Ctrl + X muestra tu build completa en orden, arriba a la izquierda, con ✓ en lo que ya compraste.',
+    ] },
+  { version: '0.4.0', titulo: 'En Vivo', nuevo: [
+      'En Vivo se abre sola en la selección de campeones: picks y bans recomendados, aliados y rivales.',
+      'Al fijar campeón: runas, hechizos y build con botones para importarlos al cliente (nada se cambia sin que lo pulses).',
+    ], arreglos: [
+      'ARAM: ya no salen anuncios de la jungla de la Grieta.',
+      'ARAM de temporada y la Arena nueva cuentan en Mi Perfil y en la pantalla de carga.',
+      'Tu rendimiento de la partida anterior ya no aparece encima de la pantalla de carga.',
+    ] },
+  { version: '0.3.0', titulo: 'Meta', nuevo: [
+      'Meta: tier list por rol, tendencias del parche y la ficha de cada campeón en Esmeralda+ (build, runas, hechizos, habilidades y counters).',
+    ] },
+  { version: '0.2.0', titulo: 'Primera versión instalable', nuevo: [
+      'Overlay en partida: Barón y Ancestral, anuncios de objetivos, diferencia de oro con Tab y tu rendimiento contra la división de arriba.',
+      'Pantalla de carga con rango, winrate y etiquetas de los 10 jugadores (Ctrl + X).',
+      'Mi Perfil, Ajustes del overlay con editor para mover las piezas, y actualizaciones automáticas.',
+    ] },
+];
+const notas = $('notas');
+NOTAS.forEach((n, i) => {
+  const d = document.createElement('details');
+  d.className = 'nota';
+  d.open = i === 0;
+  const s = document.createElement('summary');
+  const ver = document.createElement('span'); ver.className = 'ver'; ver.textContent = `v${n.version}`;
+  const tit = document.createElement('span'); tit.className = 'tit'; tit.textContent = n.titulo;
+  s.append(ver, tit);
+  if (i === 0) { const b = document.createElement('span'); b.className = 'nueva'; b.textContent = 'Última'; s.append(b); }
+  const cuerpo = document.createElement('div');
+  cuerpo.className = 'nota-cuerpo';
+  for (const [clave, titulo, cls] of [['nuevo', 'Nuevo', ''], ['arreglos', 'Arreglos', 'arreglos']]) {
+    if (!n[clave]?.length) continue;
+    const h = document.createElement('h4'); h.textContent = titulo; if (cls) h.className = cls;
+    const ul = document.createElement('ul');
+    for (const t of n[clave]) { const li = document.createElement('li'); li.textContent = t; ul.append(li); }
+    cuerpo.append(h, ul);
+  }
+  d.append(s, cuerpo);
+  notas.append(d);
+});
 
 // Vista previa: capturas reales de la app (nombres de otros jugadores difuminados).
 const CAPTURAS = [
