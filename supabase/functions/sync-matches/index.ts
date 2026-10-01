@@ -97,12 +97,17 @@ async function diagnostico(nombre: string): Promise<Response> {
         `https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/by-puuid/${j.puuid}/ids?queue=2400&start=0&count=${MATCH_HISTORY_COUNT}`));
       await intento('ids_cola_450', () => riotFetch(
         `https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/by-puuid/${j.puuid}/ids?queue=450&start=0&count=${MATCH_HISTORY_COUNT}`));
-      // ¿Se puede pedir por id la última partida que vimos en la pantalla de carga?
-      const { data: ultimaCarga } = await supabase.from('carga_partidas').select('game_id').order('updated_at', { ascending: false }).limit(1).maybeSingle();
-      if (ultimaCarga) await intento('ultima_carga_por_id', async () => {
-        const md = await riotFetch(`https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/${REGION_PARTIDA}_${ultimaCarga.game_id}`);
-        return { match_id: `${REGION_PARTIDA}_${ultimaCarga.game_id}`, cola: md.info?.queueId, esta_el: (md.info?.participants ?? []).some((p: any) => p.puuid === j.puuid) };
-      });
+      // ¿Se pueden pedir por id las partidas suyas que vimos en vivo?
+      const { data: vivas } = await supabase.from('live_games').select('game_id, participants').order('updated_at', { ascending: false }).limit(200);
+      const suyas = (vivas ?? []).filter((v: any) => JSON.stringify(v.participants ?? []).includes(j.riot_game_name.trim())).slice(0, 3);
+      r.vistas_en_vivo_por_id = [];
+      for (const v of suyas) {
+        const id = `${REGION_PARTIDA}_${v.game_id}`;
+        const res = await fetch(`https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/${id}`, { headers: { 'X-Riot-Token': RIOT_API_KEY } });
+        const md = res.ok ? await res.json() : null;
+        r.vistas_en_vivo_por_id.push({ match_id: id, http: res.status, cola: md?.info?.queueId ?? null,
+          esta_el: md ? (md.info?.participants ?? []).some((p: any) => p.puuid === j.puuid) : null });
+      }
       const todos = [...new Set([...(Array.isArray(r.ids_30_dias) ? r.ids_30_dias : []), ...(Array.isArray(r.ids_sin_filtro) ? r.ids_sin_filtro : [])])];
       const { data: guardadas } = todos.length ? await supabase.from('matches').select('match_id').in('match_id', todos) : { data: [] };
       const { data: conEl } = todos.length ? await supabase.from('match_participants').select('match_id').eq('player_id', j.id).in('match_id', todos) : { data: [] };
@@ -181,7 +186,10 @@ Deno.serve(async (req) => {
     for (const matchId of vistas.filter((id) => !guardadasYa.has(id))) {
       const res = await fetch(`https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/${matchId}`, { headers: { 'X-Riot-Token': RIOT_API_KEY } });
       if (res.status === 429) throw new LimiteRiot('Riot: límite de peticiones (429), se sigue en la próxima corrida');
-      if (!res.ok) continue; // 404: sigue en curso o Riot aún no la publica
+      if (!res.ok) { // 404: sigue en curso o Riot no la publica
+        if (res.status !== 404) log.push(`Partida vista en vivo ${matchId}: Riot respondió ${res.status}`);
+        continue;
+      }
       const detalle = await res.json();
       matchCache.set(matchId, detalle);
       for (const p of detalle.info?.participants ?? []) {
