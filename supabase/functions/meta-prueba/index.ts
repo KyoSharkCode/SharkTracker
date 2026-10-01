@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
     // 1) Qué parámetros piden las dos herramientas.
     const lista: any = await rpc('tools/list', {});
     const herramientas = (lista?.tools ?? []).filter((t: any) => ['lol_get_lane_matchup_guide', 'lol_get_champion_analysis'].includes(t.name));
-    salida.herramientas = herramientas.map((t: any) => ({ name: t.name, description: String(t.description ?? '').slice(0, 1500), inputSchema: t.inputSchema }));
+    salida.herramientas_nombres = herramientas.map((t: any) => t.name);
 
     // 2) Guía de enfrentamiento: se rellenan los parámetros obligatorios según su nombre.
     const guia = herramientas.find((t: any) => t.name === 'lol_get_lane_matchup_guide');
@@ -59,19 +59,20 @@ Deno.serve(async (req) => {
         else if (/position|lane|role/.test(n)) args[k] = posicion;
         else if (/game_mode|mode/.test(n)) args[k] = 'ranked';
         else if (/tier/.test(n)) args[k] = 'emerald_plus';
-        else if (/lang|locale/.test(n)) args[k] = v?.enum?.find((x: string) => /es/i.test(x)) ?? v?.enum?.[0] ?? 'es_ES';
+        else if (/lang|locale/.test(n)) args[k] = 'en_US'; // OP.GG solo acepta en_US o ko_KR aquí
         else if (/desired_output_fields/.test(n)) args[k] = ['data'];
       }
       salida.guia_args = args;
-      salida.guia = texto(await rpc('tools/call', { name: 'lol_get_lane_matchup_guide', arguments: args }));
+      // Responde JSON: se resume cada campo (claves + inicio del valor) para verlo entero.
+      const crudo: any = await rpc('tools/call', { name: 'lol_get_lane_matchup_guide', arguments: args });
+      const t = String(crudo?.content?.[0]?.text ?? '');
+      try {
+        const g = JSON.parse(t);
+        salida.guia_claves = Object.keys(g);
+        salida.guia_data = Object.fromEntries(Object.entries(g.data ?? {}).map(([k, v]) => [k, JSON.stringify(Array.isArray(v) ? v.slice(0, 2) : v).slice(0, 700)]));
+      } catch { salida.guia = crudo?.error ? crudo : t.slice(0, 4000); }
     }
 
-    // 3) ¿Trae OP.GG varias páginas de runas? (se piden como lista)
-    salida.runas = texto(await rpc('tools/call', {
-      name: 'lol_get_champion_analysis',
-      arguments: { game_mode: 'ranked', champion, position: posicion, tier: 'emerald_plus',
-        desired_output_fields: ['data.runes[].{id,pick_rate,play,primary_page_id,primary_rune_ids[],secondary_page_id,secondary_rune_ids[],stat_mod_ids[],win}'] },
-    }), 3000);
   } catch (e) {
     salida.error = e instanceof Error ? e.message : String(e);
   }
