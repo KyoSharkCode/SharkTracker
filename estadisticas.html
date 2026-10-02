@@ -16,7 +16,7 @@
 <style>
   :root{
     --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
-    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --border:#16324a; --text:#ffffff; --text-dim:#a9b7c6; --text-faint:#8696a8;
     --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
     --danger:#ff5f3d; --gold:#facc15; --radius:16px;
   }
@@ -33,13 +33,13 @@
   h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
-  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
   .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .avatar.pending{border-color:var(--gold); color:var(--gold);}
   .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
   .msg{padding:60px 20px; text-align:center; color:var(--text-dim); font-size:15px;}
   .section-title{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; scroll-margin-top:70px;}
-  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
+  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:none;}
   .section-title .aside{margin-left:auto; font-family:'Inter',system-ui,sans-serif; font-size:12px; font-weight:600; letter-spacing:0; text-transform:none; color:var(--text-faint);}
   section{margin-bottom:36px;}
   .card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);}
@@ -58,16 +58,16 @@
   .tiles{display:grid; grid-template-columns:repeat(6,1fr); gap:12px;}
   .tile{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:14px 16px;}
   .tile b{display:block; font-family:'Rajdhani',sans-serif; font-size:28px; line-height:1.05;}
-  .tile small{display:block; font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint); margin-top:3px;}
+  .tile small{display:block; font-size:11px; font-weight:800; color:var(--text-faint); margin-top:3px;}
   .tile .with-img{display:flex; align-items:center; gap:8px;} .tile .with-img img{width:30px; height:30px; border-radius:7px;}
   .tile .with-img b{font-size:18px;}
 
   /* Tablas */
   .tbl-wrap{overflow-x:auto;}
   table{width:100%; border-collapse:collapse; font-size:13px;}
-  th{font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint); padding:11px 12px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--border); user-select:none;}
+  th{font-size:11px; font-weight:800; color:var(--text-faint); padding:11px 12px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--border); user-select:none;}
   th[data-k]{cursor:pointer;} th[data-k]:hover{color:#fff;}
-  th.on{color:var(--accent);} th.on::after{content:' ▼'; font-size:9px;} th.on.asc::after{content:' ▲';}
+  th.on{color:var(--accent);} th.on::after{content:' ▼'; font-size:11px;} th.on.asc::after{content:' ▲';}
   th:first-child, td:first-child{text-align:left;}
   td{padding:9px 12px; border-top:1px solid rgba(22,50,74,.55); text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums;}
   tr:hover td{background:rgba(255,255,255,.02);}
@@ -90,10 +90,10 @@
   .rolecard{padding:14px;}
   .rolecard h3{margin:0 0 8px; font-family:'Rajdhani',sans-serif; font-size:20px; letter-spacing:.06em;}
   .rolecard .n{font-size:12.5px; color:var(--text-dim); font-weight:600;}
-  .rolecard .lbl{font-size:10px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint); margin-top:10px;}
+  .rolecard .lbl{font-size:11px; font-weight:800; color:var(--text-faint); margin-top:10px;}
   .rolecard .p{display:flex; align-items:center; gap:7px; margin-top:4px; font-size:13px; font-weight:700;}
   .rolecard .p img{width:24px; height:24px; border-radius:50%;}
-  .rolecard .p small{margin-left:auto; color:var(--text-faint); font-weight:600; font-size:11.5px;}
+  .rolecard .p small{margin-left:auto; color:var(--text-faint); font-weight:600; font-size:12px;}
 
   /* Dúos */
   .duo-pair{display:inline-flex; align-items:center; gap:6px;}
@@ -104,24 +104,24 @@
   .records{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;}
   .rec{display:flex; flex-direction:column; gap:8px; padding:14px; text-decoration:none; transition:border-color .15s;}
   a.rec:hover{border-color:var(--accent);}
-  .rec .t{font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint);}
+  .rec .t{font-size:11px; font-weight:800; color:var(--text-faint);}
   .rec .v{font-family:'Rajdhani',sans-serif; font-size:30px; font-weight:800; line-height:1; color:var(--gold);}
   .rec .p{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700;}
   .rec .p img{width:28px; height:28px; border-radius:7px;}
-  .rec .p small{display:block; color:var(--text-faint); font-weight:600; font-size:11.5px;}
+  .rec .p small{display:block; color:var(--text-faint); font-weight:600; font-size:12px;}
   .rec.none .v{color:var(--text-faint);}
 
   /* Horarios */
   .heat{padding:16px; overflow-x:auto;}
   .hgrid{display:grid; grid-template-columns:38px repeat(24, minmax(20px,1fr)); gap:3px; min-width:620px;}
   .hgrid .dl{font-size:11px; font-weight:700; color:var(--text-faint); display:flex; align-items:center;}
-  .hgrid .hl{font-size:9.5px; color:var(--text-faint); text-align:center;}
+  .hgrid .hl{font-size:11px; color:var(--text-faint); text-align:center;}
   .hgrid .c{aspect-ratio:1; border-radius:4px; background:rgba(255,255,255,.04);}
   .heat-foot{display:flex; flex-wrap:wrap; gap:10px 22px; margin-top:14px; font-size:12.5px; color:var(--text-dim);}
   .heat-foot b{color:#fff;}
   .slots{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:14px;}
   .slot{background:var(--panel-2); border:1px solid var(--border); border-radius:12px; padding:10px 12px;}
-  .slot small{display:block; font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint);}
+  .slot small{display:block; font-size:11px; font-weight:800; color:var(--text-faint);}
   .slot b{font-family:'Rajdhani',sans-serif; font-size:22px;}
   .slot span{font-size:12px; color:var(--text-dim);}
 
@@ -135,6 +135,7 @@
     .search{width:100%;}
   }
 </style>
+<link rel="stylesheet" href="assets/tema.css">
 </head>
 <body>
 <div class="wrap">
@@ -200,6 +201,7 @@
 import { createSupabase } from './assets/supabase.js';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
+import { icono } from './assets/iconos.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
 import { loadCatalogs, fetchParticipations, aggregate, groupBy, QUEUES, ROLES, roleLabel,
          champImg, champName, profileIconUrl, iconOr1, ICON_ONERROR, HIDE, esc, pct, fix, kfmt } from './assets/lol-data.js';
@@ -370,7 +372,7 @@ function drawDuos() {
   $(tid).innerHTML = head(tid, [['name', 'Dúo'], ['games', 'Partidas'], ['wins', 'Victorias'], ['wr', 'WR']])
     + `<tbody>${list.map(r => `<tr>
       <td><span class="duo-pair">${icon(r.x)}<span class="plus">+</span>${icon(r.y)} <b>${esc(nick(r.x))} & ${esc(nick(r.y))}</b>
-        ${r === bestK ? ' 🔥' : r === worstK && worstK !== bestK ? ' 🧊' : ''}</span></td>
+        ${r === bestK ? ' ' + icono('fuego', { size: 14, color: '#ffb38a', title: 'Mejor' }) : r === worstK && worstK !== bestK ? ' ' + icono('copo', { size: 14, color: '#7dd3fc', title: 'Peor' }) : ''}</span></td>
       <td>${r.games}</td><td>${r.wins}V · ${r.games - r.wins}D</td><td class="${wrCls(r.wr, r.games)}">${pct(r.wr)}</td></tr>`).join('')}</tbody>`;
 }
 

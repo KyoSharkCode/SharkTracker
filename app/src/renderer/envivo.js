@@ -375,7 +375,7 @@
           const op = el('div', 'mt-op');
           const encaja = estrella.has(Number(g.ids[0]));
           if (encaja) { op.classList.add('ev-estrella'); op.title = 'Encaja con este equipo rival'; }
-          op.append(iconoObjeto(g.ids[0]), el('span', null, `${encaja ? '⭐ ' : ''}${pct(g.winrate)}`));
+          op.append(iconoObjeto(g.ids[0]), el('span', null, `${encaja ? '★ ' : ''}${pct(g.winrate)}`));
           fl.append(op);
         }
         c.append(fl);
@@ -553,7 +553,7 @@
         const ic = icono(o.img, `mt-item${tengo.has(Number(o.id)) && p.titulo !== 'Inicio' ? ' ev-comprado' : ''}`, '?', o.nombre);
         iconos.append(ic);
       });
-      col.append(el('div', 'mt-pasot', `${p.titulo}${p.adaptado ? ' ⭐' : ''}`), iconos);
+      col.append(el('div', 'mt-pasot', `${p.titulo}${p.adaptado ? ' ★' : ''}`), iconos);
       orden.append(col);
     }
     c.append(orden);
@@ -564,7 +564,7 @@
         : `Siguiente: ${s.objetivo.nombre} (${s.objetivo.falta ? `faltan ${s.objetivo.falta}` : '¡ya puedes!'})`;
       c.append(el('div', 'ev-sig', linea));
     }
-    for (const m of d.motivos ?? []) c.append(el('div', 'mt-pasod', `⭐ ${m.nombre} — ${m.motivo}`));
+    for (const m of d.motivos ?? []) c.append(el('div', 'mt-pasod', `★ ${m.nombre} — ${m.motivo}`));
     return c;
   }
   function pintarPartida(caja, sub) {

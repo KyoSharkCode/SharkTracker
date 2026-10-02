@@ -14,7 +14,7 @@
 <style>
   :root{
     --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
-    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --border:#16324a; --text:#ffffff; --text-dim:#a9b7c6; --text-faint:#8696a8;
     --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
     --danger:#ff5f3d; --gold:#facc15; --radius:16px;
   }
@@ -30,26 +30,26 @@
   h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
-  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
   .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .avatar.pending{border-color:var(--gold); color:var(--gold);}
   .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
 
   .hero{position:relative; overflow:hidden; border:1px solid var(--border); border-radius:var(--radius); background:var(--panel); padding:38px 34px; display:grid; grid-template-columns:1fr auto; gap:28px; align-items:center; margin-bottom:40px;}
-  .hero::before{content:''; position:absolute; inset:0; background:radial-gradient(520px 240px at 100% 0%, rgba(0,229,199,.16), transparent 70%); pointer-events:none;}
+  .hero::before{content:none;}
   .hero > *{position:relative;}
-  .tag{display:inline-block; font-size:10.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); border:1px solid rgba(250,204,21,.4); border-radius:99px; padding:3px 10px; margin-bottom:12px;}
+  .tag{display:inline-block; font-size:11px; font-weight:800; color:var(--gold); border:1px solid rgba(250,204,21,.4); border-radius:99px; padding:3px 10px; margin-bottom:12px;}
   .hero h2{margin:0 0 10px; font-family:'Rajdhani',sans-serif; font-size:30px; font-weight:800; letter-spacing:.02em;}
   .hero p{margin:0; color:var(--text-dim); font-size:14.5px; line-height:1.6; max-width:520px;}
   .dl{display:flex; flex-direction:column; align-items:center; gap:10px; min-width:230px;}
-  .dl-btn{display:flex; align-items:center; gap:10px; background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:800; font-size:18px; letter-spacing:.04em; text-transform:uppercase; padding:14px 26px; border-radius:12px; text-decoration:none; box-shadow:0 0 24px var(--accent-glow); transition:transform .15s, box-shadow .15s;}
-  .dl-btn:hover{transform:translateY(-1px); box-shadow:0 0 34px var(--accent-glow);}
+  .dl-btn{display:flex; align-items:center; gap:10px; background:var(--accent); color:#032018; font-family:'Inter',sans-serif; font-weight:700; font-size:16px; padding:14px 26px; border-radius:12px; text-decoration:none; box-shadow:none; transition:transform .15s, box-shadow .15s;}
+  .dl-btn:hover{transform:translateY(-1px); box-shadow:none;}
   .dl-btn svg{width:20px; height:20px;}
   .dl-btn.off{background:#12283a; color:var(--text-faint); box-shadow:none; pointer-events:none;}
   .dl small{color:var(--text-faint); font-size:12px; text-align:center;}
 
   .section-title{display:flex; align-items:center; gap:10px; margin:0 0 16px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
-  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
+  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:none;}
   section{margin-bottom:40px;}
   .grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px;}
   .card{border:1px solid var(--border); border-radius:var(--radius); background:var(--panel-2); padding:20px;}
@@ -86,9 +86,9 @@
   .nota[open] summary::after{transform:rotate(90deg);}
   .nota .ver{font-family:'Rajdhani',sans-serif; font-weight:800; font-size:20px; letter-spacing:.03em;}
   .nota .tit{color:var(--text-dim); font-size:13.5px;}
-  .nota .nueva{font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#032018; background:var(--accent); border-radius:99px; padding:2px 9px;}
+  .nota .nueva{font-size:11px; font-weight:800; color:#032018; background:var(--accent); border-radius:99px; padding:2px 9px;}
   .nota-cuerpo{padding:0 20px 18px; border-top:1px solid var(--border);}
-  .nota-cuerpo h4{margin:14px 0 6px; font-size:11.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--accent);}
+  .nota-cuerpo h4{margin:14px 0 6px; font-size:12px; font-weight:800; color:var(--accent);}
   .nota-cuerpo h4.arreglos{color:var(--gold);}
   .nota-cuerpo ul{margin:0; padding-left:20px;}
   .nota-cuerpo li{color:var(--text-dim); font-size:13.5px; line-height:1.6; margin-bottom:3px;}
@@ -102,6 +102,7 @@
     .dl{min-width:0;}
   }
 </style>
+<link rel="stylesheet" href="assets/tema.css">
 </head>
 <body>
 <div class="wrap">
@@ -237,6 +238,15 @@ init();
 // Notas del parche de la app. Al publicar una versión nueva, se agrega arriba del todo.
 // Cada versión: { version, titulo, nuevo: [...], arreglos: [...] } (texto plano).
 const NOTAS = [
+  { version: '0.7.0', titulo: 'Rediseño visual', nuevo: [
+      'Nuevo aspecto: paneles sólidos sin brillos ni franjas de color, textos más grandes y con más contraste, y números que no "bailan" al cambiar.',
+      'Menú lateral con íconos.',
+      'Mi Perfil: tus etiquetas (rachas, lado del mapa, campeones…) ahora van debajo de tu nombre, y el radar de rendimiento es más grande.',
+      'Overlay en partida: todos los textos un punto más grandes y más claros (build con Ctrl + X, pantalla de carga, oro con Tab, Barón/Ancestral, Tu rendimiento y siguiente compra). La transparencia sigue igual.',
+      'Mientras carga Mi Perfil se ven siluetas grises en lugar de un "Cargando…".',
+    ], arreglos: [
+      'Navegar con el teclado ahora marca dónde estás con un borde turquesa.',
+    ] },
   { version: '0.6.0', titulo: 'Contra tu rival de línea', nuevo: [
       'En Vivo: tarjeta "Contra…" tu rival de línea con tu winrate contra él, quién gana la línea, quién mata más en solitario, el estilo recomendado y un consejo de OP.GG.',
       'Hasta 3 páginas de runas para elegir contra tu rival, cada una con su botón Importar.',
@@ -249,8 +259,8 @@ const NOTAS = [
     ] },
   { version: '0.5.0', titulo: 'Build adaptada', nuevo: [
       'En Vivo: "Contra este equipo" ajusta la build a los rivales (curaciones, daño físico o mágico, tanques, asesinos y control) y explica por qué.',
-      'Botón "Importar build adaptada" y ⭐ en los objetos situacionales que encajan con la partida.',
-      'En partida, Ctrl + X muestra tu build completa en orden, arriba a la izquierda, con ✓ en lo que ya compraste.',
+      'Botón "Importar build adaptada" y una estrella en los objetos situacionales que encajan con la partida.',
+      'En partida, Ctrl + X muestra tu build completa en orden, arriba a la izquierda, con una marca en lo que ya compraste.',
     ] },
   { version: '0.4.0', titulo: 'En Vivo', nuevo: [
       'En Vivo se abre sola en la selección de campeones: picks y bans recomendados, aliados y rivales.',

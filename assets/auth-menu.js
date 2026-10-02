@@ -4,12 +4,13 @@
 //
 //   Vinculado:     Ir a perfil · Editar perfil · Mi Twitch · (Admin Dashboard) · Cerrar sesión
 //   Sin vincular:  Terminar vinculación / Solicitud pendiente · Cerrar sesión
-//   Sin sesión:    botón "Login"
+//   Sin sesión:    botón "Iniciar sesión"
 //
 // Uso:
 //   const menu = createAuthMenu({ supabase, profileIconUrl, onEdit });
 //   menu.render(session, players, profiles);   // cada vez que la página recarga datos
 // ============================================================
+import { icono } from './iconos.js';
 
 const CSS = `
 .am-wrap{position:relative; display:flex; align-items:center;}
@@ -22,11 +23,11 @@ const CSS = `
 .am-head{display:flex; align-items:center; gap:10px; padding:10px 10px 12px; border-bottom:1px solid var(--border,#16324a); margin-bottom:6px;}
 .am-head img{width:34px; height:34px; border-radius:50%; object-fit:cover; border:2px solid var(--accent,#00e5c7); flex-shrink:0; background:#0a1622;}
 .am-head b{display:block; color:#fff; font-size:13px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.am-head small{display:block; color:var(--text-faint,#6d8ba3); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.am-item{display:flex; align-items:center; gap:10px; width:100%; padding:9px 10px; border:none; border-radius:9px; background:none; color:var(--text-dim,#9db3c4); font:600 13px Inter,system-ui,sans-serif; text-decoration:none; text-align:left; cursor:pointer;}
+.am-head small{display:block; color:var(--text-faint,#8696a8); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.am-item{display:flex; align-items:center; gap:10px; width:100%; padding:9px 10px; border:none; border-radius:9px; background:none; color:var(--text-dim,#a9b7c6); font:600 13px Inter,system-ui,sans-serif; text-decoration:none; text-align:left; cursor:pointer;}
 .am-item:hover, .am-item:focus-visible{background:rgba(0,229,199,.08); color:#fff; outline:none;}
-.am-item .ico{width:18px; text-align:center; flex-shrink:0;}
-.am-item .sub{margin-left:auto; font-size:11px; font-weight:700; color:var(--text-faint,#6d8ba3); max-width:110px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.am-item .ico{width:18px; display:flex; justify-content:center; flex-shrink:0;}
+.am-item .sub{margin-left:auto; font-size:11px; font-weight:700; color:var(--text-faint,#8696a8); max-width:110px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 .am-item .sub.ok{color:#bf94ff;}
 .am-item .count{margin-left:auto; min-width:20px; padding:1px 7px; border-radius:99px; background:var(--gold,#facc15); color:#032018; font-size:11px; font-weight:800; text-align:center;}
 .am-item.danger:hover{background:rgba(255,95,61,.1); color:var(--danger,#ff5f3d);}
@@ -34,10 +35,10 @@ const CSS = `
 
 .am-modal-bg{position:fixed; inset:0; z-index:90; background:rgba(3,8,18,.7); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; padding:20px;}
 .am-modal-bg[hidden]{display:none;}
-.am-modal{width:100%; max-width:400px; background:rgba(8,18,29,.99); border:1px solid #9146ff; border-radius:18px; padding:24px; box-shadow:0 0 40px rgba(145,70,255,.25); font-family:Inter,system-ui,sans-serif; color:#fff; position:relative;}
+.am-modal{width:100%; max-width:400px; background:rgba(8,18,29,.99); border:1px solid #9146ff; border-radius:18px; padding:24px; box-shadow:none; font-family:Inter,system-ui,sans-serif; color:#fff; position:relative;}
 .am-modal h3{margin:0 0 6px; font-family:Rajdhani,sans-serif; font-weight:700; font-size:24px; letter-spacing:.03em; text-transform:uppercase;}
-.am-modal p{margin:0 0 18px; font-size:13px; line-height:1.55; color:var(--text-dim,#9db3c4);}
-.am-modal .close{position:absolute; top:12px; right:14px; background:none; border:none; color:var(--text-faint,#6d8ba3); font-size:22px; cursor:pointer; line-height:1;}
+.am-modal p{margin:0 0 18px; font-size:13px; line-height:1.55; color:var(--text-dim,#a9b7c6);}
+.am-modal .close{position:absolute; top:12px; right:14px; background:none; border:none; color:var(--text-faint,#8696a8); font-size:22px; cursor:pointer; line-height:1;}
 .am-modal .close:hover{color:#fff;}
 .am-tw-status{display:flex; align-items:center; gap:10px; background:rgba(145,70,255,.1); border:1px solid rgba(145,70,255,.4); border-radius:12px; padding:12px 14px; margin-bottom:16px; font-size:13px;}
 .am-tw-status b{color:#fff;}
@@ -48,7 +49,7 @@ const CSS = `
 .am-btn.twitch{background:#9146ff; color:#fff; box-shadow:0 8px 24px rgba(145,70,255,.35);}
 .am-btn.twitch:hover{background:#a970ff;}
 .am-btn.twitch svg{width:18px; height:18px; fill:#fff;}
-.am-btn.ghost{background:transparent; border:1px solid var(--border,#16324a); color:var(--text-dim,#9db3c4);}
+.am-btn.ghost{background:transparent; border:1px solid var(--border,#16324a); color:var(--text-dim,#a9b7c6);}
 .am-btn.ghost:hover{border-color:var(--danger,#ff5f3d); color:var(--danger,#ff5f3d);}
 .am-btn:disabled{opacity:.55; cursor:not-allowed;}
 .am-err{font-size:12.5px; font-weight:600; color:var(--danger,#ff5f3d); margin-top:6px;}
@@ -103,7 +104,7 @@ export function createAuthMenu({ supabase, profileIconUrl, onEdit, slotId = 'aut
       (async () => {
         const { data, error } = await supabase.rpc('link_my_twitch');
         if (error) { toast(`No se pudo conectar Twitch: ${error.message}`, true); return; }
-        toast(`📺 Twitch conectado: ${data}`);
+        toast(`Twitch conectado: ${data}`);
         if (state.profile) { state.profile.twitch_username = data; draw(); }
       })();
     }
@@ -142,7 +143,7 @@ export function createAuthMenu({ supabase, profileIconUrl, onEdit, slotId = 'aut
     if (!el) return;
     const { session, mine } = state;
     if (!session) {
-      el.innerHTML = `<a class="login-btn" href="login.html">Login</a>`;
+      el.innerHTML = `<a class="login-btn" href="login.html">Iniciar sesión</a>`;
       return;
     }
     const meta = session.user.user_metadata ?? {};
@@ -157,10 +158,10 @@ export function createAuthMenu({ supabase, profileIconUrl, onEdit, slotId = 'aut
       const tw = state.profile?.twitch_username;
       const perfilUrl = `perfil.html?jugador=${encodeURIComponent(mine.id)}`;
       items = `
-        <a class="am-item" role="menuitem" href="${perfilUrl}"><span class="ico">👤</span>Ir a perfil</a>
-        <a class="am-item" role="menuitem" href="${perfilUrl}&editar=1" data-action="edit"><span class="ico">✎</span>Editar perfil</a>
-        <button class="am-item" role="menuitem" type="button" data-action="twitch"><span class="ico">📺</span>Mi Twitch<span class="sub ${tw ? 'ok' : ''}">${tw ? esc(tw) : 'Conectar'}</span></button>
-        ${state.isAdmin ? `<a class="am-item" role="menuitem" href="admin.html"><span class="ico">🛡️</span>Admin Dashboard${state.pendingCount ? `<span class="count">${state.pendingCount}</span>` : ''}</a>` : ''}
+        <a class="am-item" role="menuitem" href="${perfilUrl}"><span class="ico">${icono('grupo', { size: 16 })}</span>Ir a perfil</a>
+        <a class="am-item" role="menuitem" href="${perfilUrl}&editar=1" data-action="edit"><span class="ico">${icono('lapiz', { size: 16 })}</span>Editar perfil</a>
+        <button class="am-item" role="menuitem" type="button" data-action="twitch"><span class="ico">${icono('twitch', { size: 16 })}</span>Mi Twitch<span class="sub ${tw ? 'ok' : ''}">${tw ? esc(tw) : 'Conectar'}</span></button>
+        ${state.isAdmin ? `<a class="am-item" role="menuitem" href="admin.html"><span class="ico">${icono('escudo', { size: 16 })}</span>Admin Dashboard${state.pendingCount ? `<span class="count">${state.pendingCount}</span>` : ''}</a>` : ''}
         <div class="am-sep"></div>
         <button class="am-item danger" role="menuitem" type="button" data-action="logout"><span class="ico">↩</span>Cerrar sesión</button>`;
     } else {
@@ -168,7 +169,7 @@ export function createAuthMenu({ supabase, profileIconUrl, onEdit, slotId = 'aut
       trigger = `<span class="am-inner">${av ? `<img src="${esc(av)}" alt="">` : '?'}</span>`;
       head = `<div class="am-head">${av ? `<img src="${esc(av)}" alt="">` : ''}<div><b>${esc(discordName)}</b><small>Sin cuenta de LoL vinculada</small></div></div>`;
       items = `
-        <a class="am-item" role="menuitem" href="login.html"><span class="ico">${state.ownRequest ? '⏳' : '🔗'}</span>${state.ownRequest ? 'Solicitud pendiente' : 'Terminar vinculación'}</a>
+        <a class="am-item" role="menuitem" href="login.html"><span class="ico">${icono(state.ownRequest ? 'reloj_arena' : 'enlace', { size: 16 })}</span>${state.ownRequest ? 'Solicitud pendiente' : 'Terminar vinculación'}</a>
         <div class="am-sep"></div>
         <button class="am-item danger" role="menuitem" type="button" data-action="logout"><span class="ico">↩</span>Cerrar sesión</button>`;
     }
@@ -233,7 +234,7 @@ export function createAuthMenu({ supabase, profileIconUrl, onEdit, slotId = 'aut
     const verified = !!tw && verifiedLogin === tw.toLowerCase();
 
     const status = tw
-      ? `<div class="am-tw-status">📺 <b>${esc(tw)}</b><span class="tag ${verified ? 'ok' : 'warn'}">${verified ? 'Verificado ✓' : 'Sin verificar'}</span></div>` : '';
+      ? `<div class="am-tw-status">${icono('twitch', { size: 15 })} <b>${esc(tw)}</b><span class="tag ${verified ? 'ok' : 'warn'}">${verified ? 'Verificado ✓' : 'Sin verificar'}</span></div>` : '';
     const intro = tw
       ? (verified
           ? '<p>Tu Twitch está conectado. Cuando estés en vivo, tu ícono se pone rojo y aparece tu stream en el ranking y en tu perfil.</p>'

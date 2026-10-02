@@ -28,8 +28,8 @@
 <style>
   :root{
     --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
-    --win:#22c55e; --loss:#ff5f3d; --gold:#facc15; --ice:#7dd3fc;
-    --text:#fff; --dim:#b4c7d6; --faint:#7f9ab0;
+    --win:#7cb8ff; --loss:#ff8a94; --gold:#facc15; --ice:#7dd3fc;
+    --text:#fff; --dim:#cfe0ee; --faint:#a9b7c6;
     --s:1;
   }
   *{box-sizing:border-box;}
@@ -37,27 +37,28 @@
   body{padding:calc(8px * var(--s)); font-family:Inter,system-ui,sans-serif; color:var(--text); -webkit-font-smoothing:antialiased;}
 
   .box{position:relative; width:calc(340px * var(--s)); height:calc(92px * var(--s)); border-radius:calc(16px * var(--s)); overflow:hidden;
-       background:linear-gradient(135deg, rgba(6,16,27,.92), rgba(9,24,38,.9)); border:calc(1.5px * var(--s)) solid rgba(0,229,199,.55);
-       box-shadow:0 0 calc(18px * var(--s)) rgba(0,229,199,.18), inset 0 0 calc(24px * var(--s)) rgba(0,229,199,.06);
-       transition:border-color .4s, box-shadow .4s;}
-  .box::before{content:''; position:absolute; left:0; top:0; bottom:0; width:calc(4px * var(--s)); background:var(--accent); box-shadow:0 0 12px var(--accent-glow);}
+       /* Rediseño: panel sólido con borde fino y sombra (sin barra lateral ni brillos). */
+       background:rgba(8,16,26,.94); border:calc(1px * var(--s)) solid rgba(255,255,255,.12);
+       box-shadow:0 calc(8px * var(--s)) calc(24px * var(--s)) rgba(0,0,0,.45);
+       font-variant-numeric:tabular-nums;
+       transition:border-color .4s;}
   .box.hidden{display:none;}
 
-  .pane{position:absolute; inset:0; padding:calc(10px * var(--s)) calc(14px * var(--s)) calc(10px * var(--s)) calc(18px * var(--s)); display:flex; align-items:center; gap:calc(12px * var(--s));
+  .pane{position:absolute; inset:0; padding:calc(10px * var(--s)) calc(14px * var(--s)) calc(10px * var(--s)) calc(16px * var(--s)); display:flex; align-items:center; gap:calc(12px * var(--s));
         opacity:0; transform:translateY(calc(10px * var(--s))); transition:opacity .45s ease, transform .45s ease; pointer-events:none;}
   .pane.on{opacity:1; transform:none;}
   .pane.out{opacity:0; transform:translateY(calc(-10px * var(--s)));}
 
-  .lbl{font-size:calc(10px * var(--s)); font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); display:flex; align-items:center; gap:calc(6px * var(--s)); white-space:nowrap;}
-  .lbl b{color:var(--accent); font-weight:800;}
-  .lbl .r{margin-left:auto; letter-spacing:.04em; text-transform:none; color:var(--dim);}
-  .big{font-family:Rajdhani,sans-serif; font-weight:800; font-size:calc(27px * var(--s)); line-height:1.05; letter-spacing:.02em; white-space:nowrap;}
-  .sub{font-size:calc(12px * var(--s)); font-weight:700; color:var(--dim); white-space:nowrap; margin-top:calc(2px * var(--s));}
+  .lbl{font-size:calc(14px * var(--s)); font-weight:600; color:var(--faint); display:flex; align-items:center; gap:calc(6px * var(--s)); white-space:nowrap; line-height:1.25;}
+  .lbl b{color:var(--accent); font-weight:700;}
+  .lbl .r{margin-left:auto; color:var(--dim); display:inline-flex; align-items:center; gap:calc(4px * var(--s));}
+  .big{font-family:Rajdhani,sans-serif; font-weight:700; font-size:calc(27px * var(--s)); line-height:1.05; white-space:nowrap;}
+  .sub{font-size:calc(13px * var(--s)); font-weight:600; color:var(--dim); white-space:nowrap; margin-top:calc(2px * var(--s));}
   .grow{flex:1; min-width:0;}
 
   /* Rango */
   .emb{width:calc(64px * var(--s)); height:calc(64px * var(--s)); flex-shrink:0; display:flex; align-items:center; justify-content:center; position:relative;}
-  .emb img{width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 0 8px rgba(0,229,199,.35));}
+  .emb img{width:100%; height:100%; object-fit:contain;}
   .emb .ph{font-family:Rajdhani,sans-serif; font-weight:800; font-size:calc(22px * var(--s)); color:var(--accent); width:100%; height:100%; border-radius:50%; border:calc(2px * var(--s)) solid rgba(0,229,199,.5); display:none; align-items:center; justify-content:center;}
   .emb.noimg img{display:none;} .emb.noimg .ph{display:flex;}
   .lp{color:var(--accent); font-family:Rajdhani,sans-serif; font-weight:800; font-size:calc(19px * var(--s)); margin-left:calc(6px * var(--s));}
@@ -66,24 +67,27 @@
   .today{display:flex; align-items:baseline; gap:calc(12px * var(--s));}
   .w{color:var(--win);} .l{color:var(--loss);}
   .delta{font-family:Rajdhani,sans-serif; font-weight:800; font-size:calc(22px * var(--s));}
-  .delta.up{color:var(--win);} .delta.down{color:var(--loss);} .delta.flat{color:var(--dim);}
+  .delta.up{color:#6fdba8;} .delta.down{color:var(--loss);} .delta.flat{color:var(--dim);}
   .streak{display:inline-flex; align-items:center; gap:calc(4px * var(--s));}
+  .streak svg, .lbl svg{width:calc(14px * var(--s)); height:calc(14px * var(--s));}
   .streak.fire{color:#ffb38a;} .streak.ice{color:var(--ice);}
-  .icon-day{font-size:calc(34px * var(--s)); width:calc(48px * var(--s)); text-align:center; flex-shrink:0;}
+  .icon-day{width:calc(48px * var(--s)); height:calc(48px * var(--s)); border-radius:calc(12px * var(--s)); background:rgba(255,255,255,.06); color:var(--dim); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .icon-day.up{color:#6fdba8; background:rgba(111,219,168,.12);} .icon-day.down{color:var(--loss); background:rgba(255,95,109,.12);}
+  .icon-day svg, .alert .ic svg{width:55%; height:55%;}
 
   /* Misiones */
-  .ms{display:flex; flex-direction:column; gap:calc(3px * var(--s)); margin-top:calc(5px * var(--s));}
-  .m{display:flex; align-items:center; gap:calc(7px * var(--s)); font-size:calc(12px * var(--s)); font-weight:600; color:var(--dim); min-width:0;}
+  .ms{display:flex; flex-direction:column; gap:calc(2px * var(--s)); margin-top:calc(4px * var(--s));}
+  .m{display:flex; align-items:center; gap:calc(7px * var(--s)); font-size:calc(12.5px * var(--s)); line-height:1.25; font-weight:600; color:var(--dim); min-width:0;}
   .m i{width:calc(8px * var(--s)); height:calc(8px * var(--s)); border-radius:50%; flex-shrink:0; border:calc(1.5px * var(--s)) solid var(--tc); background:transparent;}
   .m.done i{background:var(--tc);}
   .m .t{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .m.done .t{color:#fff;}
-  .m .p{font-weight:800; font-size:calc(11px * var(--s)); color:var(--faint); white-space:nowrap;}
+  .m .p{font-weight:700; font-size:calc(12px * var(--s)); color:var(--faint); white-space:nowrap;}
   .m.done .p{color:var(--gold);}
   .pane.ms-pane{flex-direction:column; align-items:stretch; justify-content:center; gap:0;}
 
   /* Barrita de tiempo de la rotación */
-  .timer{position:absolute; left:0; bottom:0; height:calc(2px * var(--s)); width:100%; background:rgba(0,229,199,.5); transform-origin:left; transform:scaleX(0);}
+  .timer{position:absolute; left:0; bottom:0; height:calc(2px * var(--s)); width:100%; background:rgba(0,229,199,.6); transform-origin:left; transform:scaleX(0);}
   .timer.run{animation:timer var(--dur,10s) linear forwards;}
   @keyframes timer{from{transform:scaleX(0);} to{transform:scaleX(1);}}
 
@@ -94,20 +98,18 @@
   @keyframes alert-in{0%{opacity:0; transform:scale(.85);} 100%{opacity:1; transform:none;}}
   @keyframes alert-out{0%{opacity:1;} 100%{opacity:0; transform:scale(1.04);}}
   .box.alerting .pane, .box.alerting .timer{opacity:0 !important;}
-  .box.a-up{border-color:var(--gold); box-shadow:0 0 calc(28px * var(--s)) rgba(250,204,21,.45), inset 0 0 calc(30px * var(--s)) rgba(250,204,21,.12);}
-  .box.a-up::before{background:var(--gold); box-shadow:0 0 14px rgba(250,204,21,.8);}
-  .box.a-down{border-color:rgba(125,211,252,.6); box-shadow:0 0 calc(18px * var(--s)) rgba(125,211,252,.25);}
-  .box.a-down::before{background:var(--ice);}
-  .box.a-mis{border-color:var(--tc,#22c55e); box-shadow:0 0 calc(26px * var(--s)) color-mix(in srgb, var(--tc,#22c55e) 45%, transparent);}
-  .box.a-mis::before{background:var(--tc,#22c55e);}
+  /* Alertas: solo cambia el color del borde (dorado al subir, hielo al bajar, color de la misión). */
+  .box.a-up{border-color:var(--gold);}
+  .box.a-down{border-color:rgba(125,211,252,.7);}
+  .box.a-mis{border-color:var(--tc,#22c55e);}
   .alert .emb img{animation:emb-pop 1.2s ease-out;}
-  @keyframes emb-pop{0%{transform:scale(.3) rotate(-20deg); filter:brightness(3);} 60%{transform:scale(1.15);} 100%{transform:none;}}
-  .alert .big.gold{color:var(--gold); text-shadow:0 0 14px rgba(250,204,21,.6);}
+  @keyframes emb-pop{0%{transform:scale(.3) rotate(-20deg);} 60%{transform:scale(1.15);} 100%{transform:none;}}
+  .alert .big.gold{color:var(--gold);}
   .alert .big.ice{color:var(--ice);}
   .shine{position:absolute; inset:0; pointer-events:none; background:linear-gradient(100deg, transparent 35%, rgba(255,255,255,.28) 50%, transparent 65%); background-size:250% 100%; animation:shine 1.6s ease-in-out 2;}
   @keyframes shine{from{background-position:150% 0;} to{background-position:-50% 0;}}
-  .alert .ic{font-size:calc(36px * var(--s)); width:calc(56px * var(--s)); text-align:center; flex-shrink:0; animation:emb-pop 1s ease-out;}
-  .alert .t2{font-size:calc(12.5px * var(--s)); font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:calc(2px * var(--s));}
+  .alert .ic{width:calc(56px * var(--s)); height:calc(56px * var(--s)); border-radius:50%; background:color-mix(in srgb, var(--tc,#22c55e) 16%, transparent); color:var(--tc,#22c55e); display:flex; align-items:center; justify-content:center; flex-shrink:0; animation:emb-pop 1s ease-out;}
+  .alert .t2{font-size:calc(13px * var(--s)); font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:calc(2px * var(--s));}
 
   .err{font:700 13px Inter,sans-serif; color:#fff; background:rgba(255,95,61,.85); border-radius:10px; padding:8px 12px; display:inline-block;}
 </style>
@@ -121,6 +123,7 @@
 <script type="module">
 import { createSupabase } from './assets/supabase.js';
 import { rankText, emblemUrl, TIER_LABEL, esc } from './assets/lol-data.js';
+import { icono } from './assets/iconos.js';
 
 const supabase = createSupabase({ auth: { persistSession: false } });
 
@@ -260,7 +263,7 @@ function showAlert(a) {
     if (a.kind === 'liga') {
       cls = a.up ? 'a-up' : 'a-down';
       el.innerHTML = `<div class="emb"><img src="${emblemUrl(a.tier)}" alt="" onerror="this.parentElement.classList.add('noimg')"><span class="ph">${esc((TIER_LABEL[a.tier] ?? a.tier)[0])}</span></div>
-        <div class="grow"><div class="lbl">${a.up ? '⬆ ¡Subida de liga!' : '⬇ Bajada de liga'}</div>
+        <div class="grow"><div class="lbl">${a.up ? `${icono('arriba', { color: 'var(--gold)' })} ¡Subida de liga!` : `${icono('abajo', { color: 'var(--ice)' })} Bajada de liga`}</div>
           <div class="big ${a.up ? 'gold' : 'ice'}">${a.up ? '¡' : ''}${esc(TIER_LABEL[a.tier] ?? a.tier)}${a.up ? '!' : ''}</div>
           <div class="sub">${esc(nick)} · ${esc(rankText(a.rank))}${a.rank?.lp != null ? ` · ${a.rank.lp} LP` : ''}</div></div>
         ${a.up ? '<div class="shine"></div>' : ''}`;
@@ -268,7 +271,7 @@ function showAlert(a) {
       const t = MT[a.m.tier] ?? MT.easy;
       cls = 'a-mis';
       box.style.setProperty('--tc', t.color);
-      el.innerHTML = `<div class="ic">🎯</div>
+      el.innerHTML = `<div class="ic">${icono('diana')}</div>
         <div class="grow"><div class="lbl" style="color:${t.color}">Misión ${t.label.toLowerCase()} completada</div>
           <div class="big" style="font-size:calc(22px * var(--s))">+${a.m.cat?.points ?? t.pts} pt${(a.m.cat?.points ?? t.pts) === 1 ? '' : 's'}</div>
           <div class="t2">${esc(a.m.cat?.title ?? a.m.code)}</div></div><div class="shine"></div>`;
@@ -297,10 +300,10 @@ function paneRango() {
 function paneHoy() {
   const t = state.today, s = state.streak;
   const lbl = `<div class="lbl">Hoy · <b>${esc(nick)}</b><span class="r">${COLA === 'todas' ? 'Todas las colas' : 'SoloQ'}</span></div>`;
-  if (!t.w && !t.l) return `<div class="icon-day">🌅</div><div class="grow">${lbl}<div class="big" style="font-size:calc(22px * var(--s))">Sin partidas hoy</div><div class="sub">¡A por la primera victoria!</div></div>`;
+  if (!t.w && !t.l) return `<div class="icon-day">${icono('amanecer')}</div><div class="grow">${lbl}<div class="big" style="font-size:calc(22px * var(--s))">Sin partidas hoy</div><div class="sub">¡A por la primera victoria!</div></div>`;
   const d = t.lp;
-  const streakHtml = s ? `<span class="streak ${s.win ? 'fire' : 'ice'}">${s.win ? '🔥' : '❄️'} Racha de ${s.n} ${s.win ? 'victorias' : 'derrotas'}</span>` : 'Sin racha';
-  return `<div class="icon-day">${d > 0 ? '📈' : d < 0 ? '📉' : '🎮'}</div><div class="grow">${lbl}
+  const streakHtml = s ? `<span class="streak ${s.win ? 'fire' : 'ice'}">${icono(s.win ? 'fuego' : 'copo')} Racha de ${s.n} ${s.win ? 'victorias' : 'derrotas'}</span>` : 'Sin racha';
+  return `<div class="icon-day ${d > 0 ? 'up' : d < 0 ? 'down' : ''}">${icono(d > 0 ? 'sube' : d < 0 ? 'baja' : 'mando')}</div><div class="grow">${lbl}
     <div class="today"><span class="big"><span class="w">${t.w}V</span> <span class="l">${t.l}D</span></span>
       ${t.lpGames ? `<span class="delta ${d > 0 ? 'up' : d < 0 ? 'down' : 'flat'}">${d > 0 ? '+' : ''}${d} LP</span>` : ''}</div>
     <div class="sub">${streakHtml}</div></div>`;
@@ -308,7 +311,7 @@ function paneHoy() {
 function paneMisiones() {
   const ms = state.missions;
   const g = ms.group;
-  return `<div class="lbl">🎯 Misiones · <b>⏳ ${timeLeft(ms.resetAt - Date.now())}</b>${g ? `<span class="r">👥 ${g.done ? '✓' : `${Math.min(g.progress, g.target)}/${g.target}`}</span>` : ''}</div>
+  return `<div class="lbl">Misiones · <b>${timeLeft(ms.resetAt - Date.now())}</b>${g ? `<span class="r">${icono('grupo')} ${g.done ? '✓' : `${Math.min(g.progress, g.target)}/${g.target}`}</span>` : ''}</div>
     <div class="ms">${ms.list.map(m => {
       const t = MT[m.tier], target = m.cat?.target ?? 1, done = !!m.completed_at;
       return `<div class="m ${done ? 'done' : ''}" style="--tc:${t.color}"><i></i><span class="t">${esc(m.cat?.title ?? m.code)}</span><span class="p">${done ? `✓ +${m.cat?.points ?? t.pts}` : `${Math.min(m.progress, target)}/${target}`}</span></div>`;

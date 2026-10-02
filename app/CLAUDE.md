@@ -305,6 +305,29 @@ que pulse un botón.
   (y no se piden maestrías a Riot).
 - ARAM de temporada (cola 2400) cuenta como ARAM en Mi Perfil, En Vivo y la pantalla de carga.
 
+## Rediseño visual (v0.7.0, oct 2026 — mockup "SharkTracker — mejoras visuales")
+
+Mockup: `https://claude.ai/artifact/6gK8Gg31m9YjTo1ptqaLt8`. Un solo PR con app + web + overlay OBS.
+- **App** (`renderer/style.css`, bloque "v0.7" al final): tarjetas sólidas `#0c131d` sin la franja de
+  color de arriba ni brillos; títulos sin degradado; textos ≥ 11 px y grises más claros
+  (`#8696a8` / `#7d8ea0` / `#a9b7c6`); números tabulares; íconos SVG en el menú lateral (`.navico`);
+  foco visible (`:focus-visible` turquesa); siluetas `.esqueleto` mientras carga Mi Perfil.
+  Mi Perfil: las etiquetas van en fila debajo del nombre (ya no hay tarjeta "Etiquetas") y el radar
+  es más grande (260×240).
+- **Overlay en partida** (`overlay/overlay.css`): todos los textos +1 px, números tabulares, `--tenue`
+  más claro. **La transparencia del panel sigue en 0.8** (Alex no la quiere más opaca). Las piezas
+  se ensancharon un poco y sus posiciones de fábrica se movieron para que sigan cabiendo
+  (rendimiento x 1676 / 234 px, avisos x 1634 / 276 px, carga x 1484 / 420 px, build 452 px,
+  siguiente x 1385 y 996 / 250 px; quien ya movió una pieza conserva la suya). El Alma ya no
+  brilla: solo borde dorado. ⭐ de lo adaptado pasó a "★" (toma el color dorado del texto).
+- **Web**: `assets/tema.css` (se carga después del `<style>` de cada página, excepto `overlay.html`)
+  y `assets/iconos.js` (`icono(nombre, {size, color, title})`, reemplaza a los emoji). ❄️ es el
+  indicador de **mala racha** (no un cosmético): en el ranking va en su propia columna
+  "Racha · últimas 5". Los emoji de la tienda (cosméticos que eligió cada jugador) e insignias
+  (vienen de la base) se quedan.
+- **Overlay OBS** (`overlay.html`): panel sólido `rgba(8,16,26,.94)`, borde fino y sombra, sin barra
+  lateral ni brillos; etiquetas en minúsculas a 14 px; íconos SVG. Mismo tamaño y parámetros.
+
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)
 
@@ -313,7 +336,7 @@ visual" y "Overlay — estructuras" del canvas)
   (etiquetas en MAYÚSCULAS) e Inter para texto.
 - **Regla de color única: lo hace o lo tiene tu equipo → azul #4c9dff; el enemigo →
   rojo #ff5f6d** (colores relativos de LoL). Objetivos con su color propio (dragón
-  por elemento), Alma en dorado con brillo.
+  por elemento), Alma en dorado (desde v0.7 sin brillo, solo el borde).
 - Íconos: SVG propios (mismo set que assets/lol-icons.js de la web), sin imágenes
   externas. Fichas de campeón **variante B**: cuadrado redondeado con borde del
   equipo y retrato de DDragon (respaldo: iniciales).

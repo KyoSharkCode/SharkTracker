@@ -20,11 +20,11 @@ const PIEZAS = [
 const POSICIONES_FABRICA = {
   baron:       { x: 492,  y: 8 },
   ancestral:   { x: 1138, y: 8 },
-  rendimiento: { x: 1690, y: 72 },   // arriba a la derecha (220 px de ancho)
-  avisos:      { x: 1648, y: 280 },  // columna de anuncio + toast (262 px de ancho)
-  carga:       { x: 1500, y: 60 },   // panel de la pantalla de carga (400 px de ancho)
-  build:       { x: 16,   y: 16 },   // build en partida, arriba a la izquierda (430 px de ancho)
-  siguiente:   { x: 1395, y: 1000 }, // siguiente compra, a la izquierda del minimapa (240 px de ancho)
+  rendimiento: { x: 1676, y: 72 },   // arriba a la derecha (234 px de ancho)
+  avisos:      { x: 1634, y: 280 },  // columna de anuncio + toast (276 px de ancho)
+  carga:       { x: 1484, y: 60 },   // panel de la pantalla de carga (420 px de ancho)
+  build:       { x: 16,   y: 16 },   // build en partida, arriba a la izquierda (452 px de ancho)
+  siguiente:   { x: 1385, y: 996 },  // siguiente compra, a la izquierda del minimapa (250 px de ancho)
 };
 
 const archivo = () => path.join(app.getPath('userData'), 'overlay.json');

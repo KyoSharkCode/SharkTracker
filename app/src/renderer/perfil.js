@@ -59,6 +59,8 @@
     const nombre = el('div', 'profname', j.nombre);
     nombre.append(el('span', 'proftagline', ` #${j.tag}`));
     ident.append(nombre, el('div', 'proftag', ['LAN', j.rol ? `rol principal: ${j.rol}` : null].filter(Boolean).join(' · ')));
+    // v0.7: las etiquetas van en fila debajo del nombre (antes, tarjeta aparte).
+    if (conectado && p.etiquetas?.length) ident.append(filaEtiquetas(p));
 
     const badges = el('div', 'rankbadges');
     for (const [cola, r] of [['SoloQ', p.solo], ['Flex', p.flex]]) {
@@ -106,12 +108,12 @@
       return card;
     }
     p = { ...p, resumen: cola.resumen, radar: cola.radar };
-    const cx = 110, cy = 100, R = 72;
+    const cx = 130, cy = 120, R = 90;   // v0.7: radar más grande
     const puntos = (esc) => esc.map((e, i) => {
       const ang = -Math.PI / 2 + i * (Math.PI / 2);
       return `${cx + Math.cos(ang) * R * e},${cy + Math.sin(ang) * R * e}`;
     }).join(' ');
-    const svg = svgEl('svg', { width: 220, height: 200, viewBox: '0 0 220 200', class: 'radar' });
+    const svg = svgEl('svg', { width: 260, height: 240, viewBox: '0 0 260 240', class: 'radar' });
     for (const f of [1, 2 / 3, 1 / 3]) svg.append(svgEl('polygon', { points: puntos([f, f, f, f]), class: 'radar-malla' }));
     for (let i = 0; i < 4; i++) {
       const ang = -Math.PI / 2 + i * (Math.PI / 2);
@@ -119,7 +121,7 @@
     }
     if (p.radar.hayRef) svg.append(svgEl('polygon', { points: puntos([2 / 3, 2 / 3, 2 / 3, 2 / 3]), class: 'radar-ref' }));
     svg.append(svgEl('polygon', { points: puntos(p.radar.ejes.map((e) => Math.max(e.escala, 0.04))), class: 'radar-tuyo' }));
-    const pos = [[cx, 12, 'middle'], [206, cy + 3, 'end'], [cx, 196, 'middle'], [14, cy + 3, 'start']];
+    const pos = [[cx, 18, 'middle'], [252, cy + 4, 'end'], [cx, 234, 'middle'], [8, cy + 4, 'start']];
     p.radar.ejes.forEach((e, i) => {
       const t = svgEl('text', { x: pos[i][0], y: pos[i][1], 'text-anchor': pos[i][2], class: 'radar-txt' });
       t.textContent = e.nombre;
@@ -146,19 +148,16 @@
     return card;
   }
 
-  // ── Etiquetas ──
-  function pintarEtiquetas(p) {
-    const card = el('div', 'card card-tags');
-    card.append(el('div', 'cardhd', 'Etiquetas activas ahora'));
+  // ── Etiquetas: fila de píldoras bajo el nombre (según tus últimas 30 SoloQ) ──
+  function filaEtiquetas(p) {
     const fila = el('div', 'ptagrow');
+    fila.title = 'Según tus últimas 30 SoloQ: rachas, tilt, lado del mapa y campeones.';
     for (const t of p.etiquetas) {
       const tag = el('span', `ptag ${t.tipo}`);
       tag.append(el('span', 'pic', t.icono), document.createTextNode(t.texto + ' '), el('span', 'ptag-det', t.detalle));
       fila.append(tag);
     }
-    if (!p.etiquetas.length) fila.append(el('span', 'vacio', 'Ninguna por ahora: juega unas SoloQ más.'));
-    card.append(fila, el('div', 'ley-nota', 'Según tus últimas 30 SoloQ: rachas, tilt, lado del mapa y campeones.'));
-    return card;
+    return fila;
   }
 
   // ── Maestrías ──
@@ -261,6 +260,16 @@
     return card;
   }
 
+  // Cargando: siluetas grises en lugar de un "Cargando…" suelto (v0.7).
+  function esqueleto() {
+    const caja = el('div', 'esq-perfil');
+    caja.append(el('div', 'esqueleto esq-cab'));
+    const fila = el('div', 'perfil-fila');
+    fila.append(el('div', 'esqueleto esq-card'), el('div', 'esqueleto esq-card'));
+    caja.append(fila, el('div', 'esqueleto esq-hist'));
+    return caja;
+  }
+
   let ultimo = null; // última respuesta del main
   function pintar() {
     const cuerpo = byId('perfil-cuerpo');
@@ -278,8 +287,8 @@
     if (!datos) {
       byId('perfil-cab').hidden = true;
       sub.textContent = cargando ? 'Cargando tu perfil…' : 'Sin conexión con SharkTracker';
-      cuerpo.replaceChildren(cargando ? el('div', 'vacio', 'Cargando…')
-        : pintarMensaje('Error de conexión — no es tu culpa', 'Este tiburón perdió su rumbo 🦈 No pudimos conectar con SharkTracker para traer tu perfil. En cuanto vuelva la conexión, se actualiza solo.', true));
+      cuerpo.replaceChildren(cargando ? esqueleto()
+        : pintarMensaje('Error de conexión — no es tu culpa', 'Este tiburón perdió su rumbo. No pudimos conectar con SharkTracker para traer tu perfil. En cuanto vuelva la conexión, se actualiza solo.', true));
       return;
     }
     perfil = datos;
@@ -287,12 +296,12 @@
     if (!conectado) {
       sub.textContent = 'Mostrando la última información guardada en tu dispositivo';
       cuerpo.replaceChildren(pintarMensaje('Error de conexión — no es tu culpa',
-        'Este tiburón perdió su rumbo 🦈 No pudimos conectar con SharkTracker para traer tu historial, gráfica de elo, etiquetas y maestrías actualizadas. Tu identidad y tu último rango guardado siguen visibles arriba.', true));
+        'Este tiburón perdió su rumbo. No pudimos conectar con SharkTracker para traer tu historial, gráfica de elo, etiquetas y maestrías actualizadas. Tu identidad y tu último rango guardado siguen visibles arriba.', true));
       return;
     }
     sub.textContent = `Tu cuenta vinculada en SharkTracker · actualizado ${haceCuanto(datos.actualizado)}`;
     const fila = el('div', 'perfil-fila');
-    fila.append(pintarRadar(datos), pintarEtiquetas(datos), pintarMaestrias(datos));
+    fila.append(pintarRadar(datos), pintarMaestrias(datos));
     cuerpo.replaceChildren(fila, pintarElo(datos), pintarHistorial(datos));
   }
 

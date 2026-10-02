@@ -275,7 +275,7 @@ function pintarCarga() {
 }
 
 // ── Build en partida (Ctrl + X): la build completa en orden, arriba a la izquierda ──
-// Lo ya comprado se marca con ✓; lo adaptado a los rivales lleva ⭐ y su motivo abajo.
+// Lo ya comprado se marca con ✓; lo adaptado a los rivales lleva ★ y su motivo abajo.
 const AVISO_BUILD = {
   sin_modo: 'En este modo no hay build de Meta (solo en la Grieta).',
   sin_sesion: 'Inicia sesión en la app de SharkTracker para ver tu build.',
@@ -336,7 +336,7 @@ function pintarBuild() {
     for (const o of p.items) {
       n++;
       const celda = el('div', `build-celda${p.adaptado ? ' adaptado' : ''}`);
-      celda.append(el('div', 'build-num', p.adaptado ? `${n} ⭐` : String(n)), iconoItem(o, misObjetos.has(Number(o.id))));
+      celda.append(el('div', 'build-num', p.adaptado ? `${n} ★` : String(n)), iconoItem(o, misObjetos.has(Number(o.id))));
       celda.append(el('div', 'build-nombre', o.nombre));
       orden.append(celda);
     }
@@ -346,7 +346,7 @@ function pintarBuild() {
     const lista = el('div', 'build-motivos');
     for (const m of d.motivos) {
       const fila = el('div', 'build-motivo');
-      fila.append(el('span', 'build-mnombre', `⭐ ${m.nombre}`), el('span', null, ` — ${m.motivo}`));
+      fila.append(el('span', 'build-mnombre', `★ ${m.nombre}`), el('span', null, ` — ${m.motivo}`));
       lista.append(fila);
     }
     partes.push(lista);

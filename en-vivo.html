@@ -16,7 +16,7 @@
 <style>
   :root{
     --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
-    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --border:#16324a; --text:#ffffff; --text-dim:#a9b7c6; --text-faint:#8696a8;
     --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
     --danger:#ff5f3d; --danger-glow:rgba(255,95,61,.45); --gold:#facc15; --radius:16px;
     --blue:#4c9dff; --blue-bg:rgba(76,157,255,.1); --red:#ff5f6d; --red-bg:rgba(255,95,109,.1);
@@ -33,7 +33,7 @@
   h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
-  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
   .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .avatar.pending{border-color:var(--gold); color:var(--gold);}
   .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
@@ -51,7 +51,7 @@
   .gmeta b{display:block; font-family:'Rajdhani',sans-serif; font-size:22px; letter-spacing:.04em; text-transform:uppercase; line-height:1.1;}
   .gmeta small{color:var(--text-dim); font-size:12.5px;}
   .gclock{font-family:'Rajdhani',sans-serif; font-weight:800; font-size:40px; line-height:1; letter-spacing:.02em; font-variant-numeric:tabular-nums;}
-  .gclock small{display:block; font-family:'Inter',sans-serif; font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); text-align:right;}
+  .gclock small{display:block; font-family:'Inter',sans-serif; font-size:11px; font-weight:800; color:var(--text-faint); text-align:right;}
   .grp{width:100%; display:flex; gap:8px; flex-wrap:wrap;}
   .grp span{font-size:12.5px; font-weight:700; border-radius:99px; padding:4px 12px; background:rgba(0,229,199,.1); color:var(--accent); border:1px solid rgba(0,229,199,.3);}
   .grp span.vs{background:rgba(250,204,21,.1); color:var(--gold); border-color:rgba(250,204,21,.35);}
@@ -64,12 +64,12 @@
   .thead{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;}
   .thead h2{margin:0; display:flex; align-items:center; gap:10px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
   .thead h2 .bar{width:4px; height:16px; border-radius:2px;}
-  .team.blue .bar{background:var(--blue); box-shadow:0 0 10px var(--blue);} .team.red .bar{background:var(--red); box-shadow:0 0 10px var(--red);}
+  .team.blue .bar{background:var(--blue); box-shadow:none;} .team.red .bar{background:var(--red); box-shadow:none;}
   .bans{margin-left:auto; display:flex; align-items:center; gap:6px;}
-  .bans small{font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); margin-right:4px;}
+  .bans small{font-size:11px; font-weight:800; color:var(--text-faint); margin-right:4px;}
   .ban{position:relative; width:30px; height:30px; border-radius:7px; overflow:hidden; border:1px solid var(--border); background:#0a1622;}
   .ban img{width:100%; height:100%; object-fit:cover; filter:grayscale(1) brightness(.6);}
-  .ban::after{content:''; position:absolute; left:-4px; right:-4px; top:50%; height:2px; background:var(--danger); transform:rotate(-45deg); box-shadow:0 0 4px rgba(0,0,0,.8);}
+  .ban::after{content:''; position:absolute; left:-4px; right:-4px; top:50%; height:2px; background:var(--danger); transform:rotate(-45deg); box-shadow:none;}
   .ban.none::after{display:none;}
 
   .cards{display:grid; grid-template-columns:repeat(5,1fr); gap:12px;}
@@ -89,17 +89,17 @@
   .pc .kit img.rune{border-radius:50%; padding:1px; object-fit:contain;}
   .pc .kit img.sub{width:18px; height:18px; margin-top:2px;}
   /* Del grupo */
-  .pc.mine{border:2px solid var(--accent); box-shadow:0 0 22px rgba(0,229,199,.28);}
-  .pc .tag{position:absolute; top:10px; left:10px; z-index:2; font-size:10.5px; font-weight:900; letter-spacing:.06em; color:#032018; background:var(--accent); border-radius:99px; padding:3px 9px; box-shadow:0 2px 10px rgba(0,0,0,.4);}
-  .pc .rtag{position:absolute; top:10px; right:10px; z-index:2; font-size:10.5px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:#fff; background:rgba(3,8,18,.78); border:1px solid rgba(255,255,255,.28); border-radius:99px; padding:3px 9px; backdrop-filter:blur(4px);}
+  .pc.mine{border:2px solid var(--accent); box-shadow:none;}
+  .pc .tag{position:absolute; top:10px; left:10px; z-index:2; font-size:11px; font-weight:900; letter-spacing:.06em; color:#032018; background:var(--accent); border-radius:99px; padding:3px 9px; box-shadow:0 2px 10px rgba(0,0,0,.4);}
+  .pc .rtag{position:absolute; top:10px; right:10px; z-index:2; font-size:11px; font-weight:900; color:#fff; background:rgba(3,8,18,.78); border:1px solid rgba(255,255,255,.28); border-radius:99px; padding:3px 9px; backdrop-filter:blur(4px);}
   .pc .rtag.unsure{color:var(--text-dim); border-style:dashed; border-color:rgba(157,179,196,.45);}
-  .pc .st{margin-top:8px; font-size:11.5px; font-weight:700; color:var(--accent); line-height:1.35;}
-  .pc .st small{display:block; color:var(--text-faint); font-weight:600; font-size:10.5px;}
+  .pc .st{margin-top:8px; font-size:12px; font-weight:700; color:var(--accent); line-height:1.35;}
+  .pc .st small{display:block; color:var(--text-faint); font-weight:600; font-size:11px;}
 
   /* ── Lista de partidas (sin parámetro) ── */
   .glist{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px;}
   .gcard{position:relative; display:block; overflow:hidden; border-radius:var(--radius); border:1px solid var(--border); background:#06111c; min-height:170px; text-decoration:none; transition:border-color .15s, box-shadow .15s;}
-  .gcard:hover{border-color:var(--accent); box-shadow:0 0 22px rgba(0,229,199,.18);}
+  .gcard:hover{border-color:var(--accent); box-shadow:none;}
   .gcard .art{position:absolute; inset:0; background-size:cover; background-position:center 20%; opacity:.55;}
   .gcard::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(3,8,18,.95) 30%, rgba(3,8,18,.4));}
   .gcard .in{position:relative; z-index:1; padding:16px 18px; display:flex; flex-direction:column; gap:10px; height:100%;}
@@ -119,8 +119,8 @@
     .pc .info{top:0; display:flex; flex-direction:column; justify-content:center; padding:10px 14px; padding-right:110px;}
     .pc .kit{position:absolute; right:12px; top:50%; transform:translateY(-50%); margin:0;}
     .pc .st{margin-top:4px;} .pc .st small{display:inline; margin-left:4px;}
-    .pc .tag{top:auto; bottom:8px; left:auto; right:12px; font-size:9.5px;}
-    .pc .rtag{top:8px; right:12px; font-size:9.5px; padding:2px 8px;}
+    .pc .tag{top:auto; bottom:8px; left:auto; right:12px; font-size:11px;}
+    .pc .rtag{top:8px; right:12px; font-size:11px; padding:2px 8px;}
     .pc.mine{height:112px;}
     .pc.mine .kit{top:36%;}
     .bans{margin-left:0; width:100%;}
@@ -132,6 +132,7 @@
     .glist{grid-template-columns:1fr;}
   }
 </style>
+<link rel="stylesheet" href="assets/tema.css">
 </head>
 <body>
 <div class="wrap">
@@ -150,6 +151,7 @@
 import { createSupabase } from './assets/supabase.js';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
+import { icono } from './assets/iconos.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
 import { loadCatalogs, champName, champKey, champImg, champNums, profileIconUrl, DD, V, esc, HIDE } from './assets/lol-data.js';
 import { loadRoleRates, assignRoles, ROLE_SHORT } from './assets/champion-roles.js';
@@ -249,7 +251,7 @@ function cardHtml(pt) {
   const tagName = p ? 'a' : 'div';
   return `<${tagName} class="pc ${p ? 'mine' : ''}" ${p ? `href="perfil.html?jugador=${encodeURIComponent(p.id)}" title="Ver perfil de ${esc(p.riot_game_name)}"` : ''}>
     <div class="art" style="background-image:url('${loadingArt(pt.campeon)}')"></div>
-    ${p ? '<span class="tag">🦈 DEL GRUPO</span>' : ''}
+    ${p ? '<span class="tag">Del grupo</span>' : ''}
     ${pt.role ? `<span class="rtag ${pt.sure ? '' : 'unsure'}" title="${pt.sure ? 'Rol estimado' : 'Rol estimado, no seguro'}">${ROLE_SHORT[pt.role]}${pt.sure ? '' : '?'}</span>` : ''}
     <div class="info">
       <div class="champ">${esc(champName(pt.campeon))}</div>
@@ -290,15 +292,15 @@ async function renderGame() {
   const blueM = mine.filter(x => x.equipo === 'blue'), redM = mine.filter(x => x.equipo === 'red');
   const nm = (x) => esc(x.player.riot_game_name);
   const grp = [];
-  if (blueM.length > 1) grp.push(`<span>🎮 Juntos: ${blueM.map(nm).join(' + ')}</span>`);
-  if (redM.length > 1) grp.push(`<span>🎮 Juntos: ${redM.map(nm).join(' + ')}</span>`);
-  if (blueM.length && redM.length) grp.push(`<span class="vs">⚔️ Se enfrentan: ${blueM.map(nm).join(' + ')} vs ${redM.map(nm).join(' + ')}</span>`);
+  if (blueM.length > 1) grp.push(`<span>${icono('mando', { size: 14 })} Juntos: ${blueM.map(nm).join(' + ')}</span>`);
+  if (redM.length > 1) grp.push(`<span>${icono('mando', { size: 14 })} Juntos: ${redM.map(nm).join(' + ')}</span>`);
+  if (blueM.length && redM.length) grp.push(`<span class="vs">${icono('espadas', { size: 14 })} Se enfrentan: ${blueM.map(nm).join(' + ')} vs ${redM.map(nm).join(' + ')}</span>`);
 
   let endedHtml = '';
   if (st.ended) {
     st.matchId = `${PLATFORM}_${game.game_id}`;
     const { data: m } = await supabase.from('matches').select('match_id').eq('match_id', st.matchId).maybeSingle();
-    endedHtml = `<div class="ended-box"><span>🏁 <b>La partida terminó.</b> ${m ? 'Ya está el resultado con KDA, oro y objetos.' : 'El resultado aparecerá en Partidas en unos minutos.'}</span>
+    endedHtml = `<div class="ended-box"><span>${icono('bandera', { size: 16 })} <b>La partida terminó.</b> ${m ? 'Ya está el resultado con KDA, oro y objetos.' : 'El resultado aparecerá en Partidas en unos minutos.'}</span>
       ${m ? `<a class="btn" href="partidas.html?id=${encodeURIComponent(st.matchId)}${mine[0] ? `&jugador=${encodeURIComponent(mine[0].player.id)}` : ''}">Ver resultado</a>` : ''}</div>`;
   }
 
@@ -320,7 +322,7 @@ function renderList() {
   const byGame = new Map();
   st.live.forEach(l => (byGame.get(Number(l.game_id)) ?? byGame.set(Number(l.game_id), []).get(Number(l.game_id))).push(l));
   if (!byGame.size) {
-    $('view').innerHTML = `<div class="msg"><b>Nadie del grupo está jugando ahora 😴</b>Esta página se actualiza sola: en cuanto alguien entre a una partida, aparece aquí.</div>`;
+    $('view').innerHTML = `<div class="msg"><b>Nadie del grupo está jugando ahora</b>Esta página se actualiza sola: en cuanto alguien entre a una partida, aparece aquí.</div>`;
     return;
   }
   $('view').innerHTML = `<div class="glist">${[...byGame.entries()].map(([gid, ls]) => {

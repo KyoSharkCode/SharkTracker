@@ -13,7 +13,7 @@ body.editor {
   font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700;
   background: linear-gradient(90deg,#e7ecf2,#7fe0cf); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
 }
-.sub { font-size: 11px; color: #5b6b7c; }
+.sub { font-size: 11px; color: #8696a8; }
 .sub.ok { color: #6fdba8; }
 .sub.bad { color: #f0a487; }
 .acciones { display: flex; gap: 8px; flex-shrink: 0; }
