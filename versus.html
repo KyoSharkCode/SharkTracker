@@ -19,7 +19,8 @@
     --border:#16324a; --text:#ffffff; --text-dim:#a9b7c6; --text-faint:#8696a8;
     --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
     --danger:#ff5f3d; --gold:#facc15; --radius:16px;
-    --a:#00e5c7; --a-bg:rgba(0,229,199,.1); --b:#c084fc; --b-bg:rgba(192,132,252,.1);
+    /* Jugador 1 = azul y jugador 2 = rojo (como los equipos de LoL) */
+    --a:#4c9dff; --a-bg:rgba(76,157,255,.12); --b:#ff5f6d; --b-bg:rgba(255,95,109,.12);
   }
   *{box-sizing:border-box;}
   [hidden]{display:none !important;}
@@ -142,6 +143,60 @@
     .shared .when{display:none;}
     .filters .note{margin-left:0; width:100%;}
   }
+
+  /* ── Rediseño (tablero "Web: versus propuesto") ── */
+  .filters{justify-content:space-between; margin-bottom:18px;}
+  .segmentos{display:flex; gap:2px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:3px;}
+  .segmentos .chipbtn{border:0; background:none; border-radius:7px; padding:6px 12px; font-size:13px; font-weight:500; color:var(--text-dim);}
+  .segmentos .chipbtn.on{background:var(--accent); color:#04130f; font-weight:700;}
+  .filters .note{margin-left:0; font-size:13px;}
+  .duelo{display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:24px; padding:26px 30px; border-radius:18px; margin-bottom:32px;}
+  .lado{display:flex; align-items:center; gap:16px; min-width:0;}
+  .lado.b{justify-content:flex-end; text-align:right;}
+  .lado .ic{width:84px; height:84px; border-radius:50%; object-fit:cover; border:3px solid var(--a); background:#0a1622; flex-shrink:0;}
+  .lado.b .ic{border-color:var(--b);}
+  .lado .ic[src=""]{visibility:hidden;}
+  .lado .dato{display:flex; flex-direction:column; gap:4px; min-width:0;}
+  .lado.b .dato{align-items:flex-end;}
+  .lado label{font-size:12px; font-weight:600; color:var(--a);} .lado.b label{color:var(--b);}
+  .lado .sel{width:auto; max-width:100%; background-color:transparent; border:0; border-radius:8px; padding:2px 26px 2px 0; font-size:18px; font-weight:700; background-position:right 4px center;}
+  .lado.a .sel{align-self:flex-start;}
+  .lado.b .sel{text-align:right; text-align-last:right;}
+  .lado .sel:hover{background-color:rgba(255,255,255,.04);}
+  .lado .rk{display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#f3d36b;}
+  .lado .rk img{width:20px; height:20px;}
+  .lado .sub{font-size:13px; color:var(--text-dim);}
+  .lado .sub a{color:var(--accent); text-decoration:none; font-weight:600;}
+  .duelo .mid{min-width:0; gap:8px;}
+  .duelo .swap{width:48px; height:48px; display:flex; align-items:center; justify-content:center; background:#101b28; border-color:rgba(255,255,255,.14);}
+  .duelo .tally{font-size:28px;}
+  .duelo .mid small{font-size:12px; font-weight:500;}
+  .rows{padding:8px 24px; border-radius:16px;}
+  .row{border-bottom-color:rgba(255,255,255,.06); padding:12px 0; grid-template-columns:80px minmax(0,1fr) 150px minmax(0,1fr) 80px; gap:14px;}
+  .row .lbl{font-size:13px; font-weight:500;}
+  .row .lbl small{font-size:12px; font-weight:400;}
+  .row .v{font-family:'Inter',sans-serif; font-size:15px; font-weight:700; color:var(--text-dim);}
+  .row .v.win.va, .row .v.win.vb{color:#fff;}
+  .row .track{border-radius:4px; background:rgba(255,255,255,.06);}
+  .row .track i{opacity:.6;}
+  .h2h-box{text-align:left; padding:18px 20px;}
+  .h2h-box h4{font-size:13px; font-weight:600; color:var(--text-dim);}
+  .h2h-box .big{font-size:30px;}
+  @media (max-width:760px){
+    .duelo{grid-template-columns:minmax(0,1fr); padding:20px;}
+    .lado.b{flex-direction:row-reverse; justify-content:flex-end; text-align:left;} .lado.b .dato{align-items:flex-start;}
+    .lado .ic{width:60px; height:60px;}
+    .duelo .mid{flex-direction:row;}
+    .row{grid-template-columns:56px minmax(0,1fr) 96px minmax(0,1fr) 56px; gap:8px;}
+  }
+
+  @media (max-width:560px){
+    /* En celular: valor | dato | valor (las barras no caben) */
+    .row{grid-template-columns:64px minmax(0,1fr) 64px; gap:8px;}
+    .row .track{display:none;}
+    .rows{padding:4px 14px;}
+  }
+  @media (max-width:760px){ .lado.b .sel{text-align:left; text-align-last:left; align-self:flex-start;} }
 </style>
 <link rel="stylesheet" href="assets/tema.css">
 </head>
@@ -153,21 +208,44 @@
     <div class="auth-slot" id="auth-slot"></div>
   </header>
 
-  <div class="pickers">
-    <div class="pick a"><label for="sel-a">Jugador 1</label><select class="sel" id="sel-a"></select></div>
-    <button class="swap" id="swap" type="button" title="Intercambiar" aria-label="Intercambiar jugadores">⇄</button>
-    <div class="pick b"><label for="sel-b">Jugador 2</label><select class="sel" id="sel-b"></select></div>
-  </div>
   <div class="filters" id="filters">
-    <button class="chipbtn on" data-q="soloq" type="button">SoloQ</button>
-    <button class="chipbtn" data-q="flex" type="button">Flex</button>
-    <button class="chipbtn" data-q="todas" type="button">Todas las colas</button>
-    <span class="note">Partidas de los últimos 30 días</span>
+    <div class="segmentos" role="group" aria-label="Cola">
+      <button class="chipbtn on" data-q="soloq" type="button">SoloQ</button>
+      <button class="chipbtn" data-q="flex" type="button">Flex</button>
+      <button class="chipbtn" data-q="todas" type="button">Todas</button>
+    </div>
+    <span class="note">Últimos 30 días</span>
   </div>
+
+  <!-- Los dos jugadores en un solo panel: avatar, selector, rango y partidas -->
+  <section class="card duelo">
+    <div class="lado a">
+      <img class="ic" id="ic-a" src="" alt="">
+      <div class="dato">
+        <label for="sel-a">Jugador 1</label>
+        <select class="sel" id="sel-a"></select>
+        <div class="rk" id="rk-a"></div>
+        <div class="sub" id="sub-a"></div>
+      </div>
+    </div>
+    <div class="mid">
+      <button class="swap" id="swap" type="button" title="Intercambiar" aria-label="Intercambiar jugadores"><svg class="ico-svg " width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h13l-3-3M17 17H4l3 3"/></svg></button>
+      <div class="tally" id="tally"></div>
+      <small>categorías ganadas</small>
+    </div>
+    <div class="lado b">
+      <div class="dato">
+        <label for="sel-b">Jugador 2</label>
+        <select class="sel" id="sel-b"></select>
+        <div class="rk" id="rk-b"></div>
+        <div class="sub" id="sub-b"></div>
+      </div>
+      <img class="ic" id="ic-b" src="" alt="">
+    </div>
+  </section>
 
   <div id="loading" class="msg">Cargando…</div>
   <main id="main" hidden>
-    <div class="duel" id="duel"></div>
     <section>
       <h2 class="section-title"><span class="bar"></span>Cara a cara <span class="aside" id="rows-aside"></span></h2>
       <div class="card rows" id="rows"></div>
@@ -311,22 +389,17 @@ function draw() {
   }).join('');
   $('rows-aside').textContent = `${QUEUES[st.queue].label} · rango y winrate de temporada siempre de SoloQ`;
 
-  // ── Héroes ──
-  const hero = (P, r, g, side) => {
-    const [ch, sk] = favorite(P);
-    const bg = splashUrl(ch, sk);
-    return `<div class="hero ${side}">
-      <div class="bgimg" style="${bg ? `background-image:url('${bg}')` : ''}"></div>
-      <div class="body">
-        <img class="ic" src="${iconOr1(P.icon_id)}" alt="" onerror="${ICON_ONERROR()}">
-        <div><div class="nm"><a href="perfil.html?jugador=${encodeURIComponent(P.id)}">${esc(nick(P))}</a></div>
-          <div class="rk"><img src="${emblemUrl(r?.tier)}" alt="" onerror="${HIDE}">${rankText(r)}${r?.tier ? ` · ${r.lp} LP` : ''}</div>
-          <div class="sub">${g.games} partidas · ${pct(g.wr)} WR${roleLabel(P.primary_role) ? ' · ' + roleLabel(P.primary_role) : ''}</div></div>
-      </div></div>`;
+  // ── Panel de los dos jugadores ──
+  const lado = (P, r, g, s) => {
+    const ic = $(`ic-${s}`);
+    ic.onerror = () => { ic.onerror = null; ic.src = iconOr1(null); };
+    ic.src = iconOr1(P.icon_id);
+    $(`rk-${s}`).innerHTML = `<img src="${emblemUrl(r?.tier)}" alt="" onerror="${HIDE}">${rankText(r)}${r?.tier ? ` · ${r.lp} LP` : ''}`;
+    $(`sub-${s}`).innerHTML = `${g.games} partidas · ${pct(g.wr)} WR${roleLabel(P.primary_role) ? ' · ' + roleLabel(P.primary_role) : ''} · <a href="perfil.html?jugador=${encodeURIComponent(P.id)}">Perfil ›</a>`;
   };
-  $('duel').innerHTML = `${hero(A, ra, ga, 'a')}
-    <div class="mid"><div class="vs">VS</div><div class="tally"><span class="ta">${wa}</span><span class="dash">-</span><span class="tb">${wb}</span></div><small>Categorías<br>ganadas</small></div>
-    ${hero(B, rb, gb, 'b')}`;
+  lado(A, ra, ga, 'a');
+  lado(B, rb, gb, 'b');
+  $('tally').innerHTML = `<span class="ta">${wa}</span><span class="dash">–</span><span class="tb">${wb}</span>`;
 
   // ── Entre ellos ──
   const byMatchA = new Map(pa.map(m => [m.match_id, m]));

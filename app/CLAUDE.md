@@ -325,6 +325,14 @@ Mockup: `https://claude.ai/artifact/6gK8Gg31m9YjTo1ptqaLt8`. Un solo PR con app 
   indicador de **mala racha** (no un cosmético): en el ranking va en su propia columna
   "Racha · últimas 5". Los emoji de la tienda (cosméticos que eligió cada jugador) e insignias
   (vienen de la base) se quedan.
+- **Web, segunda pasada (pulido para la 1.0, oct 2026)**: en el primer PR solo el inicio se había
+  reestructurado; las demás páginas solo tenían el tema común. Ahora cada una sigue su tablero:
+  tienda (saldo con "esta semana" e insignias, pestañas subrayadas, premios compactos, precio en el botón),
+  perfil (banner de 300 px con degradado lateral, rango a la derecha, objetivo + estado de partida lado
+  a lado, historial junto a LP y Rewind), versus (los dos jugadores en un panel, azul vs rojo), estadísticas
+  (filtros en panel, totales en una franja), partida (resumen azul | marcador | rojo), en vivo (filas en dos
+  columnas en vez de cartas), reto (cabecera compacta con cuenta atrás a la derecha) y rewind (tarjetas con
+  ícono). Destacados del inicio: el JS elige 5, 4 o 3 columnas para que las filas queden parejas.
 - **Overlay OBS** (`overlay.html`): panel sólido `rgba(8,16,26,.94)`, borde fino y sombra, sin barra
   lateral ni brillos; etiquetas en minúsculas a 14 px; íconos SVG. Mismo tamaño y parámetros.
 

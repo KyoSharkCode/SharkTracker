@@ -168,6 +168,43 @@
     .pod .rk{justify-content:flex-start;}
     .pod .medal{font-size:24px;}
   }
+
+  /* ── Rediseño (tablero "Web: reto propuesto") ── */
+  /* Cabecera compacta: datos a la izquierda y cuenta atrás a la derecha */
+  .hero{min-height:0; border-radius:18px; border-color:rgba(250,204,21,.35);}
+  .hero.live{border-color:rgba(250,204,21,.35);}
+  .hero-bg{opacity:.35;}
+  .hero-body{display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:24px; row-gap:6px; align-items:center; padding:26px 30px;}
+  .hero-body > *{grid-column:1;}
+  .hero-body > .big-count{grid-column:2; grid-row:1 / span 8; margin:0; gap:18px;}
+  .kicker{justify-self:start; background:none !important; border:0 !important; padding:0; font-size:13px; font-weight:700;}
+  .kicker.live{color:#6fdba8;} .kicker.soon{color:#f3d36b;} .kicker.gold{color:#f3d36b;}
+  .reto-name{margin:4px 0 0; font-size:15px; letter-spacing:0; text-transform:none;}
+  .champ-name{font-size:34px; font-weight:700; line-height:1.1; text-transform:none; letter-spacing:0;}
+  .hero.win .champ-name{background:none; -webkit-text-fill-color:currentColor; color:#f3d36b; filter:none;}
+  .champ-name[style]{margin-top:0 !important;}
+  .riot-id{margin:0; font-size:14px; font-weight:500;}
+  .dates{margin:0; font-size:14px; font-weight:500; color:var(--text-dim);}
+  .leader-note{margin-top:4px; color:#cfe0ee;} .leader-note b{color:#f3d36b;}
+  .big-count div{background:none; border:0; padding:0; min-width:0; display:flex; flex-direction:column; align-items:center;}
+  .big-count b{font-size:40px; font-weight:700;}
+  .big-count small{font-size:12px; font-weight:500; color:var(--text-dim);}
+  .hs{background:var(--panel-2); backdrop-filter:none;}
+  .hs small{font-size:12px; font-weight:600;}
+  /* Podio, premios y tabla */
+  .pod{border-radius:16px;}
+  .award{border-radius:14px;}
+  .award small{font-size:12px; font-weight:600; color:var(--text-dim);}
+  .award span{color:#f3d36b;}
+  th{font-size:12px; font-weight:600; padding:12px 14px;}
+  th:first-child, td:first-child{padding-left:20px;} th:last-child, td:last-child{padding-right:20px;}
+  td{border-bottom-color:rgba(255,255,255,.06);}
+  .pos{font-weight:700; font-size:18px;}
+  tr:nth-child(2) .pos{color:#c9d4de;} tr:nth-child(3) .pos{color:#e8b48a;}
+  .pos-lp{color:#6fdba8; font-weight:700;} .neg-lp{color:#ff8a94; font-weight:700;}
+  .fame a{border-radius:14px; padding:16px 18px;}
+  .fame img{border-width:0; width:44px; height:44px;}
+  @media (max-width:700px){ .hero-body{grid-template-columns:minmax(0,1fr);} .hero-body > .big-count{grid-column:1; grid-row:auto; justify-self:start; margin-top:8px;} }
 </style>
 <link rel="stylesheet" href="assets/tema.css">
 </head>

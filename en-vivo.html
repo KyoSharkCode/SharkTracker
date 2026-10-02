@@ -131,6 +131,44 @@
     .gclock{font-size:32px;}
     .glist{grid-template-columns:1fr;}
   }
+
+  /* ── Rediseño (tablero "Web: en vivo propuesto") ── */
+  .livechip{white-space:nowrap; letter-spacing:.06em; color:#fff; background:#e5484d; border:0; border-radius:6px; padding:4px 9px; font-weight:800;}
+  .livechip i{background:#fff; animation:none;}
+  .gbar{border-radius:18px; padding:20px 24px; gap:20px;}
+  .gmeta b{font-size:18px; letter-spacing:0; text-transform:none; font-family:'Inter',sans-serif; font-weight:700;}
+  .gmeta small{font-size:13px;}
+  .gclock{font-size:34px; font-weight:700; color:#6fdba8; white-space:nowrap;}
+  .gclock small{font-size:12px; font-weight:500;}
+  .grp span{font-weight:600;}
+  .equipos{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; align-items:start;}
+  .team{margin:0; background:var(--panel); border:1px solid var(--border); border-radius:16px; overflow:hidden;}
+  .team.blue{border-color:rgba(76,157,255,.3);} .team.red{border-color:rgba(255,95,109,.3);}
+  .thead{margin:0; padding:12px 18px; border-bottom:1px solid rgba(255,255,255,.06);}
+  .thead h2{font-family:'Inter',sans-serif; font-size:13px; font-weight:700; letter-spacing:0; text-transform:none;}
+  .team.blue .thead h2{color:#7cb8ff;} .team.red .thead h2{color:#ff8a94;}
+  .bans small{font-size:12px; font-weight:600;}
+  .ban{width:28px; height:28px;}
+  .cards{display:flex; flex-direction:column; gap:0;}
+  .pc{aspect-ratio:auto; height:auto; display:flex; align-items:center; gap:12px; padding:11px 18px; border:0 !important; border-radius:0; background:none; border-bottom:1px solid rgba(255,255,255,.05) !important; overflow:visible;}
+  .pc:last-child{border-bottom:0 !important;}
+  .pc::after{display:none;}
+  .pc.mine{background:rgba(0,229,199,.06);}
+  a.pc:hover{background:rgba(0,229,199,.1);}
+  .pc .cimg{width:40px; height:40px; border-radius:10px; object-fit:cover; background:#0a1622; flex-shrink:0;}
+  .pc .info{position:static; padding:0; flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;}
+  .pc .who{margin:0; font-size:14px; color:#eef3f8; display:flex; align-items:center; gap:6px; min-width:0;}
+  .pc .who b{font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .pc .who img{width:18px; height:18px;}
+  .pc .tag{position:static; font-size:11px; letter-spacing:0; padding:1px 7px; box-shadow:none; flex-shrink:0;}
+  .pc .champ{font-family:'Inter',sans-serif; font-size:12px; font-weight:500; text-transform:none; letter-spacing:0; color:var(--text-dim); display:flex; align-items:center; gap:6px;}
+  .pc .rtag{position:static; font-size:11px; padding:0 6px; background:none;}
+  .pc .st{margin:2px 0 0; font-size:12px;}
+  .pc .st small{display:inline; font-size:12px;}
+  .pc .kit{margin:0; flex-shrink:0; position:static; transform:none;}
+  .gcard .top .gclock{font-size:22px;}
+  @media (max-width:900px){ .equipos{grid-template-columns:minmax(0,1fr);} }
+  @media (max-width:860px){ .pc{height:auto;} .pc .info{padding:0;} .pc .kit{position:static; transform:none;} }
 </style>
 <link rel="stylesheet" href="assets/tema.css">
 </head>
@@ -239,6 +277,8 @@ function rosterFor(game) {
 }
 
 // ── Vista: una partida ──
+// Una fila por jugador (rediseño): campeón, jugador, rol estimado, sus números con ese campeón
+// (si es del grupo) y hechizos + runas a la derecha.
 function cardHtml(pt) {
   const [g, t] = splitName(pt.nombre);
   const p = pt.player;
@@ -246,19 +286,18 @@ function cardHtml(pt) {
   const spells = (pt.hechizos ?? []).map(id => spellUrl(id)).filter(Boolean).map(u => `<img src="${u}" alt="" onerror="${HIDE}">`).join('');
   const k1 = runeUrl(pt.runas?.principal), k2 = runeUrl(pt.runas?.secundario);
   const runes = `${k1 ? `<img class="rune" src="${k1}" alt="" onerror="${HIDE}">` : ''}${k2 ? `<img class="rune sub" src="${k2}" alt="" onerror="${HIDE}">` : ''}`;
-  const stats = p ? (s?.g ? `<div class="st">${s.g} partida${s.g === 1 ? '' : 's'} · ${s.wr}% WR · ${s.kda.toFixed(1)} KDA<small>con ${esc(champName(pt.campeon))}, últimos 30 días</small></div>`
-                              : `<div class="st">Primera con ${esc(champName(pt.campeon))}<small>en los últimos 30 días</small></div>`) : '';
+  const stats = p ? (s?.g ? `<span class="st">${s.g} partida${s.g === 1 ? '' : 's'} · ${s.wr}% WR · ${s.kda.toFixed(1)} KDA <small>con ${esc(champName(pt.campeon))}, últimos 30 días</small></span>`
+                              : `<span class="st">Primera con ${esc(champName(pt.campeon))} <small>en los últimos 30 días</small></span>`) : '';
+  const rol = pt.role ? `<span class="rtag ${pt.sure ? '' : 'unsure'}" title="${pt.sure ? 'Rol estimado' : 'Rol estimado, no seguro'}">${ROLE_SHORT[pt.role]}${pt.sure ? '' : '?'}</span>` : '';
   const tagName = p ? 'a' : 'div';
   return `<${tagName} class="pc ${p ? 'mine' : ''}" ${p ? `href="perfil.html?jugador=${encodeURIComponent(p.id)}" title="Ver perfil de ${esc(p.riot_game_name)}"` : ''}>
-    <div class="art" style="background-image:url('${loadingArt(pt.campeon)}')"></div>
-    ${p ? '<span class="tag">Del grupo</span>' : ''}
-    ${pt.role ? `<span class="rtag ${pt.sure ? '' : 'unsure'}" title="${pt.sure ? 'Rol estimado' : 'Rol estimado, no seguro'}">${ROLE_SHORT[pt.role]}${pt.sure ? '' : '?'}</span>` : ''}
+    <img class="cimg" src="${champImg(pt.campeon)}" alt="" onerror="${HIDE}">
     <div class="info">
-      <div class="champ">${esc(champName(pt.campeon))}</div>
-      <div class="who">${pt.icono_invocador ? `<img src="${profileIconUrl(pt.icono_invocador)}" alt="" onerror="${HIDE}">` : ''}<span>${esc(g)}${t ? ` <small>#${esc(t)}</small>` : ''}</span></div>
+      <div class="who">${pt.icono_invocador ? `<img src="${profileIconUrl(pt.icono_invocador)}" alt="" onerror="${HIDE}">` : ''}<b>${esc(g)}</b>${t ? ` <small>#${esc(t)}</small>` : ''}${p ? '<span class="tag">Del grupo</span>' : ''}</div>
+      <div class="champ">${esc(champName(pt.campeon))}${rol}</div>
       ${stats}
-      <div class="kit">${spells}${runes}</div>
-    </div></${tagName}>`;
+    </div>
+    <div class="kit">${spells}${runes}</div></${tagName}>`;
 }
 function teamHtml(game, side, list) {
   const bans = (game.bans ?? []).filter(b => b.equipo === side);
@@ -266,7 +305,7 @@ function teamHtml(game, side, list) {
       ? `<span class="ban" title="${esc(champName(b.campeon))}"><img src="${champImg(b.campeon)}" alt="${esc(champName(b.campeon))}" onerror="${HIDE}"></span>`
       : '<span class="ban none" title="Sin baneo"></span>').join('')}</div>` : '';
   return `<section class="team ${side}">
-    <div class="thead"><h2><span class="bar"></span>Equipo ${side === 'blue' ? 'Azul' : 'Rojo'}</h2>${bansHtml}</div>
+    <div class="thead"><h2>Equipo ${side === 'blue' ? 'azul' : 'rojo'}</h2>${bansHtml}</div>
     <div class="cards">${list.map(cardHtml).join('')}</div></section>`;
 }
 async function renderGame() {
@@ -313,8 +352,7 @@ async function renderGame() {
       ${grp.length ? `<div class="grp">${grp.join('')}</div>` : ''}
     </div>
     ${endedHtml}
-    ${teamHtml(game, 'blue', ordered('blue'))}
-    ${teamHtml(game, 'red', ordered('red'))}`;
+    <div class="equipos">${teamHtml(game, 'blue', ordered('blue'))}${teamHtml(game, 'red', ordered('red'))}</div>`;
 }
 
 // ── Vista: lista de partidas del grupo ahora mismo ──

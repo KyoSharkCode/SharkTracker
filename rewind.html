@@ -108,6 +108,22 @@
   @keyframes up{to{opacity:1; transform:none;}}
   .slide .bg{animation:zoom 9s ease-out forwards;} @keyframes zoom{from{transform:scale(1.12);} to{transform:scale(1);}}
   @media (prefers-reduced-motion:reduce){ .slide .c > *, .slide .bg{animation:none; opacity:1; transform:none;} }
+
+  /* ── Rediseño del selector (tablero "Web: SoloQ Rewind propuesto") ── */
+  #picker .lead{text-align:left; margin:0 0 18px; max-width:620px; font-size:16px; color:#cfe0ee;}
+  #picker .splits{justify-content:flex-start;}
+  .chip{font:500 13px Inter,sans-serif; padding:7px 14px; border-color:rgba(255,255,255,.1);}
+  .chip.on{background:var(--accent); color:#04130f; font-weight:700; border-color:var(--accent);}
+  .chip.on small{color:#04130f; opacity:.7;}
+  .who-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .who{min-height:0; display:flex; align-items:center; gap:10px; padding:14px; border-radius:14px; background:var(--panel); transform:none !important;}
+  .who::after{display:none;}
+  .who .ic{width:40px; height:40px; border-radius:50%; object-fit:cover; background:#0a1622; flex-shrink:0;}
+  .who .in{position:static; display:flex; flex-direction:column; min-width:0;}
+  .who b{font-family:'Inter',sans-serif; font-size:14px; font-weight:700; letter-spacing:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .who small{font-size:12px;}
+  @media (max-width:820px){ .who-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+  @media (max-width:480px){ .who-grid{grid-template-columns:minmax(0,1fr);} }
 </style>
 <link rel="stylesheet" href="assets/tema.css">
 </head>
@@ -390,7 +406,7 @@ function renderPicker() {
   $('pick-body').innerHTML = `${isCurrent(st.split) ? '<p class="lead" style="margin-bottom:16px">Este split sigue en curso: lo que ves es un <b>avance</b>. El Rewind completo sale cuando termine.</p>' : ''}
     ${!st.games.length ? '<p class="lead">No hay partidas guardadas en este split: el Rewind guarda datos desde finales de agosto de 2026.</p>' : ''}
     <div class="who-grid">${list.map(p => `<a class="who" href="rewind.html?jugador=${encodeURIComponent(p.id)}&split=${st.split.id}">
-      <div class="art" style="background-image:url('${favSplash(p) ?? ''}')"></div>
+      <img class="ic" src="${profileIconUrl(p.icon_id) ?? profileIconUrl(29)}" alt="">
       <div class="in"><b>${esc(p.riot_game_name)}</b><small>${counts.get(p.id) ? `${counts.get(p.id)} partidas de SoloQ` : 'Sin partidas en este split'}</small></div></a>`).join('')}</div>`;
 }
 $('splits').addEventListener('click', async (e) => {

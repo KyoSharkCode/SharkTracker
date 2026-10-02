@@ -364,6 +364,112 @@
   footer{margin-top:60px; padding-top:32px; border-top:1px solid var(--border); text-align:center; color:var(--text-dim); font-size:13px; display:flex; flex-direction:column; align-items:center; gap:10px;}
   .footer-logo{height:34px; width:auto;}
   footer .legal{max-width:640px; margin:0 auto; font-size:11px; line-height:1.5; color:var(--text-faint, var(--text-dim)); opacity:.75;}
+
+  /* ============================================================
+     Rediseño del perfil (tablero "Web: perfil propuesto")
+     ============================================================ */
+  .breadcrumb{margin:6px 0 22px; font-size:14px;}
+  .breadcrumb a.volver{display:inline-flex; align-items:center; gap:6px; color:var(--text-dim); font-weight:600;}
+  .breadcrumb a.volver:hover{color:#fff; text-decoration:none;}
+  #breadcrumb-name{display:none;}
+  .breadcrumb .compare-link, .breadcrumb .obs-link{border-radius:10px; padding:9px 14px; font:600 14px Inter,sans-serif; color:#eef3f8; border:1px solid rgba(255,255,255,.12); background:none;}
+  .breadcrumb .compare-link:hover, .breadcrumb .obs-link:hover{border-color:var(--accent);}
+  /* Banner: más alto, degradado de izquierda a derecha y sin cajas detrás del texto */
+  .hero-banner{min-height:300px; border:0; border-radius:18px; box-shadow:var(--sombra);}
+  .hero-overlay{background:linear-gradient(90deg, rgba(3,8,18,.92) 0%, rgba(3,8,18,.55) 55%, rgba(3,8,18,.2) 100%), linear-gradient(180deg, transparent 55%, rgba(3,8,18,.6) 100%);}
+  .hero-position{top:18px; left:22px; right:auto; font-family:'Rajdhani',sans-serif; font-size:15px; font-weight:700; color:#cfe0ee; background:rgba(255,255,255,.1); border:0; backdrop-filter:none; padding:3px 12px;}
+  .hero-content{padding:28px; gap:20px; align-items:flex-end;}
+  .hero-identity{background:none; border:0; padding:0; backdrop-filter:none; gap:20px; align-items:flex-end;}
+  .hero-identity.has-bio{align-items:flex-end;}
+  .hero-avatar{width:104px; height:104px; border-radius:50%; border-width:3px;}
+  .p-name{font-size:40px; line-height:1;}
+  .p-tag{font-size:16px;}
+  .p-nick{font-size:14px; font-weight:500; color:var(--text-dim); margin-bottom:6px;}
+  .p-role{font-size:14px; color:#cfe0ee; font-weight:500; margin-top:6px;}
+  .p-bio{color:#cfe0ee; font-size:14px; max-width:520px;}
+  .hero-twitch{position:static; display:inline-flex; width:30px; height:30px; padding:5px; border-radius:50%; background:rgba(255,255,255,.08); align-self:center;}
+  .hero-identity.has-twitch .p-role, .hero-identity.has-twitch .p-bio, .hero-identity.has-twitch .tags-list{padding-right:0;}
+  .tag-pill{border-radius:6px; font-weight:700; border:0;}
+  .hero-rank{background:none; border:0; padding:0; backdrop-filter:none; gap:2px;}
+  .hero-tier-row span{font-family:'Rajdhani',sans-serif; font-size:30px; font-weight:700; color:#f3d36b; line-height:1;}
+  .hero-tier-row img{width:30px; height:30px;}
+  .hero-lp{font-size:22px; font-weight:700; background:none; -webkit-text-fill-color:currentColor; color:var(--accent);}
+  .hero-wr{font-size:13px; color:var(--text-dim);}
+  /* Objetivo + estado de partida, lado a lado */
+  .fila-objetivo{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:-8px 0 22px;}
+  .fila-objetivo .rank-goal{margin:0;}
+  .fila-objetivo .rank-goal[hidden] + .live-status-box{grid-column:1 / -1;}
+  .live-status-box{min-height:0; margin:0; padding:16px 20px; gap:12px; justify-content:flex-start; border-radius:14px;}
+  .live-status-box.in-game{align-items:center; border-color:rgba(111,219,168,.35); box-shadow:none;}
+  .live-dot{width:10px; height:10px; border-radius:50%; background:#7d8ea0; flex-shrink:0;}
+  .live-status-box.in-game .live-dot{background:#6fdba8;}
+  .live-status-box.offline .live-offline-text{opacity:1; font-weight:500; font-size:14px;}
+  .live-game-content{padding:0; gap:8px; flex:1; min-width:0;}
+  .live-game-top{gap:10px; justify-content:flex-start;}
+  .live-game-champ img{width:28px; height:28px; border-radius:7px; border-width:1px;}
+  .live-game-champ span{font-size:14px; font-weight:600; color:#cfe0ee;}
+  .live-game-mode, .live-game-side, .live-game-duration{padding:3px 9px; border-radius:6px; font-size:12px;}
+  .live-game-spells img{width:22px; height:22px;}
+  .live-game-runes{flex-direction:row;}
+  .live-game-runes img{width:20px; height:20px;}
+  .live-game-link{margin:0; border:0; background:none; padding:0; font-size:14px; font-weight:700; white-space:nowrap;}
+  .live-game-link:hover{background:none; text-decoration:underline;}
+  .live-game-duo-box{padding:6px 10px; gap:8px;}
+  /* A media anchura: título y ritmo arriba, barra y faltantes debajo */
+  .fila-objetivo .rank-goal{grid-template-columns:auto 1fr; padding:16px 20px; border-radius:14px;}
+  .fila-objetivo .rank-goal .gmid{grid-column:1 / -1; grid-row:2;}
+  .fila-objetivo .rank-goal .pace{justify-self:end; max-width:none;}
+  .rank-goal .gk{font-size:13px; font-weight:500; color:var(--text-dim);}
+  .rank-goal .gk b{color:#f3d36b; font-size:18px;}
+  .rank-goal .gbar i{background:var(--accent);}
+  .rank-goal .glines{font-size:13px;}
+  .rank-goal .pace{font-size:13px; font-weight:500;}
+  @media (max-width:820px){ .fila-objetivo{grid-template-columns:minmax(0,1fr);} }
+  /* Tarjetas de maestrías, campeones y roles */
+  .stats-grid{grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px;}
+  .stat-card{padding:18px 20px; border-radius:16px;}
+  .stat-card h3{font-family:'Inter',sans-serif; font-size:15px; font-weight:700; color:#eef3f8; text-transform:none; letter-spacing:0; border:0; padding:0; margin:0 0 14px;}
+  .stat-card h3::before{display:none;}
+  .champ-img{width:40px; height:40px; border-radius:10px;}
+  .item-title{font-size:14px; font-weight:600;}
+  .item-sub{font-size:13px;}
+  @media (max-width:900px){ .stats-grid{grid-template-columns:minmax(0,1fr);} }
+  /* Historial + progreso de LP y Rewind */
+  .hist-lp{display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:16px; align-items:start; margin-bottom:40px;}
+  .hist-lp section{margin-bottom:0;}
+  .col-lp{display:flex; flex-direction:column; gap:16px;}
+  .col-lp .rewind-cta{margin:0; border-color:rgba(192,132,252,.35);}
+  .col-lp .rewind-cta .rw-ic{background:rgba(192,132,252,.12); color:#c084fc;}
+  .col-lp .rewind-cta .rw-go{color:#c084fc;}
+  .history-panel{padding:0; overflow:hidden; border-radius:16px;}
+  .matches{gap:0;}
+  .match{border:0; border-radius:0; background:none; border-bottom:1px solid rgba(255,255,255,.06); padding:12px 18px;}
+  .match:last-child{border-bottom:0;}
+  .match-champ{font-size:14px;} .match-kda{font-size:13px; color:var(--text-dim);}
+  .queue-tabs{gap:2px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:3px;}
+  .queue-tab{font-family:'Inter',sans-serif; font-size:13px; font-weight:500; border:0; border-radius:7px; background:none; padding:6px 12px;}
+  .queue-tab.active{font-weight:700; color:#04130f;}
+  .lp-chart-wrap{border-radius:16px;}
+  .lp-chart-header .lp-label{font-size:13px; font-weight:500; color:var(--text-dim);}
+  .lp-chart-header .lp-delta.up{color:#6fdba8;} .lp-chart-header .lp-delta.down{color:#ff8a94;}
+  /* Sin gráfica de LP ni Rewind: el historial ocupa todo el ancho */
+  .hist-lp:not(:has(.col-lp > section:not([style*="none"]), .col-lp > a:not([hidden]))){grid-template-columns:minmax(0,1fr);}
+  @media (max-width:900px){ .hist-lp{grid-template-columns:minmax(0,1fr);} }
+  .act-mode{border-radius:8px; font:500 13px Inter,sans-serif;}
+  .act-mode.on{background:var(--accent); color:#04130f; font-weight:700;}
+  .act-card{border-radius:16px;}
+
+  @media (max-width:640px){
+    .hero-banner{min-height:0;}
+    .hero-content{position:relative; flex-direction:column; align-items:flex-start; padding:64px 18px 20px;}
+    .hero-identity{flex-direction:column; align-items:flex-start; gap:12px;}
+    .hero-avatar{width:76px; height:76px;}
+    .p-name{font-size:28px; overflow-wrap:anywhere;}
+    .tags-list{max-width:100%;}
+    .tag-pill{white-space:normal;}
+    .tag-pill small{display:none;}
+    .hero-rank{align-items:flex-start;}
+  }
 </style>
 <link rel="stylesheet" href="assets/tema.css">
 </head>
@@ -382,7 +488,7 @@
     <div class="auth-slot" id="auth-slot"></div>
   </header>
 
-  <div class="breadcrumb"><a href="index.html">← Volver al Ranking</a><span id="breadcrumb-name"></span><a class="compare-link" id="compare-link" href="versus.html" hidden><svg class="ico-svg " width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h13l-3-3M17 17H4l3 3"/></svg> Comparar</a><button class="compare-link obs-link" id="obs-link" type="button" hidden><svg class="ico-svg " width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="13" rx="2"/><path d="M8 21h8"/></svg> Overlay OBS</button></div>
+  <div class="breadcrumb"><a href="index.html" class="volver"><svg style="transform:rotate(-90deg)" class="ico-svg " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg> Ranking</a><span id="breadcrumb-name"></span><a class="compare-link" id="compare-link" href="versus.html" hidden><svg class="ico-svg " width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h13l-3-3M17 17H4l3 3"/></svg> Comparar</a><button class="compare-link obs-link" id="obs-link" type="button" hidden><svg class="ico-svg " width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="13" rx="2"/><path d="M8 21h8"/></svg> Overlay OBS</button></div>
 
   <div id="error-msg"></div>
 
@@ -418,14 +524,13 @@
               <span id="p-tier">—</span>
             </div>
             <div class="hero-lp" id="p-lp">0 LP</div>
+            <div class="hero-wr" id="p-wr"></div>
           </div>
         </div>
       </div>
 
     </div>
 
-    <!-- ¿Cuánto me falta? -->
-    <div class="rank-goal view-only" id="p-goal" hidden></div>
 
     <!-- Selector de campeón y skin del banner (modo edición) -->
     <section class="picker ed-only" id="picker" hidden>
@@ -449,13 +554,52 @@
       </div>
     </div>
 
-    <!-- Estado de partida: siempre visible -->
-    <div class="live-status-box offline" id="live-status-box"><span class="live-offline-text">Cargando…</span></div>
+    <!-- ¿Cuánto me falta? + estado de partida, lado a lado -->
+    <div class="fila-objetivo">
+      <div class="rank-goal view-only" id="p-goal" hidden></div>
+      <div class="live-status-box offline" id="live-status-box"><span class="live-offline-text">Cargando…</span></div>
+    </div>
 
     <div class="stats-grid">
-      <div class="stat-card"><h3>Top 3 Maestrías</h3><div id="box-mastery"></div></div>
-      <div class="stat-card"><h3>Top Campeones (SoloQ)</h3><div id="box-champs"></div></div>
-      <div class="stat-card"><h3>Roles Más Jugados</h3><div id="box-roles"></div></div>
+      <div class="stat-card"><h3>Maestrías</h3><div id="box-mastery"></div></div>
+      <div class="stat-card"><h3>Campeones en SoloQ</h3><div id="box-champs"></div></div>
+      <div class="stat-card"><h3>Roles</h3><div id="box-roles"></div></div>
+    </div>
+
+    <!-- Historial (izquierda) + progreso de LP y SoloQ Rewind (derecha) -->
+    <div class="hist-lp">
+    <section class="col-hist">
+      <div class="history-head">
+        <div class="section-title"><span class="bar"></span><h2 id="history-title">Historial reciente (SoloQ)</h2></div>
+        <div class="queue-tabs" id="queue-tabs"></div>
+      </div>
+      <div class="history-panel"><div class="matches" id="box-history"></div></div>
+    </section>
+
+      <div class="col-lp">
+    <section id="lp-chart-section" style="display:none;">
+      <div class="section-title"><span class="bar"></span><h2>Progreso de LP</h2></div>
+      <div class="lp-chart-wrap">
+        <div class="lp-chart-header">
+          <span class="lp-label" id="lp-range-label">—</span>
+          <span class="lp-delta" id="lp-delta">—</span>
+        </div>
+        <canvas id="lp-canvas" height="90"></canvas>
+        <div class="lp-chart-footer">
+          <span id="lp-date-start">Hace 7 días</span>
+          <span id="lp-date-end">Hoy</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SoloQ Rewind -->
+    <a class="rewind-cta" id="rewind-cta" href="rewind.html" hidden>
+      <span class="rw-ic"><svg class="ico-svg " width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></span>
+      <span class="rw-tx"><b>SoloQ Rewind</b><small id="rewind-sub">Tu split en historias: campeón estrella, rachas, dúo, némesis y más</small></span>
+      <span class="rw-go">Ver ›</span>
+    </a>
+
+      </div>
     </div>
 
     <!-- Cuándo juegas (mapa de actividad) -->
@@ -472,36 +616,6 @@
         <div class="act-legend" id="act-legend"></div>
         <div class="act-insights" id="act-insights"></div>
         <div class="act-note">Hora de tu dispositivo · todas las colas · últimos 30 días</div>
-      </div>
-    </section>
-
-    <!-- SoloQ Rewind -->
-    <a class="rewind-cta" id="rewind-cta" href="rewind.html" hidden>
-      <span class="rw-ic"><svg class="ico-svg " width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></span>
-      <span class="rw-tx"><b>SoloQ Rewind</b><small id="rewind-sub">Tu split en historias: campeón estrella, rachas, dúo, némesis y más</small></span>
-      <span class="rw-go">Ver ›</span>
-    </a>
-
-    <section>
-      <div class="history-head">
-        <div class="section-title"><span class="bar"></span><h2 id="history-title">Historial reciente (SoloQ)</h2></div>
-        <div class="queue-tabs" id="queue-tabs"></div>
-      </div>
-      <div class="history-panel"><div class="matches" id="box-history"></div></div>
-    </section>
-
-    <section id="lp-chart-section" style="display:none;">
-      <div class="section-title"><span class="bar"></span><h2>Progreso de LP — últimos 7 días</h2></div>
-      <div class="lp-chart-wrap">
-        <div class="lp-chart-header">
-          <span class="lp-label" id="lp-range-label">—</span>
-          <span class="lp-delta" id="lp-delta">—</span>
-        </div>
-        <canvas id="lp-canvas" height="90"></canvas>
-        <div class="lp-chart-footer">
-          <span id="lp-date-start">Hace 7 días</span>
-          <span id="lp-date-end">Hoy</span>
-        </div>
       </div>
     </section>
 
@@ -1079,6 +1193,8 @@ function renderHero(player, profile, rank, live, stream, position, soloq) {
   const tierText = rank ? `${TIER_LABEL[rank.tier] ?? rank.tier} ${rank.division ?? ''}`.trim() : 'Unranked';
   document.getElementById('p-tier').textContent = tierText;
   document.getElementById('p-lp').textContent = rank ? `${rank.lp ?? 0} LP` : '—';
+  const partidasRango = rank ? (rank.wins ?? 0) + (rank.losses ?? 0) : 0;
+  document.getElementById('p-wr').textContent = partidasRango ? `${Math.round(100 * rank.wins / partidasRango)} % WR · ${partidasRango} partidas` : '';
   const emblem = document.getElementById('p-emblem');
   emblem.style.visibility = '';
   emblem.src = emblemUrl(rank?.tier);
@@ -1195,7 +1311,7 @@ async function renderLiveBox(live, allLiveStatus, nameById) {
   if (!live.in_game || !live.game_id) {
     liveGameStartTime = null;
     box.className = 'live-status-box offline';
-    box.innerHTML = `<span class="live-offline-text">Offline</span>`;
+    box.innerHTML = `<span class="live-dot"></span><span class="live-offline-text">Desconectado</span>`;
     return;
   }
 
@@ -1230,27 +1346,21 @@ async function renderLiveBox(live, allLiveStatus, nameById) {
     </div>` : '';
 
   box.className = 'live-status-box in-game';
+  // Una fila: estado, campeón, cola, lado, tiempo, hechizos/runas, dúo y el enlace.
   box.innerHTML = `
-    <span class="live-corner-badge">En Partida</span>
+    <span class="live-dot"></span>
     <div class="live-game-content">
       <div class="live-game-top">
-        <div class="live-game-champ">
-          <img src="${live.champion ? champIconUrl(live.champion) : ''}" alt="" onerror="${HIDE_ONERROR}">
-          <span>${esc(live.champion ?? 'Desconocido')}</span>
-        </div>
-        <div class="live-game-top-right">
-          <div class="live-game-spells">${spellsHtml}</div>
-          ${runesHtml}
-        </div>
+        <b>En partida</b>
+        <span class="live-game-champ"><img src="${live.champion ? champIconUrl(live.champion) : ''}" alt="" onerror="${HIDE_ONERROR}"><span>${esc(live.champion ?? 'Desconocido')}</span></span>
+        <span class="live-game-mode">${esc(game?.queue_type ?? 'Partida')}</span>
+        <span class="live-game-side ${esAzul ? 'side-blue' : 'side-red'}">${esAzul ? 'Lado azul' : 'Lado rojo'}</span>
+        <span class="live-game-duration" id="live-game-duration">--:--</span>
+        <span class="live-game-spells">${spellsHtml}</span>${runesHtml}
       </div>
       ${duoHtml}
-      <div class="live-game-meta">
-        <div class="live-game-duration" id="live-game-duration">--:--</div>
-        <div class="live-game-mode">${esc(game?.queue_type ?? 'Partida')}</div>
-        <div class="live-game-side ${esAzul ? 'side-blue' : 'side-red'}">${esAzul ? 'Lado Azul' : 'Lado Rojo'}</div>
-      </div>
-      <a class="live-game-link" href="en-vivo.html?partida=${encodeURIComponent(live.game_id)}">Ver la partida completa en vivo ›</a>
-    </div>`;
+    </div>
+    <a class="live-game-link" href="en-vivo.html?partida=${encodeURIComponent(live.game_id)}">Ver en vivo ›</a>`;
   tickLiveGameDuration();
 }
 
