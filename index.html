@@ -16,7 +16,7 @@
 <style>
   :root{
     --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
-    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --border:#16324a; --text:#ffffff; --text-dim:#a9b7c6; --text-faint:#8696a8;
     --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
     --danger:#ff5f3d; --danger-glow:rgba(255,95,61,.45);
     --gold:#facc15; --radius:16px;
@@ -38,7 +38,7 @@
   /* Indicador de "en vivo" — igual que el sitio viejo: punto que
      pulsa + "Actualizado hace Xs/Xm", para que quede claro en stream
      que la página sigue actualizando y no se congeló. */
-  .live-indicator{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dim); background:var(--panel); border:1px solid var(--border); padding:6px 12px; border-radius:999px;}
+  .live-indicator{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim); background:var(--panel); border:1px solid var(--border); padding:6px 12px; border-radius:999px;}
   .pulse-dot{width:7px; height:7px; border-radius:50%; background:var(--accent); flex-shrink:0; animation:live-pulse 2.2s infinite;}
   @keyframes live-pulse{0%{box-shadow:0 0 0 0 var(--accent-glow);} 70%{box-shadow:0 0 0 8px rgba(0,229,199,0);} 100%{box-shadow:0 0 0 0 rgba(0,229,199,0);}}
   @media (max-width:700px){ .live-indicator{display:none !important;} }
@@ -47,17 +47,17 @@
   h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(28px,4vw,40px); letter-spacing:.03em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
-  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none;}
   /* Header: ícono de invocador del jugador con sesión iniciada */
   .avatar{overflow:hidden; transition:transform .15s, box-shadow .15s;}
-  .avatar:hover{transform:scale(1.06); box-shadow:0 0 16px var(--accent-glow);}
+  .avatar:hover{transform:scale(1.06); box-shadow:none;}
   .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   /* Sesión de Discord iniciada pero sin cuenta de LoL vinculada todavía */
-  .avatar.pending{border-color:var(--gold); box-shadow:0 0 10px rgba(250,204,21,.4); color:var(--gold);}
+  .avatar.pending{border-color:var(--gold); box-shadow:none; color:var(--gold);}
   .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
 
   .section-title{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
-  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
+  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:none;}
   .section-title h2{margin:0; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:.08em;}
   section{margin-bottom:44px;}
 
@@ -65,20 +65,24 @@
   .podium-grid{display:flex; align-items:flex-end; gap:18px; margin-bottom:24px;}
   .podium-card{flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:30px 14px 28px; min-height:250px; justify-content:center; position:relative; overflow:hidden;}
   .podium-card > *{position:relative; z-index:1;}
-  .podium-card.rank1{flex:1.4; padding:44px 14px 40px; min-height:300px; border-color:var(--accent); background:linear-gradient(180deg, rgba(0,229,199,.16), var(--panel) 65%); box-shadow:0 0 40px var(--accent-glow), 0 0 90px rgba(0,229,199,.18);}
+  .podium-card{box-shadow:var(--sombra);}
+  .podium-card.rank1{flex:1.4; padding:44px 14px 40px; min-height:300px; border-color:rgba(0,229,199,.5); background:var(--panel); box-shadow:0 16px 40px rgba(0,0,0,.5);}
   /* Fondo de la tarjeta = skin elegida (o campeón en vivo si está jugando) */
   .podium-splash{position:absolute; inset:0; z-index:0; background-size:cover; background-position:center 12%;}
   .podium-scrim{position:absolute; inset:0; z-index:0; background:linear-gradient(180deg, rgba(3,8,18,.2) 0%, rgba(3,8,18,.5) 45%, rgba(3,8,18,.94) 100%);}
-  .podium-rank-chip{font-size:10px; font-weight:800; padding:4px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:.1em; background:var(--panel-2); color:var(--text-faint); border:1px solid var(--border); margin-bottom:10px;}
+  .podium-rank-chip{font-family:'Rajdhani',sans-serif; font-size:15px; font-weight:700; padding:2px 12px; border-radius:99px; background:var(--panel-2); color:var(--text-faint); border:1px solid var(--border); margin-bottom:10px;}
   .podium-card.rank1 .podium-rank-chip{background:var(--accent); color:#032018; border:none;}
   /* Ícono grande de corona/medalla, con glow, además del chip de texto */
-  .podium-medal{font-size:34px; line-height:1; margin-bottom:8px; filter:drop-shadow(0 0 10px var(--medal-glow, rgba(250,204,21,.7)));}
-  .podium-card.rank1 .podium-medal{font-size:50px; margin-bottom:10px;}
-  .podium-medal.gold{--medal-glow:rgba(250,204,21,.85);}
-  .podium-medal.silver{--medal-glow:rgba(203,213,225,.8);}
-  .podium-medal.bronze{--medal-glow:rgba(240,168,104,.8);}
+  /* Corona del #1 (dibujada). El #2 y #3 llevan su número en el chip. */
+  .podium-medal{line-height:0; margin-bottom:8px;}
+  .podium-medal svg{width:44px; height:44px;}
+  .podium-medal.silver, .podium-medal.bronze{display:none;}
+  .podium-card:not(.rank1) .podium-rank-chip.silver{color:#d7e0ea; background:rgba(255,255,255,.1); border-color:transparent;}
+  .podium-card:not(.rank1) .podium-rank-chip.bronze{color:#e8b48a; background:rgba(205,127,50,.18); border-color:transparent;}
+  .podium-card.silver-ring .podium-avatar{border-color:#c9d4de;}
+  .podium-card.bronze-ring .podium-avatar{border-color:#cd7f32;}
   .podium-avatar{width:56px; height:56px; border-radius:50%; background:#0a1622; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; color:var(--text-dim); margin-bottom:12px; overflow:hidden;}
-  .podium-card.rank1 .podium-avatar{width:88px; height:88px; border:3px solid var(--accent); box-shadow:0 0 24px var(--accent-glow); font-size:22px; color:var(--accent);}
+  .podium-card.rank1 .podium-avatar{width:96px; height:96px; border:3px solid var(--accent); font-size:22px; color:var(--accent);}
   .podium-avatar img{width:100%; height:100%; object-fit:cover;}
   .podium-name{font-size:14px; font-weight:800;}
   .podium-card.rank1 .podium-name{font-size:19px;}
@@ -86,25 +90,32 @@
      sigue abriendo el Historial Individual como antes) */
   .profile-link{color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis; transition:color .15s;}
   .profile-link:hover{color:var(--accent); text-decoration:underline; text-underline-offset:3px;}
-  .podium-meta{font-size:11px; font-weight:600; color:var(--text-faint); text-transform:uppercase; margin:3px 0 12px;}
-  .podium-lp{font-size:17px; font-weight:900; color:var(--accent);}
-  .podium-card.rank1 .podium-lp{font-size:30px; background:linear-gradient(90deg,var(--gold),#fff3c4); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .podium-meta{font-size:12px; font-weight:600; color:var(--text-dim); margin:3px 0 10px;}
+  .podium-lp{font-family:'Rajdhani',sans-serif; font-size:30px; font-weight:700; line-height:1.1; color:var(--accent);}
+  .podium-card.rank1 .podium-lp{font-size:46px; color:var(--gold);}
   .podium-tier-row{display:flex; align-items:center; justify-content:center; gap:5px; margin-top:4px;}
-  .podium-tier{font-size:11px; color:var(--text-faint); font-weight:600;}
+  .podium-tier{font-size:13px; color:var(--text-dim); font-weight:600;}
 
   /* TWITCH — oculto por defecto, se abre con animación cuando hay vivo */
   .twitch-wrap{display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows .5s ease, opacity .4s ease, margin .5s ease; margin-bottom:0;}
   .twitch-wrap.visible{grid-template-rows:1fr; opacity:1; margin-bottom:28px;}
   .twitch-inner{min-height:0; overflow:hidden;}
-  .twitch-card{width:100%; max-width:880px; margin:0 auto; display:flex; background:var(--panel); border:1px solid var(--danger-glow); box-shadow:0 0 24px rgba(255,95,61,.12); border-radius:var(--radius); overflow:hidden;}
-  .twitch-preview{flex:0 0 480px; aspect-ratio:16/9; position:relative; background:repeating-linear-gradient(45deg,#0a1622,#0a1622 10px,#0d1c28 10px,#0d1c28 20px); border-right:1px solid var(--border);}
+  .twitch-card{width:100%; display:flex; background:var(--panel); border:1px solid rgba(255,95,109,.4); box-shadow:var(--sombra); border-radius:var(--radius); overflow:hidden;}
+  .twitch-preview{flex:0 0 480px; aspect-ratio:16/9; position:relative; background:#070d16; border-right:1px solid var(--border);}
   .twitch-preview iframe{position:absolute; inset:0; width:100%; height:100%; border:0; display:block;}
   .twitch-live-chip{position:absolute; top:12px; left:12px; display:flex; align-items:center; gap:6px; background:rgba(3,8,18,.75); padding:4px 10px; border-radius:6px;}
-  .pulse-dot{width:6px; height:6px; border-radius:50%; background:var(--danger); box-shadow:0 0 6px var(--danger-glow); animation:pulse 2s infinite;}
+  .pulse-dot{width:6px; height:6px; border-radius:50%; background:var(--danger); box-shadow:none; animation:pulse 2s infinite;}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,95,61,.6);} 70%{box-shadow:0 0 0 8px rgba(255,95,61,0);} 100%{box-shadow:0 0 0 0 rgba(255,95,61,0);}}
   .twitch-info{flex-grow:1; padding:22px 24px; display:flex; flex-direction:column; justify-content:center; gap:8px; min-width:0;}
-  .twitch-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint);}
-  .twitch-title{font-size:19px; font-weight:800; line-height:1.25; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;}
+  .twitch-label{font-size:15px; font-weight:700; color:#fff; display:flex; align-items:center; gap:10px;}
+  .twitch-label img{width:34px; height:34px; border-radius:50%;}
+  .twitch-btn{align-self:flex-start; margin-top:6px; font-size:14px; font-weight:700; color:#fff; background:#9146ff; border-radius:10px; padding:9px 16px; text-decoration:none;}
+  .twitch-btn:hover{background:#7c3aed;}
+  .twitch-head{display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:10px;}
+  .twitch-head b{display:flex; align-items:center; gap:7px; color:#ff8a94;}
+  .twitch-head b::before{content:''; width:8px; height:8px; border-radius:50%; background:#ff5f6d;}
+  .twitch-head span{color:var(--text-faint);}
+  .twitch-title{font-size:21px; font-weight:800; line-height:1.25; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;}
   /* Pantallas medianas: el video se encoge un poco; en celular, video arriba a todo el ancho y la info debajo. */
   @media (max-width:980px){ .twitch-preview{flex-basis:56%;} }
   @media (max-width:700px){
@@ -113,21 +124,26 @@
     .twitch-info{padding:14px 16px 16px; gap:5px;}
     .twitch-title{font-size:16px; -webkit-line-clamp:3;}
   }
-  .twitch-game{font-size:13px; color:var(--accent); font-weight:700;}
-  .twitch-viewers{font-size:13px; color:var(--danger); font-weight:700;}
+  .twitch-game{font-size:14px; color:var(--accent); font-weight:600;}
+  .twitch-viewers{font-size:14px; color:#ff8a94; font-weight:700;}
 
   /* Tarjetas destacadas (Primera Victoria, Rey de la Temporada) */
-  .spotlight-card{position:relative; overflow:hidden; display:flex; align-items:center; gap:16px; background:var(--panel); border:1px solid rgba(250,204,21,.4); box-shadow:0 0 24px rgba(250,204,21,.1); border-radius:var(--radius); padding:18px 22px; margin-bottom:28px;}
-  .spotlight-badge{position:absolute; top:0; left:0; background:var(--gold); color:#000; font-size:10px; font-weight:800; padding:4px 12px; border-bottom-right-radius:8px; text-transform:uppercase; letter-spacing:.08em;}
+  .spotlight-card{position:relative; overflow:hidden; display:flex; flex-wrap:wrap; align-items:center; column-gap:16px; row-gap:6px; background:var(--panel); border:1px solid rgba(250,204,21,.35); border-radius:var(--radius); padding:16px 20px; margin-bottom:0;}
+  .spotlight-badge{flex-basis:100%; color:#f3d36b; font-size:13px; font-weight:700;}
+  /* Primera victoria y Partida del mes, lado a lado */
+  .destacados-dia{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-bottom:44px;}
+  .destacados-dia section{margin:0;}
+  .destacados-dia .spotlight-card, .destacados-dia .mm-card{height:100%; box-sizing:border-box;}
+  @media (max-width:820px){ .destacados-dia{grid-template-columns:minmax(0,1fr);} }
   .spotlight-icon{width:52px; height:52px; border-radius:12px; background:rgba(250,204,21,.16); border:2px solid var(--gold); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; overflow:hidden;}
   .spotlight-icon img{width:100%; height:100%; object-fit:cover;}
   /* Antes de que alguien gane hoy — misma tarjeta, atenuada. */
   .spotlight-card.pending{border-color:var(--border); box-shadow:none; opacity:.8;}
-  .spotlight-card.pending .spotlight-badge{background:var(--panel-2); color:var(--text-faint);}
+  .spotlight-card.pending .spotlight-badge{color:var(--text-faint);}
   .spotlight-card.pending .spotlight-icon{background:var(--panel-2); border-color:var(--border); font-size:22px; color:var(--text-faint);}
   .spotlight-champ{width:36px; height:36px; border-radius:8px; overflow:hidden; border:1px solid var(--gold); flex-shrink:0; background:#0a1622;}
   .spotlight-champ img{width:100%; height:100%; object-fit:cover;}
-  .spotlight-meta{display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:12px; color:var(--text-faint); font-weight:600; margin-top:2px;}
+  .spotlight-meta{display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:13px; color:var(--text-dim); font-weight:500; margin-top:2px;}
   .spotlight-meta .spells{display:flex; gap:3px;}
   .spotlight-meta .spells img{width:16px; height:16px; border-radius:4px; border:1px solid var(--border); background:#0a1622;}
   /* Rey de la Temporada — mismo estilo de tarjeta que Primera Victoria,
@@ -136,26 +152,40 @@
      lleva una corona chiquita superpuesta, como se veía en el sitio
      viejo (SoloQReto). */
   .rey-avatar-wrap{position:relative; flex-shrink:0;}
-  .rey-crown-badge{position:absolute; top:-6px; left:-6px; width:20px; height:20px; border-radius:50%; background:var(--bg); box-shadow:0 0 0 1px var(--gold); display:flex; align-items:center; justify-content:center; font-size:11px; line-height:1;}
-  .rey-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); display:flex; align-items:center; gap:5px;}
+  .rey-crown-badge{position:absolute; top:-8px; left:-8px; width:22px; height:22px; border-radius:50%; background:var(--bg); box-shadow:0 0 0 1px var(--gold); display:flex; align-items:center; justify-content:center; line-height:0;}
+  .rey-label{font-size:13px; font-weight:700; color:#f3d36b; display:flex; align-items:center; gap:6px;}
 
   /* Grids de tarjetas (badges recientes / destacados semana) */
   .cards-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
-  .info-card{display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px;}
-  .info-card .ico{width:44px; height:44px; border-radius:12px; background:var(--panel-2); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;}
-  .info-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint);}
-  .info-player{font-size:14px; font-weight:800; margin:2px 0;}
-  .info-detail{font-size:12px; color:var(--accent); font-weight:700; display:flex; align-items:center; gap:5px;}
+  .info-card{display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:14px 16px;}
+  .info-card .ico{width:40px; height:40px; border-radius:10px; background:rgba(255,255,255,.05); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .info-label{font-size:12px; font-weight:600; color:var(--text-dim);}
+  .info-player{font-size:15px; font-weight:700; margin:2px 0;}
+  .info-detail{font-size:13px; color:var(--accent); font-weight:600; display:flex; align-items:center; gap:5px;}
+  /* Últimas 10 partidas: una sola franja con separadores */
+  #badges-recientes{gap:0; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+  #badges-recientes .info-card{background:none; border:0; border-radius:0; border-right:1px solid var(--border); padding:18px 22px;}
+  #badges-recientes .info-card:last-child{border-right:0;}
+  /* Destacados de la semana: 4 columnas compactas; los que no tienen dueño van en una línea */
+  #destacados-semana{grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px;}
+  #destacados-semana .info-card .ico{display:none;}
+  .sin-duenyo{margin:12px 0 0; font-size:13px; color:var(--text-faint);}
+  @media (max-width:900px){ #destacados-semana{grid-template-columns:repeat(2,minmax(0,1fr));} }
+  @media (max-width:700px){ #badges-recientes .info-card{border-right:0; border-bottom:1px solid var(--border);} }
   .badge-champ-icon{width:18px; height:18px; border-radius:4px; object-fit:cover; flex-shrink:0;}
   @media (max-width:700px){ .cards-grid{grid-template-columns:1fr 1fr;} }
 
   /* Ranking */
   .filter-bar{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
-  .filter-bar select{background:var(--panel-2); color:var(--text); border:1px solid var(--border); padding:7px 12px; border-radius:8px; font-family:inherit; font-size:12px; cursor:pointer;}
+  .filter-bar select{background:var(--panel); color:var(--text); border:1px solid rgba(255,255,255,.14); padding:8px 12px; border-radius:10px; font-family:inherit; font-size:14px; cursor:pointer;}
   .rank-head, .rank-row{display:flex; align-items:center; gap:14px;}
-  .rank-head{padding:0 16px 8px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint);}
-  .rank-list{display:flex; flex-direction:column; gap:6px;}
-  .rank-row{min-height:68px; padding:12px 16px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); position:relative; overflow:hidden; contain:paint; display:flex; align-items:center;}
+  /* Ranking: una sola tabla (panel con separadores) en lugar de una tarjeta por fila. */
+  .rank-table{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+  .rank-head{padding:12px 20px; font-size:12px; font-weight:600; color:var(--text-faint); border-bottom:1px solid var(--border);}
+  .rank-list{display:flex; flex-direction:column; gap:0;}
+  .rank-row{min-height:72px; padding:12px 20px; background:transparent; border:0; border-bottom:1px solid var(--border); border-radius:0; position:relative; overflow:hidden; contain:paint; display:flex; align-items:center;}
+  .rank-row:last-child{border-bottom:0;}
+  .rank-row:first-child{background:rgba(0,229,199,.05);}
   /* Racha — solo el icono 🔥/❄️ + un borde que "respira" alrededor de
      toda la fila. Va en un ::after propio (no en la animación de la fila)
      para no pisarse con los efectos de fila de la tienda, que usan su
@@ -166,82 +196,74 @@
   .rank-row.streak-fire{border-color:rgba(var(--streak-c),.55);}
   .rank-row.streak-ice{border-color:rgba(var(--streak-c),.5);}
   .rank-row.streak-fire::after, .rank-row.streak-ice::after{content:''; position:absolute; inset:0; z-index:2; pointer-events:none; border-radius:inherit;
-    box-shadow:inset 0 0 0 1px rgba(var(--streak-c),.7), inset 0 0 10px rgba(var(--streak-c),.22);
+    box-shadow:inset 0 0 0 1px rgba(var(--streak-c),.7);
     animation:streak-border 2.4s ease-in-out infinite;}
   .rank-row.streak-ice::after{animation-duration:2.8s;}
   @keyframes streak-border{
     0%,100%{box-shadow:inset 0 0 0 1px rgba(var(--streak-c),.55), inset 0 0 8px rgba(var(--streak-c),.14);}
     50%{box-shadow:inset 0 0 0 1.5px rgba(var(--streak-c),.95), inset 0 0 16px rgba(var(--streak-c),.32);}}
   .row-content{position:relative; z-index:1; display:flex; align-items:center; gap:14px; width:100%;}
-  .col-pos{width:24px; font-size:14px; font-weight:700; color:var(--text-faint); text-align:center;}
-  .col-pos.pos-1{font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:800; color:var(--gold); text-shadow:0 0 10px rgba(250,204,21,.6);}
-  .col-pos.pos-2{font-size:17px; text-shadow:0 0 10px rgba(203,213,225,.65);}
-  .col-pos.pos-3{font-size:17px; text-shadow:0 0 10px rgba(240,168,104,.65);}
+  .col-pos{width:28px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; color:var(--text-faint); text-align:center; line-height:0;}
+  .col-pos.pos-1{color:var(--gold);}
+  .col-pos.pos-2{color:#d7e0ea;}
+  .col-pos.pos-3{color:#e8b48a;}
   .col-avatar{position:relative; width:44px; height:44px; flex-shrink:0;}
   .avatar-circle{width:100%; height:100%; border-radius:50%; overflow:hidden; background:#0a1622; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px;}
   /* Ícono de Twitch — hueco propio entre el nombre/racha y la franja
      del campeón (antes iba en la esquina del avatar y chocaba con los
      marcos). El hueco existe aunque no tenga Twitch, para que todo
      quede alineado. Se pone rojo cuando está en vivo. */
-  .col-twitch{width:20px; flex-shrink:0; display:flex; align-items:center; justify-content:center;}
-  .twitch-badge{width:18px; height:18px; display:flex; align-items:center; justify-content:center; text-decoration:none; filter:drop-shadow(0 1px 2px rgba(0,0,0,.6)); transition:transform .15s;}
+  .col-twitch{width:30px; flex-shrink:0; display:flex; align-items:center; justify-content:center;}
+  .twitch-badge{width:20px; height:20px; display:flex; align-items:center; justify-content:center; text-decoration:none; filter:drop-shadow(0 1px 2px rgba(0,0,0,.6)); transition:transform .15s;}
   .twitch-badge:hover{transform:scale(1.15);}
   .twitch-badge img{width:100%; height:100%; display:block;}
-  .twitch-badge.live{border-radius:50%; box-shadow:0 0 0 1px var(--danger), 0 0 8px var(--danger-glow);}
+  .twitch-badge.live{border-radius:50%; box-shadow:0 0 0 1.5px #ff5f6d;}
   .twitch-badge.live img{filter:brightness(0) saturate(100%) invert(46%) sepia(89%) saturate(1657%) hue-rotate(325deg) brightness(103%) contrast(101%);}
-  .streak-icon{font-size:13px; display:inline-block;}
-  .rank-row.streak-fire .streak-icon{animation:fire-flicker 1.1s ease-in-out infinite; filter:drop-shadow(0 0 4px rgba(255,130,70,.8));}
-  .rank-row.streak-ice .streak-icon{animation:ice-float 2.4s ease-in-out infinite; filter:drop-shadow(0 0 4px rgba(125,211,252,.8));}
-  @keyframes fire-flicker{0%,100%{transform:scale(1) rotate(-4deg);} 50%{transform:scale(1.18) rotate(4deg);}}
-  @keyframes ice-float{0%,100%{transform:translateY(0) rotate(-6deg);} 50%{transform:translateY(-2px) rotate(8deg);}}
+  /* Racha (🔥/❄️ de antes) + últimas 5: columna propia, ya no pegada al nombre. */
+  .col-forma{width:168px; flex-shrink:0; display:flex; align-items:center; gap:8px;}
+  .racha{width:52px; display:flex; align-items:center; gap:4px; font-size:13px; font-weight:700; white-space:nowrap;}
+  .racha.fire{color:#ffb38a;} .racha.ice{color:#7dd3fc;}
+  .ultimas{display:flex; gap:4px;}
+  .ultimas i{width:15px; height:15px; border-radius:4px; background:rgba(255,255,255,.08);}
+  .ultimas i.w{background:#4c9dff;} .ultimas i.l{background:#ff5f6d;}
   .col-role{width:96px; flex-shrink:0;}
   /* Todas las píldoras del mismo ancho; la flecha tiene su propio hueco fijo
      (aunque no haya flecha) para que nada se desplace. */
   .role-pill, .role-head{display:inline-block; width:74px; text-align:center; box-sizing:border-box;}
-  .role-pill{ background:rgba(0,229,199,.14); color:var(--accent); font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px;}
+  .role-pill{ background:rgba(255,255,255,.06); color:var(--text-dim); font-size:12px; font-weight:600; padding:3px 10px; border-radius:99px;}
   .avatar-circle img{width:100%; height:100%; object-fit:cover;}
-  .col-name{flex-grow:1; min-width:0; font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  /* Campeón representativo — en vivo si está jugando, si no su campeón
-     elegido. Franja de alto completo de la fila (no una cajita), corte
-     diagonal, difuminada — sutil, no ocupa todo el fondo de la fila
-     como hacía el splash viejo. */
-  .col-champ-outer{align-self:stretch; width:64px; flex-shrink:0; margin:-12px 0; position:relative; overflow:hidden; clip-path:polygon(30% 0,100% 0,70% 100%,0 100%);}
-  /* Nítido, no borroso — se oscurece con brightness bajo + un degradé
-     encima, así el personaje se ve claro pero queda integrado a la
-     fila (parte del fondo) en vez de robarse la atención. */
-  .col-champ-outer::before{content:''; position:absolute; inset:0 -2px; background-image:var(--champbg); background-size:cover; background-position:center 18%; filter:saturate(1.05) brightness(.55);}
-  .col-champ-outer::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(3,8,18,.1), rgba(3,8,18,.55) 55%, rgba(3,8,18,.82) 100%);}
-  .col-champ-outer.live::after{background:linear-gradient(90deg, rgba(255,95,61,.14), rgba(3,8,18,.5) 55%, rgba(3,8,18,.78) 100%);}
-  .col-estado{width:96px; display:flex; flex-direction:column; align-items:flex-start; gap:3px;}
+  .col-name{flex-grow:1; min-width:0; font-size:16px; font-weight:700; display:flex; align-items:center; gap:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .col-estado{width:120px; display:flex; flex-direction:column; align-items:flex-start; gap:3px;}
   /* Dúo en vivo: dos+ del roster en la misma partida ahora mismo,
      mismo equipo — chip pequeño bajo "En partida", igual que hacía el
      sitio viejo con duo_con. */
-  .duo-tag{font-size:10px; font-weight:700; color:var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
+  .duo-tag{font-size:11px; font-weight:600; display:flex; align-items:center; gap:4px; color:var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
   .champ-mini{width:20px; height:20px; border-radius:5px; overflow:hidden; flex-shrink:0; background:#0a1622; border:1px solid var(--border);}
   .champ-mini img{width:100%; height:100%; object-fit:cover;}
-  .status-chip{font-size:10px; font-weight:800; padding:4px 8px; border-radius:6px; text-transform:uppercase; white-space:nowrap;}
-  a.status-chip{text-decoration:none; transition:box-shadow .15s;} a.status-chip:hover{box-shadow:0 0 10px var(--danger-glow);}
-  .status-chip.in-game{background:rgba(255,95,61,.15); color:var(--danger); border:1px solid rgba(255,95,61,.4);}
-  .status-chip.offline{background:rgba(161,161,170,.1); color:#a1a1aa; border:1px solid rgba(161,161,170,.2);}
-  .col-role{width:96px; flex-shrink:0; font-size:12px; color:var(--text-dim); font-weight:600; display:flex; align-items:center; gap:6px;}
-  .trend-arrow{width:12px; flex-shrink:0; text-align:center; font-size:11px; font-weight:900; line-height:1;}
-  .trend-arrow.up{color:var(--accent);}
-  .trend-arrow.down{color:var(--danger);}
-  .col-rank{width:110px; display:flex; align-items:center; gap:6px;}
+  /* Estado: punto + texto. "En partida" resalta en verde; desconectado queda discreto. */
+  .status-chip{display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:500; white-space:nowrap; text-decoration:none;}
+  .status-chip::before{content:''; width:7px; height:7px; border-radius:50%; background:#4a5768; flex-shrink:0;}
+  .status-chip.offline{color:var(--text-faint);}
+  .status-chip.in-game{color:#6fdba8; font-weight:600;} .status-chip.in-game::before{background:#6fdba8;}
+  a.status-chip:hover{text-decoration:underline; text-underline-offset:3px;}
+  .col-role{width:92px; flex-shrink:0; font-size:12px; color:var(--text-dim); font-weight:600; display:flex; align-items:center; gap:6px;}
+  /* LP ganados/perdidos en sus últimas 5 de SoloQ (junto a los LP) */
+  .lp-delta{font-size:12px; font-weight:700; margin-left:4px;}
+  .lp-delta.up{color:#6fdba8;} .lp-delta.down{color:#ff8a94;}
+  .col-rank{width:150px; display:flex; align-items:center; gap:8px;}
   .rank-emblem{width:18px; height:18px; flex-shrink:0;}
-  .col-rank .tier-lp .tier{font-size:13px; color:#fff; font-weight:700; line-height:1.2;}
-  .col-rank .tier-lp .lp{font-size:11px; color:var(--accent); font-weight:700; line-height:1.2;}
-  .col-wr{width:90px;}
-  .wr-pct{font-size:11px; color:var(--text-faint); margin-bottom:3px;}
-  .wr-bar{height:4px; background:#0a1622; border-radius:99px; overflow:hidden;}
-  .wr-fill{height:100%; background:var(--accent); box-shadow:0 0 8px var(--accent-glow);}
+  .col-rank .tier-lp .tier{font-size:14px; color:#fff; font-weight:700; line-height:1.25;}
+  .col-rank .tier-lp .lp{font-size:13px; color:var(--text-dim); font-weight:600; line-height:1.25;}
+  .col-wr{width:110px;}
+  .wr-pct{font-size:14px; font-weight:600; color:#fff; margin-bottom:5px;}
+  .wr-bar{height:4px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden;}
+  .wr-fill{height:100%; background:var(--accent);}
   @media (max-width:760px){
     .rank-head{display:none;}
-    .col-role, .col-wr{display:none;}
+    .col-role, .col-wr, .col-forma{display:none;}
   }
   /* Celular: que el nombre del jugador siempre quepa (la franja del campeón se oculta) y el header no se desborde. */
   @media (max-width:560px){
-    .col-champ-outer{display:none !important;}
     header{grid-template-columns:auto 1fr auto; gap:8px;}
     header h1{font-size:22px;}
     .cards-grid{grid-template-columns:minmax(0,1fr);}
@@ -255,7 +277,7 @@
   /* Historial Individual — últimas 5 partidas SoloQ del jugador
      seleccionado en el ranking (click en una fila). */
   .rank-row{cursor:pointer; transition:border-color .15s ease;}
-  .rank-row.active{border-color:var(--accent);}
+  .rank-row.active{background:rgba(0,229,199,.08);}
   /* El aro de selección NO va como box-shadow de .rank-row: eso pinta
      por DEBAJO de .row-content (que tiene z-index:1 para ir encima de
      las partículas/shimmer de racha), así que la cabecita del campeón
@@ -263,59 +285,68 @@
      .row-content (que pinta último, encima de todo su contenido,
      incluida la cabecita) queda siempre visible, dé la vuelta completa
      a la fila. */
-  .rank-row.active .row-content::after{content:''; position:absolute; inset:-12px -16px; z-index:5; pointer-events:none; border-radius:var(--radius); box-shadow:0 0 0 1px var(--accent) inset;}
-  .history-panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px;}
+  .rank-row.active .row-content::after{content:''; position:absolute; inset:-12px -20px; z-index:5; pointer-events:none; box-shadow:3px 0 0 0 var(--accent) inset;}
+  .history-panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+  /* Historial individual + temporada, lado a lado */
+  .historial-temporada{display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:20px;}
+  .historial-temporada > div{min-width:0;}
+  .historial-temporada #rey-temporada-section{margin:0 0 12px;}
+  .historial-temporada .spotlight-card{margin:0;}
+  .historial-temporada .countdown-grid{grid-template-columns:minmax(0,1fr) !important;}
+  @media (max-width:900px){ .historial-temporada{grid-template-columns:minmax(0,1fr);} }
+  .history-who{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim);}
   .history-hint{font-size:12px; color:var(--text-faint); margin:0 0 14px;}
-  .matches{display:flex; flex-direction:column; gap:8px;}
-  a.match, .match{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:14px; padding:10px 12px; border-radius:10px; background:var(--panel-2); border:1px solid var(--border); text-decoration:none; color:inherit;}
-  a.match{text-decoration:none; color:inherit; transition:border-color .15s, background .15s;}
-  a.match:hover{border-color:var(--accent); background:rgba(0,229,199,.05);}
+  .matches{display:flex; flex-direction:column; gap:0;}
+  a.match, .match{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:14px; padding:12px 18px; border-bottom:1px solid var(--border); text-decoration:none; color:inherit;}
+  a.match:last-child, .match:last-child{border-bottom:0;}
+  a.match{text-decoration:none; color:inherit; transition:background .15s;}
+  a.match:hover{background:rgba(0,229,199,.05);}
   .match-icons{display:flex; align-items:center; gap:5px;}
   .match .champ-icon{width:36px; height:36px; border-radius:8px; object-fit:cover; background:#0a1622; flex-shrink:0;}
   .match-spells{display:flex; flex-direction:column; gap:3px;}
   .match-spells img{width:16px; height:16px; border-radius:4px; border:1px solid var(--border); background:#0a1622;}
   .match-runes{display:flex; flex-direction:column; gap:3px;}
   .match-runes img{width:16px; height:16px; border-radius:50%; border:1px solid var(--border); background:#0a1622; object-fit:contain; padding:1px;}
-  .match-champ{font-size:13px; font-weight:800; color:#fff;}
-  .match-kda{font-size:12px; color:var(--text-faint);}
-  .match-duo{font-size:11px; font-weight:700; color:var(--accent); margin-top:2px;}
+  .match-champ{font-size:14px; font-weight:700; color:#fff;}
+  .match-kda{font-size:13px; color:var(--text-dim);}
+  .match-duo{font-size:12px; font-weight:600; color:var(--accent); margin-top:2px; display:flex; align-items:center; gap:5px;}
   .match-result-block{display:flex; flex-direction:column; align-items:flex-end; gap:4px;}
-  .result-chip{font-size:11px; font-weight:700; padding:4px 10px; border-radius:99px; text-transform:uppercase; text-align:center;}
-  .result-chip.victoria{color:var(--accent); background:rgba(0,229,199,.14);}
-  .result-chip.derrota{color:var(--danger); background:rgba(255,95,61,.14);}
+  .result-chip{font-size:12px; font-weight:700; padding:3px 10px; border-radius:6px; text-align:center;}
+  .result-chip.victoria{color:#7cb8ff; background:rgba(76,157,255,.12);}
+  .result-chip.derrota{color:#ff8a94; background:rgba(255,95,109,.12);}
   .result-chip.remake{color:var(--text-faint); background:rgba(161,161,170,.1);}
-  .lp-change{font-size:11px; font-weight:800;}
-  .lp-change.win{color:var(--accent);}
-  .lp-change.loss{color:var(--danger);}
-  .egida-tag{font-size:10px; font-weight:700; color:var(--text-dim); background:rgba(255,255,255,.08); border:1px dashed rgba(255,255,255,.35); border-radius:99px; padding:2px 8px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;}
+  .lp-change{font-size:13px; font-weight:700;}
+  .lp-change.win{color:#6fdba8;}
+  .lp-change.loss{color:#ff8a94;}
+  .egida-tag{font-size:11px; font-weight:700; color:var(--text-dim); background:rgba(255,255,255,.08); border:1px dashed rgba(255,255,255,.35); border-radius:99px; padding:2px 8px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;}
   .egida-tag img{width:12px; height:12px; object-fit:contain;}
-  .autofill-tag{font-size:10px; font-weight:700; color:var(--gold); background:rgba(250,204,21,.08); border:1px dashed rgba(250,204,21,.45); border-radius:99px; padding:2px 8px; white-space:nowrap; cursor:help;}
+  .autofill-tag{font-size:11px; font-weight:700; color:var(--gold); background:rgba(250,204,21,.08); border:1px dashed rgba(250,204,21,.45); border-radius:99px; padding:2px 8px; white-space:nowrap; cursor:help;}
 
   /* Historial de logros */
   .logros-panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
-  .logro-item{display:flex; align-items:center; gap:14px; padding:14px 18px; border-bottom:1px solid var(--border);}
+  .logro-item{display:flex; align-items:center; gap:14px; padding:12px 18px; border-bottom:1px solid var(--border);}
   .logro-item:last-child{border-bottom:none;}
-  .logro-icon{width:38px; height:38px; border-radius:50%; background:var(--panel-2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0;}
+  .logro-icon{width:34px; height:34px; border-radius:50%; background:color-mix(in srgb, var(--c, #a9b7c6) 14%, transparent); color:var(--c, #a9b7c6); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
   .logro-icon img{width:20px; height:20px;}
-  .logro-text{font-size:13px; font-weight:600; color:var(--text-dim);}
-  .logro-text b{color:#fff; font-weight:800;}
-  .logro-detail{font-size:12px; color:var(--accent); font-weight:600; margin-top:2px;}
-  .logro-time{font-size:11px; color:var(--text-faint); flex-shrink:0;}
+  .logro-text{font-size:14px; font-weight:500; color:var(--text-dim);}
+  .logro-text b{color:#fff; font-weight:700;}
+  .logro-detail{font-size:13px; color:var(--text-dim); font-weight:500; margin-top:2px;}
+  .logro-time{font-size:13px; color:var(--text-faint); flex-shrink:0;}
   .empty{padding:24px; text-align:center; color:var(--text-faint); font-size:13px;}
 
   /* Cuenta regresiva */
-  .countdown-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px;}
-  .countdown-card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px 18px; text-align:center;}
-  .countdown-label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); margin-bottom:14px;}
-  .countdown-digits{display:flex; justify-content:center; gap:14px;}
-  .cd-unit{display:flex; flex-direction:column; align-items:center; min-width:46px;}
-  .cd-value{font-family:'Rajdhani',sans-serif; font-size:28px; font-weight:800; color:var(--accent); line-height:1;}
-  .cd-caption{font-size:10px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em; margin-top:4px;}
+  .countdown-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:12px;}
+  .countdown-card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; text-align:left;}
+  .countdown-label{font-size:13px; font-weight:600; color:var(--text-dim); margin-bottom:8px;}
+  .countdown-digits{display:flex; justify-content:flex-start; gap:10px;}
+  .cd-unit{display:flex; align-items:baseline; gap:2px; min-width:0;}
+  .cd-value{font-family:'Rajdhani',sans-serif; font-size:24px; font-weight:700; color:var(--accent); line-height:1;}
+  .cd-caption{font-size:12px; color:var(--text-faint); margin-top:0;}
   .countdown-card.finished .cd-value{color:var(--gold);}
   a.countdown-card{display:block; text-decoration:none; color:inherit; transition:border-color .15s, box-shadow .15s;}
-  a.countdown-card:hover{border-color:var(--accent); box-shadow:0 0 18px rgba(0,229,199,.15);}
+  a.countdown-card:hover{border-color:var(--accent);}
   .reto-winner-card{border-color:rgba(250,204,21,.45);}
-  .reto-winner-name{font-family:'Rajdhani',sans-serif; font-size:30px; font-weight:800; color:var(--gold); line-height:1.1;}
+  .reto-winner-name{font-family:'Rajdhani',sans-serif; font-size:26px; font-weight:800; color:var(--gold); line-height:1.1;}
   .reto-winner-link{margin-top:8px; font-size:12px; font-weight:700; color:var(--accent);}
   @media (max-width:600px){ .countdown-grid{grid-template-columns:1fr;} }
 
@@ -326,12 +357,13 @@
   .value-changed::after{content:''; position:absolute; top:0; left:-60%; width:50%; height:100%; pointer-events:none;
     background:linear-gradient(100deg, transparent, rgba(255,255,255,.75), transparent);
     animation:sweep-shine .9s ease;}
-  @keyframes value-flash{ 0%{ filter:brightness(1);} 18%{ filter:brightness(1.6) drop-shadow(0 0 6px var(--accent-glow)); } 100%{ filter:brightness(1); } }
+  @keyframes value-flash{ 0%{ filter:brightness(1);} 18%{ filter:brightness(1.6); } 100%{ filter:brightness(1); } }
   @keyframes sweep-shine{ from{ left:-60%; } to{ left:130%; } }
 
   footer{margin-top:60px; padding-top:32px; border-top:1px solid var(--border); text-align:center; color:var(--text-dim); font-size:13px;}
   footer .legal{max-width:640px; margin:0 auto; font-size:11px; line-height:1.5; color:var(--text-faint, var(--text-dim)); opacity:.75;}
 </style>
+<link rel="stylesheet" href="assets/tema.css">
 </head>
 <body>
 <div class="wrap">
@@ -358,13 +390,15 @@
     </div>
   </div>
 
-  <section id="primera-victoria-section">
-    <div id="primera-victoria"></div>
-  </section>
+  <div class="destacados-dia">
+    <section id="primera-victoria-section">
+      <div id="primera-victoria"></div>
+    </section>
 
-  <section id="partida-mes-section">
-    <div id="partida-mes"></div>
-  </section>
+    <section id="partida-mes-section">
+      <div id="partida-mes"></div>
+    </section>
+  </div>
 
   <section>
     <div class="section-title"><span class="bar"></span><h2>Últimas 10 Partidas</h2></div>
@@ -378,41 +412,45 @@
         <option value="ALL">Todos los Elos</option>
       </select>
     </div>
-    <div class="rank-head">
-      <div class="col-pos">#</div><div style="width:44px;"></div>
-      <div style="flex-grow:1;">Jugador</div><div class="col-twitch"></div><div style="width:64px;"></div>
-      <div class="col-estado">Estado</div>
-      <div class="col-role"><span class="trend-arrow"></span><span class="role-head">Rol (10p)</span></div>
-      <div class="col-rank">Rango</div>
-      <div class="col-wr">Winrate</div>
-    </div>
-    <div class="rank-list" id="ranking-list"></div>
-  </section>
-
-  <section>
-    <div class="section-title"><span class="bar"></span><h2>Historial Individual</h2></div>
-    <div class="history-panel" id="history-panel">
-      <p class="empty">Haz clic en la fila de un jugador para ver su historial reciente.</p>
+    <div class="rank-table">
+      <div class="rank-head">
+        <div class="col-pos">#</div><div style="width:44px;"></div>
+        <div style="flex-grow:1;">Jugador</div><div class="col-twitch"></div>
+        <div class="col-forma">Racha · últimas 5</div>
+        <div class="col-estado">Estado</div>
+        <div class="col-role"><span class="role-head">Rol (10p)</span></div>
+        <div class="col-rank">Rango</div>
+        <div class="col-wr">Winrate</div>
+      </div>
+      <div class="rank-list" id="ranking-list"></div>
     </div>
   </section>
 
-  <section id="rey-temporada-section" style="display:none;">
-    <div id="rey-temporada"></div>
+  <section class="historial-temporada">
+    <div>
+      <div class="section-title"><span class="bar"></span><h2>Historial Individual</h2><span class="aside" id="history-who"></span></div>
+      <div class="history-panel" id="history-panel">
+        <p class="empty">Haz clic en la fila de un jugador para ver su historial reciente.</p>
+      </div>
+    </div>
+    <div>
+      <div class="section-title"><span class="bar"></span><h2>Temporada</h2></div>
+      <section id="rey-temporada-section" style="display:none;">
+        <div id="rey-temporada"></div>
+      </section>
+      <div class="countdown-grid" id="countdown-grid"></div>
+    </div>
   </section>
 
   <section>
     <div class="section-title"><span class="bar"></span><h2>Destacados de la Semana</h2></div>
     <div class="cards-grid" id="destacados-semana"></div>
+    <p class="sin-duenyo" id="sin-duenyo" hidden></p>
   </section>
 
   <section>
     <div class="section-title"><span class="bar"></span><h2>Historial de Logros</h2></div>
     <div class="logros-panel" id="logros"></div>
-  </section>
-
-  <section>
-    <div class="section-title"><span class="bar"></span><h2>Cuenta Regresiva</h2></div>
-    <div class="countdown-grid" id="countdown-grid"></div>
   </section>
 
   <footer>
@@ -429,6 +467,7 @@ import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
 import { renderMatchOfMonth } from './assets/rank-history.js';
+import { icono } from './assets/iconos.js';
 import { injectCosmeticsCss, decorateAvatar, applyRowEffect, nameHtml, loadEquipped } from './assets/cosmetics.js';
 injectCosmeticsCss();
 let equippedMap = new Map();   // cosméticos de la tienda que lleva puestos cada jugador
@@ -440,29 +479,32 @@ const TIER_ORDER = ['IRON','BRONZE','SILVER','GOLD','PLATINUM','EMERALD','DIAMON
 const TIER_LABEL = {IRON:'Hierro',BRONZE:'Bronce',SILVER:'Plata',GOLD:'Oro',PLATINUM:'Platino',EMERALD:'Esmeralda',DIAMOND:'Diamante',MASTER:'Maestro',GRANDMASTER:'Gran Maestro',CHALLENGER:'Aspirante'};
 const MINI_CREST_BASE = 'https://raw.communitydragon.org/14.10/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/';
 const BADGE_META = {
-  top_asesino:{icono:'⚔️',label:'Top Asesino',empty:'Sin partidas registradas todavía.'},
-  top_observador:{icono:'👁️',label:'Top Observador',empty:'Sin partidas registradas todavía.'},
-  sin_rendirse:{icono:'🎮',label:'Sin Rendirse',empty:'Nadie ha jugado 3 o más partidas hoy todavía.'},
-  otp_del_torneo:{icono:'🎯',label:'OTP del Torneo',empty:'Nadie ha jugado esta semana todavía.'},
-  escalador:{icono:'📈',label:'El Escalador',empty:'Nadie ha subido de LP esta semana todavía.'},
-  horas_en_la_grieta:{icono:'⏱️',label:'Horas en la Grieta',empty:'Nadie ha jugado esta semana todavía.'},
-  agresivo:{icono:'🩸',label:'Agresivo',empty:'Nadie ha conseguido primera sangre esta semana.'},
-  kda_player:{icono:'📊',label:'KDA Player',empty:'Sin partidas suficientes esta semana.'},
-  pentakills:{icono:'💀',label:'Pentakills',empty:'Nadie ha conseguido una pentakill esta semana.'},
-  tortuga:{icono:'🐢',label:'El Tortuga',empty:'Nadie ha jugado esta semana aún.'},
-  asistente:{icono:'🤝',label:'El Asistente',empty:'Sin datos de asistencias aún.'},
-  duo_dinamico:{icono:'🎮',label:'Dúo Dinámico',empty:'Nadie ha jugado en dúo esta semana.'},
-  farmeador:{icono:'🌾',label:'El Farmeador',empty:'Sin partidas suficientes esta semana.'},
-  defensor:{icono:'🛡️',label:'El Defensor',empty:'Sin partidas suficientes esta semana.'},
-  ladron:{icono:'🥷',label:'El Ladrón',empty:'Nadie ha robado un objetivo esta semana.'},
-  destructor:{icono:'💥',label:'El Destructor',empty:'Nadie ha destruido una estructura esta semana.'},
-  stop:{icono:'🛑',label:'Stop',empty:'Nadie ha inmovilizado a un enemigo esta semana.'},
-  champion_pool:{icono:'🎭',label:'Maestro del Champion Pool',empty:'Nadie ha ganado esta semana todavía.'},
+  top_asesino:{icono:'espadas',label:'Top Asesino',empty:'Sin partidas registradas todavía.'},
+  top_observador:{icono:'ojo',label:'Top Observador',empty:'Sin partidas registradas todavía.'},
+  sin_rendirse:{icono:'mando',label:'Sin Rendirse',empty:'Nadie ha jugado 3 o más partidas hoy todavía.'},
+  otp_del_torneo:{icono:'diana',label:'OTP del Torneo',empty:'Nadie ha jugado esta semana todavía.'},
+  escalador:{icono:'sube',label:'El Escalador',empty:'Nadie ha subido de LP esta semana todavía.'},
+  horas_en_la_grieta:{icono:'reloj',label:'Horas en la Grieta',empty:'Nadie ha jugado esta semana todavía.'},
+  agresivo:{icono:'gota',label:'Agresivo',empty:'Nadie ha conseguido primera sangre esta semana.'},
+  kda_player:{icono:'barras',label:'KDA Player',empty:'Sin partidas suficientes esta semana.'},
+  pentakills:{icono:'calavera',label:'Pentakills',empty:'Nadie ha conseguido una pentakill esta semana.'},
+  tortuga:{icono:'caparazon',label:'El Tortuga',empty:'Nadie ha jugado esta semana aún.'},
+  asistente:{icono:'manos',label:'El Asistente',empty:'Sin datos de asistencias aún.'},
+  duo_dinamico:{icono:'mando',label:'Dúo Dinámico',empty:'Nadie ha jugado en dúo esta semana.'},
+  farmeador:{icono:'espiga',label:'El Farmeador',empty:'Sin partidas suficientes esta semana.'},
+  defensor:{icono:'escudo',label:'El Defensor',empty:'Sin partidas suficientes esta semana.'},
+  ladron:{icono:'mano',label:'El Ladrón',empty:'Nadie ha robado un objetivo esta semana.'},
+  destructor:{icono:'explosion',label:'El Destructor',empty:'Nadie ha destruido una estructura esta semana.'},
+  stop:{icono:'alto',label:'Stop',empty:'Nadie ha inmovilizado a un enemigo esta semana.'},
+  champion_pool:{icono:'capas',label:'Maestro del Champion Pool',empty:'Nadie ha ganado esta semana todavía.'},
 };
+// Ícono (assets/iconos.js) + color de cada tipo de evento del Historial de Logros.
 const EVENT_META = {
-  badge_semanal:'🏅', badge_reciente:'🏅', record_lp:'📈', adelantamiento:'🔥', rey_temporada:'👑',
-  primera_victoria_dia:'🌅', reto_ganado:'🏆', posible_egida:'assets/Aegis_of_Valor_icon.svg', logro_partida:'⚔️',
-  mision_completada:'🎯', mision_grupal:'👥', reroll_ganado:'🎲', compra:'🛍️', canje:'🎁', insignia:'🏅',
+  badge_semanal:['medalla','#f3d36b'], badge_reciente:['medalla','#f3d36b'], record_lp:['sube','#6fdba8'],
+  adelantamiento:['fuego','#ffb38a'], rey_temporada:['corona','#facc15'], primera_victoria_dia:['amanecer','#f3d36b'],
+  reto_ganado:['trofeo','#f3d36b'], posible_egida:['assets/Aegis_of_Valor_icon.svg','#a9b7c6'], logro_partida:['espadas','#00e5c7'],
+  mision_completada:['diana','#00e5c7'], mision_grupal:['grupo','#00e5c7'], reroll_ganado:['dado','#c4b5fd'],
+  compra:['bolsa','#c4b5fd'], canje:['regalo','#c4b5fd'], insignia:['insignia','#f3d36b'],
 };
 
 const ddragonVersion = await getDDragonVersion('15.19.1');
@@ -589,20 +631,6 @@ async function loadAllHistories(playerIds) {
 
 // Racha de 3+ victorias o derrotas seguidas, contando desde la partida
 // más reciente hacia atrás — mismo criterio que usaba el sitio viejo.
-// Flecha de tendencia junto al rol — YA NO es "ganaste/perdiste la
-// última partida" (así era en el sitio viejo), Alex pidió cambiarlo a
-// balance de victorias/derrotas en las últimas 5 de SoloQ: más
-// victorias que derrotas → arriba, más derrotas que victorias → abajo.
-// Con 3 partidas o menos jugadas, o empate 2-2, no hay flecha.
-function getTrendArrow(id) {
-  const games = (historyByPlayer.get(id) ?? []).slice(0, 5);
-  if (games.length < 3) return null;
-  const wins = games.filter(g => g.win).length;
-  const losses = games.length - wins;
-  if (wins === losses) return null;
-  return wins > losses ? 'up' : 'down';
-}
-
 function getStreakType(id) {
   const games = historyByPlayer.get(id) ?? [];
   if (games.length < 3) return null;
@@ -610,6 +638,14 @@ function getStreakType(id) {
   let racha = 0;
   for (const g of games) { if (g.win === primero) racha++; else break; }
   return racha >= 3 ? (primero ? 'fire' : 'ice') : null;
+}
+// Cuántas seguidas lleva (mismo sentido que la última partida).
+function getStreakCount(id) {
+  const games = historyByPlayer.get(id) ?? [];
+  if (!games.length) return 0;
+  let racha = 0;
+  for (const g of games) { if (g.win === games[0].win) racha++; else break; }
+  return racha;
 }
 
 // Cambiar de jugador seleccionado ya no consulta la red — solo lee
@@ -679,7 +715,7 @@ function renderHistoryPanel(id) {
         <span>
           <div class="match-champ">${m.champion}</div>
           <div class="match-kda">${kda} KDA</div>
-          ${duoNames.length ? `<div class="match-duo">🎮 Dúo con ${duoNames.join(', ')}</div>` : ''}
+          ${duoNames.length ? `<div class="match-duo">${icono('mando', { size: 13 })} Dúo con ${duoNames.join(', ')}</div>` : ''}
         </span>
         <span class="match-result-block">
           <span class="result-chip ${resultado}">${resultado === 'victoria' ? 'Victoria' : resultado === 'remake' ? 'Remake' : 'Derrota'}</span>
@@ -693,6 +729,8 @@ function renderHistoryPanel(id) {
   }).join('');
 
   panel.innerHTML = `<div class="matches">${matchesHtml}</div>`;
+  const who = document.getElementById('history-who');
+  if (who) who.textContent = `${nameById.get(id) ?? ''} · últimas ${participaciones.length} de SoloQ`;
 }
 
 // ── Filtro de elo: se arma una sola vez ──────────────────────────
@@ -714,29 +752,26 @@ let podiumSweepFields = new Map();
 // fila ni se toca — así una fila cambiando no hace parpadear a las demás.
 function buildRow(p, idx) {
   const streakType = getStreakType(p.id); // 'fire' | 'ice' | null
-  const streakEmoji = streakType === 'fire' ? '🔥' : streakType === 'ice' ? '❄️' : '';
-  const streakTitle = streakType === 'fire' ? 'Racha de victorias' : streakType === 'ice' ? 'Racha de derrotas' : '';
+  const streakTitle = streakType === 'fire' ? 'Racha de victorias' : streakType === 'ice' ? 'Racha de derrotas (mala racha)' : '';
+  const streakN = streakType ? getStreakCount(p.id) : 0;
+  // Racha + últimas 5 de SoloQ (cuadritos azul = victoria, rojo = derrota).
+  const ultimas = (historyByPlayer.get(p.id) ?? []).slice(0, 5);
+  const ultimasKey = ultimas.map(g => g.win ? 'w' : 'l').join('');
+  const rachaHtml = streakType
+    ? `<span class="racha ${streakType}" title="${streakTitle}">${icono(streakType === 'fire' ? 'fuego' : 'copo', { size: 15 })}${streakType === 'fire' ? '+' : '−'}${streakN}</span>`
+    : '<span class="racha"></span>';
+  const formaHtml = `${rachaHtml}<div class="ultimas" title="Últimas ${ultimas.length} de SoloQ">${[...ultimasKey].map(c => `<i class="${c}"></i>`).join('')}</div>`;
+  // LP ganados/perdidos en esas últimas 5.
+  const conLp = ultimas.filter(g => g.lp_change != null);
+  const lpDelta = conLp.length ? conLp.reduce((t, g) => t + g.lp_change, 0) : null;
+  const lpDeltaHtml = lpDelta ? `<span class="lp-delta ${lpDelta > 0 ? 'up' : 'down'}" title="LP en sus últimas ${conLp.length}">${lpDelta > 0 ? '▲' : '▼'} ${Math.abs(lpDelta)}</span>` : '';
   const enPartida = p.live?.in_game;
   const duoCon = p.live?.duo_con ?? [];
   const wr = p.rank && (p.rank.wins + p.rank.losses) > 0 ? Math.round(p.rank.wins / (p.rank.wins + p.rank.losses) * 100) : null;
-  const trend = getTrendArrow(p.id);
-  const trendHtml = trend
-    ? `<span class="trend-arrow ${trend}" title="${trend === 'up' ? 'Más victorias que derrotas en sus últimas 5' : 'Más derrotas que victorias en sus últimas 5'}">${trend === 'up' ? '▲' : '▼'}</span>` : '<span class="trend-arrow"></span>';
 
-  // Top 3 con corona/medalla (con glow) reemplazando el número — el
-  // resto de las posiciones muestra el número normal.
+  // #1 con corona dibujada; #2 y #3 con su número en plata/bronce.
   const posClass = idx === 0 ? 'pos-1' : idx === 1 ? 'pos-2' : idx === 2 ? 'pos-3' : '';
-  const posContent = idx === 0 ? '👑' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : (idx + 1);
-
-  // Campeón representativo: en vivo si está jugando, si no su
-  // "representación" elegida (players.favorite_champion). Ya no cubre
-  // toda la fila (eso se sacó) — es solo la franja angosta y difuminada
-  // de .col-champ-outer, entre el nombre y la columna de Estado.
-  // Campeón/skin elegidos en su perfil, o los que venían cargados por defecto.
-  const favChamp = p.profile?.favorite_champion || p.favorite_champion;
-  const favSkin = p.profile?.favorite_champion ? (p.profile.favorite_skin ?? 0) : (p.favorite_skin ?? 0);
-  const champBg = enPartida ? p.live.champion : favChamp;
-  const skinBg = enPartida ? 0 : favSkin;
+  const posContent = idx === 0 ? icono('corona', { size: 20, color: '#facc15', title: 'Primer lugar' }) : (idx + 1);
 
   const iconUrl = profileIconUrl(p.icon_id);
   const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(p.riot_game_name);
@@ -756,17 +791,17 @@ function buildRow(p, idx) {
     <div class="row-content">
       <div class="col-pos ${posClass}">${posContent}</div>
       <div class="col-avatar"><div class="avatar-circle">${avatarHtml}</div></div>
-      <div class="col-name"><a class="profile-link" href="perfil.html?jugador=${encodeURIComponent(p.id)}" title="Ver perfil de ${esc(p.riot_game_name)}" onclick="event.stopPropagation()">${nameHtml(p.riot_game_name, cos)}</a>${streakEmoji ? ` <span class="streak-icon" title="${streakTitle}">${streakEmoji}</span>` : ''}</div>
+      <div class="col-name"><a class="profile-link" href="perfil.html?jugador=${encodeURIComponent(p.id)}" title="Ver perfil de ${esc(p.riot_game_name)}" onclick="event.stopPropagation()">${nameHtml(p.riot_game_name, cos)}</a></div>
       <div class="col-twitch">${twitchBadgeHtml}</div>
-      <div class="col-champ-outer ${enPartida ? 'live' : ''}" ${champBg ? `style="--champbg:url('${splashUrl(champBg, skinBg)}')"` : ''}></div>
+      <div class="col-forma">${formaHtml}</div>
       <div class="col-estado">
-        ${enPartida && p.live.game_id ? `<a class="status-chip in-game" href="en-vivo.html?partida=${encodeURIComponent(p.live.game_id)}" title="Ver la partida en vivo" onclick="event.stopPropagation()">En partida ›</a>` : `<span class="status-chip ${enPartida ? 'in-game' : 'offline'}">${enPartida ? 'En partida' : 'Offline'}</span>`}
-        ${enPartida && duoCon.length ? `<span class="duo-tag" title="Dúo con ${esc(duoCon.join(', '))}">🎮 con ${esc(duoCon.join(', '))}</span>` : ''}
+        ${enPartida && p.live.game_id ? `<a class="status-chip in-game" href="en-vivo.html?partida=${encodeURIComponent(p.live.game_id)}" title="Ver la partida en vivo" onclick="event.stopPropagation()">En partida ›</a>` : `<span class="status-chip ${enPartida ? 'in-game' : 'offline'}">${enPartida ? 'En partida' : 'Desconectado'}</span>`}
+        ${enPartida && duoCon.length ? `<span class="duo-tag" title="Dúo con ${esc(duoCon.join(', '))}">${icono('mando', { size: 13 })} con ${esc(duoCon.join(', '))}</span>` : ''}
       </div>
-      <div class="col-role">${trendHtml}${p.primary_role ? `<span class="role-pill">${roleLabel(p.primary_role)}</span>` : '<span class="role-head">—</span>'}</div>
+      <div class="col-role">${p.primary_role ? `<span class="role-pill">${roleLabel(p.primary_role)}</span>` : '<span class="role-head">—</span>'}</div>
       <div class="col-rank">
         <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="" onerror="${HIDE_ONERROR}">
-        <div class="tier-lp"><div class="tier">${tierText}</div><div class="lp">${lpText}</div></div>
+        <div class="tier-lp"><div class="tier">${tierText}</div><div class="lp">${lpText}${lpDeltaHtml}</div></div>
       </div>
       <div class="col-wr">
         ${wr !== null ? `<div class="wr-pct">${wr}%</div><div class="wr-bar"><div class="wr-fill" style="width:${wr}%"></div></div>` : ''}
@@ -774,8 +809,8 @@ function buildRow(p, idx) {
     </div>`;
 
   row.dataset.signature = JSON.stringify([
-    p.id === selectedPlayerId, streakType, posContent, champBg, skinBg,
-    avatarHtml, twitchLive, enPartida, duoCon, trend, roleLabel(p.primary_role), tierText, lpText, wr,
+    p.id === selectedPlayerId, streakType, streakN, ultimasKey, lpDelta, posContent,
+    avatarHtml, twitchLive, enPartida, duoCon, roleLabel(p.primary_role), tierText, lpText, wr,
     cos?.marco, cos?.fila, cos?.nombre, cos?.nombre_valor, cos?.emoji,
   ]);
   // Cosméticos de la tienda: efecto de fila + marco alrededor del avatar
@@ -825,10 +860,11 @@ function renderRanking() {
 }
 filterSelect.addEventListener('change', renderRanking);
 
-function renderBadgeCard(container, categoria, badgeByCategory, nameById) {
+function renderBadgeCard(container, categoria, badgeByCategory, nameById, { soloConDueno = false } = {}) {
   const meta = BADGE_META[categoria];
-  if (!meta) return;
+  if (!meta) return false;
   const b = badgeByCategory.get(categoria);
+  if (!b && soloConDueno) return false;
   const div = document.createElement('div');
   div.className = 'info-card';
   if (b) {
@@ -840,7 +876,7 @@ function renderBadgeCard(container, categoria, badgeByCategory, nameById) {
     const champHtml = b.champion
       ? `<img class="badge-champ-icon" src="${champIconUrl(b.champion)}" alt="${esc(b.champion)}" onerror="${HIDE_ONERROR}">` : '';
     div.innerHTML = `
-      <div class="ico">${meta.icono}</div>
+      <div class="ico">${icono(meta.icono, { size: 20, color: '#00e5c7' })}</div>
       <div style="min-width:0;">
         <div class="info-label">${meta.label}</div>
         <div class="info-player">${nombres}</div>
@@ -848,13 +884,14 @@ function renderBadgeCard(container, categoria, badgeByCategory, nameById) {
       </div>`;
   } else {
     div.innerHTML = `
-      <div class="ico">${meta.icono}</div>
+      <div class="ico">${icono(meta.icono, { size: 20, color: '#8696a8' })}</div>
       <div style="min-width:0;">
         <div class="info-label">${meta.label}</div>
         <div class="info-detail" style="color:var(--text-faint);font-weight:600;">${meta.empty ?? 'Sin datos todavía.'}</div>
       </div>`;
   }
   container.appendChild(div);
+  return true;
 }
 
 // ── Carga + dibuja TODO — se vuelve a llamar cada vez que Realtime
@@ -947,7 +984,7 @@ function renderPodium() {
     if (!p) return;
     const rankNum = idx + 1;
     const div = document.createElement('div');
-    div.className = `podium-card ${rankNum === 1 ? 'rank1' : ''}`;
+    div.className = `podium-card ${rankNum === 1 ? 'rank1' : rankNum === 2 ? 'silver-ring' : 'bronze-ring'}`;
     // Fondo del podio = SIEMPRE la skin elegida (favorite_champion/skin).
     // El swap a campeón en vivo solo pasa en la fila del ranking, no aquí.
     const champBg = p.profile?.favorite_champion || p.favorite_champion;
@@ -958,7 +995,7 @@ function renderPodium() {
     // Avatar = ícono de invocador REAL (players.icon_id), no el campeón.
     const iconUrl = profileIconUrl(p.icon_id);
     const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(p.riot_game_name);
-    const medalIcon = rankNum === 1 ? '👑' : rankNum === 2 ? '🥈' : '🥉';
+    const medalIcon = rankNum === 1 ? icono('corona', { size: 44, color: '#facc15', title: 'Primer lugar' }) : '';
     const medalClass = rankNum === 1 ? 'gold' : rankNum === 2 ? 'silver' : 'bronze';
     const tierText = p.rank ? (TIER_LABEL[p.rank.tier] ?? p.rank.tier) + ' ' + (p.rank.division ?? '') : 'Unranked';
     const lpText = `${p.rank?.lp ?? 0} LP`;
@@ -972,7 +1009,7 @@ function renderPodium() {
     div.innerHTML = `
       ${splashHtml}
       <div class="podium-medal ${medalClass}">${medalIcon}</div>
-      <div class="podium-rank-chip">${rankNum === 1 ? '👑 #1' : '#' + rankNum}</div>
+      <div class="podium-rank-chip ${medalClass}">#${rankNum}</div>
       <div class="podium-avatar">${avatarHtml}</div>
       <div class="podium-name"><a class="profile-link" href="perfil.html?jugador=${encodeURIComponent(p.id)}" title="Ver perfil de ${esc(p.riot_game_name)}">${esc(p.riot_game_name)}</a></div>
       <div class="podium-meta">${roleLabel(p.primary_role) ?? 'Sin datos'}</div>
@@ -998,21 +1035,26 @@ function renderTwitch() {
       const parentDomain = window.location.hostname || 'localhost';
       card.innerHTML = `
       <div class="twitch-preview">
-        <div class="twitch-live-chip"><span class="pulse-dot"></span><span style="font-size:10px;font-weight:800;color:#fff;text-transform:uppercase;">En vivo</span></div>
+        <div class="twitch-live-chip"><span class="pulse-dot"></span><span style="font-size:11px;font-weight:800;color:#fff;text-transform:uppercase;">En vivo</span></div>
         <iframe src="https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parentDomain}&muted=true" allowfullscreen></iframe>
       </div>
       <div class="twitch-info">
-        <div class="twitch-label"></div>
+        <div class="twitch-head"><b>En vivo ahora</b><span>Twitch</span></div>
+        <div class="twitch-label"><img alt="" hidden><span></span></div>
         <div class="twitch-title"></div>
         <div class="twitch-game"></div>
         <div class="twitch-viewers"></div>
+        <a class="twitch-btn" href="https://twitch.tv/${encodeURIComponent(channel)}" target="_blank" rel="noopener">Ver en Twitch</a>
       </div>`;
       card.dataset.channel = channel;
     }
-    card.querySelector('.twitch-label').textContent = channel;
+    card.querySelector('.twitch-label span').textContent = channel;
+    const twIcon = profileIconUrl(liveStreamer.icon_id);
+    const twImg = card.querySelector('.twitch-label img');
+    if (twIcon && twImg.getAttribute('src') !== twIcon) { twImg.src = twIcon; twImg.hidden = false; }
     card.querySelector('.twitch-title').textContent = liveStreamer.stream.title ?? '';
     card.querySelector('.twitch-game').textContent = liveStreamer.stream.game_name ?? '';
-    card.querySelector('.twitch-viewers').textContent = `${liveStreamer.stream.viewer_count ?? 0} viewers`;
+    card.querySelector('.twitch-viewers').textContent = `${liveStreamer.stream.viewer_count ?? 0} espectadores`;
     requestAnimationFrame(() => twitchWrap.classList.add('visible'));
   } else {
     twitchWrap.classList.remove('visible');
@@ -1044,9 +1086,9 @@ function renderFirstWin() {
     document.getElementById('primera-victoria').innerHTML = `
       <div class="spotlight-card">
         <div class="spotlight-badge">Primera Victoria del Día</div>
-        <div class="spotlight-icon" style="margin-top:8px;">${pvAvatarHtml}</div>
+        <div class="spotlight-icon">${pvAvatarHtml}</div>
         ${pvChampHtml}
-        <div style="margin-top:8px;min-width:0;">
+        <div style="min-width:0;">
           <div style="font-size:17px;font-weight:800;">${esc(p.riot_game_name)}</div>
           <div class="spotlight-meta">
             ${firstWin.champion ? `<span>${esc(firstWin.champion)}</span>` : ''}
@@ -1056,7 +1098,7 @@ function renderFirstWin() {
             ${pvDuracion ? `<span>${pvDuracion}</span>` : ''}
           </div>
         </div>
-        <div style="margin-top:8px;margin-left:auto;font-size:12px;color:var(--gold);font-weight:800;">
+        <div style="margin-left:auto;font-size:13px;color:#f3d36b;font-weight:700;">
           ${new Date(firstWin.won_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
         </div>
       </div>`;
@@ -1064,8 +1106,8 @@ function renderFirstWin() {
     document.getElementById('primera-victoria').innerHTML = `
       <div class="spotlight-card pending">
         <div class="spotlight-badge">Primera Victoria del Día</div>
-        <div class="spotlight-icon" style="margin-top:8px;">🌅</div>
-        <div style="margin-top:8px;font-size:13px;color:var(--text-faint);font-weight:600;">Nadie ha ganado hoy todavía.</div>
+        <div class="spotlight-icon">${icono('amanecer', { size: 24 })}</div>
+        <div style="font-size:13px;color:var(--text-faint);font-weight:600;">Nadie ha ganado hoy todavía.</div>
       </div>`;
   }
 }
@@ -1078,9 +1120,15 @@ function renderBadges() {
   badgesRecientesEl.innerHTML = '';
   destacadosEl.innerHTML = '';
   ['top_asesino', 'sin_rendirse', 'top_observador'].forEach(c => renderBadgeCard(badgesRecientesEl, c, badgeByCategory, nameById));
+  // Destacados: tarjeta solo para los que tienen dueño; el resto en una línea.
+  const sinDueno = [];
   ['otp_del_torneo', 'escalador', 'horas_en_la_grieta', 'agresivo', 'kda_player', 'champion_pool',
    'tortuga', 'asistente', 'pentakills', 'duo_dinamico', 'farmeador', 'defensor', 'ladron', 'destructor', 'stop']
-    .forEach(c => renderBadgeCard(destacadosEl, c, badgeByCategory, nameById));
+    .forEach(c => { if (!renderBadgeCard(destacadosEl, c, badgeByCategory, nameById, { soloConDueno: true }) && BADGE_META[c]) sinDueno.push(BADGE_META[c].label); });
+  const sinDuenoEl = document.getElementById('sin-duenyo');
+  sinDuenoEl.hidden = !sinDueno.length;
+  sinDuenoEl.textContent = sinDueno.length ? `Sin dueño esta semana: ${sinDueno.join(', ')}.` : '';
+  if (!destacadosEl.children.length) destacadosEl.innerHTML = '<div class="empty" style="grid-column:1/-1;">Nadie ha reclamado un destacado esta semana todavía.</div>';
 
   // Rey de la Temporada — mismo formato que el sitio viejo: ícono real
   // de invocador con coronita superpuesta, nombre completo (con tag) y
@@ -1099,12 +1147,12 @@ function renderBadges() {
       <div class="spotlight-card">
         <div class="rey-avatar-wrap">
           <div class="spotlight-icon">${reyAvatarHtml}</div>
-          <div class="rey-crown-badge">👑</div>
+          <div class="rey-crown-badge">${icono('corona', { size: 13, color: '#facc15' })}</div>
         </div>
         <div style="min-width:0;flex-grow:1;">
-          <div class="rey-label"><span>👑</span>Rey de la Temporada</div>
+          <div class="rey-label">${icono('corona', { size: 15, color: '#facc15' })}Rey de la Temporada</div>
           <div style="font-size:15px;font-weight:800;margin-top:3px;">${esc(reyNombre)}</div>
-          <div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:2px;">${esc(rey.detail)}</div>
+          <div style="font-size:13px;color:#f3d36b;font-weight:600;margin-top:2px;">${esc(rey.detail)}</div>
         </div>
       </div>`;
   } else {
@@ -1134,7 +1182,7 @@ function renderLogros() {
     logrosEl.innerHTML = `<div class="empty">Todavía no hay logros registrados.</div>`;
   } else {
     events.forEach(ev => {
-      const icono = EVENT_META[ev.type] ?? '🔔';
+      const [ico, color] = EVENT_META[ev.type] ?? ['campana', '#a9b7c6'];
       const nombreNuevo = esc(nameById.get(ev.player_id) ?? '?');
       const nombreAnterior = ev.previous_player_id ? esc(nameById.get(ev.previous_player_id)) : null;
       let texto = '';
@@ -1146,9 +1194,9 @@ function renderLogros() {
       else if (ev.type === 'reto_ganado') texto = `<b>${nombreNuevo}</b> ganó el reto`;
       else if (ev.type === 'mision_completada') texto = `<b>${nombreNuevo}</b> completó una misión ${({ easy: 'fácil', medium: 'media', hard: 'difícil' })[ev.category] ?? ''}`;
       else if (ev.type === 'mision_grupal') texto = `El grupo completó la misión grupal`;
-      else if (ev.type === 'reroll_ganado') texto = `<b>${nombreNuevo}</b> ganó un reroll 🎲`;
-      else if (ev.type === 'compra') texto = `<b>${nombreNuevo}</b> se compró algo en la tienda 🛍️`;
-      else if (ev.type === 'canje') texto = `<b>${nombreNuevo}</b> canjeó un premio 🎁`;
+      else if (ev.type === 'reroll_ganado') texto = `<b>${nombreNuevo}</b> ganó un reroll`;
+      else if (ev.type === 'compra') texto = `<b>${nombreNuevo}</b> se compró algo en la tienda`;
+      else if (ev.type === 'canje') texto = `<b>${nombreNuevo}</b> canjeó un premio`;
       else if (ev.type === 'insignia') texto = `<b>${nombreNuevo}</b> consiguió una insignia`;
       else if (ev.type === 'posible_egida') texto = `<b>${nombreNuevo}</b> posible Égida de Valor`;
       else if (ev.category?.startsWith('perfecta:')) texto = `<b>${nombreNuevo}</b> logró Partida Perfecta`;
@@ -1158,9 +1206,9 @@ function renderLogros() {
 
       const item = document.createElement('div');
       item.className = 'logro-item';
-      const iconoHtml = icono.endsWith('.svg') ? `<img src="${icono}" alt="" onerror="${HIDE_ONERROR}">` : icono;
+      const iconoHtml = ico.endsWith('.svg') ? `<img src="${ico}" alt="" onerror="${HIDE_ONERROR}">` : icono(ico, { size: 18 });
       item.innerHTML = `
-        <div class="logro-icon">${iconoHtml}</div>
+        <div class="logro-icon" style="--c:${color}">${iconoHtml}</div>
         <div style="flex:1;min-width:0;">
           <div class="logro-text">${texto}</div>
           ${ev.detail ? `<div class="logro-detail">${esc(ev.detail)}</div>` : ''}
@@ -1232,7 +1280,7 @@ function buildCountdowns(reto) {
   const grid = document.getElementById('countdown-grid');
   const winnerCard = !reto?.open && reto?.lastWinner ? `
     <a class="countdown-card reto-winner-card" href="reto.html?id=${reto.lastWinner.id}">
-      <div class="countdown-label">🏆 Ganador de ${escHtml(reto.lastWinner.name)}</div>
+      <div class="countdown-label">Ganador de ${escHtml(reto.lastWinner.name)}</div>
       <div class="reto-winner-name">${escHtml(reto.lastWinner.player)}</div>
       <div class="reto-winner-link">Ver resultados →</div>
     </a>` : '';

@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#030812; --panel:rgba(10,22,34,.7); --border:#16324a; --text:#fff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --bg:#030812; --panel:rgba(10,22,34,.7); --border:#16324a; --text:#fff; --text-dim:#a9b7c6; --text-faint:#8696a8;
     --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45); --danger:#ff5f3d; --gold:#facc15; --pink:#ff5fa8; --violet:#a66bff; --radius:16px;
   }
   *{box-sizing:border-box;}
@@ -67,7 +67,7 @@
   .slide .bg{position:absolute; inset:0; background-size:cover; background-position:center 20%; z-index:0;}
   .slide .shade{position:absolute; inset:0; z-index:0;}
   .slide > .c{position:relative; z-index:1; display:flex; flex-direction:column; gap:14px;}
-  .k{font-size:12px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; color:var(--accent);}
+  .k{font-size:12px; font-weight:900; color:var(--accent);}
   .big{font-family:'Rajdhani',sans-serif; font-weight:800; font-size:78px; line-height:.9; letter-spacing:.01em;}
   .mid{font-family:'Rajdhani',sans-serif; font-weight:800; font-size:40px; line-height:1; letter-spacing:.02em; text-transform:uppercase;}
   .t{font-size:17px; line-height:1.45; color:#e6f1f8;} .t b{color:#fff;}
@@ -76,7 +76,7 @@
   .gold{color:var(--gold);} .pink{color:var(--pink);} .red{color:#ff8a6b;} .teal{color:var(--accent);}
   .row{display:flex; gap:10px; flex-wrap:wrap;}
   .pill{background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:12px; padding:10px 12px; min-width:92px;}
-  .pill b{display:block; font-family:'Rajdhani',sans-serif; font-size:26px; line-height:1;} .pill small{font-size:11px; color:var(--text-dim); font-weight:700; text-transform:uppercase; letter-spacing:.06em;}
+  .pill b{display:block; font-family:'Rajdhani',sans-serif; font-size:26px; line-height:1;} .pill small{font-size:11px; color:var(--text-dim); font-weight:700;}
   .mini{display:flex; align-items:center; gap:10px; font-size:14px; font-weight:700;}
   .mini img{width:40px; height:40px; border-radius:10px; border:1px solid rgba(255,255,255,.2);}
   .mini small{color:var(--text-dim); font-weight:600;}
@@ -85,7 +85,7 @@
   .rolebar span:last-child{text-align:right; color:var(--text-dim);}
   .ranks{display:grid; grid-template-columns:1fr auto 1fr auto 1fr; align-items:center; gap:6px; text-align:center;}
   .ranks .r img{width:64px; height:64px; object-fit:contain; display:block; margin:0 auto 4px;}
-  .ranks .r b{display:block; font-size:14px;} .ranks .r small{font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; font-weight:800;}
+  .ranks .r b{display:block; font-size:14px;} .ranks .r small{font-size:11px; color:var(--text-dim); font-weight:800;}
   .ranks .ar{font-size:20px; color:var(--text-faint);}
   .people{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
   .person{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:6px;}
@@ -94,12 +94,12 @@
   .person b{font-size:16px;} .person small{font-size:12px; color:var(--text-dim); line-height:1.4;}
   .summary{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
   .summary div{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:10px 12px;}
-  .summary small{display:block; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint);}
+  .summary small{display:block; font-size:11px; font-weight:800; color:var(--text-faint);}
   .summary b{font-size:15px;}
   .btns{display:flex; gap:8px; flex-wrap:wrap; position:relative; z-index:7;}
   .btn{border:none; border-radius:10px; padding:11px 16px; font:800 13.5px Inter,sans-serif; background:var(--accent); color:#032018; cursor:pointer; text-decoration:none;}
   .btn.ghost{background:rgba(255,255,255,.1); color:#fff; border:1px solid rgba(255,255,255,.2);}
-  .hint{position:absolute; bottom:18px; left:0; right:0; z-index:6; text-align:center; font-size:11.5px; color:rgba(255,255,255,.55); pointer-events:none;}
+  .hint{position:absolute; bottom:18px; left:0; right:0; z-index:6; text-align:center; font-size:12px; color:rgba(255,255,255,.55); pointer-events:none;}
   .badge-now{display:inline-block; align-self:flex-start; font-size:11px; font-weight:900; letter-spacing:.08em; color:#032018; background:var(--gold); border-radius:99px; padding:4px 10px;}
   /* Animación de entrada */
   .slide .c > *{opacity:0; transform:translateY(16px); animation:up .55s cubic-bezier(.2,.8,.2,1) forwards;}
@@ -109,6 +109,7 @@
   .slide .bg{animation:zoom 9s ease-out forwards;} @keyframes zoom{from{transform:scale(1.12);} to{transform:scale(1);}}
   @media (prefers-reduced-motion:reduce){ .slide .c > *, .slide .bg{animation:none; opacity:1; transform:none;} }
 </style>
+<link rel="stylesheet" href="assets/tema.css">
 </head>
 <body>
 <div class="wrap" id="picker">
@@ -138,6 +139,7 @@
 import { createSupabase } from './assets/supabase.js';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
+import { icono } from './assets/iconos.js';
 import { loadCatalogs, champName, champImg, splashUrl, profileIconUrl, emblemUrl, rankText, roleLabel, esc } from './assets/lol-data.js';
 createNavMenu({ current: 'rewind' });
 
@@ -283,8 +285,8 @@ function slides(R, sp) {
   }
   S.push({ html: `${glow('rgba(250,204,21,.28)', 'rgba(255,95,61,.25)')}<div class="c">
       <div class="k">Rachas</div>
-      ${R.best.n ? `<div class="t">🔥 Tu mejor racha</div><div class="big gold">${R.best.n}</div><div class="t">victorias seguidas <span class="sub">· ${fmtDate(R.best.from)}${fmtDate(R.best.from) !== fmtDate(R.best.to) ? ' → ' + fmtDate(R.best.to) : ''}</span></div>` : ''}
-      ${R.worst.n ? `<div class="t" style="margin-top:14px">❄️ Y la que prefieres olvidar</div><div class="mid red">${R.worst.n} derrotas seguidas</div><div class="sub">${fmtDate(R.worst.from)}${fmtDate(R.worst.from) !== fmtDate(R.worst.to) ? ' → ' + fmtDate(R.worst.to) : ''}</div>` : ''}</div>` });
+      ${R.best.n ? `<div class="t">${icono('fuego', { size: 18, color: '#ffb38a' })} Tu mejor racha</div><div class="big gold">${R.best.n}</div><div class="t">victorias seguidas <span class="sub">· ${fmtDate(R.best.from)}${fmtDate(R.best.from) !== fmtDate(R.best.to) ? ' → ' + fmtDate(R.best.to) : ''}</span></div>` : ''}
+      ${R.worst.n ? `<div class="t" style="margin-top:14px">${icono('copo', { size: 18, color: '#7dd3fc' })} Y la que prefieres olvidar</div><div class="mid red">${R.worst.n} derrotas seguidas</div><div class="sub">${fmtDate(R.worst.from)}${fmtDate(R.worst.from) !== fmtDate(R.worst.to) ? ' → ' + fmtDate(R.worst.to) : ''}</div>` : ''}</div>` });
   if (R.top) {
     const g = R.top;
     S.push({ bgimg: splashUrl(g.champion, 0), html: `${bg(splashUrl(g.champion, 0))}<div class="c">
@@ -300,8 +302,8 @@ function slides(R, sp) {
       <div class="k">Tu gente</div>
       <div class="mid">Amigos y <span class="red">rivales</span></div>
       <div class="people">
-        ${R.duo ? card(R.duo, '', '🤝 Tu dúo', `${R.duo.n} partidas juntos · ${R.duo.wr}% WR`) : '<div class="person"><small>🤝 Tu dúo</small><b>Nadie</b><small>No jugaste con nadie del grupo</small></div>'}
-        ${R.nem ? card(R.nem, 'nem', '😈 Tu némesis', `Te ganó ${R.nem.lost} de ${R.nem.n} veces que se enfrentaron`) : '<div class="person nem"><small>😈 Tu némesis</small><b>Ninguno</b><small>Nadie del grupo te ganó</small></div>'}
+        ${R.duo ? card(R.duo, '', `${icono('manos', { size: 14 })} Tu dúo`, `${R.duo.n} partidas juntos · ${R.duo.wr}% WR`) : `<div class="person"><small>${icono('manos', { size: 14 })} Tu dúo</small><b>Nadie</b><small>No jugaste con nadie del grupo</small></div>`}
+        ${R.nem ? card(R.nem, 'nem', `${icono('diablo', { size: 14 })} Tu némesis`, `Te ganó ${R.nem.lost} de ${R.nem.n} veces que se enfrentaron`) : `<div class="person nem"><small>${icono('diablo', { size: 14 })} Tu némesis</small><b>Ninguno</b><small>Nadie del grupo te ganó</small></div>`}
       </div></div>` });
   }
   if (R.rank) {
@@ -316,7 +318,7 @@ function slides(R, sp) {
   S.push({ html: `${glow('rgba(255,95,168,.3)', 'rgba(166,107,255,.3)')}<div class="c">
       <div class="k">Datos curiosos</div>
       <div class="row"><div class="pill"><b>${nInt(R.kills)}</b><small>asesinatos</small></div><div class="pill"><b>${nInt(R.deaths)}</b><small>muertes</small></div><div class="pill"><b>${nInt(R.assists)}</b><small>asistencias</small></div></div>
-      ${R.pentas ? `<div class="t">🖐️ <b>${R.pentas} pentakill${R.pentas === 1 ? '' : 's'}</b>. Leyenda.</div>` : ''}
+      ${R.pentas ? `<div class="t">${icono('mano', { size: 18 })} <b>${R.pentas} pentakill${R.pentas === 1 ? '' : 's'}</b>. Leyenda.</div>` : ''}
       ${R.maxKills ? `<div class="t">Tu partida más sangrienta: <b>${R.maxKills.kills} kills</b> con ${esc(champName(R.maxKills.champion))}.</div>` : ''}
       ${R.longest ? `<div class="t">La más larga duró <b>${Math.floor(R.longest.duration_seconds / 60)} minutos</b>.</div>` : ''}
       <div class="t">Tu hora favorita para jugar: <b>${String(R.favHour).padStart(2, '0')}:00</b>.</div></div>` });
@@ -328,12 +330,12 @@ function slides(R, sp) {
         <div><small>Partidas</small><b>${R.games} · ${R.wr}% WR</b></div>
         <div><small>Horas</small><b>${n1(R.hours)} h</b></div>
         <div><small>Campeón</small><b>${esc(champName(R.champs[0].c))}</b></div>
-        <div><small>Mejor racha</small><b>🔥 ${R.best.n}</b></div>
+        <div><small>Mejor racha</small><b>${icono('fuego', { size: 16, color: '#ffb38a' })} ${R.best.n}</b></div>
         <div><small>Dúo</small><b>${esc(R.duo?.p?.riot_game_name ?? '—')}</b></div>
         <div><small>Némesis</small><b>${esc(R.nem?.p?.riot_game_name ?? '—')}</b></div>
         ${R.rank ? `<div><small>Rango</small><b>${esc(rankText(R.rank.last))}</b></div><div><small>LP neto</small><b>${R.lpNet >= 0 ? '+' : ''}${R.lpNet}</b></div>` : ''}
       </div>
-      <div class="btns"><button class="btn" id="copy" data-url="${esc(url)}" type="button">🔗 Copiar link</button><a class="btn ghost" href="rewind.html?split=${sp.id}">Ver otro jugador</a><button class="btn ghost" id="again" type="button">↺ Otra vez</button></div></div>` });
+      <div class="btns"><button class="btn" id="copy" data-url="${esc(url)}" type="button">${icono('enlace', { size: 16 })} Copiar link</button><a class="btn ghost" href="rewind.html?split=${sp.id}">Ver otro jugador</a><button class="btn ghost" id="again" type="button">↺ Otra vez</button></div></div>` });
   return S;
 }
 
@@ -350,7 +352,7 @@ function show(i) {
   $('tap-next').hidden = !!s.final;
   $('copy')?.addEventListener('click', async (e) => {
     const b = e.currentTarget;
-    try { await navigator.clipboard.writeText(b.dataset.url); b.textContent = '✅ Copiado'; } catch { prompt('Copia el link:', b.dataset.url); }
+    try { await navigator.clipboard.writeText(b.dataset.url); b.textContent = 'Copiado'; } catch { prompt('Copia el link:', b.dataset.url); }
   });
   $('again')?.addEventListener('click', () => show(0));
 }
@@ -374,7 +376,7 @@ async function play(p) {
     <a class="x" href="rewind.html?split=${st.split.id}" aria-label="Cerrar">×</a>`;
   deck = R ? slides(R, st.split) : [{ final: true, html: `<div class="shade" style="background:#050b16"></div><div class="c">
       <div class="k">SoloQ Rewind · ${esc(st.split.name)}</div><div class="mid">${esc(p.riot_game_name)}</div>
-      <div class="t">No hay partidas de SoloQ guardadas en este split 😴</div>
+      <div class="t">No hay partidas de SoloQ guardadas en este split.</div>
       <div class="sub">El Rewind guarda datos desde finales de agosto de 2026: los splits anteriores no tienen partidas.</div>
       <div class="btns"><a class="btn ghost" href="rewind.html?split=${st.split.id}">Ver otro jugador</a></div></div>` }];
   show(0);

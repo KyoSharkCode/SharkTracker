@@ -5,6 +5,7 @@
 // Uso:  import { createMissionsWidget } from './assets/missions-widget.js';
 //       createMissionsWidget({ supabase, profileIconUrl });
 // ============================================================
+import { icono } from './iconos.js';
 
 const TIERS = {
   easy:   { label: 'Fácil',   color: '#22c55e', pts: 1 },
@@ -29,55 +30,55 @@ const CSS = `
 .mw-panel.open{transform:none;}
 .mw-head{display:flex; align-items:center; gap:10px; padding:18px 18px 14px; border-bottom:1px solid var(--border,#16324a);}
 .mw-head h2{margin:0; font-family:Rajdhani,sans-serif; font-size:21px; letter-spacing:.06em; text-transform:uppercase;}
-.mw-head small{display:block; font-size:12px; color:var(--text-faint,#6d8ba3); font-weight:600; margin-top:2px;}
+.mw-head small{display:block; font-size:12px; color:var(--text-faint,#8696a8); font-weight:600; margin-top:2px;}
 .mw-head small b{color:var(--accent,#00e5c7);}
-.mw-close{margin-left:auto; background:none; border:none; color:var(--text-faint,#6d8ba3); font-size:24px; cursor:pointer; line-height:1; padding:4px;}
+.mw-close{margin-left:auto; background:none; border:none; color:var(--text-faint,#8696a8); font-size:24px; cursor:pointer; line-height:1; padding:4px;}
 .mw-close:hover{color:#fff;}
 .mw-body{overflow-y:auto; padding:14px 16px 24px; display:flex; flex-direction:column; gap:18px;}
 .mw-panel section.mw-sec{margin:0; padding:0;}
-.mw-sec h3{margin:0 0 10px; display:flex; align-items:center; gap:8px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint,#6d8ba3);}
-.mw-sec h3 .rr{margin-left:auto; text-transform:none; letter-spacing:0; font-size:12px; color:var(--text-dim,#9db3c4);}
+.mw-sec h3{margin:0 0 10px; display:flex; align-items:center; gap:8px; font-size:11px; font-weight:800; color:var(--text-faint,#8696a8);}
+.mw-sec h3 .rr{margin-left:auto; text-transform:none; letter-spacing:0; font-size:12px; color:var(--text-dim,#a9b7c6);}
 .mw-sec h3 .rr b{color:#fff;}
 .mw-card{position:relative; background:rgba(13,26,38,.8); border:1px solid var(--border,#16324a); border-left:3px solid var(--tc); border-radius:12px; padding:11px 12px 12px; margin-bottom:8px;}
 .mw-card.done{border-color:rgba(250,204,21,.45); border-left-color:var(--tc); background:rgba(250,204,21,.05);}
 .mw-card .top{display:flex; align-items:center; gap:8px;}
-.mw-chip{font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; padding:2px 8px; border-radius:99px; color:#032018; background:var(--tc);}
-.mw-pts{margin-left:auto; font-size:11.5px; font-weight:800; color:var(--text-dim,#9db3c4);}
+.mw-chip{font-size:11px; font-weight:800; padding:2px 8px; border-radius:99px; color:#032018; background:var(--tc);}
+.mw-pts{margin-left:auto; font-size:12px; font-weight:800; color:var(--text-dim,#a9b7c6);}
 .mw-card.done .mw-pts{color:var(--gold,#facc15);}
 .mw-card .ttl{font-size:14px; font-weight:700; margin:7px 0 2px; line-height:1.35;}
-.mw-card .note{font-size:11px; color:var(--text-faint,#6d8ba3);}
+.mw-card .note{font-size:11px; color:var(--text-faint,#8696a8);}
 .mw-bar{display:flex; align-items:center; gap:8px; margin-top:8px;}
 .mw-bar .tr{flex:1; height:7px; border-radius:5px; background:rgba(255,255,255,.07); overflow:hidden;}
 .mw-bar .tr i{display:block; height:100%; border-radius:5px; background:var(--tc);}
-.mw-bar span{font-size:11.5px; font-weight:800; color:var(--text-dim,#9db3c4); min-width:34px; text-align:right;}
-.mw-reroll{border:1px solid var(--border,#16324a); background:none; color:var(--text-dim,#9db3c4); border-radius:8px; padding:3px 8px; font-size:12px; font-weight:700; cursor:pointer;}
+.mw-bar span{font-size:12px; font-weight:800; color:var(--text-dim,#a9b7c6); min-width:34px; text-align:right;}
+.mw-reroll{border:1px solid var(--border,#16324a); background:none; color:var(--text-dim,#a9b7c6); border-radius:8px; padding:3px 8px; font-size:12px; font-weight:700; cursor:pointer;}
 .mw-reroll:hover{border-color:var(--accent,#00e5c7); color:#fff;}
 .mw-reroll:disabled{opacity:.5; cursor:wait;}
-.mw-confirm{margin-top:9px; padding:9px 10px; border-radius:9px; background:rgba(0,229,199,.07); border:1px solid rgba(0,229,199,.3); font-size:12.5px; color:var(--text-dim,#9db3c4);}
+.mw-confirm{margin-top:9px; padding:9px 10px; border-radius:9px; background:rgba(0,229,199,.07); border:1px solid rgba(0,229,199,.3); font-size:12.5px; color:var(--text-dim,#a9b7c6);}
 .mw-confirm .acts{display:flex; gap:6px; margin-top:7px;}
 .mw-confirm button{border:none; border-radius:8px; padding:6px 11px; font-weight:800; font-size:12px; cursor:pointer;}
-.mw-confirm .yes{background:var(--accent,#00e5c7); color:#032018;} .mw-confirm .no{background:none; border:1px solid var(--border,#16324a); color:var(--text-dim,#9db3c4);}
+.mw-confirm .yes{background:var(--accent,#00e5c7); color:#032018;} .mw-confirm .no{background:none; border:1px solid var(--border,#16324a); color:var(--text-dim,#a9b7c6);}
 .mw-err{color:var(--danger,#ff5f3d); font-size:12px; font-weight:600; margin-top:6px;}
 .mw-group{--tc:#4c9dff;}
-.mw-login{font-size:12.5px; color:var(--text-dim,#9db3c4); background:rgba(13,26,38,.8); border:1px dashed var(--border,#16324a); border-radius:12px; padding:12px; text-align:center;}
+.mw-login{font-size:12.5px; color:var(--text-dim,#a9b7c6); background:rgba(13,26,38,.8); border:1px dashed var(--border,#16324a); border-radius:12px; padding:12px; text-align:center;}
 .mw-login a{color:var(--accent,#00e5c7); font-weight:700;}
 .mw-rank{border:1px solid var(--border,#16324a); border-radius:12px; overflow:hidden;}
 .mw-row{display:flex; align-items:center; gap:10px; width:100%; padding:9px 12px; border:none; border-bottom:1px solid rgba(22,50,74,.6); background:none; color:#fff; font:inherit; text-align:left; cursor:pointer;}
 .mw-row:last-child{border-bottom:none;}
 .mw-row:hover{background:rgba(255,255,255,.03);}
 .mw-row.me{background:rgba(0,229,199,.06);}
-.mw-row .pos{width:18px; font-family:Rajdhani,sans-serif; font-weight:800; font-size:16px; color:var(--text-faint,#6d8ba3);}
+.mw-row .pos{width:18px; font-family:Rajdhani,sans-serif; font-weight:800; font-size:16px; color:var(--text-faint,#8696a8);}
 .mw-row img{width:28px; height:28px; border-radius:50%; object-fit:cover; background:#0a1622;}
 .mw-row .nm{flex:1; min-width:0; font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 .mw-row .d3{display:flex; gap:4px;}
 .mw-row .d3 i{width:9px; height:9px; border-radius:50%; border:1.5px solid var(--tc); }
 .mw-row .d3 i.done{background:var(--tc);}
 .mw-row .pt{font-family:Rajdhani,sans-serif; font-size:18px; font-weight:800; min-width:30px; text-align:right;}
-.mw-detail{padding:4px 12px 10px 40px; border-bottom:1px solid rgba(22,50,74,.6); font-size:12.5px; color:var(--text-dim,#9db3c4);}
+.mw-detail{padding:4px 12px 10px 40px; border-bottom:1px solid rgba(22,50,74,.6); font-size:12.5px; color:var(--text-dim,#a9b7c6);}
 .mw-detail div{display:flex; gap:8px; align-items:center; padding:3px 0;}
 .mw-detail i{width:8px; height:8px; border-radius:50%; background:var(--tc); flex-shrink:0;}
 .mw-detail .ok{margin-left:auto; color:var(--gold,#facc15); font-weight:800;}
-.mw-foot{font-size:11.5px; color:var(--text-faint,#6d8ba3); line-height:1.5;}
+.mw-foot{font-size:12px; color:var(--text-faint,#8696a8); line-height:1.5;}
 @media (max-width:560px){ .mw-panel{width:100vw;} .mw-tab{padding:10px 6px;} .mw-tab .t{font-size:12px;} }
 `;
 
@@ -167,13 +168,13 @@ export function createMissionsWidget({ supabase, profileIconUrl }) {
     const confirming = own && st.confirm === m.id;
     return `<div class="mw-card ${done ? 'done' : ''}" style="--tc:${t.color}">
       <div class="top"><span class="mw-chip">${t.label}</span>
-        ${own && !done && st.data.mine.rerolls > 0 && !confirming ? `<button class="mw-reroll" type="button" data-reroll="${m.id}" title="Cambiar por otra misión ${t.label.toLowerCase()}">🎲 Cambiar</button>` : ''}
+        ${own && !done && st.data.mine.rerolls > 0 && !confirming ? `<button class="mw-reroll" type="button" data-reroll="${m.id}" title="Cambiar por otra misión ${t.label.toLowerCase()}">${icono('dado', { size: 13 })} Cambiar</button>` : ''}
         <span class="mw-pts">${done ? '✓ ' : ''}+${m.cat?.points ?? t.pts} pt${(m.cat?.points ?? t.pts) === 1 ? '' : 's'}</span></div>
       <div class="ttl">${esc(m.cat?.title ?? m.code)}</div>
       ${m.cat?.rift_only ? '<div class="note">Solo cuenta en la Grieta del Invocador</div>' : ''}
       <div class="mw-bar"><div class="tr"><i style="width:${Math.round(100 * prog / target)}%"></i></div><span>${prog}/${target}</span></div>
       ${confirming ? `<div class="mw-confirm">¿Cambiar esta misión por otra ${t.label.toLowerCase()}? Gastas 1 reroll y la nueva empieza de cero.
-        <div class="acts"><button class="yes" type="button" data-reroll-yes="${m.id}" ${st.busy ? 'disabled' : ''}>🎲 Sí, cambiar</button><button class="no" type="button" data-reroll-no>Cancelar</button></div>
+        <div class="acts"><button class="yes" type="button" data-reroll-yes="${m.id}" ${st.busy ? 'disabled' : ''}>${icono('dado', { size: 13 })} Sí, cambiar</button><button class="no" type="button" data-reroll-no>Cancelar</button></div>
         ${st.error ? `<div class="mw-err">${esc(st.error)}</div>` : ''}</div>` : ''}
     </div>`;
   }
@@ -182,34 +183,34 @@ export function createMissionsWidget({ supabase, profileIconUrl }) {
     const d = st.data;
     if (!d || !tab) return;
     const left = d.resetAt - Date.now();
-    const mineDots = d.mine ? `<span class="dots">${d.mine.ms.map(m => `<i class="${m.completed_at ? 'done' : ''}" style="color:${TIERS[m.tier].color}"></i>`).join('')}</span>` : '<span class="ic">🎯</span>';
-    tab.innerHTML = `${mineDots}<span class="t">Misiones</span><span class="c">⏳ ${timeLeft(left)}</span>`;
+    const mineDots = d.mine ? `<span class="dots">${d.mine.ms.map(m => `<i class="${m.completed_at ? 'done' : ''}" style="color:${TIERS[m.tier].color}"></i>`).join('')}</span>` : `<span class="ic">${icono('diana', { size: 16 })}</span>`;
+    tab.innerHTML = `${mineDots}<span class="t">Misiones</span><span class="c">${icono('reloj_arena', { size: 12 })} ${timeLeft(left)}</span>`;
     tab.title = `Misiones semanales — se reinician en ${timeLeft(left)}`;
     if (!st.open) { panel.innerHTML = ''; return; }
     const g = d.groupCat;
     const gTarget = g?.target ?? 1, gProg = Math.min(d.week.group_progress, gTarget);
     panel.innerHTML = `
-      <div class="mw-head"><div><h2>🎯 Misiones semanales</h2><small>Se reinician en <b>${timeLeft(left)}</b> · lunes 6:00 (hora de Madrid)</small></div>
+      <div class="mw-head"><div><h2>Misiones semanales</h2><small>Se reinician en <b>${timeLeft(left)}</b> · lunes 6:00 (hora de Madrid)</small></div>
         <button class="mw-close" type="button" aria-label="Cerrar">×</button></div>
       <div class="mw-body">
-        ${d.mine ? `<section class="mw-sec"><h3>Tus misiones <span class="rr">🎲 Rerolls: <b>${d.mine.rerolls}</b>/2</span></h3>
+        ${d.mine ? `<section class="mw-sec"><h3>Tus misiones <span class="rr">${icono('dado', { size: 13 })} Rerolls: <b>${d.mine.rerolls}</b>/2</span></h3>
             ${d.mine.ms.map(m => missionCard(m, true)).join('')}</section>`
           : `<div class="mw-login">${d.loggedIn ? 'Tu cuenta de LoL todavía no está vinculada: <a href="login.html">termina de vincularla</a> para tener misiones.' : '<a href="login.html">Inicia sesión</a> para ver tus misiones y usar rerolls.'}</div>`}
-        ${g ? `<section class="mw-sec"><h3>👥 Misión grupal</h3>
+        ${g ? `<section class="mw-sec"><h3>Misión grupal</h3>
           <div class="mw-card mw-group ${d.groupDone ? 'done' : ''}" style="--tc:#4c9dff">
             <div class="top"><span class="mw-chip">Grupo</span><span class="mw-pts">${d.groupDone ? '✓ ' : ''}+${g.points} pts a quien juegue</span></div>
             <div class="ttl">${esc(g.title)}</div>
             <div class="mw-bar"><div class="tr"><i style="width:${Math.round(100 * gProg / gTarget)}%"></i></div><span>${gProg}/${gTarget}</span></div>
           </div></section>` : ''}
-        <section class="mw-sec"><h3>🏆 Tabla de la semana</h3>
+        <section class="mw-sec"><h3>Tabla de la semana</h3>
           <div class="mw-rank">${d.rows.map((r, i) => `
             <button class="mw-row ${d.mine?.id === r.id ? 'me' : ''}" type="button" data-expand="${r.id}" aria-expanded="${st.expanded === r.id}">
               <span class="pos">${i + 1}</span><img src="${iconUrl(r.icon_id)}" alt="" onerror="${fallback()}">
               <span class="nm">${esc(r.nm)}</span>
               <span class="d3">${r.ms.map(m => `<i class="${m.completed_at ? 'done' : ''}" style="--tc:${TIERS[m.tier].color}" title="${esc(m.cat?.title ?? '')}"></i>`).join('')}</span>
               <span class="pt">${r.pts}</span></button>
-            ${st.expanded === r.id ? `<div class="mw-detail">${r.ms.map(m => `<div style="--tc:${TIERS[m.tier].color}"><i></i>${esc(m.cat?.title ?? m.code)} <span style="color:var(--text-faint,#6d8ba3)">${Math.min(m.progress, m.cat?.target ?? 1)}/${m.cat?.target ?? 1}</span>${m.completed_at ? '<span class="ok">✓</span>' : ''}</div>`).join('')}
-              <div style="color:var(--text-faint,#6d8ba3)">🎲 ${r.rerolls}/2 rerolls</div></div>` : ''}`).join('')}</div></section>
+            ${st.expanded === r.id ? `<div class="mw-detail">${r.ms.map(m => `<div style="--tc:${TIERS[m.tier].color}"><i></i>${esc(m.cat?.title ?? m.code)} <span style="color:var(--text-faint,#8696a8)">${Math.min(m.progress, m.cat?.target ?? 1)}/${m.cat?.target ?? 1}</span>${m.completed_at ? '<span class="ok">✓</span>' : ''}</div>`).join('')}
+              <div style="color:var(--text-faint,#8696a8)">${r.rerolls}/2 rerolls</div></div>` : ''}`).join('')}</div></section>
         <p class="mw-foot">Cuentan todas las colas (sin remakes). Fácil 1 pt · Media 2 · Difícil 3. Todos empiezan la semana con 1 reroll; se gana otro (máximo 2) con una pentakill, una victoria sin morir o subiendo de liga.</p>
       </div>`;
   }

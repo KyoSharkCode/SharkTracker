@@ -1,5 +1,5 @@
 // ============================================================
-// Generador del overlay para OBS (botón "📺 Overlay OBS" del perfil).
+// Generador del overlay para OBS (botón "Overlay OBS" del perfil).
 // Arma la URL de overlay.html con las opciones elegidas, muestra una
 // vista previa en vivo y permite probar las alertas.
 //
@@ -12,31 +12,31 @@ const CSS = `
 .og{width:760px; max-width:100%; max-height:calc(100vh - 32px); overflow-y:auto; background:rgba(6,14,23,.99); border:1px solid var(--border,#16324a); border-radius:18px; box-shadow:0 30px 80px rgba(0,0,0,.6); font-family:Inter,system-ui,sans-serif; color:#fff;}
 .og-head{display:flex; align-items:center; gap:10px; padding:18px 20px 14px; border-bottom:1px solid var(--border,#16324a);}
 .og-head h2{margin:0; font-family:Rajdhani,sans-serif; font-size:22px; letter-spacing:.05em; text-transform:uppercase;}
-.og-head small{display:block; color:var(--text-faint,#6d8ba3); font-size:12.5px; font-weight:600; margin-top:2px;}
-.og-x{margin-left:auto; background:none; border:none; color:var(--text-faint,#6d8ba3); font-size:26px; line-height:1; cursor:pointer; padding:4px;}
+.og-head small{display:block; color:var(--text-faint,#8696a8); font-size:12.5px; font-weight:600; margin-top:2px;}
+.og-x{margin-left:auto; background:none; border:none; color:var(--text-faint,#8696a8); font-size:26px; line-height:1; cursor:pointer; padding:4px;}
 .og-x:hover{color:#fff;}
 .og-body{display:grid; grid-template-columns:1fr 1fr; gap:18px; padding:18px 20px 20px;}
 .og-opts{display:flex; flex-direction:column; gap:14px;}
-.og-f > span{display:block; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint,#6d8ba3); margin-bottom:6px;}
+.og-f > span{display:block; font-size:11px; font-weight:800; color:var(--text-faint,#8696a8); margin-bottom:6px;}
 .og-chips{display:flex; flex-wrap:wrap; gap:6px;}
-.og-chips label{display:inline-flex; align-items:center; gap:6px; background:rgba(13,26,38,.8); border:1px solid var(--border,#16324a); border-radius:99px; padding:6px 12px; font-size:13px; font-weight:600; cursor:pointer; user-select:none; color:var(--text-dim,#9db3c4);}
+.og-chips label{display:inline-flex; align-items:center; gap:6px; background:rgba(13,26,38,.8); border:1px solid var(--border,#16324a); border-radius:99px; padding:6px 12px; font-size:13px; font-weight:600; cursor:pointer; user-select:none; color:var(--text-dim,#a9b7c6);}
 .og-chips label:has(input:checked){border-color:var(--accent,#00e5c7); background:rgba(0,229,199,.1); color:#fff;}
 .og-chips input{accent-color:var(--accent,#00e5c7); margin:0;}
-.og-note{font-size:11.5px; color:var(--text-faint,#6d8ba3); margin-top:5px; line-height:1.45;}
+.og-note{font-size:12px; color:var(--text-faint,#8696a8); margin-top:5px; line-height:1.45;}
 .og-prev{display:flex; flex-direction:column; gap:10px; min-width:0;}
 .og-stage{position:relative; border-radius:12px; border:1px solid var(--border,#16324a); overflow:hidden; min-height:150px; display:flex; align-items:center; justify-content:center; padding:10px;
   background:linear-gradient(135deg,#1d3b2a 0%,#2c4a33 35%,#3b3a2a 65%,#20303f 100%);}
-.og-stage::after{content:'Vista previa sobre el juego'; position:absolute; right:8px; bottom:6px; font-size:10px; font-weight:700; color:rgba(255,255,255,.55); letter-spacing:.04em;}
+.og-stage::after{content:'Vista previa sobre el juego'; position:absolute; right:8px; bottom:6px; font-size:11px; font-weight:700; color:rgba(255,255,255,.55); letter-spacing:.04em;}
 .og-frame{overflow:hidden; flex-shrink:0;}
 .og-stage iframe{border:none; background:transparent; display:block; transform-origin:0 0;}
 .og-test{display:flex; gap:6px; flex-wrap:wrap;}
-.og-btn{border:1px solid var(--border,#16324a); background:transparent; color:var(--text-dim,#9db3c4); border-radius:9px; padding:7px 12px; font:700 12.5px Inter,sans-serif; cursor:pointer;}
+.og-btn{border:1px solid var(--border,#16324a); background:transparent; color:var(--text-dim,#a9b7c6); border-radius:9px; padding:7px 12px; font:700 12.5px Inter,sans-serif; cursor:pointer;}
 .og-btn:hover{border-color:var(--accent,#00e5c7); color:#fff;}
 .og-btn.pri{background:var(--accent,#00e5c7); border-color:var(--accent,#00e5c7); color:#032018;}
-.og-btn.pri:hover{box-shadow:0 0 14px rgba(0,229,199,.45);}
+.og-btn.pri:hover{box-shadow:none;}
 .og-url{display:flex; gap:6px;}
 .og-url input{flex:1; min-width:0; background:#06111c; border:1px solid var(--border,#16324a); border-radius:9px; padding:8px 10px; color:#fff; font:600 12px ui-monospace,Menlo,Consolas,monospace; outline:none;}
-.og-steps{margin:0; padding-left:18px; font-size:12.5px; line-height:1.6; color:var(--text-dim,#9db3c4);}
+.og-steps{margin:0; padding-left:18px; font-size:12.5px; line-height:1.6; color:var(--text-dim,#a9b7c6);}
 .og-steps b{color:#fff;}
 @media (max-width:700px){ .og-body{grid-template-columns:1fr;} }
 `;
@@ -57,7 +57,7 @@ export function openOverlayGenerator({ id, name }) {
   const bg = document.createElement('div');
   bg.className = 'og-bg';
   bg.innerHTML = `<div class="og" role="dialog" aria-modal="true" aria-labelledby="og-title">
-    <div class="og-head"><div><h2 id="og-title">📺 Overlay para OBS</h2><small>${esc(name)} · se actualiza solo mientras juegas</small></div>
+    <div class="og-head"><div><h2 id="og-title">Overlay para OBS</h2><small>${esc(name)} · se actualiza solo mientras juegas</small></div>
       <button class="og-x" type="button" aria-label="Cerrar">×</button></div>
     <div class="og-body">
       <div class="og-opts">

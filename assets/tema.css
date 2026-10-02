@@ -1,0 +1,67 @@
+/* ============================================================
+   Tema común de SharkTracker (rediseño visual, oct 2026).
+   Se carga DESPUÉS del <style> de cada página, así que estas reglas
+   ganan a las de la página sin tener que tocarlas una por una.
+
+   Criterios (acordados con Alex sobre el mockup):
+   - Paneles sólidos y bordes suaves; profundidad con sombra, no con brillos.
+   - Textos secundarios con contraste suficiente (≥ 4,5 : 1 sobre el fondo).
+   - Títulos sin degradado; títulos de sección en tamaño normal, sin MAYÚSCULAS.
+   - Foco visible al navegar con teclado; scroll y selección con la marca.
+   - Números de ancho fijo para que no "bailen" al actualizarse.
+   El Overlay OBS (overlay.html) NO usa este archivo: tiene fondo transparente.
+   ============================================================ */
+
+:root{
+  --panel:#0b1520; --panel-2:#0f1b29;
+  --border:rgba(255,255,255,.08);
+  --text-dim:#a9b7c6; --text-faint:#8696a8;
+  --accent-glow:rgba(0,229,199,0);
+  --sombra:0 12px 32px rgba(0,0,0,.45);
+}
+
+body{
+  background:#030812;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Título de la página: blanco sólido y sin MAYÚSCULAS (antes degradado blanco → turquesa). */
+header h1, h1{
+  background:none !important;
+  -webkit-background-clip:border-box !important; background-clip:border-box !important;
+  color:#fff !important;
+  text-transform:none !important; letter-spacing:0 !important;
+}
+
+/* Títulos de sección: Rajdhani en tamaño normal, sin la barrita ni MAYÚSCULAS. */
+.section-title .bar{display:none !important;}
+.section-title h2, h2.section-title, .section-title:is(h2,h3){
+  font-size:24px !important; letter-spacing:0 !important; text-transform:none !important;
+}
+.section-title .aside{font-family:'Inter',sans-serif; font-size:13px; font-weight:500; color:var(--text-faint); text-transform:none; letter-spacing:0;}
+
+/* Botón de inicio de sesión del encabezado. */
+.login-btn{box-shadow:none !important;}
+
+/* Avatar del encabezado sin halo. */
+.avatar, .avatar:hover, .avatar.pending{box-shadow:none !important;}
+
+/* Navegación con teclado: anillo turquesa en lo que tiene el foco. */
+:focus-visible{outline:2px solid #00e5c7; outline-offset:2px;}
+a:focus-visible, button:focus-visible{border-radius:6px;}
+
+/* Selección de texto y barras de scroll con la marca. */
+::selection{background:rgba(0,229,199,.35); color:#fff;}
+html{scrollbar-color:#22364a #030812;}
+::-webkit-scrollbar{width:10px; height:10px;}
+::-webkit-scrollbar-track{background:#030812;}
+::-webkit-scrollbar-thumb{background:#22364a; border-radius:6px; border:2px solid #030812;}
+::-webkit-scrollbar-thumb:hover{background:#2e4a63;}
+
+/* Cargando: silueta gris que "respira" suave (en lugar de solo "Cargando…"). */
+.esqueleto{background:#121c2a; border-radius:8px; animation:esqueleto 1.6s ease-in-out infinite;}
+@keyframes esqueleto{0%,100%{opacity:1;} 50%{opacity:.55;}}
+@media (prefers-reduced-motion:reduce){ .esqueleto{animation:none;} }
+
+/* Íconos dibujados (assets/iconos.js): heredan el color del texto. */
+.ico-svg{display:inline-block; vertical-align:middle; flex-shrink:0;}

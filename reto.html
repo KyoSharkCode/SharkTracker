@@ -16,7 +16,7 @@
 <style>
   :root{
     --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
-    --border:#16324a; --text:#ffffff; --text-dim:#9db3c4; --text-faint:#6d8ba3;
+    --border:#16324a; --text:#ffffff; --text-dim:#a9b7c6; --text-faint:#8696a8;
     --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
     --danger:#ff5f3d; --gold:#facc15; --gold-glow:rgba(250,204,21,.35);
     --silver:#cbd5e1; --bronze:#d9955b; --radius:16px;
@@ -41,7 +41,7 @@
   h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
-  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:0 0 10px var(--accent-glow); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden; transition:transform .15s, box-shadow .15s;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden; transition:transform .15s, box-shadow .15s;}
   .avatar:hover{transform:scale(1.06);}
   .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .avatar.pending{border-color:var(--gold); color:var(--gold);}
@@ -51,18 +51,18 @@
   .msg b{display:block; color:#fff; font-family:'Rajdhani',sans-serif; font-size:26px; letter-spacing:.04em; text-transform:uppercase; margin-bottom:6px;}
 
   .section-title{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
-  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent-glow);}
+  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:none;}
   section{margin-bottom:38px;}
 
   /* ── Hero ── */
   .hero{position:relative; border-radius:22px; overflow:hidden; min-height:380px; border:1px solid var(--border); background:#06111c; display:flex; align-items:flex-end; margin-bottom:26px;}
-  .hero.win{border-color:rgba(250,204,21,.55); box-shadow:0 0 50px rgba(250,204,21,.15);}
-  .hero.live{border-color:var(--accent); box-shadow:0 0 40px rgba(0,229,199,.15);}
+  .hero.win{border-color:rgba(250,204,21,.55); box-shadow:none;}
+  .hero.live{border-color:var(--accent); box-shadow:none;}
   .hero-bg{position:absolute; inset:0; background-size:cover; background-position:center 20%;}
   .hero-bg::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(3,8,18,.95) 0%, rgba(3,8,18,.7) 45%, rgba(3,8,18,.15) 100%), linear-gradient(0deg, rgba(3,8,18,.9) 0%, transparent 55%);}
   .hero-body{position:relative; z-index:1; padding:34px 36px; width:100%;}
-  .kicker{display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; padding:5px 12px; border-radius:99px;}
-  .kicker.gold{background:var(--gold); color:#1a1300;}
+  .kicker{display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:800; padding:5px 12px; border-radius:99px;}
+  .kicker.gold{background:rgba(250,204,21,.14); color:#f3d36b; border:1px solid rgba(250,204,21,.4);}
   .kicker.live{background:rgba(0,229,199,.16); color:var(--accent); border:1px solid rgba(0,229,199,.4);}
   .kicker.soon{background:rgba(250,204,21,.14); color:var(--gold); border:1px solid rgba(250,204,21,.4);}
   .reto-name{margin:14px 0 4px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim);}
@@ -73,22 +73,24 @@
   .hs{display:flex; align-items:center; gap:10px; background:rgba(3,8,18,.72); border:1px solid var(--border); border-radius:14px; padding:10px 16px; backdrop-filter:blur(6px);}
   .hs img{width:34px; height:34px;}
   .hs b{display:block; font-family:'Rajdhani',sans-serif; font-size:22px; line-height:1; color:#fff;}
-  .hs small{display:block; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin-top:3px;}
+  .hs small{display:block; font-size:11px; font-weight:800; color:var(--text-faint); margin-top:3px;}
   .hs.gold b{color:var(--gold);}
   .dates{margin-top:16px; font-size:12.5px; color:var(--text-faint); font-weight:600;}
   .big-count{display:flex; gap:14px; margin-top:18px;}
   .big-count div{text-align:center; min-width:62px; background:rgba(3,8,18,.72); border:1px solid var(--border); border-radius:14px; padding:10px 8px;}
   .big-count b{display:block; font-family:'Rajdhani',sans-serif; font-size:34px; line-height:1; color:var(--accent);}
-  .big-count small{font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint);}
+  .big-count small{font-size:11px; font-weight:800; color:var(--text-faint);}
   .leader-note{margin-top:16px; font-size:14px; color:var(--text-dim);}
   .leader-note b{color:var(--gold);}
 
   /* ── Podio ── */
   .podium{display:grid; grid-template-columns:1fr 1.15fr 1fr; gap:14px; align-items:end;}
   .pod{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:22px 14px 18px; text-align:center; position:relative;}
-  .pod .medal{font-size:30px; line-height:1;}
+  .pod .medal{line-height:0; display:flex; justify-content:center;}
+  .pod .medal .num{font-family:'Rajdhani',sans-serif; font-size:24px; font-weight:700; line-height:1; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;}
+  .pod .medal .n2{color:#d7e0ea; background:rgba(255,255,255,.1);} .pod .medal .n3{color:#e8b48a; background:rgba(205,127,50,.18);}
   .pod img.ic{width:66px; height:66px; border-radius:50%; object-fit:cover; margin:10px auto 8px; display:block; border:3px solid var(--border); background:#0a1622;}
-  .pod.p1{border-color:rgba(250,204,21,.55); padding-top:30px; box-shadow:0 0 24px rgba(250,204,21,.12);}
+  .pod.p1{border-color:rgba(250,204,21,.55); padding-top:30px; box-shadow:none;}
   .pod.p1 img.ic{width:84px; height:84px; border-color:var(--gold);}
   .pod.p2 img.ic{border-color:var(--silver);}
   .pod.p3 img.ic{border-color:var(--bronze);}
@@ -103,8 +105,8 @@
   /* ── Premios ── */
   .awards{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
   .award{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px; display:flex; gap:12px; align-items:center;}
-  .award .ico{width:44px; height:44px; border-radius:12px; background:var(--panel-2); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;}
-  .award small{display:block; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint);}
+  .award .ico{width:44px; height:44px; border-radius:12px; background:var(--panel-2); display:flex; align-items:center; justify-content:center; color:var(--accent); flex-shrink:0;}
+  .award small{display:block; font-size:11px; font-weight:800; color:var(--text-faint);}
   .award b{display:block; font-size:14.5px; margin:2px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .award span{font-size:12px; color:var(--accent); font-weight:700;}
   .award.none{opacity:.45;}
@@ -112,7 +114,7 @@
   /* ── Tabla ── */
   .card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
   table{width:100%; border-collapse:collapse; font-size:13.5px;}
-  th{text-align:left; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); padding:12px 14px; border-bottom:1px solid var(--border); white-space:nowrap;}
+  th{text-align:left; font-size:11px; font-weight:800; color:var(--text-faint); padding:12px 14px; border-bottom:1px solid var(--border); white-space:nowrap;}
   td{padding:11px 14px; border-bottom:1px solid var(--border); vertical-align:middle;}
   tr:last-child td{border-bottom:none;}
   tr.first td{background:rgba(250,204,21,.05);}
@@ -145,8 +147,8 @@
   .fame img{width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--gold); background:#0a1622; flex-shrink:0;}
   .fame .ph{width:40px; height:40px; border-radius:50%; border:2px dashed var(--border); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
   .fame b{display:block; font-size:13.5px;}
-  .fame small{display:block; color:var(--text-faint); font-size:11.5px; font-weight:600;}
-  .fame .w{color:var(--gold); font-weight:700; font-size:12.5px;}
+  .fame small{display:block; color:var(--text-faint); font-size:12px; font-weight:600;}
+  .fame .w{color:var(--gold); font-weight:700; font-size:13px; display:inline-flex; align-items:center; gap:5px;}
   .fame .st{color:var(--accent); font-weight:700; font-size:12.5px;}
 
   @media (max-width:860px){ .awards{grid-template-columns:repeat(2,1fr);} }
@@ -167,6 +169,7 @@
     .pod .medal{font-size:24px;}
   }
 </style>
+<link rel="stylesheet" href="assets/tema.css">
 </head>
 <body>
 <div class="wrap">
@@ -214,6 +217,7 @@ import { createSupabase } from './assets/supabase.js';
 import { getDDragonVersion } from './assets/lol-data.js';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
+import { icono } from './assets/iconos.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
 createNavMenu({ current: location.hash === '#fame-sec' ? 'fama' : 'reto' });
 
@@ -284,7 +288,7 @@ async function drawFinished(ch) {
     <div class="hero win">
       <div class="hero-bg" style="${splash ? `background-image:url('${splash}')` : 'background:linear-gradient(135deg,#1a1300,#06111c)'}"></div>
       <div class="hero-body">
-        <span class="kicker gold">🏆 ${w ? 'Ganador del reto' : 'Reto terminado'}</span>
+        <span class="kicker gold">${icono('trofeo', { size: 15 })} ${w ? 'Ganador del reto' : 'Reto terminado'}</span>
         <div class="reto-name">${esc(ch.name)}</div>
         ${w ? `
           <h2 class="champ-name">${esc(nombreDe(w))}</h2>
@@ -352,7 +356,7 @@ async function drawOpen(ch, players, profiles) {
     <div class="hero ${live ? 'live' : ''}">
       <div class="hero-bg" style="${splash ? `background-image:url('${splash}')` : 'background:linear-gradient(135deg,#032a26,#06111c)'}"></div>
       <div class="hero-body">
-        <span class="kicker ${live ? 'live' : 'soon'}">${live ? '● En curso' : '⏳ Próximamente'}</span>
+        <span class="kicker ${live ? 'live' : 'soon'}">${live ? '● En curso' : `${icono('reloj_arena', { size: 14 })} Próximamente`}</span>
         <h2 class="champ-name" style="margin-top:14px;">${esc(ch.name)}</h2>
         <div class="riot-id">${live ? 'Termina en' : 'Empieza en'}</div>
         <div class="big-count" id="count">
@@ -386,10 +390,12 @@ function playerLink(r, inner) {
 
 function drawPodium(top) {
   $('podium-sec').hidden = !top.length;
+  // #1 con corona; #2 y #3 con su número en plata/bronce (antes 🥇🥈🥉).
+  const medal = (n) => n === 1 ? icono('corona', { size: 30, color: '#facc15', title: 'Primer lugar' }) : `<span class="num n${n}">${n}</span>`;
   const card = (r, n) => {
-    if (!r) return `<div class="pod p${n} empty"><div class="medal">${['🥇','🥈','🥉'][n - 1]}</div><div class="nm">—</div></div>`;
+    if (!r) return `<div class="pod p${n} empty"><div class="medal">${medal(n)}</div><div class="nm">—</div></div>`;
     return `<div class="pod p${n}">
-      <div class="medal">${['🥇','🥈','🥉'][n - 1]}</div>
+      <div class="medal">${medal(n)}</div>
       <img class="ic" src="${iconOr1(r.icon_id)}" alt="" onerror="${ICON_ONERROR}">
       <div class="nm">${playerLink(r, esc(nombreDe(r)))}</div>
       <div class="rk"><img src="${emblemUrl(r.tier)}" alt="" onerror="this.style.visibility='hidden'">${rankText(r)}${r.tier ? ` · ${r.lp ?? 0} LP` : ''}</div>
@@ -405,13 +411,13 @@ function drawAwards(rows) {
   const mejorWr = best(elig, r => r.reto_wins / r.reto_games);
   const mejorKda = best(elig, r => kda(r));
   const subida = best(rows.filter(r => (r.reto_lp_net ?? 0) > 0), r => r.reto_lp_net);
-  const a = (ico, label, r, val) => `<div class="award ${r ? '' : 'none'}"><div class="ico">${ico}</div><div style="min-width:0;">
+  const a = (ico, label, r, val) => `<div class="award ${r ? '' : 'none'}"><div class="ico">${icono(ico, { size: 22 })}</div><div style="min-width:0;">
       <small>${label}</small><b>${r ? esc(nombreDe(r)) : 'Nadie'}</b><span>${r ? val : `mín. ${MIN_PARTIDAS_PREMIO} partidas`}</span></div></div>`;
   $('awards').innerHTML =
-    a('⚔️', 'Más partidas', masPartidas, `${masPartidas?.reto_games} partidas`) +
-    a('🎯', 'Mejor winrate', mejorWr, mejorWr ? `${Math.round(100 * mejorWr.reto_wins / mejorWr.reto_games)}% (${mejorWr.reto_games} p.)` : '') +
-    a('🗡️', 'Mejor KDA', mejorKda, mejorKda ? `${kda(mejorKda).toFixed(2)} KDA` : '') +
-    a('📈', 'Mayor subida', subida, subida ? `+${subida.reto_lp_net} LP` : '');
+    a('espadas', 'Más partidas', masPartidas, `${masPartidas?.reto_games} partidas`) +
+    a('diana', 'Mejor winrate', mejorWr, mejorWr ? `${Math.round(100 * mejorWr.reto_wins / mejorWr.reto_games)}% (${mejorWr.reto_games} p.)` : '') +
+    a('espada', 'Mejor KDA', mejorKda, mejorKda ? `${kda(mejorKda).toFixed(2)} KDA` : '') +
+    a('sube', 'Mayor subida', subida, subida ? `+${subida.reto_lp_net} LP` : '');
   $('awards-sec').hidden = !rows.some(r => r.reto_games > 0);
 }
 
@@ -439,9 +445,9 @@ function drawFame(list, winByCh, currentId) {
     const w = winByCh.get(c.id);
     const live = !c.finished_at && new Date(c.starts_at).getTime() <= Date.now();
     const status = c.finished_at
-      ? (w ? `<span class="w">🏆 ${esc(w.display_name || w.riot_game_name)}</span>` : '<span class="dim">Sin ganador</span>')
-      : `<span class="st">${live ? '● En curso' : '⏳ Próximo'}</span>`;
-    const pic = c.finished_at && w ? `<img src="${iconOr1(w.icon_id)}" alt="" onerror="${ICON_ONERROR}">` : `<span class="ph">${c.finished_at ? '🏆' : '⏳'}</span>`;
+      ? (w ? `<span class="w">${icono('trofeo', { size: 14 })} ${esc(w.display_name || w.riot_game_name)}</span>` : '<span class="dim">Sin ganador</span>')
+      : `<span class="st">${live ? '● En curso' : 'Próximo'}</span>`;
+    const pic = c.finished_at && w ? `<img src="${iconOr1(w.icon_id)}" alt="" onerror="${ICON_ONERROR}">` : `<span class="ph">${icono(c.finished_at ? 'trofeo' : 'reloj_arena', { size: 20 })}</span>`;
     return `<a href="reto.html?id=${c.id}" class="${c.id === currentId ? 'current' : ''}">${pic}
       <div style="min-width:0;"><b>${esc(c.name)}</b><small>${fechaCorta(c.starts_at)} → ${fechaCorta(c.ends_at)}</small>${status}</div></a>`;
   }).join('');
