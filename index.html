@@ -167,10 +167,14 @@
   #badges-recientes .info-card{background:none; border:0; border-radius:0; border-right:1px solid var(--border); padding:18px 22px;}
   #badges-recientes .info-card:last-child{border-right:0;}
   /* Destacados de la semana: 4 columnas compactas; los que no tienen dueño van en una línea */
-  #destacados-semana{grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px;}
+  /* Destacados: flex centrado; las columnas (--cols) las elige el JS según cuántas tarjetas hay,
+     para que las filas queden parejas y la última, centrada. */
+  #destacados-semana{display:flex; flex-wrap:wrap; justify-content:center; gap:12px; --cols:4;}
+  #destacados-semana .info-card{flex:0 0 calc((100% - (var(--cols) - 1) * 12px) / var(--cols)); min-width:0; box-sizing:border-box; align-items:flex-start;}
   #destacados-semana .info-card .ico{display:none;}
   .sin-duenyo{margin:12px 0 0; font-size:13px; color:var(--text-faint);}
-  @media (max-width:900px){ #destacados-semana{grid-template-columns:repeat(2,minmax(0,1fr));} }
+  @media (max-width:900px){ #destacados-semana{--cols:2 !important;} }
+  @media (max-width:560px){ #destacados-semana{--cols:1 !important;} }
   @media (max-width:700px){ #badges-recientes .info-card{border-right:0; border-bottom:1px solid var(--border);} }
   .badge-champ-icon{width:18px; height:18px; border-radius:4px; object-fit:cover; flex-shrink:0;}
   @media (max-width:700px){ .cards-grid{grid-template-columns:1fr 1fr;} }
@@ -1128,6 +1132,10 @@ function renderBadges() {
   const sinDuenoEl = document.getElementById('sin-duenyo');
   sinDuenoEl.hidden = !sinDueno.length;
   sinDuenoEl.textContent = sinDueno.length ? `Sin dueño esta semana: ${sinDueno.join(', ')}.` : '';
+  // Columnas: de 5, 4 o 3, la que deja la última fila más llena (13 → 5+5+3, 12 → 4+4+4).
+  const n = destacadosEl.children.length;
+  const cols = n <= 5 ? Math.max(n, 1) : [5, 4, 3].reduce((mejor, c) => ((n % c || c) / c > (n % mejor || mejor) / mejor ? c : mejor));
+  destacadosEl.style.setProperty('--cols', cols);
   if (!destacadosEl.children.length) destacadosEl.innerHTML = '<div class="empty" style="grid-column:1/-1;">Nadie ha reclamado un destacado esta semana todavía.</div>';
 
   // Rey de la Temporada — mismo formato que el sitio viejo: ícono real

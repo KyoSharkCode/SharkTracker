@@ -96,7 +96,7 @@
   .team-name{font-family:'Rajdhani',sans-serif; font-size:17px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;}
   .team.blue .team-name{color:var(--blue);} .team.red .team-name{color:var(--red);}
   .team-res{font-size:11px; font-weight:800; padding:2px 9px; border-radius:99px;}
-  .team-res.win{background:rgba(0,229,199,.14); color:var(--accent);} .team-res.loss{background:rgba(255,95,61,.12); color:var(--danger);}
+  .team-res.win{background:rgba(76,157,255,.14); color:#7cb8ff;} .team-res.loss{background:rgba(255,95,109,.12); color:#ff8a94;}
   .team-stats{font-size:12px; color:var(--text-dim); font-weight:700;}
   .bans{margin-left:auto; display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-faint); font-weight:700;}
   .bans img{width:24px; height:24px; border-radius:6px; filter:grayscale(1) brightness(.7); border:1px solid var(--border);}
@@ -195,6 +195,32 @@
     .arena-grid{grid-template-columns:1fr;}
     .bans{margin-left:0;}
   }
+
+  /* ── Rediseño (tablero "Web: partida propuesta") ── */
+  .summary{border-radius:18px; padding:24px 28px;}
+  .summary.win, .summary.loss{border-color:var(--border);}
+  .result{text-transform:none; letter-spacing:0; font-weight:700;}
+  .result.win{color:#7cb8ff;} .result.loss{color:#ff8a94;}
+  .summary.dos{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); gap:24px;}
+  .summary .eq{display:flex; flex-direction:column; gap:6px; min-width:0;}
+  .summary .eq.r{align-items:flex-end; text-align:right;}
+  .eq-nombre{font-size:13px; font-weight:700;}
+  .eq.b .eq-nombre, .eq.b .eq-res{color:#7cb8ff;} .eq.r .eq-nombre, .eq.r .eq-res{color:#ff8a94;}
+  .eq-res{font-family:'Rajdhani',sans-serif; font-size:32px; font-weight:700; line-height:1;}
+  .eq-oro{font-size:13px; color:var(--text-dim);}
+  .eq .obj-row{justify-content:flex-start; flex-wrap:wrap; gap:8px 12px; font-size:13px;}
+  .eq.r .obj-row{justify-content:flex-end;}
+  .summary .centro{display:flex; flex-direction:column; align-items:center; gap:4px;}
+  .summary .centro .meta{justify-content:center; margin-top:6px; font-size:13px; font-weight:500;}
+  .score .n{font-size:44px; font-weight:700;}
+  .score .vs{font-size:28px; letter-spacing:0;}
+  .score-sub{font-size:13px; font-weight:500;}
+  .team{border-radius:16px;}
+  .team.blue{border-color:rgba(76,157,255,.3);} .team.red{border-color:rgba(255,95,109,.3);}
+  .team-name{font-family:'Inter',sans-serif; font-size:15px; font-weight:700; letter-spacing:0; text-transform:none;}
+  tr.me td{background:rgba(0,229,199,.06);}
+  tr.me td:first-child{box-shadow:inset 3px 0 0 var(--accent);}
+  @media (max-width:760px){ .summary.dos{grid-template-columns:minmax(0,1fr);} .summary .eq.r{align-items:flex-start; text-align:left;} .eq.r .obj-row{justify-content:flex-start;} }
 </style>
 <link rel="stylesheet" href="assets/tema.css">
 </head>
@@ -359,12 +385,28 @@ function drawSummary() {
     if (!t) return '';
     const col = c === 'b' ? '#4c9dff' : '#ff5f6d';
     const o = (icon, n, title) => `<span class="obj" title="${title}">${lolIcon(icon, { size: 19, color: col })}${n}</span>`;
-    return `<div class="obj-row ${c}"><span class="lbl">${label}</span>
+    return `<div class="obj-row ${c}">${label ? `<span class="lbl">${label}</span>` : ''}
       ${o('tower', t.objectives.tower, 'Torres')}${o('inhibitor', t.objectives.inhibitor, 'Inhibidores')}${o('dragon', t.objectives.dragon, 'Dragones')}
       ${o('baron', t.objectives.baron, 'Barones')}${o('herald', t.objectives.riftHerald, 'Heraldos')}${o('grubs', t.objectives.horde, 'Larvas del Vacío')}
       ${t.objectives.atakhan ? o('atakhan', t.objectives.atakhan, 'Atakhan') : ''}</div>`;
   };
   const twoTeams = !isArena() && tb && tr;
+  const meta = `<div class="meta"><span class="chip">${esc(d.queueName)}</span><span>${icono('reloj', { size: 14 })} ${fmtTime(d.duration)}</span><span>${fecha}</span><span>Parche ${esc(d.patch)}</span></div>`;
+  // Dos equipos: azul a la izquierda, marcador y datos al centro, rojo a la derecha (como en el mockup).
+  if (twoTeams && !remake) {
+    const ganaAzul = d.participants.find(p => p.teamId === 100)?.win;
+    const lado = (t, c, nombre, gana, id) => `<div class="eq ${c}">
+        <span class="eq-nombre">Equipo ${nombre}${me?.teamId === id ? ' · tu equipo' : ''}</span>
+        <span class="eq-res">${gana ? 'Victoria' : 'Derrota'}</span>
+        ${d.mapId === 11 ? objRow(t, c, '') : `<span class="eq-oro">${k(goldT(id))} de oro</span>`}
+      </div>`;
+    $('summary').className = `card summary dos ${cls}`;
+    $('summary').innerHTML = `${lado(tb, 'b', 'azul', ganaAzul, 100)}
+      <div class="centro"><div class="score"><span class="n b">${tb.objectives.champion}</span><span class="vs">–</span><span class="n r">${tr.objectives.champion}</span></div>
+        <div class="score-sub">Kills · oro ${k(goldT(100))} vs ${k(goldT(200))}</div>${meta}</div>
+      ${lado(tr, 'r', 'rojo', !ganaAzul, 200)}`;
+    return;
+  }
   $('summary').className = `card summary ${cls}`;
   $('summary').innerHTML = `
     <div>

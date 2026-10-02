@@ -134,6 +134,39 @@
     td, th{padding:8px 7px;}
     .search{width:100%;}
   }
+
+  /* ── Rediseño (tablero "Web: estadísticas propuesto") ── */
+  .toolbar{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:12px 16px; gap:12px 16px; top:8px;}
+  .grp{gap:2px; background:#070d16; border-radius:10px; padding:3px;}
+  .grp .chipbtn{border:0; background:none; border-radius:7px; padding:6px 12px; font-size:13px; font-weight:500; color:var(--text-dim);}
+  .grp .chipbtn.on{background:var(--accent); color:#04130f; font-weight:700;}
+  .jump{gap:14px;}
+  .jump a{font-size:13px; font-weight:600; color:var(--accent); padding:0; background:none !important;}
+  .jump a:hover{text-decoration:underline;}
+  /* Totales: una sola franja con separadores */
+  .tiles{gap:0; background:var(--panel); border:1px solid var(--border); border-radius:16px; overflow:hidden;}
+  .tile{background:none; border:0; border-right:1px solid rgba(255,255,255,.06); border-radius:0; padding:16px 20px; display:flex; flex-direction:column-reverse; justify-content:flex-end; gap:4px;}
+  .tile:last-child{border-right:0;}
+  .tile small{font-size:13px; font-weight:500; color:var(--text-dim); margin:0;}
+  .tile b{font-weight:700;}
+  @media (max-width:900px){ .tile:nth-child(3n){border-right:0;} .tile:nth-child(-n+3){border-bottom:1px solid rgba(255,255,255,.06);} }
+  /* Tablas */
+  .card.tbl-wrap, .card:has(> .tbl-wrap){border-radius:16px; overflow:hidden;}
+  th{font-size:12px; font-weight:600; padding:12px; border-bottom:0;}
+  th:first-child, td:first-child{padding-left:20px;} th:last-child, td:last-child{padding-right:20px;}
+  td{padding:11px 12px; border-top:1px solid rgba(255,255,255,.06); font-size:14px;}
+  .good{color:#7cb8ff;} .bad{color:#ff8a94;}
+  /* Roles */
+  .rolecard{border-radius:16px; padding:16px 18px;}
+  .rolecard h3{font-size:20px; letter-spacing:0;}
+  .rolecard .lbl{font-size:12px; font-weight:600;}
+  /* Dúos y récords lado a lado */
+  /* Dúos y récords: uno debajo del otro (hay 12 récords; lado a lado quedaba una columna muy larga) */
+  .duos-rec{display:block;}
+  .rec{border-radius:14px; padding:14px 16px; gap:4px;}
+  .rec .t{font-size:12px; font-weight:600; color:var(--text-dim);}
+  .rec .v{font-size:24px; font-weight:700; color:#f3d36b;}
+  .slot small{font-size:12px; font-weight:600;}
 </style>
 <link rel="stylesheet" href="assets/tema.css">
 </head>
@@ -180,6 +213,7 @@
       <div class="roles" id="roles"></div>
     </section>
 
+    <div class="duos-rec">
     <section>
       <h2 class="section-title" id="s-duos"><span class="bar"></span>Dúos del grupo <span class="aside">Cuando dos del roster cayeron en el mismo equipo</span></h2>
       <div class="card tbl-wrap"><table id="t-duos"></table></div>
@@ -189,6 +223,7 @@
       <h2 class="section-title" id="s-rec"><span class="bar"></span>Récords <span class="aside">Toca uno para ver la partida</span></h2>
       <div class="records" id="records"></div>
     </section>
+    </div>
 
     <section>
       <h2 class="section-title" id="s-hor"><span class="bar"></span>¿Cuándo juega el grupo? <span class="aside">En tu hora local</span></h2>

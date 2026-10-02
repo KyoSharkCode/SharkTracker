@@ -65,3 +65,7 @@ html{scrollbar-color:#22364a #030812;}
 
 /* Íconos dibujados (assets/iconos.js): heredan el color del texto. */
 .ico-svg{display:inline-block; vertical-align:middle; flex-shrink:0;}
+
+/* Botón de sesión siempre en una línea; título más chico en celular para que quepa el encabezado. */
+.login-btn{white-space:nowrap;}
+@media (max-width:560px){ header h1{font-size:24px !important;} }
