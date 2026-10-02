@@ -4,8 +4,10 @@ const $ = (id) => document.getElementById(id);
 
 // ── Escalado: el diseño está pensado a 1920×1080 y se ajusta a tu pantalla ──
 // (las zonas se anclan al centro y al borde derecho en overlay.css)
+// Ajustes → Apariencia → "Tamaño del overlay" multiplica ese escalado.
+let escalaExtra = 1;
 function escalar() {
-  const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+  const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080) * escalaExtra;
   document.documentElement.style.setProperty('--s', String(s));
 }
 window.addEventListener('resize', escalar);
@@ -404,6 +406,10 @@ const ver = (pieza) => config.visible?.[pieza] !== false;
 function aplicarConfig(nueva) {
   if (!nueva) return;
   config = nueva;
+  // Apariencia: tamaño y transparencia de los paneles (0.8 = la de siempre).
+  escalaExtra = Number(config.apariencia?.escala) || 1;
+  escalar();
+  document.documentElement.style.setProperty('--op', String(config.apariencia?.opacidad ?? 0.8));
   for (const [id, pos] of Object.entries(config.posiciones ?? {})) {
     const nodo = $(id);
     if (!nodo) continue;

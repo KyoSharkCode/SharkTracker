@@ -55,6 +55,14 @@ contextBridge.exposeInMainWorld('sharkTracker', {
     abrirEditor: () => ipcRenderer.send('editor:abrir'),
   },
 
+  // Ajustes → Apariencia y Notificaciones (userData/ajustes.json)
+  ajustes: {
+    get: () => ipcRenderer.invoke('ajustes:get'),
+    set: (cambios) => ipcRenderer.invoke('ajustes:set', cambios),
+    onChanged: (callback) => ipcRenderer.on('ajustes:changed', (_e, ajustes) => callback(ajustes)),
+    probarAviso: () => ipcRenderer.invoke('ajustes:probarAviso'),
+  },
+
   // Sesión de Discord
   auth: {
     getState: () => ipcRenderer.invoke('auth:getState'),

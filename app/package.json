@@ -1,7 +1,7 @@
 {
   "name": "sharktracker-app",
   "productName": "SharkTracker",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "SharkTracker para escritorio: compañero personal para League of Legends",
   "author": "KyoSumiVT",
   "main": "src/main.js",
