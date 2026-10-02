@@ -27,6 +27,11 @@ const POSICIONES_FABRICA = {
   siguiente:   { x: 1385, y: 996 },  // siguiente compra, a la izquierda del minimapa (250 px de ancho)
 };
 
+// Ajustes → Apariencia: tamaño del overlay (sobre el escalado a tu pantalla) y
+// transparencia de sus paneles (0.8 = la de siempre).
+const ESCALAS = [0.8, 0.9, 1, 1.1, 1.2];
+const OPACIDAD = { min: 0.5, max: 0.95, fabrica: 0.8 };
+
 const archivo = () => path.join(app.getPath('userData'), 'overlay.json');
 const archivoFondo = () => path.join(app.getPath('userData'), 'fondo-editor');
 
@@ -34,6 +39,7 @@ function fabrica() {
   return {
     visible: Object.fromEntries(PIEZAS.map((p) => [p, true])),
     posiciones: structuredClone(POSICIONES_FABRICA),
+    apariencia: { escala: 1, opacidad: OPACIDAD.fabrica },
   };
 }
 
@@ -44,6 +50,10 @@ function normalizar(datos) {
   for (const p of PIEZAS) {
     if (typeof datos?.visible?.[p] === 'boolean') base.visible[p] = datos.visible[p];
   }
+  const escala = Number(datos?.apariencia?.escala);
+  if (ESCALAS.includes(escala)) base.apariencia.escala = escala;
+  const opacidad = Number(datos?.apariencia?.opacidad);
+  if (Number.isFinite(opacidad)) base.apariencia.opacidad = Math.round(Math.min(Math.max(opacidad, OPACIDAD.min), OPACIDAD.max) * 100) / 100;
   for (const [id, pos] of Object.entries(datos?.posiciones ?? {})) {
     if (!base.posiciones[id]) continue;
     const x = Number(pos?.x), y = Number(pos?.y);
@@ -62,12 +72,13 @@ function leer() {
   return structuredClone(cache);
 }
 
-// cambios: { visible?: {…}, posiciones?: {…} } — solo lo que cambia.
+// cambios: { visible?: {…}, posiciones?: {…}, apariencia?: {…} } — solo lo que cambia.
 function guardar(cambios) {
   const actual = leer();
   cache = normalizar({
     visible: { ...actual.visible, ...(cambios?.visible ?? {}) },
     posiciones: { ...actual.posiciones, ...(cambios?.posiciones ?? {}) },
+    apariencia: { ...actual.apariencia, ...(cambios?.apariencia ?? {}) },
   });
   fs.writeFileSync(archivo(), JSON.stringify(cache, null, 2));
   return leer();
@@ -96,4 +107,4 @@ function quitarFondo() {
   for (const f of [archivoFondo(), `${archivoFondo()}.tipo`]) { try { fs.unlinkSync(f); } catch { /* no había */ } }
 }
 
-module.exports = { leer, guardar, fabrica, guardarFondo, leerFondo, quitarFondo, POSICIONES_FABRICA };
+module.exports = { leer, guardar, fabrica, normalizar, guardarFondo, leerFondo, quitarFondo, POSICIONES_FABRICA, ESCALAS, OPACIDAD };

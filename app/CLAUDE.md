@@ -64,8 +64,7 @@ vez haciendo una app de escritorio).
   del cliente de League, es una pieza aparte.
 - "Meta" (tier list, counters, tendencias) — necesita una fuente de datos
   externa o que Alex la mantenga.
-- "Ajustes → Apariencia" y "Ajustes → Notificaciones" — ya están marcadas como
-  "próximamente" en el mockup visual.
+- ~~"Ajustes → Apariencia" y "Ajustes → Notificaciones"~~ — hechas en la v0.8.0 (Fase 2, bloque 4).
 - El motor de clips.
 
 ## Referencia visual
@@ -87,8 +86,7 @@ Discord, overlay en partida (Barón/Ancestral, avisos, oro con Tab, Tu rendimien
 pantalla de carga (con Ctrl + X), Ajustes → Overlay con editor y Mi Perfil.
 **Fase 2 en curso** (plan acordado): Bloque 0 puesta a punto ✅ · Bloque 1 early access ✅
 (instalador + actualizaciones automáticas) · Bloque 2 Meta (v0.3.0, datos del MCP de OP.GG
-guardados en Supabase; ver sección "Meta") ✅ · Bloque 3 En Vivo (LCU; en ranked NO revelar
-nombres ocultos en selección) · Bloque 4 Ajustes Apariencia/Notificaciones · Bloque 5 motor
+guardados en Supabase; ver sección "Meta") ✅ · Bloque 3 En Vivo ✅ · Bloque 4 Ajustes Apariencia/Notificaciones ✅ (v0.8.0, ver abajo) · Bloque 5 motor
 de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no pública).
 
 ## Versión, empaquetado y publicación (Fase 2, bloques 0 y 1)
@@ -149,7 +147,9 @@ app/
                            Vacuolarvas, Heraldo, torres e inhibidores, diferencia de oro
                            por fila del Tab. Tiempos en TIEMPOS
     preload-overlay.js   → contextBridge (window.overlay): recibe el estado, Tab y los ajustes
-    overlay-config.js    → ajustes del overlay (qué se ve y dónde) en userData/overlay.json,
+    ajustes-app.js       → Ajustes → Apariencia (acento, ventana) y Notificaciones, en userData/ajustes.json
+    notificaciones.js    → avisos de Windows del grupo (cada 60 s); textos en notificaciones-calculos.js
+    overlay-config.js    → ajustes del overlay (qué se ve, dónde, tamaño y opacidad) en userData/overlay.json,
                            y la captura de fondo opcional del editor
     preload-editor.js    → contextBridge (window.editor) de la ventana "Reposicionar elementos"
     editor/              → ventana "Reposicionar elementos" (pantalla emulada del juego)
@@ -328,6 +328,34 @@ Mockup: `https://claude.ai/artifact/6gK8Gg31m9YjTo1ptqaLt8`. Un solo PR con app 
 - **Overlay OBS** (`overlay.html`): panel sólido `rgba(8,16,26,.94)`, borde fino y sombra, sin barra
   lateral ni brillos; etiquetas en minúsculas a 14 px; íconos SVG. Mismo tamaño y parámetros.
 
+## Ajustes → Apariencia y Notificaciones (Fase 2, bloque 4 — v0.8.0)
+
+Mockup: tableros "Ajustes — Apariencia" y "Ajustes — Notificaciones" del canvas de la app.
+Decidido con Alex: color de acento + overlay + ventana; tema claro y "Versiones temáticas"
+quedan como "Próximamente" (el claro obligaría a rehacer ~400 colores fijos). Avisos = los del
+grupo del mockup (no los de la app).
+- `ajustes-app.js` (main): `userData/ajustes.json` → `acento` (turquesa/lila/dorado/azul/rojo),
+  `ventana` (`siempreEncima`, `bandeja`, `alIniciar`, todo apagado de fábrica) y `avisos`
+  (`dientes`, `misiones`, `semana`, `retos`, encendidos de fábrica). IPC `ajustes:get/set`,
+  `ajustes:changed`, `ajustes:probarAviso`.
+- **Acento**: `renderer/style.css` usa `--acento` (y `--acento-claro`/`--acento-oscuro` con
+  color-mix) en lugar del turquesa fijo; app.js la cambia. **El overlay en partida sigue en
+  turquesa** (azul y rojo ahí son los equipos).
+- **Overlay**: `overlay-config.js` guarda `apariencia: { escala (0.8–1.2), opacidad (0.5–0.95, 0.8 de
+  fábrica) }`; overlay.js multiplica `--s` por la escala y pone `--op` (alfa de `--panel` y de los avisos).
+- **Ventana** (main.js `aplicarVentana`): `setAlwaysOnTop`; bandeja con `Tray` (Abrir / Salir) y la ×
+  solo esconde (`saliendo` = true al Salir, al actualizar y en `before-quit`); `setLoginItemSettings`
+  con `--al-iniciar` (solo app instalada): con bandeja activada arranca escondida.
+- **Avisos** (`notificaciones.js` + `notificaciones-calculos.js`, este último se prueba en Node): cada
+  60 s, con sesión y cuenta vinculada, lee con tu sesión (tablas de lectura pública, **sin SQL nuevo**)
+  lo que pasó desde la última vuelta (`userData/avisos.json`: `desde` y `semana`; al abrir, nunca más
+  de 12 h atrás; la primera vez empieza "desde ahora"): `wallet_tx` (dientes > 0, juntos en un aviso)
+  y `prize_claims.resolved_at` (premio entregado/rechazado); `player_missions.completed_at` y
+  `mission_weeks.group_completed_at`; `challenges` que empiezan o terminan (+ ganador y tu puesto de
+  `challenge_results`); resumen de tu semana el lunes ≥ 6:00 Madrid (hasta 3 días después): misiones,
+  dientes y Top N (`wallet_tx` reason `top`, detalle "Top N de la semana"). Máx. 4 avisos por vuelta.
+  Clic → abre la página en sharktracker.lol. Solo llegan con la app abierta o en la bandeja.
+
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)
 
@@ -477,8 +505,7 @@ que se arreglan en cuanto corre (cada minuto). Si algún día se cambia la key, 
 ## Pendiente fuera de la app
 
 - ✅ Dominio `sharktracker.lol` (GitHub Pages, HTTPS) activo; Site URL de Supabase y
-  SQL de Discord aplicados. Cuando haya un rato: quitar `kyosharkcode.github.io` de la
-  lista de CORS de las 3 Edge Functions (ya redirige al dominio).
+  SQL de Discord aplicados. `kyosharkcode.github.io` ya se quitó del CORS de las Edge Functions (v0.2.0).
 - Actualizar Electron (el de la v33 trae Node 20 y supabase-js avisa que lo dejará).
 
 ## Estilo de comunicación de Alex

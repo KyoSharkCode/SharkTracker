@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, screen, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu } = require('electron');
 const path = require('path');
 const https = require('https');
 const { execFile } = require('child_process');
@@ -7,6 +7,8 @@ const auth = require('./auth');
 const { crearEstadoPartida } = require('./game-state');
 const { siguienteCompra } = require('./build-adaptada');
 const ajustesOverlay = require('./overlay-config');
+const ajustesApp = require('./ajustes-app');
+const notificaciones = require('./notificaciones');
 
 // La Live Client Data API de League usa un certificado autofirmado local,
 // así que hay que decirle a Node que no lo rechace (127.0.0.1:2999, nunca sale de tu PC).
@@ -49,6 +51,8 @@ if (!gotLock) {
 
   app.whenReady().then(() => {
     createWindow();
+    aplicarVentana(ajustesApp.leer());
+    notificaciones.iniciar({ auth, ajustes: ajustesApp, abrirApp: focusWindow });
     iniciarActualizaciones();
     auth.onChange(() => sendAuthState());
     // En Windows, si la app estaba cerrada, el enlace llega en los argumentos.
@@ -84,9 +88,52 @@ async function handleDeepLink(url) {
 
 function focusWindow() {
   if (!mainWindow) return;
+  if (!mainWindow.isVisible()) mainWindow.show();
   if (mainWindow.isMinimized()) mainWindow.restore();
   mainWindow.focus();
 }
+
+// ── Ajustes → Apariencia → Ventana ──
+// - Siempre encima: la ventana de la app queda por encima de las demás.
+// - Bandeja: al cerrar con × la app se queda junto al reloj (los avisos siguen
+//   llegando); "Salir" en el menú del ícono la cierra de verdad.
+// - Al iniciar Windows: se abre sola (y si usas la bandeja, empieza escondida ahí).
+const ARG_AL_INICIAR = '--al-iniciar';
+let tray = null;
+let saliendo = false; // true = cerrar de verdad (Salir, actualizar, apagar)
+app.on('before-quit', () => { saliendo = true; });
+
+function crearBandeja() {
+  if (tray) return;
+  tray = new Tray(path.join(__dirname, 'assets', 'icon.png'));
+  tray.setToolTip('SharkTracker');
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: 'Abrir SharkTracker', click: () => focusWindow() },
+    { type: 'separator' },
+    { label: 'Salir', click: () => { saliendo = true; app.quit(); } },
+  ]));
+  tray.on('click', () => focusWindow());
+}
+
+function aplicarVentana(ajustes) {
+  const v = ajustes.ventana;
+  mainWindow?.setAlwaysOnTop(v.siempreEncima);
+  if (v.bandeja) crearBandeja();
+  else { tray?.destroy(); tray = null; }
+  // Solo en la app instalada (con npm start registraría Electron, no SharkTracker).
+  if (app.isPackaged && process.platform === 'win32') {
+    app.setLoginItemSettings({ openAtLogin: v.alIniciar, args: [ARG_AL_INICIAR] });
+  }
+}
+
+ipcMain.handle('ajustes:get', () => ajustesApp.leer());
+ipcMain.handle('ajustes:set', (_e, cambios) => {
+  const ajustes = ajustesApp.guardar(cambios);
+  aplicarVentana(ajustes);
+  mainWindow?.webContents.send('ajustes:changed', ajustes);
+  return ajustes;
+});
+ipcMain.handle('ajustes:probarAviso', () => notificaciones.probar());
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -98,6 +145,8 @@ function createWindow() {
     title: 'SharkTracker',
     icon: path.join(__dirname, 'assets', 'icon.png'),
     backgroundColor: '#05070c',
+    // Abierta por Windows al iniciar sesión y con la bandeja activada: empieza escondida.
+    show: !(process.argv.includes(ARG_AL_INICIAR) && ajustesApp.leer().ventana.bandeja),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -106,6 +155,13 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+  // Con la bandeja activada, la × solo esconde la ventana.
+  mainWindow.on('close', (e) => {
+    if (!saliendo && tray && ajustesApp.leer().ventana.bandeja) {
+      e.preventDefault();
+      mainWindow.hide();
+    }
+  });
   // Al cerrar la ventana principal se cierra también el overlay (si no, la app seguiría viva).
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -148,7 +204,7 @@ function iniciarActualizaciones() {
   const buscar = () => autoUpdater.checkForUpdates().catch(() => avisarActualizacion({ estado: 'error' }));
   buscar();
   setInterval(buscar, 4 * 3600 * 1000);
-  ipcMain.on('update:instalar', () => autoUpdater.quitAndInstall());
+  ipcMain.on('update:instalar', () => { saliendo = true; autoUpdater.quitAndInstall(); });
 }
 ipcMain.handle('update:estado', () => estadoActualizacion);
 

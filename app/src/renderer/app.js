@@ -163,7 +163,7 @@ async function checkLiveGame() {
 
 checkBtn.addEventListener('click', checkLiveGame);
 
-// --- Ajustes: pestañas (Cuenta / Overlay) ---
+// --- Ajustes: pestañas (Cuenta / Overlay / Apariencia / Notificaciones) ---
 document.querySelectorAll('.stab:not(.disabled)').forEach((tab) => tab.addEventListener('click', () => {
   document.querySelectorAll('.stab').forEach((t) => t.classList.toggle('active', t === tab));
   document.querySelectorAll('.subpage').forEach((p) => p.classList.toggle('active', p.id === 'stab-' + tab.dataset.stab));
@@ -185,6 +185,84 @@ interruptores.forEach((sw) => sw.addEventListener('click', async () => {
 window.sharkTracker.overlayConfig.onChanged(renderOverlayConfig);
 window.sharkTracker.overlayConfig.get().then(renderOverlayConfig);
 $('btn-reposicionar').addEventListener('click', () => window.sharkTracker.overlayConfig.abrirEditor());
+
+// --- Ajustes → Apariencia: tamaño y opacidad del overlay (viven en los ajustes del overlay) ---
+const ESCALAS = [[0.8, '80 %'], [0.9, '90 %'], [1, '100 %'], [1.1, '110 %'], [1.2, '120 %']];
+const escalaEl = $('ov-escala');
+for (const [valor, texto] of ESCALAS) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'segmento';
+  b.dataset.escala = String(valor);
+  b.setAttribute('role', 'radio');
+  b.textContent = texto;
+  b.addEventListener('click', async () => renderApariencia(await window.sharkTracker.overlayConfig.set({ apariencia: { escala: valor } })));
+  escalaEl.append(b);
+}
+const opacidadEl = $('ov-opacidad');
+function renderApariencia(config) {
+  const ap = config?.apariencia ?? { escala: 1, opacidad: 0.8 };
+  escalaEl.querySelectorAll('.segmento').forEach((b) => {
+    const on = Number(b.dataset.escala) === ap.escala;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-checked', String(on));
+  });
+  if (document.activeElement !== opacidadEl) opacidadEl.value = String(Math.round(ap.opacidad * 100));
+  $('ov-opacidad-v').textContent = `${Math.round(ap.opacidad * 100)} %`;
+}
+opacidadEl.addEventListener('input', () => { $('ov-opacidad-v').textContent = `${opacidadEl.value} %`; });
+opacidadEl.addEventListener('change', async () => {
+  renderApariencia(await window.sharkTracker.overlayConfig.set({ apariencia: { opacidad: Number(opacidadEl.value) / 100 } }));
+});
+window.sharkTracker.overlayConfig.onChanged(renderApariencia);
+window.sharkTracker.overlayConfig.get().then(renderApariencia);
+
+// --- Ajustes → Apariencia (acento, ventana) y Notificaciones: userData/ajustes.json ---
+const ACENTOS = [['turquesa', 'Turquesa', '#00e5c7'], ['lila', 'Lila', '#c19bf2'], ['dorado', 'Dorado', '#e8c766'], ['azul', 'Azul', '#7db3f0'], ['rojo', 'Rojo', '#ea8a8a']];
+const acentosEl = $('acentos');
+for (const [clave, nombre, color] of ACENTOS) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'acento';
+  b.dataset.acento = clave;
+  b.setAttribute('role', 'radio');
+  b.style.setProperty('--c', color);
+  b.innerHTML = '<span class="acento-muestra"></span>';
+  b.append(document.createTextNode(nombre));
+  b.addEventListener('click', async () => renderAjustes(await window.sharkTracker.ajustes.set({ acento: clave })));
+  acentosEl.append(b);
+}
+const swVentana = document.querySelectorAll('.sw[data-ventana]');
+const swAvisos = document.querySelectorAll('.sw[data-aviso]');
+function marcar(sw, on) {
+  sw.classList.toggle('on', on);
+  sw.setAttribute('aria-checked', String(on));
+}
+function renderAjustes(aj) {
+  if (!aj) return;
+  // El acento se aplica a toda la ventana con la variable --acento (style.css).
+  const color = ACENTOS.find(([c]) => c === aj.acento)?.[2] ?? '#00e5c7';
+  document.documentElement.style.setProperty('--acento', color);
+  acentosEl.querySelectorAll('.acento').forEach((b) => {
+    const on = b.dataset.acento === aj.acento;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-checked', String(on));
+  });
+  swVentana.forEach((sw) => marcar(sw, !!aj.ventana?.[sw.dataset.ventana]));
+  swAvisos.forEach((sw) => marcar(sw, aj.avisos?.[sw.dataset.aviso] !== false));
+}
+swVentana.forEach((sw) => sw.addEventListener('click', async () => {
+  renderAjustes(await window.sharkTracker.ajustes.set({ ventana: { [sw.dataset.ventana]: !sw.classList.contains('on') } }));
+}));
+swAvisos.forEach((sw) => sw.addEventListener('click', async () => {
+  renderAjustes(await window.sharkTracker.ajustes.set({ avisos: { [sw.dataset.aviso]: !sw.classList.contains('on') } }));
+}));
+window.sharkTracker.ajustes.onChanged(renderAjustes);
+window.sharkTracker.ajustes.get().then(renderAjustes);
+$('btn-probar-aviso').addEventListener('click', async () => {
+  const ok = await window.sharkTracker.ajustes.probarAviso();
+  $('probar-aviso-txt').textContent = ok ? 'Enviado: mira la esquina de la pantalla.' : 'Windows no deja mostrar avisos (revisa Configuración → Notificaciones).';
+});
 
 // --- Versión (sale de package.json) y actualizaciones automáticas ---
 window.sharkTracker.app.version().then((v) => {

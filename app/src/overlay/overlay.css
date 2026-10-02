@@ -1,7 +1,8 @@
 /* Overlay en partida — estilo de sharktracker.lol (paleta, tipografía, paneles).
    v0.7 (rediseño): textos un punto más grandes y números de ancho fijo; misma transparencia (80 %). */
 :root {
-  --panel: rgba(8,18,29,.8);      /* 10 % más transparente que al principio (a pedido de Alex). NO subir: v0.7 la mantiene */
+  --op: .8;                       /* transparencia: 0.8 de fábrica (a pedido de Alex); se cambia en Ajustes → Apariencia */
+  --panel: rgba(8,18,29,var(--op));
   --borde: #16324a;
   --texto: #ffffff;
   --tenue: #8fa3b8;      /* v0.7: un poco más claro para leerse mejor sobre el juego */
@@ -59,7 +60,7 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .aviso {
   width: 276px;
   border-color: color-mix(in srgb, var(--c) 40%, var(--borde));
-  background: linear-gradient(90deg, color-mix(in srgb, var(--c) 14%, rgba(8,18,29,.82)), rgba(8,18,29,.82));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c) 14%, rgba(8,18,29,var(--op))), rgba(8,18,29,var(--op)));
 }
 .aviso .titulo { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; line-height: 1.1; }
 .aviso .titulo.urgente { color: var(--enemigo); }
