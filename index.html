@@ -297,7 +297,7 @@
   .ultimas i{transition:transform 180ms cubic-bezier(.23,1,.32,1);}
   @media (hover:hover) and (pointer:fine){
     .rank-row:hover{box-shadow:inset 0 0 0 999px rgba(255,255,255,.035);}
-    .rank-row:hover .ultimas i{transform:scale(1.05);}
+    .rank-row:hover .ultimas i{transform:scale(1.15);}
     .rank-row:hover .ultimas i:nth-child(2){transition-delay:20ms;}
     .rank-row:hover .ultimas i:nth-child(3){transition-delay:40ms;}
     .rank-row:hover .ultimas i:nth-child(4){transition-delay:60ms;}
@@ -868,8 +868,21 @@ function renderRanking() {
   if (!sameSet) {
     // Cambió el filtro, o cambió el orden/quién está en el top — no hay
     // forma barata de parchear eso, se reconstruye la lista completa.
+    // Si son los mismos jugadores en otro orden (alguien subió o bajó en vivo),
+    // cada fila se desliza desde donde estaba hasta su nuevo puesto (técnica FLIP).
+    const reordena = existingIds.length === visibleIds.length && visibleIds.every(id => existingIds.includes(id));
+    const antes = reordena ? new Map(Array.from(listEl.children, el => [el.dataset.playerId, el.getBoundingClientRect().top])) : null;
     listEl.innerHTML = '';
     visible.forEach((p, idx) => listEl.appendChild(buildRow(p, idx)));
+    if (antes && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      for (const el of listEl.children) {
+        const dy = antes.get(el.dataset.playerId) - el.getBoundingClientRect().top;
+        if (Math.abs(dy) < 1) continue;
+        el.style.zIndex = dy > 0 ? '3' : '2'; // la que sube pasa por encima de la que baja
+        el.animate([{ transform: `translateY(${dy}px)` }, { transform: 'translateY(0)' }],
+          { duration: 420, easing: 'cubic-bezier(.77,0,.175,1)' }).finished.then(() => { el.style.zIndex = ''; }, () => {});
+      }
+    }
     return;
   }
 
@@ -1001,6 +1014,22 @@ async function renderAuth() {
   authMenu.render(session, state.players, state.profiles);
 }
 
+// LP del podio en la primera carga: sube de 0 a su valor mientras la tarjeta entra.
+function contarLp(el, retraso) {
+  const m = /^(\d+)( LP)$/.exec(el?.textContent ?? '');
+  if (!m || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const final = Number(m[1]);
+  el.textContent = `0${m[2]}`;
+  setTimeout(() => {
+    const t0 = performance.now(), dur = 900;
+    const paso = (t) => {
+      const k = Math.min((t - t0) / dur, 1);
+      el.textContent = `${Math.round(final * (1 - Math.pow(1 - k, 3)))}${m[2]}`; // ease-out: rápido al principio
+      if (k < 1) requestAnimationFrame(paso);
+    };
+    requestAnimationFrame(paso);
+  }, retraso);
+}
 let podioAnimado = false; // la entrada del podio solo se ve al cargar, no en cada actualización en vivo
 function renderPodium() {
   // Podio (top 3)
@@ -1012,7 +1041,8 @@ function renderPodium() {
     const rankNum = idx + 1;
     const div = document.createElement('div');
     div.className = `podium-card ${rankNum === 1 ? 'rank1' : rankNum === 2 ? 'silver-ring' : 'bronze-ring'}`;
-    if (!podioAnimado) { div.classList.add('entra'); div.style.setProperty('--i', rankNum - 1); }
+    const entra = !podioAnimado;
+    if (entra) { div.classList.add('entra'); div.style.setProperty('--i', rankNum - 1); }
     // Fondo del podio = SIEMPRE la skin elegida (favorite_champion/skin).
     // El swap a campeón en vivo solo pasa en la fila del ranking, no aquí.
     const champBg = p.profile?.favorite_champion || p.favorite_champion;
@@ -1047,6 +1077,7 @@ function renderPodium() {
         <div class="podium-tier ${tierChanged ? 'value-changed' : ''}">${tierText}</div>
       </div>`;
     podiumEl.appendChild(div);
+    if (entra) contarLp(div.querySelector('.podium-lp'), 150 + (rankNum - 1) * 90);
   });
   if (podiumEl.children.length) podioAnimado = true;
 }
