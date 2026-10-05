@@ -271,8 +271,13 @@
     header{grid-template-columns:auto 1fr auto; gap:8px;}
     header h1{font-size:22px;}
     .cards-grid{grid-template-columns:minmax(0,1fr);}
-    .row-content{gap:8px;}
-    .col-estado{width:auto;}
+    /* El estado va debajo del nombre (si no, "Desconectado" deja el nombre en 1 letra). */
+    .row-content{display:grid; grid-template-columns:auto auto minmax(0,1fr) auto auto; grid-template-areas:"pos av name tw rank" "pos av est est rank"; column-gap:8px; row-gap:2px;}
+    .col-pos{grid-area:pos;} .col-avatar{grid-area:av;} .col-name{grid-area:name;} .col-twitch{grid-area:tw;} .col-rank{grid-area:rank; width:auto;}
+    .col-estado{grid-area:est; width:auto; min-width:0;}
+    .col-estado .status-chip{font-size:12px;}
+    /* Área tocable del nombre: que no la recorte la columna. */
+    .col-name{overflow:visible;} .col-name .profile-link{display:block; min-width:0; overflow:hidden; text-overflow:ellipsis;}
     /* En celular el hueco vacío de Twitch no se reserva: el nombre manda. */
     .col-twitch:empty{display:none;}
     .col-twitch{width:16px;} .twitch-badge{width:16px; height:16px;}

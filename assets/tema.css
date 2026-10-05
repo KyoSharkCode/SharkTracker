@@ -69,3 +69,37 @@ html{scrollbar-color:#22364a #030812;}
 /* Botón de sesión siempre en una línea; título más chico en celular para que quepa el encabezado. */
 .login-btn{white-space:nowrap;}
 @media (max-width:560px){ header h1{font-size:24px !important;} }
+
+/* ============================================================
+   Menos movimiento (Windows / macOS / móvil → "reducir movimiento").
+   Todo lo que se repite en bucle (puntos "en vivo", borde de racha,
+   cosméticos animados de la tienda, silueta de carga) hace UNA pasada
+   y se queda quieto: el estado se sigue viendo (punto rojo = en vivo),
+   solo deja de latir. Lo único que sigue girando son los "cargando…",
+   porque avisan que algo está pasando (más lentos).
+   Las transiciones de hover/foco se mantienen: son respuesta, no adorno.
+   ============================================================ */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto !important;}
+  *, *::before, *::after{animation-iteration-count:1 !important;}
+  .spinner, .ai-spinner{animation-iteration-count:infinite !important; animation-duration:1.6s !important;}
+}
+
+/* ============================================================
+   Áreas táctiles (solo pantallas táctiles: en PC no cambia nada).
+   Mínimo 44 px de alto para todo lo que se toca.
+   - Botones, pestañas, chips, selects y buscadores: crecen a 44 px.
+   - Enlaces de texto (nombres del ranking, "volver"…): el área tocable
+     crece por dentro (padding + margen negativo), el diseño no se mueve.
+   - Íconos chicos (Twitch): un área invisible alrededor.
+   ============================================================ */
+@media (pointer:coarse){
+  html .nav-btn{width:44px; height:44px;}
+  html .nav-close{min-width:44px; min-height:44px;}
+  .chipbtn, button.chip, button.tab, button.btn, select, .elo-filter,
+  input:is([type=text],[type=search],:not([type])){min-height:44px;}
+  .login-btn, .twitch-btn{display:inline-flex; align-items:center; justify-content:center; min-height:44px; box-sizing:border-box;}
+  a.profile-link, a.status-chip, .volver, .back, .lbl a, .msg a, .sub a{padding-block:14px; margin-block:-14px;}
+  .twitch-badge{position:relative;}
+  .twitch-badge::after{content:''; position:absolute; inset:-14px -6px;}
+}
