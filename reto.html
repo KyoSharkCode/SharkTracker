@@ -14,13 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
-    --border:#16324a; --text:#ffffff; --text-dim:#a9b7c6; --text-faint:#8696a8;
-    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
-    --danger:#ff5f3d; --gold:#facc15; --gold-glow:rgba(250,204,21,.35);
-    --silver:#cbd5e1; --bronze:#d9955b; --radius:16px;
-  }
+  :root{ /* colores propios de esta página (la paleta común está en assets/tema.css) */ --gold-glow:rgba(250,204,21,.35); --silver:#cbd5e1; --bronze:#d9955b; }
   *{box-sizing:border-box;}
   [hidden]{display:none !important;}
   body{
@@ -41,11 +35,11 @@
   h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
-  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden; transition:transform .15s, box-shadow .15s;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:var(--placeholder); border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden; transition:transform .15s, box-shadow .15s;}
   .avatar:hover{transform:scale(1.06);}
   .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .avatar.pending{border-color:var(--gold); color:var(--gold);}
-  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+  .login-btn{background:var(--accent); color:var(--on-accent); font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
 
   .msg{padding:70px 20px; text-align:center; color:var(--text-dim); font-size:15px; line-height:1.6;}
   .msg b{display:block; color:#fff; font-family:'Rajdhani',sans-serif; font-size:26px; letter-spacing:.04em; text-transform:uppercase; margin-bottom:6px;}
@@ -55,14 +49,14 @@
   section{margin-bottom:38px;}
 
   /* ── Hero ── */
-  .hero{position:relative; border-radius:22px; overflow:hidden; min-height:380px; border:1px solid var(--border); background:#06111c; display:flex; align-items:flex-end; margin-bottom:26px;}
+  .hero{position:relative; border-radius:22px; overflow:hidden; min-height:380px; border:1px solid var(--border); background:var(--field); display:flex; align-items:flex-end; margin-bottom:26px;}
   .hero.win{border-color:rgba(250,204,21,.55); box-shadow:none;}
   .hero.live{border-color:var(--accent); box-shadow:none;}
   .hero-bg{position:absolute; inset:0; background-size:cover; background-position:center 20%;}
   .hero-bg::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(3,8,18,.95) 0%, rgba(3,8,18,.7) 45%, rgba(3,8,18,.15) 100%), linear-gradient(0deg, rgba(3,8,18,.9) 0%, transparent 55%);}
   .hero-body{position:relative; z-index:1; padding:34px 36px; width:100%;}
   .kicker{display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:800; padding:5px 12px; border-radius:99px;}
-  .kicker.gold{background:rgba(250,204,21,.14); color:#f3d36b; border:1px solid rgba(250,204,21,.4);}
+  .kicker.gold{background:rgba(250,204,21,.14); color:var(--gold-soft); border:1px solid rgba(250,204,21,.4);}
   .kicker.live{background:rgba(0,229,199,.16); color:var(--accent); border:1px solid rgba(0,229,199,.4);}
   .kicker.soon{background:rgba(250,204,21,.14); color:var(--gold); border:1px solid rgba(250,204,21,.4);}
   .reto-name{margin:14px 0 4px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim);}
@@ -89,7 +83,7 @@
   .pod .medal{line-height:0; display:flex; justify-content:center;}
   .pod .medal .num{font-family:'Rajdhani',sans-serif; font-size:24px; font-weight:700; line-height:1; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;}
   .pod .medal .n2{color:#d7e0ea; background:rgba(255,255,255,.1);} .pod .medal .n3{color:#e8b48a; background:rgba(205,127,50,.18);}
-  .pod img.ic{width:66px; height:66px; border-radius:50%; object-fit:cover; margin:10px auto 8px; display:block; border:3px solid var(--border); background:#0a1622;}
+  .pod img.ic{width:66px; height:66px; border-radius:50%; object-fit:cover; margin:10px auto 8px; display:block; border:3px solid var(--border); background:var(--placeholder);}
   .pod.p1{border-color:rgba(250,204,21,.55); padding-top:30px; box-shadow:none;}
   .pod.p1 img.ic{width:84px; height:84px; border-color:var(--gold);}
   .pod.p2 img.ic{border-color:var(--silver);}
@@ -123,7 +117,7 @@
   .pos{font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:800; color:var(--text-faint); width:40px;}
   tr.first .pos{color:var(--gold);}
   .pl{display:flex; align-items:center; gap:10px; min-width:0;}
-  .pl img{width:32px; height:32px; border-radius:50%; object-fit:cover; border:2px solid var(--border); background:#0a1622; flex-shrink:0;}
+  .pl img{width:32px; height:32px; border-radius:50%; object-fit:cover; border:2px solid var(--border); background:var(--placeholder); flex-shrink:0;}
   .pl a{font-weight:700; text-decoration:none;}
   .pl a:hover{color:var(--accent);}
   .pl small{color:var(--text-faint); font-weight:600;}
@@ -137,14 +131,14 @@
   .people{display:flex; flex-wrap:wrap; gap:10px;}
   .person{display:inline-flex; align-items:center; gap:9px; background:var(--panel); border:1px solid var(--border); border-radius:99px; padding:4px 14px 4px 4px; font-weight:700; font-size:13.5px; text-decoration:none;}
   .person:hover{border-color:var(--accent);}
-  .person img{width:32px; height:32px; border-radius:50%; object-fit:cover; background:#0a1622;}
+  .person img{width:32px; height:32px; border-radius:50%; object-fit:cover; background:var(--placeholder);}
 
   /* ── Salón de la fama ── */
   .fame{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px;}
   .fame a{display:flex; align-items:center; gap:12px; background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:12px 14px; text-decoration:none; transition:border-color .15s;}
   .fame a:hover{border-color:var(--gold);}
   .fame a.current{border-color:var(--accent);}
-  .fame img{width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--gold); background:#0a1622; flex-shrink:0;}
+  .fame img{width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--gold); background:var(--placeholder); flex-shrink:0;}
   .fame .ph{width:40px; height:40px; border-radius:50%; border:2px dashed var(--border); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
   .fame b{display:block; font-size:13.5px;}
   .fame small{display:block; color:var(--text-faint); font-size:12px; font-weight:600;}
@@ -178,14 +172,14 @@
   .hero-body > *{grid-column:1;}
   .hero-body > .big-count{grid-column:2; grid-row:1 / span 8; margin:0; gap:18px;}
   .kicker{justify-self:start; background:none !important; border:0 !important; padding:0; font-size:13px; font-weight:700;}
-  .kicker.live{color:#6fdba8;} .kicker.soon{color:#f3d36b;} .kicker.gold{color:#f3d36b;}
+  .kicker.live{color:var(--green);} .kicker.soon{color:var(--gold-soft);} .kicker.gold{color:var(--gold-soft);}
   .reto-name{margin:4px 0 0; font-size:15px; letter-spacing:0; text-transform:none;}
   .champ-name{font-size:34px; font-weight:700; line-height:1.1; text-transform:none; letter-spacing:0;}
-  .hero.win .champ-name{background:none; -webkit-text-fill-color:currentColor; color:#f3d36b; filter:none;}
+  .hero.win .champ-name{background:none; -webkit-text-fill-color:currentColor; color:var(--gold-soft); filter:none;}
   .champ-name[style]{margin-top:0 !important;}
   .riot-id{margin:0; font-size:14px; font-weight:500;}
   .dates{margin:0; font-size:14px; font-weight:500; color:var(--text-dim);}
-  .leader-note{margin-top:4px; color:#cfe0ee;} .leader-note b{color:#f3d36b;}
+  .leader-note{margin-top:4px; color:var(--text-soft);} .leader-note b{color:var(--gold-soft);}
   .big-count div{background:none; border:0; padding:0; min-width:0; display:flex; flex-direction:column; align-items:center;}
   .big-count b{font-size:40px; font-weight:700;}
   .big-count small{font-size:12px; font-weight:500; color:var(--text-dim);}
@@ -195,13 +189,13 @@
   .pod{border-radius:16px;}
   .award{border-radius:14px;}
   .award small{font-size:12px; font-weight:600; color:var(--text-dim);}
-  .award span{color:#f3d36b;}
+  .award span{color:var(--gold-soft);}
   th{font-size:12px; font-weight:600; padding:12px 14px;}
   th:first-child, td:first-child{padding-left:20px;} th:last-child, td:last-child{padding-right:20px;}
   td{border-bottom-color:rgba(255,255,255,.06);}
   .pos{font-weight:700; font-size:18px;}
   tr:nth-child(2) .pos{color:#c9d4de;} tr:nth-child(3) .pos{color:#e8b48a;}
-  .pos-lp{color:#6fdba8; font-weight:700;} .neg-lp{color:#ff8a94; font-weight:700;}
+  .pos-lp{color:var(--green); font-weight:700;} .neg-lp{color:var(--red-soft); font-weight:700;}
   .fame a{border-radius:14px; padding:16px 18px;}
   .fame img{border-width:0; width:44px; height:44px;}
   @media (max-width:700px){ .hero-body{grid-template-columns:minmax(0,1fr);} .hero-body > .big-count{grid-column:1; grid-row:auto; justify-self:start; margin-top:8px;} }
@@ -331,7 +325,7 @@ async function drawFinished(ch) {
           <h2 class="champ-name">${esc(nombreDe(w))}</h2>
           <div class="riot-id">${esc(w.riot_game_name)}#${esc(w.riot_tag_line)}</div>
           <div class="hero-stats">
-            <div class="hs gold"><img src="${emblemUrl(w.tier)}" alt="" onerror="this.style.visibility='hidden'"><div><b>${rankText(w)}</b><small>Rango final</small></div></div>
+            <div class="hs gold"><img loading="lazy" decoding="async" src="${emblemUrl(w.tier)}" alt="" onerror="this.style.visibility='hidden'"><div><b>${rankText(w)}</b><small>Rango final</small></div></div>
             <div class="hs"><div><b>${w.lp ?? 0} LP</b><small>Puntos de liga</small></div></div>
             ${w.reto_games ? `<div class="hs"><div><b>${Math.round(100 * w.reto_wins / w.reto_games)}%</b><small>Winrate en el reto</small></div></div>` : ''}
           </div>` : `<h2 class="champ-name">Sin ganador</h2><div class="riot-id">Ningún participante tenía rango SoloQ al cierre.</div>`}
@@ -416,7 +410,7 @@ async function drawOpen(ch, players, profiles) {
     $('table-sec').hidden = true;
     $('people-sec').hidden = false;
     $('people').innerHTML = people.map(p => `
-      <a class="person" href="perfil.html?jugador=${encodeURIComponent(p.id)}"><img src="${iconOr1(p.icon_id)}" alt="" onerror="${ICON_ONERROR}">${esc(p.display_name || p.riot_game_name)}</a>`).join('')
+      <a class="person" href="perfil.html?jugador=${encodeURIComponent(p.id)}"><img loading="lazy" decoding="async" src="${iconOr1(p.icon_id)}" alt="" onerror="${ICON_ONERROR}">${esc(p.display_name || p.riot_game_name)}</a>`).join('')
       || '<span class="dim">Sin participantes.</span>';
   }
 }
@@ -433,9 +427,9 @@ function drawPodium(top) {
     if (!r) return `<div class="pod p${n} empty"><div class="medal">${medal(n)}</div><div class="nm">—</div></div>`;
     return `<div class="pod p${n}">
       <div class="medal">${medal(n)}</div>
-      <img class="ic" src="${iconOr1(r.icon_id)}" alt="" onerror="${ICON_ONERROR}">
+      <img loading="lazy" decoding="async" class="ic" src="${iconOr1(r.icon_id)}" alt="" onerror="${ICON_ONERROR}">
       <div class="nm">${playerLink(r, esc(nombreDe(r)))}</div>
-      <div class="rk"><img src="${emblemUrl(r.tier)}" alt="" onerror="this.style.visibility='hidden'">${rankText(r)}${r.tier ? ` · ${r.lp ?? 0} LP` : ''}</div>
+      <div class="rk"><img loading="lazy" decoding="async" src="${emblemUrl(r.tier)}" alt="" onerror="this.style.visibility='hidden'">${rankText(r)}${r.tier ? ` · ${r.lp ?? 0} LP` : ''}</div>
     </div>`;
   };
   $('podium').innerHTML = card(top[1], 2) + card(top[0], 1) + card(top[2], 3);
@@ -466,8 +460,8 @@ function drawTable(rows, title) {
     const lp = r.reto_lp_net;
     return `<tr class="${i === 0 && r.elo_score != null ? 'first' : ''}">
       <td class="pos">${i + 1}</td>
-      <td><div class="pl"><img src="${iconOr1(r.icon_id)}" alt="" onerror="${ICON_ONERROR}"><div>${playerLink(r, esc(nombreDe(r)))}<br><small>#${esc(r.riot_tag_line)}</small></div></div></td>
-      <td><div class="rank"><img src="${emblemUrl(r.tier)}" alt="" onerror="this.style.visibility='hidden'">${rankText(r)}${r.tier ? ` <span class="dim">${r.lp ?? 0} LP</span>` : ''}</div></td>
+      <td><div class="pl"><img loading="lazy" decoding="async" src="${iconOr1(r.icon_id)}" alt="" onerror="${ICON_ONERROR}"><div>${playerLink(r, esc(nombreDe(r)))}<br><small>#${esc(r.riot_tag_line)}</small></div></div></td>
+      <td><div class="rank"><img loading="lazy" decoding="async" src="${emblemUrl(r.tier)}" alt="" onerror="this.style.visibility='hidden'">${rankText(r)}${r.tier ? ` <span class="dim">${r.lp ?? 0} LP</span>` : ''}</div></td>
       <td class="num hide-sm">${r.reto_games}</td>
       <td class="num">${r.reto_games ? Math.round(100 * r.reto_wins / r.reto_games) + '%' : '<span class="dim">—</span>'}</td>
       <td class="num hide-sm">${k != null ? k.toFixed(2) : '<span class="dim">—</span>'}</td>
@@ -484,7 +478,7 @@ function drawFame(list, winByCh, currentId) {
     const status = c.finished_at
       ? (w ? `<span class="w">${icono('trofeo', { size: 14 })} ${esc(w.display_name || w.riot_game_name)}</span>` : '<span class="dim">Sin ganador</span>')
       : `<span class="st">${live ? '● En curso' : 'Próximo'}</span>`;
-    const pic = c.finished_at && w ? `<img src="${iconOr1(w.icon_id)}" alt="" onerror="${ICON_ONERROR}">` : `<span class="ph">${icono(c.finished_at ? 'trofeo' : 'reloj_arena', { size: 20 })}</span>`;
+    const pic = c.finished_at && w ? `<img loading="lazy" decoding="async" src="${iconOr1(w.icon_id)}" alt="" onerror="${ICON_ONERROR}">` : `<span class="ph">${icono(c.finished_at ? 'trofeo' : 'reloj_arena', { size: 20 })}</span>`;
     return `<a href="reto.html?id=${c.id}" class="${c.id === currentId ? 'current' : ''}">${pic}
       <div style="min-width:0;"><b>${esc(c.name)}</b><small>${fechaCorta(c.starts_at)} → ${fechaCorta(c.ends_at)}</small>${status}</div></a>`;
   }).join('');

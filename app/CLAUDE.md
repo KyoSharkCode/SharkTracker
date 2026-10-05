@@ -321,6 +321,8 @@ Mockup: `https://claude.ai/artifact/6gK8Gg31m9YjTo1ptqaLt8`. Un solo PR con app 
   siguiente x 1385 y 996 / 250 px; quien ya movió una pieza conserva la suya). El Alma ya no
   brilla: solo borde dorado. ⭐ de lo adaptado pasó a "★" (toma el color dorado del texto).
 - **Web**: `assets/tema.css` (se carga después del `<style>` de cada página, excepto `overlay.html`)
+  - **Paleta única** en el `:root` de `tema.css` (`--bg`, `--panel`, `--field`, `--placeholder`, `--text-soft`, `--accent`, `--on-accent`, `--danger`, `--green`, `--gold`/`--gold-soft`, `--blue`/`--blue-soft`, `--red`/`--red-soft`, `--twitch`, `--discord`…). En el CSS de las páginas se usa `var(--…)`, nunca hex sueltos; el `:root` de cada página solo guarda sus colores propios (p. ej. `--a`/`--b` de Versus). Rojos: `--danger` (#ff5f3d, en vivo/errores) ≠ `--red` (#ff5f6d, equipo rojo).
+  - Imágenes generadas por JS con `loading="lazy" decoding="async"`. Para desplegar algo, animar `grid-template-rows`/`opacity`, no márgenes.
   y `assets/iconos.js` (`icono(nombre, {size, color, title})`, reemplaza a los emoji). ❄️ es el
   indicador de **mala racha** (no un cosmético): en el ranking va en su propia columna
   "Racha · últimas 5". Los emoji de la tienda (cosméticos que eligió cada jugador) e insignias

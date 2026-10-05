@@ -14,12 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
-    --border:#16324a; --text:#ffffff; --text-dim:#a9b7c6; --text-faint:#8696a8;
-    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
-    --danger:#ff5f3d; --gold:#facc15; --radius:16px;
-  }
+  
   *{box-sizing:border-box;}
   [hidden]{display:none !important;}
   body{margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
@@ -33,10 +28,10 @@
   h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
-  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:var(--placeholder); border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
   .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .avatar.pending{border-color:var(--gold); color:var(--gold);}
-  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+  .login-btn{background:var(--accent); color:var(--on-accent); font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
   .msg{padding:60px 20px; text-align:center; color:var(--text-dim); font-size:15px;}
   .section-title{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; scroll-margin-top:70px;}
   .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:none;}
@@ -72,7 +67,7 @@
   td{padding:9px 12px; border-top:1px solid rgba(22,50,74,.55); text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums;}
   tr:hover td{background:rgba(255,255,255,.02);}
   .who{display:flex; align-items:center; gap:10px; min-width:0;}
-  .who img{width:30px; height:30px; border-radius:50%; object-fit:cover; background:#0a1622; flex-shrink:0;}
+  .who img{width:30px; height:30px; border-radius:50%; object-fit:cover; background:var(--placeholder); flex-shrink:0;}
   .who img.sq{border-radius:7px;}
   .who a{font-weight:700; text-decoration:none;} .who a:hover{color:var(--accent);}
   .who b{font-weight:700;}
@@ -81,7 +76,7 @@
   .mini img{width:22px; height:22px; border-radius:50%; border:1px solid var(--border);}
   .best{display:inline-flex; align-items:center; gap:6px; font-weight:700;}
   .best img{width:22px; height:22px; border-radius:50%;}
-  .search{background:#06111c; border:1px solid var(--border); border-radius:10px; padding:7px 11px; color:#fff; font-size:13px; font-weight:600; outline:none; width:200px;}
+  .search{background:var(--field); border:1px solid var(--border); border-radius:10px; padding:7px 11px; color:#fff; font-size:13px; font-weight:600; outline:none; width:200px;}
   .search:focus{border-color:var(--accent);}
   .more{display:block; width:100%; background:none; border:none; border-top:1px solid var(--border); color:var(--accent); font-weight:700; font-size:13px; padding:10px; cursor:pointer;}
 
@@ -139,7 +134,7 @@
   .toolbar{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:12px 16px; gap:12px 16px; top:8px;}
   .grp{gap:2px; background:#070d16; border-radius:10px; padding:3px;}
   .grp .chipbtn{border:0; background:none; border-radius:7px; padding:6px 12px; font-size:13px; font-weight:500; color:var(--text-dim);}
-  .grp .chipbtn.on{background:var(--accent); color:#04130f; font-weight:700;}
+  .grp .chipbtn.on{background:var(--accent); color:var(--on-accent); font-weight:700;}
   .jump{gap:14px;}
   .jump a{font-size:13px; font-weight:600; color:var(--accent); padding:0; background:none !important;}
   .jump a:hover{text-decoration:underline;}
@@ -155,7 +150,7 @@
   th{font-size:12px; font-weight:600; padding:12px; border-bottom:0;}
   th:first-child, td:first-child{padding-left:20px;} th:last-child, td:last-child{padding-right:20px;}
   td{padding:11px 12px; border-top:1px solid rgba(255,255,255,.06); font-size:14px;}
-  .good{color:#7cb8ff;} .bad{color:#ff8a94;}
+  .good{color:var(--blue-soft);} .bad{color:var(--red-soft);}
   /* Roles */
   .rolecard{border-radius:16px; padding:16px 18px;}
   .rolecard h3{font-size:20px; letter-spacing:0;}
@@ -165,7 +160,7 @@
   .duos-rec{display:block;}
   .rec{border-radius:14px; padding:14px 16px; gap:4px;}
   .rec .t{font-size:12px; font-weight:600; color:var(--text-dim);}
-  .rec .v{font-size:24px; font-weight:700; color:#f3d36b;}
+  .rec .v{font-size:24px; font-weight:700; color:var(--gold-soft);}
   .slot small{font-size:12px; font-weight:600;}
 </style>
 <link rel="stylesheet" href="assets/tema.css">
@@ -249,7 +244,7 @@ createMissionsWidget({ supabase, profileIconUrl });
 
 const st = { players: new Map(), profiles: new Map(), all: [], queue: 'soloq', days: 30, sort: {}, champAll: false };
 const nick = (id) => { const p = st.players.get(id); if (!p) return '?'; const pr = st.profiles.get(id); return pr?.display_name && pr.display_name !== p.riot_game_name ? pr.display_name : p.riot_game_name; };
-const icon = (id) => `<img src="${iconOr1(st.players.get(id)?.icon_id)}" alt="" onerror="${ICON_ONERROR()}">`;
+const icon = (id) => `<img loading="lazy" decoding="async" src="${iconOr1(st.players.get(id)?.icon_id)}" alt="" onerror="${ICON_ONERROR()}">`;
 const pLink = (id) => `<a href="perfil.html?jugador=${encodeURIComponent(id)}">${esc(nick(id))}</a>`;
 const MIN_CHAMP = 2, MIN_ROLE = 3, MIN_DUO = 2;
 
@@ -321,7 +316,7 @@ function drawTiles() {
     `<div class="tile"><b>${Math.round(g.hours)} h</b><small>Horas jugadas</small></div>`,
     `<div class="tile"><b>${champs.size}</b><small>Campeones distintos</small></div>`,
     `<div class="tile"><b>${g.pentas}</b><small>Pentakills</small></div>`,
-    top ? `<div class="tile"><div class="with-img"><img src="${champImg(top[0])}" alt="" onerror="${HIDE}"><b>${esc(champName(top[0]))}</b></div><small>Más jugado · ${top[1].length}</small></div>`
+    top ? `<div class="tile"><div class="with-img"><img loading="lazy" decoding="async" src="${champImg(top[0])}" alt="" onerror="${HIDE}"><b>${esc(champName(top[0]))}</b></div><small>Más jugado · ${top[1].length}</small></div>`
         : `<div class="tile"><b>—</b><small>Campeón más jugado</small></div>`,
   ].join('');
 }
@@ -363,9 +358,9 @@ function drawChamps() {
   if (!list.length) { $(tid).innerHTML = `<tr><td class="empty">${q ? 'Ningún campeón coincide.' : 'Sin partidas en este período.'}</td></tr>`; return; }
   $(tid).innerHTML = head(tid, [['name', 'Campeón'], ['games', 'Partidas'], ['wr', 'WR'], ['kda', 'KDA', 'hide-sm'], ['nPlayers', 'Quién lo jugó'], [null, `El mejor (mín. ${MIN_CHAMP})`]])
     + `<tbody>${shown.map(r => `<tr>
-      <td><div class="who"><img class="sq" src="${champImg(r.c)}" alt="" onerror="${HIDE}"><b>${esc(champName(r.c))}</b></div></td>
+      <td><div class="who"><img loading="lazy" decoding="async" class="sq" src="${champImg(r.c)}" alt="" onerror="${HIDE}"><b>${esc(champName(r.c))}</b></div></td>
       <td>${r.games}</td><td class="${wrCls(r.wr, r.games)}">${pct(r.wr)}</td><td class="hide-sm">${fix(r.kda, 2)}</td>
-      <td><div class="mini">${r.players.slice(0, 5).map(p => `<img src="${iconOr1(st.players.get(p.id)?.icon_id)}" title="${esc(nick(p.id))}: ${p.games} p · ${pct(p.wr)}" alt="" onerror="${ICON_ONERROR()}">`).join('')}</div></td>
+      <td><div class="mini">${r.players.slice(0, 5).map(p => `<img loading="lazy" decoding="async" src="${iconOr1(st.players.get(p.id)?.icon_id)}" title="${esc(nick(p.id))}: ${p.games} p · ${pct(p.wr)}" alt="" onerror="${ICON_ONERROR()}">`).join('')}</div></td>
       <td>${r.best ? `<span class="best">${icon(r.best.id)}${esc(nick(r.best.id))} <small style="color:var(--text-faint)">${pct(r.best.wr)} · ${r.best.games}p</small></span>` : '<span style="color:var(--text-faint)">—</span>'}</td></tr>`).join('')}</tbody>`;
 }
 
@@ -434,7 +429,7 @@ function drawRecords() {
   $('records').innerHTML = REC.map(([t, m, f]) => m ? `
     <a class="card rec" href="partidas.html?id=${encodeURIComponent(m.match_id)}&jugador=${encodeURIComponent(m.player_id)}">
       <span class="t">${t}</span><span class="v">${esc(f(m))}</span>
-      <span class="p"><img src="${champImg(m.champion)}" alt="" onerror="${HIDE}"><span>${esc(nick(m.player_id))}<small>${esc(champName(m.champion))} · ${m.kills}/${m.deaths}/${m.assists} · ${m.win ? 'Victoria' : 'Derrota'}</small></span></span></a>`
+      <span class="p"><img loading="lazy" decoding="async" src="${champImg(m.champion)}" alt="" onerror="${HIDE}"><span>${esc(nick(m.player_id))}<small>${esc(champName(m.champion))} · ${m.kills}/${m.deaths}/${m.assists} · ${m.win ? 'Victoria' : 'Derrota'}</small></span></span></a>`
     : `<div class="card rec none"><span class="t">${t}</span><span class="v">—</span></div>`).join('');
 }
 

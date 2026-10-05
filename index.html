@@ -14,13 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
-    --border:#16324a; --text:#ffffff; --text-dim:#a9b7c6; --text-faint:#8696a8;
-    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
-    --danger:#ff5f3d; --danger-glow:rgba(255,95,61,.45);
-    --gold:#facc15; --radius:16px;
-  }
+  
   *{box-sizing:border-box;}
   body{
     margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
@@ -47,14 +41,14 @@
   h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(28px,4vw,40px); letter-spacing:.03em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
-  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:var(--placeholder); border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none;}
   /* Header: ícono de invocador del jugador con sesión iniciada */
   .avatar{overflow:hidden; transition:transform .15s, box-shadow .15s;}
   .avatar:hover{transform:scale(1.06); box-shadow:none;}
   .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   /* Sesión de Discord iniciada pero sin cuenta de LoL vinculada todavía */
   .avatar.pending{border-color:var(--gold); box-shadow:none; color:var(--gold);}
-  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+  .login-btn{background:var(--accent); color:var(--on-accent); font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
 
   .section-title{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
   .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:none;}
@@ -71,7 +65,7 @@
   .podium-splash{position:absolute; inset:0; z-index:0; background-size:cover; background-position:center 12%;}
   .podium-scrim{position:absolute; inset:0; z-index:0; background:linear-gradient(180deg, rgba(3,8,18,.2) 0%, rgba(3,8,18,.5) 45%, rgba(3,8,18,.94) 100%);}
   .podium-rank-chip{font-family:'Rajdhani',sans-serif; font-size:15px; font-weight:700; padding:2px 12px; border-radius:99px; background:var(--panel-2); color:var(--text-faint); border:1px solid var(--border); margin-bottom:10px;}
-  .podium-card.rank1 .podium-rank-chip{background:var(--accent); color:#032018; border:none;}
+  .podium-card.rank1 .podium-rank-chip{background:var(--accent); color:var(--on-accent); border:none;}
   /* Ícono grande de corona/medalla, con glow, además del chip de texto */
   /* Corona del #1 (dibujada). El #2 y #3 llevan su número en el chip. */
   .podium-medal{line-height:0; margin-bottom:8px;}
@@ -81,7 +75,7 @@
   .podium-card:not(.rank1) .podium-rank-chip.bronze{color:#e8b48a; background:rgba(205,127,50,.18); border-color:transparent;}
   .podium-card.silver-ring .podium-avatar{border-color:#c9d4de;}
   .podium-card.bronze-ring .podium-avatar{border-color:#cd7f32;}
-  .podium-avatar{width:56px; height:56px; border-radius:50%; background:#0a1622; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; color:var(--text-dim); margin-bottom:12px; overflow:hidden;}
+  .podium-avatar{width:56px; height:56px; border-radius:50%; background:var(--placeholder); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; color:var(--text-dim); margin-bottom:12px; overflow:hidden;}
   .podium-card.rank1 .podium-avatar{width:96px; height:96px; border:3px solid var(--accent); font-size:22px; color:var(--accent);}
   .podium-avatar img{width:100%; height:100%; object-fit:cover;}
   .podium-name{font-size:14px; font-weight:800;}
@@ -97,8 +91,10 @@
   .podium-tier{font-size:13px; color:var(--text-dim); font-weight:600;}
 
   /* TWITCH — oculto por defecto, se abre con animación cuando hay vivo */
-  .twitch-wrap{display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows .5s ease, opacity .4s ease, margin .5s ease; margin-bottom:0;}
-  .twitch-wrap.visible{grid-template-rows:1fr; opacity:1; margin-bottom:28px;}
+  .twitch-wrap{display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows .5s ease, opacity .4s ease;}
+  .twitch-wrap.visible{grid-template-rows:1fr; opacity:1;}
+  /* El espacio de abajo va dentro de lo que se despliega: así se anima junto con la tarjeta sin animar márgenes. */
+  .twitch-inner > .twitch-card{margin-bottom:28px;}
   .twitch-inner{min-height:0; overflow:hidden;}
   .twitch-card{width:100%; display:flex; background:var(--panel); border:1px solid rgba(255,95,109,.4); box-shadow:var(--sombra); border-radius:var(--radius); overflow:hidden;}
   .twitch-preview{flex:0 0 480px; aspect-ratio:16/9; position:relative; background:#070d16; border-right:1px solid var(--border);}
@@ -109,11 +105,11 @@
   .twitch-info{flex-grow:1; padding:22px 24px; display:flex; flex-direction:column; justify-content:center; gap:8px; min-width:0;}
   .twitch-label{font-size:15px; font-weight:700; color:#fff; display:flex; align-items:center; gap:10px;}
   .twitch-label img{width:34px; height:34px; border-radius:50%;}
-  .twitch-btn{align-self:flex-start; margin-top:6px; font-size:14px; font-weight:700; color:#fff; background:#9146ff; border-radius:10px; padding:9px 16px; text-decoration:none;}
+  .twitch-btn{align-self:flex-start; margin-top:6px; font-size:14px; font-weight:700; color:#fff; background:var(--twitch); border-radius:10px; padding:9px 16px; text-decoration:none;}
   .twitch-btn:hover{background:#7c3aed;}
   .twitch-head{display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:10px;}
-  .twitch-head b{display:flex; align-items:center; gap:7px; color:#ff8a94;}
-  .twitch-head b::before{content:''; width:8px; height:8px; border-radius:50%; background:#ff5f6d;}
+  .twitch-head b{display:flex; align-items:center; gap:7px; color:var(--red-soft);}
+  .twitch-head b::before{content:''; width:8px; height:8px; border-radius:50%; background:var(--red);}
   .twitch-head span{color:var(--text-faint);}
   .twitch-title{font-size:21px; font-weight:800; line-height:1.25; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;}
   /* Pantallas medianas: el video se encoge un poco; en celular, video arriba a todo el ancho y la info debajo. */
@@ -125,11 +121,11 @@
     .twitch-title{font-size:16px; -webkit-line-clamp:3;}
   }
   .twitch-game{font-size:14px; color:var(--accent); font-weight:600;}
-  .twitch-viewers{font-size:14px; color:#ff8a94; font-weight:700;}
+  .twitch-viewers{font-size:14px; color:var(--red-soft); font-weight:700;}
 
   /* Tarjetas destacadas (Primera Victoria, Rey de la Temporada) */
   .spotlight-card{position:relative; overflow:hidden; display:flex; flex-wrap:wrap; align-items:center; column-gap:16px; row-gap:6px; background:var(--panel); border:1px solid rgba(250,204,21,.35); border-radius:var(--radius); padding:16px 20px; margin-bottom:0;}
-  .spotlight-badge{flex-basis:100%; color:#f3d36b; font-size:13px; font-weight:700;}
+  .spotlight-badge{flex-basis:100%; color:var(--gold-soft); font-size:13px; font-weight:700;}
   /* Primera victoria y Partida del mes, lado a lado */
   .destacados-dia{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-bottom:44px;}
   .destacados-dia section{margin:0;}
@@ -141,11 +137,11 @@
   .spotlight-card.pending{border-color:var(--border); box-shadow:none; opacity:.8;}
   .spotlight-card.pending .spotlight-badge{color:var(--text-faint);}
   .spotlight-card.pending .spotlight-icon{background:var(--panel-2); border-color:var(--border); font-size:22px; color:var(--text-faint);}
-  .spotlight-champ{width:36px; height:36px; border-radius:8px; overflow:hidden; border:1px solid var(--gold); flex-shrink:0; background:#0a1622;}
+  .spotlight-champ{width:36px; height:36px; border-radius:8px; overflow:hidden; border:1px solid var(--gold); flex-shrink:0; background:var(--placeholder);}
   .spotlight-champ img{width:100%; height:100%; object-fit:cover;}
   .spotlight-meta{display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:13px; color:var(--text-dim); font-weight:500; margin-top:2px;}
   .spotlight-meta .spells{display:flex; gap:3px;}
-  .spotlight-meta .spells img{width:16px; height:16px; border-radius:4px; border:1px solid var(--border); background:#0a1622;}
+  .spotlight-meta .spells img{width:16px; height:16px; border-radius:4px; border:1px solid var(--border); background:var(--placeholder);}
   /* Rey de la Temporada — mismo estilo de tarjeta que Primera Victoria,
      pero la etiqueta va como label arriba del nombre (con la corona en
      línea) en vez de listón en la esquina, y el ícono de invocador
@@ -153,7 +149,7 @@
      viejo (SoloQReto). */
   .rey-avatar-wrap{position:relative; flex-shrink:0;}
   .rey-crown-badge{position:absolute; top:-8px; left:-8px; width:22px; height:22px; border-radius:50%; background:var(--bg); box-shadow:0 0 0 1px var(--gold); display:flex; align-items:center; justify-content:center; line-height:0;}
-  .rey-label{font-size:13px; font-weight:700; color:#f3d36b; display:flex; align-items:center; gap:6px;}
+  .rey-label{font-size:13px; font-weight:700; color:var(--gold-soft); display:flex; align-items:center; gap:6px;}
 
   /* Grids de tarjetas (badges recientes / destacados semana) */
   .cards-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
@@ -212,7 +208,7 @@
   .col-pos.pos-2{color:#d7e0ea;}
   .col-pos.pos-3{color:#e8b48a;}
   .col-avatar{position:relative; width:44px; height:44px; flex-shrink:0;}
-  .avatar-circle{width:100%; height:100%; border-radius:50%; overflow:hidden; background:#0a1622; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px;}
+  .avatar-circle{width:100%; height:100%; border-radius:50%; overflow:hidden; background:var(--placeholder); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px;}
   /* Ícono de Twitch — hueco propio entre el nombre/racha y la franja
      del campeón (antes iba en la esquina del avatar y chocaba con los
      marcos). El hueco existe aunque no tenga Twitch, para que todo
@@ -221,7 +217,7 @@
   .twitch-badge{width:20px; height:20px; display:flex; align-items:center; justify-content:center; text-decoration:none; filter:drop-shadow(0 1px 2px rgba(0,0,0,.6)); transition:transform .15s;}
   .twitch-badge:hover{transform:scale(1.15);}
   .twitch-badge img{width:100%; height:100%; display:block;}
-  .twitch-badge.live{border-radius:50%; box-shadow:0 0 0 1.5px #ff5f6d;}
+  .twitch-badge.live{border-radius:50%; box-shadow:0 0 0 1.5px var(--red);}
   .twitch-badge.live img{filter:brightness(0) saturate(100%) invert(46%) sepia(89%) saturate(1657%) hue-rotate(325deg) brightness(103%) contrast(101%);}
   /* Racha (🔥/❄️ de antes) + últimas 5: columna propia, ya no pegada al nombre. */
   .col-forma{width:168px; flex-shrink:0; display:flex; align-items:center; gap:8px;}
@@ -229,7 +225,7 @@
   .racha.fire{color:#ffb38a;} .racha.ice{color:#7dd3fc;}
   .ultimas{display:flex; gap:4px;}
   .ultimas i{width:15px; height:15px; border-radius:4px; background:rgba(255,255,255,.08);}
-  .ultimas i.w{background:#4c9dff;} .ultimas i.l{background:#ff5f6d;}
+  .ultimas i.w{background:var(--blue);} .ultimas i.l{background:var(--red);}
   .col-role{width:96px; flex-shrink:0;}
   /* Todas las píldoras del mismo ancho; la flecha tiene su propio hueco fijo
      (aunque no haya flecha) para que nada se desplace. */
@@ -242,18 +238,18 @@
      mismo equipo — chip pequeño bajo "En partida", igual que hacía el
      sitio viejo con duo_con. */
   .duo-tag{font-size:11px; font-weight:600; display:flex; align-items:center; gap:4px; color:var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
-  .champ-mini{width:20px; height:20px; border-radius:5px; overflow:hidden; flex-shrink:0; background:#0a1622; border:1px solid var(--border);}
+  .champ-mini{width:20px; height:20px; border-radius:5px; overflow:hidden; flex-shrink:0; background:var(--placeholder); border:1px solid var(--border);}
   .champ-mini img{width:100%; height:100%; object-fit:cover;}
   /* Estado: punto + texto. "En partida" resalta en verde; desconectado queda discreto. */
   .status-chip{display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:500; white-space:nowrap; text-decoration:none;}
   .status-chip::before{content:''; width:7px; height:7px; border-radius:50%; background:#4a5768; flex-shrink:0;}
   .status-chip.offline{color:var(--text-faint);}
-  .status-chip.in-game{color:#6fdba8; font-weight:600;} .status-chip.in-game::before{background:#6fdba8;}
+  .status-chip.in-game{color:var(--green); font-weight:600;} .status-chip.in-game::before{background:var(--green);}
   a.status-chip:hover{text-decoration:underline; text-underline-offset:3px;}
   .col-role{width:92px; flex-shrink:0; font-size:12px; color:var(--text-dim); font-weight:600; display:flex; align-items:center; gap:6px;}
   /* LP ganados/perdidos en sus últimas 5 de SoloQ (junto a los LP) */
   .lp-delta{font-size:12px; font-weight:700; margin-left:4px;}
-  .lp-delta.up{color:#6fdba8;} .lp-delta.down{color:#ff8a94;}
+  .lp-delta.up{color:var(--green);} .lp-delta.down{color:var(--red-soft);}
   .col-rank{width:150px; display:flex; align-items:center; gap:8px;}
   .rank-emblem{width:18px; height:18px; flex-shrink:0;}
   .col-rank .tier-lp .tier{font-size:14px; color:#fff; font-weight:700; line-height:1.25;}
@@ -311,22 +307,22 @@
   a.match{text-decoration:none; color:inherit; transition:background .15s;}
   a.match:hover{background:rgba(0,229,199,.05);}
   .match-icons{display:flex; align-items:center; gap:5px;}
-  .match .champ-icon{width:36px; height:36px; border-radius:8px; object-fit:cover; background:#0a1622; flex-shrink:0;}
+  .match .champ-icon{width:36px; height:36px; border-radius:8px; object-fit:cover; background:var(--placeholder); flex-shrink:0;}
   .match-spells{display:flex; flex-direction:column; gap:3px;}
-  .match-spells img{width:16px; height:16px; border-radius:4px; border:1px solid var(--border); background:#0a1622;}
+  .match-spells img{width:16px; height:16px; border-radius:4px; border:1px solid var(--border); background:var(--placeholder);}
   .match-runes{display:flex; flex-direction:column; gap:3px;}
-  .match-runes img{width:16px; height:16px; border-radius:50%; border:1px solid var(--border); background:#0a1622; object-fit:contain; padding:1px;}
+  .match-runes img{width:16px; height:16px; border-radius:50%; border:1px solid var(--border); background:var(--placeholder); object-fit:contain; padding:1px;}
   .match-champ{font-size:14px; font-weight:700; color:#fff;}
   .match-kda{font-size:13px; color:var(--text-dim);}
   .match-duo{font-size:12px; font-weight:600; color:var(--accent); margin-top:2px; display:flex; align-items:center; gap:5px;}
   .match-result-block{display:flex; flex-direction:column; align-items:flex-end; gap:4px;}
   .result-chip{font-size:12px; font-weight:700; padding:3px 10px; border-radius:6px; text-align:center;}
-  .result-chip.victoria{color:#7cb8ff; background:rgba(76,157,255,.12);}
-  .result-chip.derrota{color:#ff8a94; background:rgba(255,95,109,.12);}
+  .result-chip.victoria{color:var(--blue-soft); background:rgba(76,157,255,.12);}
+  .result-chip.derrota{color:var(--red-soft); background:rgba(255,95,109,.12);}
   .result-chip.remake{color:var(--text-faint); background:rgba(161,161,170,.1);}
   .lp-change{font-size:13px; font-weight:700;}
-  .lp-change.win{color:#6fdba8;}
-  .lp-change.loss{color:#ff8a94;}
+  .lp-change.win{color:var(--green);}
+  .lp-change.loss{color:var(--red-soft);}
   .egida-tag{font-size:11px; font-weight:700; color:var(--text-dim); background:rgba(255,255,255,.08); border:1px dashed rgba(255,255,255,.35); border-radius:99px; padding:2px 8px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;}
   .egida-tag img{width:12px; height:12px; object-fit:contain;}
   .autofill-tag{font-size:11px; font-weight:700; color:var(--gold); background:rgba(250,204,21,.08); border:1px dashed rgba(250,204,21,.45); border-radius:99px; padding:2px 8px; white-space:nowrap; cursor:help;}
@@ -335,7 +331,7 @@
   .logros-panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
   .logro-item{display:flex; align-items:center; gap:14px; padding:12px 18px; border-bottom:1px solid var(--border);}
   .logro-item:last-child{border-bottom:none;}
-  .logro-icon{width:34px; height:34px; border-radius:50%; background:color-mix(in srgb, var(--c, #a9b7c6) 14%, transparent); color:var(--c, #a9b7c6); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .logro-icon{width:34px; height:34px; border-radius:50%; background:color-mix(in srgb, var(--c, var(--text-dim)) 14%, transparent); color:var(--c, var(--text-dim)); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
   .logro-icon img{width:20px; height:20px;}
   .logro-text{font-size:14px; font-weight:500; color:var(--text-dim);}
   .logro-text b{color:#fff; font-weight:700;}
@@ -690,22 +686,22 @@ function renderHistoryPanel(id) {
       .map(c => nameById.get(c.player_id));
 
     const spellsHtml = (m.summoner_spells ?? [])
-      .map(sid => { const url = spellIconUrl(sid); return url ? `<img src="${url}" alt="" onerror="${HIDE_ONERROR}">` : ''; })
+      .map(sid => { const url = spellIconUrl(sid); return url ? `<img loading="lazy" decoding="async" src="${url}" alt="" onerror="${HIDE_ONERROR}">` : ''; })
       .join('');
 
     const keystoneUrl = runeIconUrl(m.keystone_perk);
     const secundariaUrl = runeIconUrl(m.secondary_style);
     const runesHtml = (keystoneUrl || secundariaUrl) ? `
       <span class="match-runes">
-        ${keystoneUrl ? `<img src="${keystoneUrl}" alt="" onerror="${HIDE_ONERROR}">` : ''}
-        ${secundariaUrl ? `<img src="${secundariaUrl}" alt="" onerror="${HIDE_ONERROR}">` : ''}
+        ${keystoneUrl ? `<img loading="lazy" decoding="async" src="${keystoneUrl}" alt="" onerror="${HIDE_ONERROR}">` : ''}
+        ${secundariaUrl ? `<img loading="lazy" decoding="async" src="${secundariaUrl}" alt="" onerror="${HIDE_ONERROR}">` : ''}
       </span>` : '';
 
     // Remake = partida terminada en menos de 5 minutos (misma convención que el sitio viejo).
     const resultado = !m.win && m.matches.duration_seconds < 300 ? 'remake' : (m.win ? 'victoria' : 'derrota');
     const kda = `${m.kills ?? 0}/${m.deaths ?? 0}/${m.assists ?? 0}`;
     const egidaHtml = m.extra_stats?.posible_egida
-      ? `<span class="egida-tag" title="Ganaste bastante más LP de lo normal en esta partida — probablemente Égida de Valor (LP doble por autocompletado). Es una estimación, Riot no lo confirma directamente."><img src="assets/Aegis_of_Valor_icon.svg" alt="">Égida de Valor</span>`
+      ? `<span class="egida-tag" title="Ganaste bastante más LP de lo normal en esta partida — probablemente Égida de Valor (LP doble por autocompletado). Es una estimación, Riot no lo confirma directamente."><img loading="lazy" decoding="async" src="assets/Aegis_of_Valor_icon.svg" alt="">Égida de Valor</span>`
       : '';
     // ¿Autofill? — jugó un rol distinto a su rol principal (Riot no lo confirma).
     const rolPrincipal = roleLabel(playersById.get(id)?.primary_role);
@@ -717,7 +713,7 @@ function renderHistoryPanel(id) {
     return `
       <a class="match" href="partidas.html?id=${encodeURIComponent(m.match_id)}&jugador=${encodeURIComponent(id)}" title="Ver la partida completa">
         <span class="match-icons">
-          <img class="champ-icon" src="${champIconUrl(m.champion)}" alt="" onerror="${HIDE_ONERROR}">
+          <img loading="lazy" decoding="async" class="champ-icon" src="${champIconUrl(m.champion)}" alt="" onerror="${HIDE_ONERROR}">
           ${spellsHtml ? `<span class="match-spells">${spellsHtml}</span>` : ''}
           ${runesHtml}
         </span>
@@ -783,10 +779,10 @@ function buildRow(p, idx) {
   const posContent = idx === 0 ? icono('corona', { size: 20, color: '#facc15', title: 'Primer lugar' }) : (idx + 1);
 
   const iconUrl = profileIconUrl(p.icon_id);
-  const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(p.riot_game_name);
+  const avatarHtml = iconUrl ? `<img loading="lazy" decoding="async" src="${iconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(p.riot_game_name);
   const twitchLive = !!p.stream?.is_live;
   const twitchBadgeHtml = p.profile.twitch_username
-    ? `<a class="twitch-badge ${twitchLive ? 'live' : ''}" href="https://twitch.tv/${encodeURIComponent(p.profile.twitch_username)}" target="_blank" rel="noopener" title="Twitch${twitchLive ? ' en vivo' : ''}" onclick="event.stopPropagation()"><img src="assets/${twitchLive ? 'Online_Twitch' : 'Offline_Twitch'}.svg" alt="Twitch"></a>`
+    ? `<a class="twitch-badge ${twitchLive ? 'live' : ''}" href="https://twitch.tv/${encodeURIComponent(p.profile.twitch_username)}" target="_blank" rel="noopener" title="Twitch${twitchLive ? ' en vivo' : ''}" onclick="event.stopPropagation()"><img loading="lazy" decoding="async" src="assets/${twitchLive ? 'Online_Twitch' : 'Offline_Twitch'}.svg" alt="Twitch"></a>`
     : '';
   const tierText = p.rank ? (TIER_LABEL[p.rank.tier] ?? p.rank.tier) + ' ' + (p.rank.division ?? '') : 'Unranked';
   const lpText = `${p.rank?.lp ?? 0} LP`;
@@ -809,7 +805,7 @@ function buildRow(p, idx) {
       </div>
       <div class="col-role">${p.primary_role ? `<span class="role-pill">${roleLabel(p.primary_role)}</span>` : '<span class="role-head">—</span>'}</div>
       <div class="col-rank">
-        <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="" onerror="${HIDE_ONERROR}">
+        <img loading="lazy" decoding="async" class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="" onerror="${HIDE_ONERROR}">
         <div class="tier-lp"><div class="tier">${tierText}</div><div class="lp">${lpText}${lpDeltaHtml}</div></div>
       </div>
       <div class="col-wr">
@@ -883,7 +879,7 @@ function renderBadgeCard(container, categoria, badgeByCategory, nameById, { solo
     const ids = (b.player_ids && b.player_ids.length) ? b.player_ids : [b.player_id];
     const nombres = esc(ids.map(id => nameById.get(id) ?? '?').join(' & '));
     const champHtml = b.champion
-      ? `<img class="badge-champ-icon" src="${champIconUrl(b.champion)}" alt="${esc(b.champion)}" onerror="${HIDE_ONERROR}">` : '';
+      ? `<img loading="lazy" decoding="async" class="badge-champ-icon" src="${champIconUrl(b.champion)}" alt="${esc(b.champion)}" onerror="${HIDE_ONERROR}">` : '';
     div.innerHTML = `
       <div class="ico">${icono(meta.icono, { size: 20, color: '#00e5c7' })}</div>
       <div style="min-width:0;">
@@ -1003,7 +999,7 @@ function renderPodium() {
       : '';
     // Avatar = ícono de invocador REAL (players.icon_id), no el campeón.
     const iconUrl = profileIconUrl(p.icon_id);
-    const avatarHtml = iconUrl ? `<img src="${iconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(p.riot_game_name);
+    const avatarHtml = iconUrl ? `<img loading="lazy" decoding="async" src="${iconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(p.riot_game_name);
     const medalIcon = rankNum === 1 ? icono('corona', { size: 44, color: '#facc15', title: 'Primer lugar' }) : '';
     const medalClass = rankNum === 1 ? 'gold' : rankNum === 2 ? 'silver' : 'bronze';
     const tierText = p.rank ? (TIER_LABEL[p.rank.tier] ?? p.rank.tier) + ' ' + (p.rank.division ?? '') : 'Unranked';
@@ -1024,7 +1020,7 @@ function renderPodium() {
       <div class="podium-meta">${roleLabel(p.primary_role) ?? 'Sin datos'}</div>
       <div class="podium-lp ${lpChanged ? 'value-changed' : ''}">${lpText}</div>
       <div class="podium-tier-row">
-        <img class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="" onerror="${HIDE_ONERROR}">
+        <img loading="lazy" decoding="async" class="rank-emblem" src="${emblemUrl(p.rank?.tier)}" alt="" onerror="${HIDE_ONERROR}">
         <div class="podium-tier ${tierChanged ? 'value-changed' : ''}">${tierText}</div>
       </div>`;
     podiumEl.appendChild(div);
@@ -1049,7 +1045,7 @@ function renderTwitch() {
       </div>
       <div class="twitch-info">
         <div class="twitch-head"><b>En vivo ahora</b><span>Twitch</span></div>
-        <div class="twitch-label"><img alt="" hidden><span></span></div>
+        <div class="twitch-label"><img loading="lazy" decoding="async" alt="" hidden><span></span></div>
         <div class="twitch-title"></div>
         <div class="twitch-game"></div>
         <div class="twitch-viewers"></div>
@@ -1083,12 +1079,12 @@ function renderFirstWin() {
   const p = firstWin?.player_id ? roster.find(r => r.id === firstWin.player_id) : null;
   if (p) {
     const pvIconUrl = profileIconUrl(p.icon_id);
-    const pvAvatarHtml = pvIconUrl ? `<img src="${pvIconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(p.riot_game_name);
+    const pvAvatarHtml = pvIconUrl ? `<img loading="lazy" decoding="async" src="${pvIconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(p.riot_game_name);
     const pvChampHtml = firstWin.champion
-      ? `<div class="spotlight-champ"><img src="${champIconUrl(firstWin.champion)}" alt="${esc(firstWin.champion)}" onerror="${HIDE_ONERROR}"></div>` : '';
+      ? `<div class="spotlight-champ"><img loading="lazy" decoding="async" src="${champIconUrl(firstWin.champion)}" alt="${esc(firstWin.champion)}" onerror="${HIDE_ONERROR}"></div>` : '';
     const pvKda = firstWin.kills != null ? `${firstWin.kills}/${firstWin.deaths}/${firstWin.assists} KDA` : null;
     const pvSpellsHtml = (firstWin.summoner_spells ?? [])
-      .map(sid => { const url = spellIconUrl(sid); return url ? `<img src="${url}" alt="" onerror="${HIDE_ONERROR}">` : ''; }).join('');
+      .map(sid => { const url = spellIconUrl(sid); return url ? `<img loading="lazy" decoding="async" src="${url}" alt="" onerror="${HIDE_ONERROR}">` : ''; }).join('');
     const pvLado = firstWin.team === 'blue' ? 'Equipo Azul' : firstWin.team === 'red' ? 'Equipo Rojo' : null;
     const pvDuracion = formatDuration(firstWin.duration_seconds);
 
@@ -1152,7 +1148,7 @@ function renderBadges() {
     reySection.style.display = '';
     const reyPlayer = playersById.get(rey.player_id);
     const reyIconUrl = profileIconUrl(reyPlayer?.icon_id);
-    const reyAvatarHtml = reyIconUrl ? `<img src="${reyIconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(reyPlayer?.riot_game_name ?? nameById.get(rey.player_id) ?? '?');
+    const reyAvatarHtml = reyIconUrl ? `<img loading="lazy" decoding="async" src="${reyIconUrl}" alt="" onerror="${AVATAR_ONERROR}">` : initials(reyPlayer?.riot_game_name ?? nameById.get(rey.player_id) ?? '?');
     const reyNombre = reyPlayer
       ? `${reyPlayer.riot_game_name}${reyPlayer.riot_tag_line ? `#${reyPlayer.riot_tag_line}` : ''}`
       : (nameById.get(rey.player_id) ?? '?');
@@ -1219,7 +1215,7 @@ function renderLogros() {
 
       const item = document.createElement('div');
       item.className = 'logro-item';
-      const iconoHtml = ico.endsWith('.svg') ? `<img src="${ico}" alt="" onerror="${HIDE_ONERROR}">` : icono(ico, { size: 18 });
+      const iconoHtml = ico.endsWith('.svg') ? `<img loading="lazy" decoding="async" src="${ico}" alt="" onerror="${HIDE_ONERROR}">` : icono(ico, { size: 18 });
       item.innerHTML = `
         <div class="logro-icon" style="--c:${color}">${iconoHtml}</div>
         <div style="flex:1;min-width:0;">

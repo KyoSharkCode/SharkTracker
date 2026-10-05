@@ -14,13 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
-    --border:#16324a; --text:#ffffff; --text-dim:#a9b7c6; --text-faint:#8696a8;
-    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
-    --danger:#ff5f3d; --gold:#facc15; --radius:16px;
-    --discord:#5865F2; --magenta:#c026d3;
-  }
+  :root{ /* colores propios de esta página (la paleta común está en assets/tema.css) */ --magenta:#c026d3; }
   *{box-sizing:border-box;}
   body{margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif; background:var(--bg); display:grid; grid-template-columns:1.1fr 1fr;}
   a{color:inherit;}
@@ -40,7 +34,7 @@
   .perks .ico{width:34px; height:34px; border-radius:10px; background:rgba(0,229,199,.1); color:var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
 
   .preview-label{font-size:13px; font-weight:600; color:var(--text-faint); margin-bottom:8px;}
-  .preview-row{display:flex; align-items:center; gap:14px; background:#0b1520; border:1px solid var(--border); border-radius:14px; padding:12px 16px; max-width:480px; transition:border-color .3s, box-shadow .3s;}
+  .preview-row{display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:12px 16px; max-width:480px; transition:border-color .3s, box-shadow .3s;}
   .preview-row.found{border-color:var(--accent); box-shadow:none;}
   .preview-row .pos{font-family:'Rajdhani'; font-weight:700; font-size:18px; color:var(--text-faint); width:26px; text-align:center;}
   .preview-row .av{width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#0ea5e9,#c026d3); border:2px solid var(--accent); overflow:hidden; flex-shrink:0;}
@@ -93,7 +87,7 @@
   .match.bad{color:var(--danger); background:rgba(255,95,61,.08); border:1px solid rgba(255,95,61,.3);}
   .match.wait{color:var(--text-dim); background:rgba(255,255,255,.03); border:1px solid var(--border);}
   .spacer{height:22px;}
-  .btn-main{width:100%; padding:15px 18px; border:none; border-radius:12px; background:var(--accent); color:#032018; font-family:'Inter',sans-serif; font-weight:700; font-size:16px;}
+  .btn-main{width:100%; padding:15px 18px; border:none; border-radius:12px; background:var(--accent); color:var(--on-accent); font-family:'Inter',sans-serif; font-weight:700; font-size:16px;}
   .link-btn{display:block; width:100%; text-align:center; margin-top:16px; font-size:12px; color:var(--text-faint); background:none; border:none; text-decoration:none;}
   .link-btn:hover{color:#fff; text-decoration:underline;}
   .hint{margin:14px 0 0; font-size:12px; line-height:1.5; color:var(--text-faint);}
@@ -108,7 +102,7 @@
 
   /* Solicitud pendiente */
   .pending-card{display:flex; gap:14px; align-items:flex-start; background:rgba(250,204,21,.07); border:1px solid rgba(250,204,21,.35); border-radius:12px; padding:14px 16px; margin-bottom:22px;}
-  .pending-card .ico{line-height:0; color:#f3d36b;}
+  .pending-card .ico{line-height:0; color:var(--gold-soft);}
   .pending-card b{display:block; color:#fff; font-size:14px; margin-bottom:4px;}
   .pending-card span{font-size:12.5px; line-height:1.5; color:var(--text-dim);}
   .notice{font-size:12.5px; font-weight:600; line-height:1.5; color:var(--gold); background:rgba(250,204,21,.07); border:1px solid rgba(250,204,21,.3); border-radius:10px; padding:10px 12px; margin-bottom:18px;}
@@ -260,7 +254,7 @@ async function refresh() {
 
   const meta = session.user.user_metadata ?? {};
   $('dc-name').textContent = meta.custom_claims?.global_name || meta.full_name || meta.name || meta.user_name || 'tu cuenta';
-  $('dc-av').innerHTML = meta.avatar_url ? `<img src="${esc(meta.avatar_url)}" alt="">` : '';
+  $('dc-av').innerHTML = meta.avatar_url ? `<img loading="lazy" decoding="async" src="${esc(meta.avatar_url)}" alt="">` : '';
 
   // ¿Ya tiene una cuenta del roster vinculada?
   const { data: mine } = await supabase.from('players').select('*').eq('user_id', session.user.id).maybeSingle();
@@ -314,7 +308,7 @@ async function fillPreview(player) {
   $('pv-role').textContent = roleLabel(player.primary_role) ?? '—';
   await versionReady;
   const icon = profileIconUrl(player.icon_id);
-  $('pv-av').innerHTML = icon ? `<img src="${icon}" alt="" onerror="this.remove()">` : '';
+  $('pv-av').innerHTML = icon ? `<img loading="lazy" decoding="async" src="${icon}" alt="" onerror="this.remove()">` : '';
 
   // Posición y LP: mismo criterio que index.html (último snapshot de SoloQ, elo_score desc).
   const [{ data: players }, { data: snaps }] = await Promise.all([
