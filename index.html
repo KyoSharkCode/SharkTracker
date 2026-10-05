@@ -140,6 +140,12 @@
   .destacados-dia{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-bottom:44px;}
   .destacados-dia section{margin:0;}
   .destacados-dia .spotlight-card, .destacados-dia .mm-card{height:100%; box-sizing:border-box;}
+  /* Esqueletos de esta página (ver tema.css): tamaños calcados de las tarjetas reales. */
+  .destacados-dia .sk-stack{height:100%;}
+  .sk-dia{height:100%; min-height:108px; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; gap:12px; padding:14px 18px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);}
+  .sk-dia-fila{display:flex; align-items:center; gap:12px;}
+  .sk .podium-card.rank1{min-height:403px;}
+  .sk-recientes .info-card{min-height:100px; box-sizing:border-box;}
   @media (max-width:820px){ .destacados-dia{grid-template-columns:minmax(0,1fr);} }
   .spotlight-icon{width:52px; height:52px; border-radius:12px; background:rgba(250,204,21,.16); border:2px solid var(--gold); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; overflow:hidden;}
   .spotlight-icon img{width:100%; height:100%; object-fit:cover;}
@@ -169,19 +175,19 @@
   .info-player{font-size:15px; font-weight:700; margin:2px 0;}
   .info-detail{font-size:13px; color:var(--accent); font-weight:600; display:flex; align-items:center; gap:5px;}
   /* Últimas 10 partidas: una sola franja con separadores */
-  #badges-recientes{gap:0; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
-  #badges-recientes .info-card{background:none; border:0; border-radius:0; border-right:1px solid var(--border); padding:18px 22px;}
-  #badges-recientes .info-card:last-child{border-right:0;}
+  #badges-recientes, .sk-recientes{gap:0; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+  #badges-recientes .info-card, .sk-recientes .info-card{background:none; border:0; border-radius:0; border-right:1px solid var(--border); padding:18px 22px;}
+  #badges-recientes .info-card:last-child, .sk-recientes .info-card:last-child{border-right:0;}
   /* Destacados de la semana: 4 columnas compactas; los que no tienen dueño van en una línea */
   /* Destacados: flex centrado; las columnas (--cols) las elige el JS según cuántas tarjetas hay,
      para que las filas queden parejas y la última, centrada. */
-  #destacados-semana{display:flex; flex-wrap:wrap; justify-content:center; gap:12px; --cols:4;}
-  #destacados-semana .info-card{flex:0 0 calc((100% - (var(--cols) - 1) * 12px) / var(--cols)); min-width:0; box-sizing:border-box; align-items:flex-start;}
+  #destacados-semana, .sk-destacados{display:flex; flex-wrap:wrap; justify-content:center; gap:12px; --cols:4;}
+  #destacados-semana .info-card, .sk-destacados .info-card{flex:0 0 calc((100% - (var(--cols) - 1) * 12px) / var(--cols)); min-width:0; box-sizing:border-box; align-items:flex-start;}
   #destacados-semana .info-card .ico{display:none;}
   .sin-duenyo{margin:12px 0 0; font-size:13px; color:var(--text-faint);}
-  @media (max-width:900px){ #destacados-semana{--cols:2 !important;} }
-  @media (max-width:560px){ #destacados-semana{--cols:1 !important;} }
-  @media (max-width:700px){ #badges-recientes .info-card{border-right:0; border-bottom:1px solid var(--border);} }
+  @media (max-width:900px){ #destacados-semana, .sk-destacados{--cols:2 !important;} }
+  @media (max-width:560px){ #destacados-semana, .sk-destacados{--cols:1 !important;} }
+  @media (max-width:700px){ #badges-recientes .info-card, .sk-recientes .info-card{border-right:0; border-bottom:1px solid var(--border);} }
   .badge-champ-icon{width:18px; height:18px; border-radius:4px; object-fit:cover; flex-shrink:0;}
   @media (max-width:700px){ .cards-grid{grid-template-columns:1fr 1fr;} }
 
@@ -407,7 +413,10 @@
   </header>
 
   <section>
-    <div class="podium-grid" id="podium"></div>
+    <div class="sk-stack">
+      <div class="podium-grid" id="podium"></div>
+      <div class="podium-grid sk" aria-hidden="true"><div class="podium-card silver-ring"><span class="sk-b sk-p" style="width:34px;height:20px"></span><span style="height:12px"></span><span class="sk-b sk-c" style="width:56px;height:56px"></span><span style="height:12px"></span><span class="sk-b" style="width:60%;height:14px"></span><span style="height:6px"></span><span class="sk-b" style="width:28%;height:10px"></span><span style="height:10px"></span><span class="sk-b" style="width:46%;height:30px"></span><span style="height:8px"></span><span class="sk-b" style="width:38%;height:12px"></span></div><div class="podium-card rank1"><span class="sk-b sk-c" style="width:44px;height:44px"></span><span style="height:8px"></span><span class="sk-b sk-p" style="width:34px;height:20px"></span><span style="height:12px"></span><span class="sk-b sk-c" style="width:96px;height:96px"></span><span style="height:12px"></span><span class="sk-b" style="width:60%;height:16px"></span><span style="height:6px"></span><span class="sk-b" style="width:28%;height:10px"></span><span style="height:10px"></span><span class="sk-b" style="width:46%;height:46px"></span><span style="height:8px"></span><span class="sk-b" style="width:38%;height:12px"></span></div><div class="podium-card bronze-ring"><span class="sk-b sk-p" style="width:34px;height:20px"></span><span style="height:12px"></span><span class="sk-b sk-c" style="width:56px;height:56px"></span><span style="height:12px"></span><span class="sk-b" style="width:60%;height:14px"></span><span style="height:6px"></span><span class="sk-b" style="width:28%;height:10px"></span><span style="height:10px"></span><span class="sk-b" style="width:46%;height:30px"></span><span style="height:8px"></span><span class="sk-b" style="width:38%;height:12px"></span></div></div>
+    </div>
   </section>
 
   <div class="twitch-wrap" id="twitch-wrap">
@@ -418,17 +427,26 @@
 
   <div class="destacados-dia">
     <section id="primera-victoria-section">
-      <div id="primera-victoria"></div>
+      <div class="sk-stack">
+        <div id="primera-victoria"></div>
+        <div class="sk"><div class="sk-dia" aria-hidden="true"><span class="sk-b" style="width:40%;height:11px"></span><div class="sk-dia-fila"><span class="sk-b sk-c" style="width:46px;height:46px"></span><span class="sk-b sk-r" style="width:36px;height:36px"></span><div style="flex:1;min-width:0"><span class="sk-b" style="width:50%;height:15px"></span><span style="height:7px"></span><span class="sk-b" style="width:75%;height:11px"></span></div><span class="sk-b" style="width:44px;height:22px"></span></div></div></div>
+      </div>
     </section>
 
     <section id="partida-mes-section">
-      <div id="partida-mes"></div>
+      <div class="sk-stack">
+        <div id="partida-mes"></div>
+        <div class="sk"><div class="sk-dia" aria-hidden="true"><span class="sk-b" style="width:40%;height:11px"></span><div class="sk-dia-fila"><span class="sk-b sk-c" style="width:46px;height:46px"></span><span class="sk-b sk-r" style="width:36px;height:36px"></span><div style="flex:1;min-width:0"><span class="sk-b" style="width:50%;height:15px"></span><span style="height:7px"></span><span class="sk-b" style="width:75%;height:11px"></span></div><span class="sk-b" style="width:44px;height:22px"></span></div></div></div>
+      </div>
     </section>
   </div>
 
   <section>
     <div class="section-title"><span class="bar"></span><h2>Últimas 10 Partidas</h2></div>
-    <div class="cards-grid" id="badges-recientes"></div>
+    <div class="sk-stack">
+      <div class="cards-grid" id="badges-recientes"></div>
+      <div class="cards-grid sk-recientes sk" aria-hidden="true"><div class="info-card"><span class="sk-b sk-r" style="width:40px;height:40px"></span><div style="flex:1;min-width:0"><span class="sk-b" style="width:45%;height:10px"></span><span style="height:7px"></span><span class="sk-b" style="width:70%;height:14px"></span><span style="height:7px"></span><span class="sk-b" style="width:55%;height:10px"></span></div></div><div class="info-card"><span class="sk-b sk-r" style="width:40px;height:40px"></span><div style="flex:1;min-width:0"><span class="sk-b" style="width:45%;height:10px"></span><span style="height:7px"></span><span class="sk-b" style="width:70%;height:14px"></span><span style="height:7px"></span><span class="sk-b" style="width:55%;height:10px"></span></div></div><div class="info-card"><span class="sk-b sk-r" style="width:40px;height:40px"></span><div style="flex:1;min-width:0"><span class="sk-b" style="width:45%;height:10px"></span><span style="height:7px"></span><span class="sk-b" style="width:70%;height:14px"></span><span style="height:7px"></span><span class="sk-b" style="width:55%;height:10px"></span></div></div></div>
+    </div>
   </section>
 
   <section>
@@ -448,7 +466,10 @@
         <div class="col-rank">Rango</div>
         <div class="col-wr">Winrate</div>
       </div>
-      <div class="rank-list" id="ranking-list"></div>
+      <div class="sk-stack">
+        <div class="rank-list" id="ranking-list"></div>
+        <div class="rank-list sk" aria-hidden="true"><div class="rank-row"><div class="row-content"><div class="col-pos"><span class="sk-b sk-m" style="width:12px;height:14px"></span></div><div class="col-avatar"><span class="sk-b sk-c" style="width:44px;height:44px"></span></div><div class="col-name"><span class="sk-b" style="width:52%;height:15px"></span></div><div class="col-twitch"></div><div class="col-forma"><span class="sk-b" style="width:118px;height:15px"></span></div><div class="col-estado"><span class="sk-b" style="width:92px;height:12px"></span></div><div class="col-role"><span class="sk-b sk-p" style="width:74px;height:20px"></span></div><div class="col-rank"><span class="sk-b sk-c" style="width:28px;height:28px;flex-shrink:0"></span><div style="flex:1"><span class="sk-b" style="width:70%;height:13px"></span><span style="height:5px"></span><span class="sk-b" style="width:45%;height:11px"></span></div></div><div class="col-wr"><span class="sk-b" style="width:40%;height:13px"></span><span style="height:7px"></span><span class="sk-b" style="width:100%;height:4px"></span></div></div></div><div class="rank-row"><div class="row-content"><div class="col-pos"><span class="sk-b sk-m" style="width:12px;height:14px"></span></div><div class="col-avatar"><span class="sk-b sk-c" style="width:44px;height:44px"></span></div><div class="col-name"><span class="sk-b" style="width:52%;height:15px"></span></div><div class="col-twitch"></div><div class="col-forma"><span class="sk-b" style="width:118px;height:15px"></span></div><div class="col-estado"><span class="sk-b" style="width:92px;height:12px"></span></div><div class="col-role"><span class="sk-b sk-p" style="width:74px;height:20px"></span></div><div class="col-rank"><span class="sk-b sk-c" style="width:28px;height:28px;flex-shrink:0"></span><div style="flex:1"><span class="sk-b" style="width:70%;height:13px"></span><span style="height:5px"></span><span class="sk-b" style="width:45%;height:11px"></span></div></div><div class="col-wr"><span class="sk-b" style="width:40%;height:13px"></span><span style="height:7px"></span><span class="sk-b" style="width:100%;height:4px"></span></div></div></div><div class="rank-row"><div class="row-content"><div class="col-pos"><span class="sk-b sk-m" style="width:12px;height:14px"></span></div><div class="col-avatar"><span class="sk-b sk-c" style="width:44px;height:44px"></span></div><div class="col-name"><span class="sk-b" style="width:52%;height:15px"></span></div><div class="col-twitch"></div><div class="col-forma"><span class="sk-b" style="width:118px;height:15px"></span></div><div class="col-estado"><span class="sk-b" style="width:92px;height:12px"></span></div><div class="col-role"><span class="sk-b sk-p" style="width:74px;height:20px"></span></div><div class="col-rank"><span class="sk-b sk-c" style="width:28px;height:28px;flex-shrink:0"></span><div style="flex:1"><span class="sk-b" style="width:70%;height:13px"></span><span style="height:5px"></span><span class="sk-b" style="width:45%;height:11px"></span></div></div><div class="col-wr"><span class="sk-b" style="width:40%;height:13px"></span><span style="height:7px"></span><span class="sk-b" style="width:100%;height:4px"></span></div></div></div><div class="rank-row"><div class="row-content"><div class="col-pos"><span class="sk-b sk-m" style="width:12px;height:14px"></span></div><div class="col-avatar"><span class="sk-b sk-c" style="width:44px;height:44px"></span></div><div class="col-name"><span class="sk-b" style="width:52%;height:15px"></span></div><div class="col-twitch"></div><div class="col-forma"><span class="sk-b" style="width:118px;height:15px"></span></div><div class="col-estado"><span class="sk-b" style="width:92px;height:12px"></span></div><div class="col-role"><span class="sk-b sk-p" style="width:74px;height:20px"></span></div><div class="col-rank"><span class="sk-b sk-c" style="width:28px;height:28px;flex-shrink:0"></span><div style="flex:1"><span class="sk-b" style="width:70%;height:13px"></span><span style="height:5px"></span><span class="sk-b" style="width:45%;height:11px"></span></div></div><div class="col-wr"><span class="sk-b" style="width:40%;height:13px"></span><span style="height:7px"></span><span class="sk-b" style="width:100%;height:4px"></span></div></div></div><div class="rank-row"><div class="row-content"><div class="col-pos"><span class="sk-b sk-m" style="width:12px;height:14px"></span></div><div class="col-avatar"><span class="sk-b sk-c" style="width:44px;height:44px"></span></div><div class="col-name"><span class="sk-b" style="width:52%;height:15px"></span></div><div class="col-twitch"></div><div class="col-forma"><span class="sk-b" style="width:118px;height:15px"></span></div><div class="col-estado"><span class="sk-b" style="width:92px;height:12px"></span></div><div class="col-role"><span class="sk-b sk-p" style="width:74px;height:20px"></span></div><div class="col-rank"><span class="sk-b sk-c" style="width:28px;height:28px;flex-shrink:0"></span><div style="flex:1"><span class="sk-b" style="width:70%;height:13px"></span><span style="height:5px"></span><span class="sk-b" style="width:45%;height:11px"></span></div></div><div class="col-wr"><span class="sk-b" style="width:40%;height:13px"></span><span style="height:7px"></span><span class="sk-b" style="width:100%;height:4px"></span></div></div></div><div class="rank-row"><div class="row-content"><div class="col-pos"><span class="sk-b sk-m" style="width:12px;height:14px"></span></div><div class="col-avatar"><span class="sk-b sk-c" style="width:44px;height:44px"></span></div><div class="col-name"><span class="sk-b" style="width:52%;height:15px"></span></div><div class="col-twitch"></div><div class="col-forma"><span class="sk-b" style="width:118px;height:15px"></span></div><div class="col-estado"><span class="sk-b" style="width:92px;height:12px"></span></div><div class="col-role"><span class="sk-b sk-p" style="width:74px;height:20px"></span></div><div class="col-rank"><span class="sk-b sk-c" style="width:28px;height:28px;flex-shrink:0"></span><div style="flex:1"><span class="sk-b" style="width:70%;height:13px"></span><span style="height:5px"></span><span class="sk-b" style="width:45%;height:11px"></span></div></div><div class="col-wr"><span class="sk-b" style="width:40%;height:13px"></span><span style="height:7px"></span><span class="sk-b" style="width:100%;height:4px"></span></div></div></div></div>
+      </div>
     </div>
   </section>
 
@@ -470,7 +491,10 @@
 
   <section>
     <div class="section-title"><span class="bar"></span><h2>Destacados de la Semana</h2></div>
-    <div class="cards-grid" id="destacados-semana"></div>
+    <div class="sk-stack">
+      <div class="cards-grid" id="destacados-semana"></div>
+      <div class="cards-grid sk-destacados sk" aria-hidden="true"><div class="info-card"><div style="flex:1;min-width:0"><span class="sk-b" style="width:45%;height:10px"></span><span style="height:7px"></span><span class="sk-b" style="width:70%;height:14px"></span><span style="height:7px"></span><span class="sk-b" style="width:55%;height:10px"></span></div></div><div class="info-card"><div style="flex:1;min-width:0"><span class="sk-b" style="width:45%;height:10px"></span><span style="height:7px"></span><span class="sk-b" style="width:70%;height:14px"></span><span style="height:7px"></span><span class="sk-b" style="width:55%;height:10px"></span></div></div><div class="info-card"><div style="flex:1;min-width:0"><span class="sk-b" style="width:45%;height:10px"></span><span style="height:7px"></span><span class="sk-b" style="width:70%;height:14px"></span><span style="height:7px"></span><span class="sk-b" style="width:55%;height:10px"></span></div></div><div class="info-card"><div style="flex:1;min-width:0"><span class="sk-b" style="width:45%;height:10px"></span><span style="height:7px"></span><span class="sk-b" style="width:70%;height:14px"></span><span style="height:7px"></span><span class="sk-b" style="width:55%;height:10px"></span></div></div><div class="info-card"><div style="flex:1;min-width:0"><span class="sk-b" style="width:45%;height:10px"></span><span style="height:7px"></span><span class="sk-b" style="width:70%;height:14px"></span><span style="height:7px"></span><span class="sk-b" style="width:55%;height:10px"></span></div></div><div class="info-card"><div style="flex:1;min-width:0"><span class="sk-b" style="width:45%;height:10px"></span><span style="height:7px"></span><span class="sk-b" style="width:70%;height:14px"></span><span style="height:7px"></span><span class="sk-b" style="width:55%;height:10px"></span></div></div><div class="info-card"><div style="flex:1;min-width:0"><span class="sk-b" style="width:45%;height:10px"></span><span style="height:7px"></span><span class="sk-b" style="width:70%;height:14px"></span><span style="height:7px"></span><span class="sk-b" style="width:55%;height:10px"></span></div></div><div class="info-card"><div style="flex:1;min-width:0"><span class="sk-b" style="width:45%;height:10px"></span><span style="height:7px"></span><span class="sk-b" style="width:70%;height:14px"></span><span style="height:7px"></span><span class="sk-b" style="width:55%;height:10px"></span></div></div></div>
+    </div>
     <p class="sin-duenyo" id="sin-duenyo" hidden></p>
   </section>
 
@@ -486,6 +510,7 @@
   </footer>
 </div>
 
+<script src="assets/esqueletos.js"></script>
 <script type="module">
 import { createSupabase } from './assets/supabase.js';
 import { getDDragonVersion, esc } from './assets/lol-data.js';
@@ -1308,6 +1333,7 @@ async function refresh(keys = Object.keys(loaders)) {
 }
 
 await refresh();
+document.dispatchEvent(new Event('sharktracker:listo')); // esqueletos que sigan sin datos (secciones vacías) se retiran
 
 // ── Cuenta regresiva — fija, no depende de datos de Supabase.
 // Convierte hora "de pared" en Madrid a UTC real (mismo patrón que

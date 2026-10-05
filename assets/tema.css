@@ -146,3 +146,30 @@ img:not([src]){visibility:hidden;}
    ============================================================ */
 :where(button, .btn, .login-btn, .twitch-btn, .chipbtn, .chip, .tab){transition:scale 160ms cubic-bezier(.23,1,.32,1);}
 :where(button, .btn, .login-btn, .twitch-btn, .chipbtn, button.chip, .tab):active:not(:disabled){scale:.97;}
+
+/* ============================================================
+   Esqueletos de carga (shimmer). Uso:
+   <div class="sk-stack">
+     <div id="contenido-real"></div>            ← vacío hasta que llegan los datos
+     <div class="sk" aria-hidden="true">…bloques .sk-b con la forma real…</div>
+   </div>
+   + <script src="assets/esqueletos.js"></script> antes del script de la página.
+   Ambos ocupan la misma celda: al llegar los datos, fundido cruzado de 300 ms.
+   ============================================================ */
+.sk-stack{display:grid;}
+.sk-stack > *{grid-area:1 / 1; min-width:0;}
+.sk{pointer-events:none; user-select:none; transition:opacity 300ms ease;}
+.sk.sk-sale{opacity:0;}
+.sk span{display:block;}
+.sk-entra{animation:sk-entra 300ms ease;}
+@keyframes sk-entra{from{opacity:0;}}
+/* Bloque gris con un brillo que lo cruza (solo transform: no repinta). */
+.sk-b{position:relative; overflow:hidden; flex-shrink:0; background:var(--skeleton); border-radius:6px; max-width:100%;}
+.sk-b::after{content:''; position:absolute; inset:0; transform:translateX(-100%);
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent);
+  animation:sk-brillo 1.6s cubic-bezier(.4,0,.2,1) infinite;}
+@keyframes sk-brillo{to{transform:translateX(100%);}}
+.sk-c{border-radius:50%;} .sk-p{border-radius:99px;} .sk-r{border-radius:10px;} .sk-m{border-radius:4px;}
+/* En el esqueleto no se resalta nada (ni el #1 ni la primera fila). */
+.sk .podium-card, .sk .podium-card.rank1{border-color:var(--border);}
+.sk .rank-row{background:none; cursor:default;}
