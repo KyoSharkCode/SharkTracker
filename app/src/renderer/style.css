@@ -826,7 +826,7 @@ html, body { font-variant-numeric: tabular-nums; }
   transform-origin: left center; pointer-events: none;
 }
 .con-indicador.listo .nav-indicador, .con-indicador.listo .stab-indicador {
-  transition: transform 220ms var(--ease-out), height 220ms var(--ease-out);
+  transition: transform 220ms var(--ease-out);
 }
 
 /* Chip de estado ("Sin partida" ↔ "En partida"): el texto cambia con un fundido. */
