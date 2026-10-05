@@ -41,12 +41,17 @@ $Carpeta = Join-Path $env:LOCALAPPDATA 'SharkTracker-prueba-clips'
 $Salida  = $env:ST_SALIDA
 if (-not $Salida) { $Salida = [Environment]::GetFolderPath('Desktop') }
 $Buf     = Join-Path $Carpeta 'bufer'
-$Res     = Join-Path $Salida 'resultados-clips-C0.txt'
+$ArchivoRes     = Join-Path $Salida 'resultados-clips-C0.txt'
 New-Item -ItemType Directory -Force -Path $Carpeta, $Buf | Out-Null
 Get-ChildItem $Buf -File -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
-Set-Content -Path $Res -Value '' -Encoding UTF8
+[IO.File]::WriteAllText($ArchivoRes, '', [Text.Encoding]::UTF8)
 
-function Log([string]$t) { Write-Host $t; Add-Content -Path $Res -Value $t -Encoding UTF8 }
+$script:LogFallo = $false
+function Log([string]$t) {
+  Write-Host $t
+  try { [IO.File]::AppendAllText($ArchivoRes, $t + "`r`n", [Text.Encoding]::UTF8) }
+  catch { if (-not $script:LogFallo) { $script:LogFallo = $true; Write-Host ('No se pudo escribir ' + $ArchivoRes + ': ' + $_.Exception.Message) -ForegroundColor Red } }
+}
 function Titulo([string]$t) { Log ''; Log ('== ' + $t + ' ' + ('=' * [Math]::Max(3, 60 - $t.Length))) }
 function Aviso([string]$t) { Write-Host $t -ForegroundColor Cyan }
 
@@ -63,9 +68,9 @@ Log ("CPU: {0} ({1} nucleos / {2} hilos)" -f $cpu.Name.Trim(), $cpu.NumberOfCore
 Log ("RAM: {0} GB" -f $ramGB)
 $gpus = @(Get-CimInstance Win32_VideoController)
 foreach ($g in $gpus) {
-  $res = ''
-  if ($g.CurrentHorizontalResolution) { $res = " - pantalla {0}x{1} a {2} Hz" -f $g.CurrentHorizontalResolution, $g.CurrentVerticalResolution, $g.CurrentRefreshRate }
-  Log ("GPU: {0} (driver {1}){2}" -f $g.Name, $g.DriverVersion, $res)
+  $txtPantalla = ''
+  if ($g.CurrentHorizontalResolution) { $txtPantalla = " - pantalla {0}x{1} a {2} Hz" -f $g.CurrentHorizontalResolution, $g.CurrentVerticalResolution, $g.CurrentRefreshRate }
+  Log ("GPU: {0} (driver {1}){2}" -f $g.Name, $g.DriverVersion, $txtPantalla)
 }
 $bat = Get-CimInstance Win32_Battery -ErrorAction SilentlyContinue
 if ($bat) {
@@ -94,10 +99,10 @@ if (-not $ffmpeg) {
   $ffmpeg = Get-ChildItem $Carpeta -Recurse -Filter ffmpeg.exe -ErrorAction SilentlyContinue | Select-Object -First 1
 }
 if (-not $ffmpeg) { Log 'No se pudo bajar FFmpeg (revisa la conexion y vuelve a abrir el .bat).'; return }
-$FF = $ffmpeg.FullName
-Log ('FFmpeg: ' + ((& $FF -hide_banner -version 2>&1 | Select-Object -First 1) -replace '^ffmpeg version ', ''))
+$RutaFfmpeg = $ffmpeg.FullName
+Log ('FFmpeg: ' + ((& $RutaFfmpeg -hide_banner -version 2>&1 | Select-Object -First 1) -replace '^ffmpeg version ', ''))
 
-$PM = $null
+$RutaPresentMon = $null
 $pmExe = Get-ChildItem $Carpeta -Filter 'PresentMon*.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
 if (-not $pmExe) {
   try {
@@ -112,7 +117,7 @@ if (-not $pmExe) {
     }
   } catch { Log ('PresentMon no se pudo bajar: ' + $_.Exception.Message) }
 }
-if ($pmExe) { $PM = $pmExe.FullName; Log ('PresentMon: ' + $pmExe.Name) }
+if ($pmExe) { $RutaPresentMon = $pmExe.FullName; Log ('PresentMon: ' + $pmExe.Name) }
 else { Log 'PresentMon: no disponible (se mide CPU/GPU/RAM, pero no los FPS)' }
 
 # ---------------------------------------------- 3. Que codificador funciona aqui
@@ -135,7 +140,7 @@ $prueba = Join-Path $Carpeta 'prueba.mp4'
 foreach ($c in $cands) {
   Remove-Item $prueba -Force -ErrorAction SilentlyContinue
   $a = @('-hide_banner', '-loglevel', 'error', '-y', '-f', 'lavfi', '-i', 'ddagrab=output_idx=0:framerate=60', '-t', '3') + $c.vf + $c.c + $calidad + @($prueba)
-  $err = & $FF @a 2>&1 | Out-String
+  $err = & $RutaFfmpeg @a 2>&1 | Out-String
   $ok = (Test-Path $prueba) -and ((Get-Item $prueba).Length -gt 20KB)
   if ($ok) {
     Log ("OK    " + $c.n)
@@ -164,6 +169,11 @@ function TiempoDeJuego {
   try { (Invoke-RestMethod -UseBasicParsing -TimeoutSec 2 -Uri 'https://127.0.0.1:2999/liveclientdata/gamestats').gameTime } catch { $null }
 }
 Aviso ''
+$grabadores = @(Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.ProcessName -match '^(obs64|obs32|NVIDIA Share|nvcontainer|Medal|Outplayed|Overwolf|RadeonSoftware)$' } | Select-Object -ExpandProperty ProcessName -Unique)
+if ($grabadores.Count) {
+  Log ('Programas que pueden estar grabando a la vez: ' + ($grabadores -join ', '))
+  Aviso 'Para que la medida sea limpia, cierra OBS y apaga la "Repeticion instantanea" de NVIDIA durante la prueba.'
+}
 Aviso 'Listo. Ahora entra a una partida (normal, ARAM o practica sirven).'
 Aviso 'Consejo: usa el modo de pantalla "Sin bordes" en las opciones de video de LoL.'
 Aviso 'La prueba empieza sola cuando pasa la pantalla de carga. No cierres esta ventana.'
@@ -181,7 +191,7 @@ function IniciarGrabacion {
   $a = @('-hide_banner', '-loglevel', 'error', '-y', '-f', 'lavfi', '-i', 'ddagrab=output_idx=0:framerate=60') + $elegido.vf + $elegido.c + $calidad +
        @('-f', 'segment', '-segment_time', '2', '-segment_wrap', '30', '-reset_timestamps', '1', '-segment_format', 'mpegts', (Join-Path $Buf 'trozo%03d.ts'))
   $psi = New-Object Diagnostics.ProcessStartInfo
-  $psi.FileName = $FF
+  $psi.FileName = $RutaFfmpeg
   $psi.Arguments = ($a | ForEach-Object { if ($_ -match '\s') { '"' + $_ + '"' } else { $_ } }) -join ' '
   $psi.UseShellExecute = $false
   $psi.RedirectStandardInput = $true
@@ -213,18 +223,18 @@ function Fps([string]$csv) {
 }
 
 function Bloque([string]$nombre, [bool]$grabar, [int]$seg) {
-  $ff = $null
-  if ($grabar) { $ff = IniciarGrabacion; Start-Sleep -Seconds 3 }
+  $grab = $null
+  if ($grabar) { $grab = IniciarGrabacion; Start-Sleep -Seconds 3 }
   $csv = Join-Path $Carpeta ("fps-" + $nombre + ".csv")
   Remove-Item $csv -Force -ErrorAction SilentlyContinue
-  $pm = $null
-  if ($PM) {
-    $pm = Start-Process -FilePath $PM -WindowStyle Hidden -PassThru -ArgumentList @(
+  $procPm = $null
+  if ($RutaPresentMon) {
+    $procPm = Start-Process -FilePath $RutaPresentMon -WindowStyle Hidden -PassThru -ArgumentList @(
       '--process_name', '"League of Legends.exe"', '--output_file', ('"' + $csv + '"'),
       '--timed', $seg, '--terminate_after_timed', '--no_console_stats', '--stop_existing_session')
   }
-  $cpuT = @(); $g3d = @(); $genc = @()
-  $cpuFfIni = $null; if ($ff) { try { $ff.Refresh(); $cpuFfIni = $ff.TotalProcessorTime } catch {} }
+  $cpuT = @(); $g3d = @(); $genc = @(); $porPid = @{}; $muestrasEnc = 0
+  $cpuFfIni = $null; if ($grab) { try { $grab.Refresh(); $cpuFfIni = $grab.TotalProcessorTime } catch {} }
   $reloj = [Diagnostics.Stopwatch]::StartNew()
   $ramFf = 0
   while ($reloj.Elapsed.TotalSeconds -lt $seg) {
@@ -233,18 +243,33 @@ function Bloque([string]$nombre, [bool]$grabar, [int]$seg) {
     try {
       $eng = Get-CimInstance Win32_PerfFormattedData_GPUPerformanceCounters_GPUEngine
       $g3d  += [double](($eng | Where-Object { $_.Name -match 'engtype_3D$' } | Measure-Object UtilizationPercentage -Sum).Sum)
-      $genc += [double](($eng | Where-Object { $_.Name -match 'engtype_VideoEncode$' } | Measure-Object UtilizationPercentage -Sum).Sum)
+      $encs = @($eng | Where-Object { $_.Name -match 'engtype_VideoEncode$' })
+      $genc += [double](($encs | Measure-Object UtilizationPercentage -Sum).Sum)
+      foreach ($e in $encs) {
+        if ($e.UtilizationPercentage -gt 0 -and $e.Name -match '^pid_(\d+)_') {
+          $idp = [int]$Matches[1]; $porPid[$idp] = [double]$porPid[$idp] + [double]$e.UtilizationPercentage
+        }
+      }
+      $muestrasEnc++
     } catch {}
-    if ($ff) { try { $ff.Refresh(); $ramFf = [Math]::Max($ramFf, $ff.WorkingSet64) } catch {} }
+    if ($grab) { try { $grab.Refresh(); $ramFf = [Math]::Max($ramFf, $grab.WorkingSet64) } catch {} }
     Start-Sleep -Seconds 2
   }
   $dur = $reloj.Elapsed.TotalSeconds
   $cpuFf = $null
-  if ($ff -and $cpuFfIni) { try { $ff.Refresh(); $cpuFf = 100 * ($ff.TotalProcessorTime - $cpuFfIni).TotalSeconds / $dur / [Environment]::ProcessorCount } catch {} }
-  if ($pm) { try { $pm.WaitForExit(15000) | Out-Null } catch {} }
-  if ($ff) { DetenerGrabacion $ff }
+  if ($grab -and $cpuFfIni) { try { $grab.Refresh(); $cpuFf = 100 * ($grab.TotalProcessorTime - $cpuFfIni).TotalSeconds / $dur / [Environment]::ProcessorCount } catch {} }
+  if ($procPm) { try { $procPm.WaitForExit(15000) | Out-Null } catch {} }
+  if ($grab) { DetenerGrabacion $grab }
   $prom = { param($l) if ($l.Count) { ($l | Measure-Object -Average).Average } else { $null } }
+  # Quien usa el codificador de video de la GPU en este tramo (OBS, repeticion instantanea de NVIDIA, Discord...).
+  $usoEnc = @()
+  foreach ($k in $porPid.Keys) {
+    $nom = (Get-Process -Id $k -ErrorAction SilentlyContinue).ProcessName
+    if (-not $nom) { $nom = 'pid ' + $k }
+    $usoEnc += ('{0} {1:N0} %' -f $nom, ($porPid[$k] / [Math]::Max(1, $muestrasEnc)))
+  }
   return [pscustomobject]@{
+    UsoCodif = ($usoEnc -join ', ')
     Bloque = $nombre; Graba = $grabar; Segundos = [int]$dur
     Fps = (Fps $csv); Cpu = (& $prom $cpuT); Gpu3D = (& $prom $g3d); GpuEnc = (& $prom $genc)
     CpuFfmpeg = $cpuFf; RamFfmpegMB = [Math]::Round($ramFf / 1MB)
@@ -268,7 +293,7 @@ if ($trozos.Count -ge 3) {
   Set-Content -Path $lista -Encoding ASCII -Value ($trozos | ForEach-Object { "file '" + ($_.FullName -replace "'", "'\''") + "'" })
   $clip = Join-Path $Salida 'clip-prueba-C0.mp4'
   $t0 = [Diagnostics.Stopwatch]::StartNew()
-  & $FF -hide_banner -loglevel error -y -f concat -safe 0 -i $lista -c copy $clip 2>&1 | Out-Null
+  & $RutaFfmpeg -hide_banner -loglevel error -y -f concat -safe 0 -i $lista -c copy $clip 2>&1 | Out-Null
   $t0.Stop()
   if (Test-Path $clip) {
     Log ("Guardado clip-prueba-C0.mp4 ({0:N1} MB) en {1:N2} s, sin recodificar." -f ((Get-Item $clip).Length / 1MB), $t0.Elapsed.TotalSeconds)
@@ -287,6 +312,9 @@ foreach ($r in $tramos) {
     (& $f $fps '{0,6:N1}'), (& $f $baj '{0,6:N1}'), (& $f $r.Cpu '{0,6:N1}'), (& $f $r.Gpu3D '{0,6:N1}'), (& $f $r.GpuEnc '{0,6:N1}'),
     (& $f $r.CpuFfmpeg '{0,6:N2}'), $ram)
 }
+Log ''
+Log 'Quien uso el codificador de video de la GPU en cada tramo:'
+foreach ($r in $tramos) { $u = $r.UsoCodif; if (-not $u) { $u = 'nadie' }; Log ('  ' + $r.Bloque + ': ' + $u) }
 $sin = @($tramos | Where-Object { -not $_.Graba }); $con = @($tramos | Where-Object { $_.Graba })
 function Media($lista, [scriptblock]$sel) { $v = @($lista | ForEach-Object $sel | Where-Object { $null -ne $_ }); if ($v.Count) { ($v | Measure-Object -Average).Average } else { $null } }
 $fpsSin = Media $sin { if ($_.Fps) { $_.Fps.fps } }; $fpsCon = Media $con { if ($_.Fps) { $_.Fps.fps } }
