@@ -41,7 +41,7 @@
 
   /* Selectores */
   .pickers{display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:end; margin-bottom:16px;}
-  .pick label{display:block; font-size:11px; font-weight:800; margin-bottom:6px;}
+  .pick label{display:block; font-size:12px; font-weight:800; margin-bottom:6px;}
   .pick.a label{color:var(--a);} .pick.b label{color:var(--b);} .pick.b{text-align:right;}
   .sel{width:100%; appearance:none; background:var(--field) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%239db3c4' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center; border:1px solid var(--border); border-radius:11px; padding:11px 34px 11px 13px; color:#fff; font-weight:700; font-size:14px; outline:none; cursor:pointer; color-scheme:dark;}
   .pick.a .sel:focus{border-color:var(--a);} .pick.b .sel:focus{border-color:var(--b);}
@@ -73,14 +73,14 @@
   .mid .vs{font-family:'Rajdhani',sans-serif; font-size:40px; font-weight:800; line-height:1; color:var(--text-faint);}
   .mid .tally{font-family:'Rajdhani',sans-serif; font-size:34px; font-weight:800; line-height:1;}
   .mid .tally .ta{color:var(--a);} .mid .tally .tb{color:var(--b);} .mid .tally span.dash{color:var(--text-faint); margin:0 6px;}
-  .mid small{font-size:11px; font-weight:800; color:var(--text-faint); text-align:center;}
+  .mid small{font-size:12px; font-weight:800; color:var(--text-faint); text-align:center;}
 
   /* Filas de comparación */
   .rows{padding:6px 18px;}
   .row{display:grid; grid-template-columns:90px 1fr 170px 1fr 90px; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(22,50,74,.6);}
   .row:last-child{border-bottom:none;}
   .row .lbl{text-align:center; font-size:12px; font-weight:700; color:var(--text-dim);}
-  .row .lbl small{display:block; font-size:11px; color:var(--text-faint); font-weight:600;}
+  .row .lbl small{display:block; font-size:12px; color:var(--text-faint); font-weight:600;}
   .row .v{font-family:'Rajdhani',sans-serif; font-size:19px; font-weight:800; color:var(--text-dim);}
   .row .v.va{text-align:right;} .row .v.vb{text-align:left;}
   .row .v.win.va{color:var(--a);} .row .v.win.vb{color:var(--b);}
@@ -110,7 +110,7 @@
   /* Historial entre ellos */
   .h2h{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
   .h2h-box{padding:18px; text-align:center;}
-  .h2h-box h4{margin:0 0 6px; font-size:11px; font-weight:800; color:var(--text-faint);}
+  .h2h-box h4{margin:0 0 6px; font-size:12px; font-weight:800; color:var(--text-faint);}
   .h2h-box .big{font-family:'Rajdhani',sans-serif; font-size:38px; font-weight:800; line-height:1.1;}
   .h2h-box .big .ta{color:var(--a);} .h2h-box .big .tb{color:var(--b);} .h2h-box .big .w{color:var(--accent);} .h2h-box .big .l{color:var(--danger);}
   .h2h-box p{margin:6px 0 0; font-size:12.5px; color:var(--text-dim);}
@@ -118,7 +118,7 @@
   .shared a:last-child{border-bottom:none;}
   .shared a:hover{background:rgba(0,229,199,.05);}
   .shared img{width:30px; height:30px; border-radius:7px;}
-  .shared .tag{font-size:11px; font-weight:800; padding:2px 8px; border-radius:99px;}
+  .shared .tag{font-size:12px; font-weight:800; padding:2px 8px; border-radius:99px;}
   .shared .tag.duo{background:rgba(0,229,199,.12); color:var(--accent);} .shared .tag.vs{background:rgba(250,204,21,.12); color:var(--gold);}
   .shared .res{margin-left:auto; font-weight:800; font-size:12px;}
   .shared .when{color:var(--text-faint); font-size:12px; width:90px; text-align:right;}
@@ -148,7 +148,7 @@
   .lado.b{justify-content:flex-end; text-align:right;}
   .lado .ic{width:84px; height:84px; border-radius:50%; object-fit:cover; border:3px solid var(--a); background:var(--placeholder); flex-shrink:0;}
   .lado.b .ic{border-color:var(--b);}
-  .lado .ic[src=""]{visibility:hidden;}
+  .lado .ic:not([src]), .lado .ic[src=""]{visibility:hidden;}
   .lado .dato{display:flex; flex-direction:column; gap:4px; min-width:0;}
   .lado.b .dato{align-items:flex-end;}
   .lado label{font-size:12px; font-weight:600; color:var(--a);} .lado.b label{color:var(--b);}
@@ -213,7 +213,7 @@
   <!-- Los dos jugadores en un solo panel: avatar, selector, rango y partidas -->
   <section class="card duelo">
     <div class="lado a">
-      <img class="ic" id="ic-a" src="" alt="">
+      <img class="ic" id="ic-a" alt="">
       <div class="dato">
         <label for="sel-a">Jugador 1</label>
         <select class="sel" id="sel-a"></select>
@@ -233,7 +233,7 @@
         <div class="rk" id="rk-b"></div>
         <div class="sub" id="sub-b"></div>
       </div>
-      <img class="ic" id="ic-b" src="" alt="">
+      <img class="ic" id="ic-b" alt="">
     </div>
   </section>
 

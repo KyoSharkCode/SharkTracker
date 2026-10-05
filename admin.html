@@ -45,7 +45,7 @@
 
   .section-title{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
   .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:none;}
-  .section-title .count{font-family:'Inter'; font-size:11px; font-weight:800; color:var(--on-accent); background:var(--gold); border-radius:99px; padding:2px 9px; letter-spacing:0;}
+  .section-title .count{font-family:'Inter'; font-size:12px; font-weight:800; color:var(--on-accent); background:var(--gold); border-radius:99px; padding:2px 9px; letter-spacing:0;}
   .section-title .count.zero{background:var(--border); color:var(--text-dim);}
   section{margin-bottom:40px;}
   /* Pestañas del dashboard: una sección a la vez */
@@ -56,7 +56,7 @@
     border-radius:99px; padding:9px 16px; font:700 13px Inter,sans-serif; cursor:pointer; transition:border-color .15s, color .15s, box-shadow .15s;}
   .tab:hover{border-color:var(--accent); color:#fff;}
   .tab.on{background:rgba(0,229,199,.12); border-color:var(--accent); color:#fff; box-shadow:none;}
-  .tab .tc{font-size:11px; font-weight:800; color:var(--on-accent); background:var(--gold); border-radius:99px; padding:1px 7px;}
+  .tab .tc{font-size:12px; font-weight:800; color:var(--on-accent); background:var(--gold); border-radius:99px; padding:1px 7px;}
   .tab .tc.bad{background:var(--danger); color:#fff;}
   .tab .tc[hidden]{display:none;}
   @media (max-width:560px){
@@ -92,7 +92,7 @@
 
   /* Jugadores */
   table{width:100%; border-collapse:collapse; font-size:13.5px;}
-  th{text-align:left; font-size:11px; font-weight:800; color:var(--text-faint); padding:12px 16px; border-bottom:1px solid var(--border);}
+  th{text-align:left; font-size:12px; font-weight:800; color:var(--text-faint); padding:12px 16px; border-bottom:1px solid var(--border);}
   td{padding:11px 16px; border-bottom:1px solid var(--border); vertical-align:middle;}
   tr:last-child td{border-bottom:none;}
   .pl{display:flex; align-items:center; gap:10px; min-width:0;}
@@ -103,7 +103,7 @@
   .dc{color:var(--text-dim);}
   .none{color:var(--text-faint); font-style:italic;}
   .tw{display:inline-flex; align-items:center; gap:6px; color:#d4bbff; font-weight:700;}
-  .badge{font-size:11px; font-weight:800; padding:2px 8px; border-radius:99px; white-space:nowrap;}
+  .badge{font-size:12px; font-weight:800; padding:2px 8px; border-radius:99px; white-space:nowrap;}
   .badge.ok{background:rgba(145,70,255,.22); color:#d4bbff;}
   .badge.warn{background:rgba(250,204,21,.14); color:var(--gold);}
   .actions{display:flex; gap:6px; justify-content:flex-end;}
@@ -120,7 +120,7 @@
   .ch-card.live{border-color:var(--accent); box-shadow:none;}
   .ch-top{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
   .ch-top h3{margin:0; font-family:'Rajdhani',sans-serif; font-size:22px; font-weight:700; letter-spacing:.03em;}
-  .chip{font-size:11px; font-weight:800; padding:3px 10px; border-radius:99px;}
+  .chip{font-size:12px; font-weight:800; padding:3px 10px; border-radius:99px;}
   .chip.live{background:rgba(0,229,199,.15); color:var(--accent);}
   .chip.soon{background:rgba(250,204,21,.14); color:var(--gold);}
   .ch-meta{margin:6px 0 12px; font-size:13px; color:var(--text-dim);}
@@ -140,7 +140,7 @@
   .form{background:var(--panel); border:1px solid var(--accent); border-radius:var(--radius); padding:18px 20px; margin-bottom:14px;}
   .form h3{margin:0 0 14px; font-family:'Rajdhani',sans-serif; font-size:18px; letter-spacing:.05em; text-transform:uppercase;}
   .fields{display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; margin-bottom:14px;}
-  .fields label, .pick-label{display:block; font-size:11px; font-weight:800; color:var(--text-faint); margin-bottom:5px;}
+  .fields label, .pick-label{display:block; font-size:12px; font-weight:800; color:var(--text-faint); margin-bottom:5px;}
   .in{width:100%; background:var(--field); border:1px solid var(--border); border-radius:9px; padding:9px 11px; color:#fff; font:600 13.5px Inter,sans-serif; outline:none; color-scheme:dark;}
   .in:focus{border-color:var(--accent);}
   .pick{display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:8px; margin-bottom:14px;}
@@ -178,7 +178,7 @@
   /* Splits */
   .sp-row{display:grid; grid-template-columns:minmax(0,1.3fr) 1fr 1fr auto; gap:10px; align-items:end; padding:12px 16px; border-bottom:1px solid var(--border);}
   .sp-row:last-child{border-bottom:none;}
-  .sp-row label{display:block; font-size:11px; font-weight:800; color:var(--text-faint); margin-bottom:4px;}
+  .sp-row label{display:block; font-size:12px; font-weight:800; color:var(--text-faint); margin-bottom:4px;}
   .sp-row .actions{padding-bottom:1px;}
   .sp-row.now{background:linear-gradient(90deg, rgba(0,229,199,.06), transparent 70%);}
   .sp-row .confirm{grid-column:1 / -1; margin-top:0;}
@@ -186,19 +186,19 @@
 
   /* Recompensas */
   .rw-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px; padding:14px 16px;}
-  .rw-grid label{display:block; font-size:11px; font-weight:800; color:var(--text-faint); margin-bottom:4px;}
-  .rw-sub{font-size:11px; font-weight:800; color:var(--text-faint); margin:18px 0 8px;}
+  .rw-grid label{display:block; font-size:12px; font-weight:800; color:var(--text-faint); margin-bottom:4px;}
+  .rw-sub{font-size:12px; font-weight:800; color:var(--text-faint); margin:18px 0 8px;}
   .rw-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 16px; border-bottom:1px solid var(--border); font-size:13px;}
   .rw-row:last-child{border-bottom:none;}
   .rw-row .nm{flex:1; min-width:160px;} .rw-row .nm b{display:block;} .rw-row .nm small{color:var(--text-faint);}
   .rw-row .in{width:auto;} .rw-row .in.num{width:90px;} .rw-row .in.txt{width:190px;}
   .rw-bal{font-weight:800; color:var(--gold); min-width:70px;}
-  .rw-kind{font-size:11px; font-weight:800; color:var(--text-faint); border:1px solid var(--border); border-radius:99px; padding:1px 8px;}
+  .rw-kind{font-size:12px; font-weight:800; color:var(--text-faint); border:1px solid var(--border); border-radius:99px; padding:1px 8px;}
   .rw-ic{width:34px; height:34px;} .rw-ic svg{width:100%; height:100%;}
   /* Discord */
   .dc-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:8px 16px; padding:14px 16px;}
   .dc-grid label{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim); cursor:pointer;}
-  .dc-grid label small{color:var(--text-faint); font-size:11px;}
+  .dc-grid label small{color:var(--text-faint); font-size:12px;}
   .dc-secrets{display:flex; gap:8px; flex-wrap:wrap; margin:0 0 4px;}
   .dc-tests{display:flex; gap:8px; flex-wrap:wrap; padding:12px 16px; border-top:1px solid var(--border);}
   .dc-err{display:block; color:var(--danger); font-size:12px; margin-top:2px;}
@@ -217,7 +217,7 @@
     tr{border-bottom:1px solid var(--border); padding:8px 0;}
     tr:last-child{border-bottom:none;}
     td{border:none; padding:6px 16px;}
-    td[data-label]::before{content:attr(data-label); display:block; font-size:11px; font-weight:800; color:var(--text-faint); margin-bottom:2px;}
+    td[data-label]::before{content:attr(data-label); display:block; font-size:12px; font-weight:800; color:var(--text-faint); margin-bottom:2px;}
     .actions{justify-content:flex-start; flex-wrap:wrap;}
     td:last-child{width:100%;}
     .req{flex-wrap:wrap;}
@@ -297,7 +297,7 @@
     <section data-tab="tienda">
       <h2 class="section-title"><span class="bar"></span>Recompensas y tienda 🦷</h2>
       <div id="rw-status"></div>
-      <div class="rw-sub">Premios por entregar <span class="count zero" id="rw-claims-n" style="font-size:11px">0</span></div>
+      <div class="rw-sub">Premios por entregar <span class="count zero" id="rw-claims-n" style="font-size:12px">0</span></div>
       <div class="card" id="rw-claims"></div>
       <div class="rw-sub">Dientes por jugador</div>
       <div class="card" id="rw-players"></div>

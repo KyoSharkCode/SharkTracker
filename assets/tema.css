@@ -133,3 +133,7 @@ html{scrollbar-color:#22364a var(--bg);}
   .twitch-badge{position:relative;}
   .twitch-badge::after{content:''; position:absolute; inset:-14px -6px;}
 }
+
+/* Imagen que todavía no tiene src (la rellena el JS): invisible hasta entonces,
+   en vez de mostrar el ícono de imagen rota o el texto alternativo. */
+img:not([src]){visibility:hidden;}
