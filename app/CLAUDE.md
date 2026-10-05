@@ -540,6 +540,14 @@ Decisiones:
   que leer el minimapa por captura de pantalla → se hace después, reutilizando la
   captura del motor de clips. Revisar la política de Riot antes de publicarlo.
 
+## v0.8.1: auditoría visual de la app (accesibilidad y pulido)
+- Paleta en el `:root` de `renderer/style.css` (`--fondo`, `--panel`, `--texto`, `--texto-tenue`, `--texto-apagado`, `--texto-mudo`, `--verde`, `--en-vivo`, `--dorado`, `--rojo-suave`, `--salmon`, `--lila`, `--azul`, `--rojo`, `--discord`, además de `--acento`). En el CSS se usa `var(--…)`; los hex sueltos que quedan son tonos únicos. `editor.css` usa las variables del overlay más `--ed-*`.
+- Texto mínimo 12 px en la app (11 px solo en etiquetas en MAYÚSCULAS); en el overlay, mínimo 11 px (se agranda con la escala de Apariencia).
+- Menú lateral = `<nav>` con `<button class="navitem">` y `aria-current="page"` (se usa con Tab + Enter).
+- `prefers-reduced-motion`: todo lo que late en bucle da una sola pasada.
+- Íconos (`icono()` en meta.js, envivo.js y perfil.js) con `loading="lazy"`.
+- Nada de guiones largos (—) en los textos; se usa `:`, `·` o una coma. "—" solo como valor vacío en números.
+
 ## Key de Riot y PUUID
 
 Riot cifra los PUUID **por key**: al pasar de la key de desarrollo a la personal

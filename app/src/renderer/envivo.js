@@ -63,6 +63,7 @@
     if (url) {
       const img = el('img');
       img.alt = '';
+      img.loading = 'lazy'; img.decoding = 'async'; // la tier list tiene 100+ íconos: solo se piden los que se ven
       img.addEventListener('error', () => { img.remove(); caja.textContent = respaldo; });
       img.src = url;
       caja.append(img);
@@ -367,7 +368,7 @@
     const estrella = new Set(a?.estrella ?? []);
     const situ = [['4.º', f.cuarto], ['5.º', f.quinto], ['6.º', f.sexto]].filter(([, l]) => l?.length);
     if (situ.length) {
-      c.append(el('div', 'mt-subt', 'Situacionales — según la partida'));
+      c.append(el('div', 'mt-subt', 'Situacionales, según la partida'));
       for (const [t, lista] of situ) {
         const fl = el('div', 'mt-situ');
         fl.append(el('span', 'mt-situt', `${t} objeto`));
@@ -564,7 +565,7 @@
         : `Siguiente: ${s.objetivo.nombre} (${s.objetivo.falta ? `faltan ${s.objetivo.falta}` : '¡ya puedes!'})`;
       c.append(el('div', 'ev-sig', linea));
     }
-    for (const m of d.motivos ?? []) c.append(el('div', 'mt-pasod', `★ ${m.nombre} — ${m.motivo}`));
+    for (const m of d.motivos ?? []) c.append(el('div', 'mt-pasod', `★ ${m.nombre}: ${m.motivo}`));
     return c;
   }
   function pintarPartida(caja, sub) {

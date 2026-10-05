@@ -8,7 +8,10 @@ $('btn-close').addEventListener('click', () => window.sharkTracker.close());
 // --- Navegación entre páginas ---
 const navItems = document.querySelectorAll('.navitem:not(.disabled)');
 function goTo(page) {
-  navItems.forEach((n) => n.classList.toggle('active', n.dataset.page === page));
+  navItems.forEach((n) => {
+    n.classList.toggle('active', n.dataset.page === page);
+    if (n.dataset.page === page) n.setAttribute('aria-current', 'page'); else n.removeAttribute('aria-current');
+  });
   document.querySelectorAll('.page').forEach((p) => p.classList.toggle('active', p.id === 'page-' + page));
 }
 navItems.forEach((item) => item.addEventListener('click', () => {
@@ -137,7 +140,7 @@ async function checkLiveGame() {
   const result = await window.sharkTracker.checkLiveGame();
 
   if (result.inGame) {
-    statusEl.textContent = '✓ Conectado — hay una partida en curso y la app puede leer sus datos.';
+    statusEl.textContent = '✓ Conectado: hay una partida en curso y la app puede leer sus datos.';
     statusEl.className = 'livestatus ok';
     jsonEl.hidden = false;
     // Solo mostramos un resumen, el objeto completo es enorme
@@ -148,7 +151,7 @@ async function checkLiveGame() {
         activePlayer: g.activePlayer?.summonerName,
         jugadores: g.allPlayers?.map((p) => p.summonerName),
         // Eventos de la partida (para comprobar los nombres que usa Riot)
-        eventos: g.events?.Events?.map((e) => `${Math.floor(e.EventTime / 60)}:${String(Math.floor(e.EventTime % 60)).padStart(2, '0')} ${e.EventName}${e.DragonType ? ' (' + e.DragonType + ')' : ''}${e.KillerName ? ' — ' + e.KillerName : ''}`)
+        eventos: g.events?.Events?.map((e) => `${Math.floor(e.EventTime / 60)}:${String(Math.floor(e.EventTime % 60)).padStart(2, '0')} ${e.EventName}${e.DragonType ? ' (' + e.DragonType + ')' : ''}${e.KillerName ? ' · ' + e.KillerName : ''}`)
       },
       null,
       2
@@ -266,7 +269,7 @@ $('btn-probar-aviso').addEventListener('click', async () => {
 
 // --- Versión (sale de package.json) y actualizaciones automáticas ---
 window.sharkTracker.app.version().then((v) => {
-  $('app-version').textContent = `— v${v.split('.').slice(0, 2).join('.')}`;
+  $('app-version').textContent = `v${v}`;
   $('acerca-version').textContent = v;
 });
 function renderActualizacion(e) {

@@ -1,7 +1,9 @@
+/* Colores del editor (el resto viene de overlay.css: --acento, --tenue, --panel…). */
+:root { --ed-fondo: #05070c; --ed-texto: #e7ecf2; --ed-tenue: #8696a8; }
 /* Ventana "Reposicionar elementos" — estilo de la app. */
 html, body { overflow: hidden; }
 body.editor {
-  background: #05070c; color: #e7ecf2; user-select: none;
+  background: var(--ed-fondo); color: var(--ed-texto); user-select: none;
   display: flex; flex-direction: column; height: 100vh;
 }
 .barra {
@@ -11,23 +13,23 @@ body.editor {
 .barra-baja { border-bottom: none; border-top: 1px solid rgba(255,255,255,0.06); }
 .titulo {
   font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700;
-  background: linear-gradient(90deg,#e7ecf2,#7fe0cf); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  background: linear-gradient(90deg,var(--ed-texto),#7fe0cf); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
 }
-.sub { font-size: 11px; color: #8696a8; }
+.sub { font-size: 12px; color: var(--ed-tenue); }
 .sub.ok { color: #6fdba8; }
 .sub.bad { color: #f0a487; }
 .acciones { display: flex; gap: 8px; flex-shrink: 0; }
 .btn {
-  font-family: inherit; font-size: 11px; font-weight: 600; color: #8a97a6; cursor: pointer;
+  font-family: inherit; font-size: 12px; font-weight: 600; color: #8a97a6; cursor: pointer;
   background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 7px 14px;
 }
-.btn:hover { color: #e7ecf2; border-color: rgba(255,255,255,0.25); }
+.btn:hover { color: var(--ed-texto); border-color: rgba(255,255,255,0.25); }
 .btn.on { color: #7fe0cf; border-color: rgba(0,229,199,0.55); background: rgba(0,229,199,0.1); }
 .btn-pri {
-  font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; color: #05070c; border: none;
-  background: linear-gradient(135deg,#00e5c7,#0a8f7f); box-shadow: 0 0 14px rgba(0,229,199,0.3);
+  font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; color: var(--ed-fondo); border: none;
+  background: linear-gradient(135deg,var(--acento),#0a8f7f); box-shadow: 0 0 14px rgba(0,229,199,0.3);
 }
-.btn-pri:hover { color: #05070c; filter: brightness(1.08); }
+.btn-pri:hover { color: var(--ed-fondo); filter: brightness(1.08); }
 
 /* ── Pantalla emulada ── */
 .caja { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 16px; }
@@ -62,13 +64,13 @@ body.editor {
 #baron, #ancestral, #rendimiento, #avisos, #carga { cursor: grab; outline: 2px dashed rgba(0,229,199,0.45); outline-offset: 4px; }
 #avisos { border-radius: 12px; }
 .editor .arrastrando { cursor: grabbing !important; }
-.editor .elegida { outline: 2px solid #00e5c7 !important; }
+.editor .elegida { outline: 2px solid var(--acento) !important; }
 /* En el editor no hace falta animar la entrada de cada pieza */
 .editor .entrando, .editor .saliendo { animation: none !important; }
 
 .coords {
   position: absolute; pointer-events: none; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700;
-  color: #05070c; background: #00e5c7; border-radius: 6px; padding: 2px 8px; white-space: nowrap;
+  color: var(--ed-fondo); background: var(--acento); border-radius: 6px; padding: 2px 8px; white-space: nowrap;
 }
 
 /* Posiciones del esquema del HUD (1920×1080) */
