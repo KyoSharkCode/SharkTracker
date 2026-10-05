@@ -146,3 +146,48 @@ img:not([src]){visibility:hidden;}
    ============================================================ */
 :where(button, .btn, .login-btn, .twitch-btn, .chipbtn, .chip, .tab){transition:scale 160ms cubic-bezier(.23,1,.32,1);}
 :where(button, .btn, .login-btn, .twitch-btn, .chipbtn, button.chip, .tab):active:not(:disabled){scale:.97;}
+
+/* ============================================================
+   Esqueletos de carga (shimmer). Uso:
+   <div class="sk-stack">
+     <div id="contenido-real"></div>            ← vacío hasta que llegan los datos
+     <div class="sk" aria-hidden="true">…bloques .sk-b con la forma real…</div>
+   </div>
+   + <script src="assets/esqueletos.js"></script> antes del script de la página.
+   Ambos ocupan la misma celda: al llegar los datos, fundido cruzado de 300 ms.
+   ============================================================ */
+.sk-stack{display:grid;}
+.sk-stack > *{grid-area:1 / 1; min-width:0;}
+.sk{pointer-events:none; user-select:none; transition:opacity 300ms ease;}
+.sk[hidden]{display:none !important;}
+.sk.sk-sale{opacity:0;}
+.sk span{display:block;}
+.sk-entra{animation:sk-entra 300ms ease;}
+@keyframes sk-entra{from{opacity:0;}}
+/* Bloque gris con un brillo que lo cruza (solo transform: no repinta). */
+.sk-b{position:relative; overflow:hidden; flex-shrink:0; background:var(--skeleton); border-radius:6px; max-width:100%;}
+.sk-b::after{content:''; position:absolute; inset:0; transform:translateX(-100%);
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent);
+  animation:sk-brillo 1.6s cubic-bezier(.4,0,.2,1) infinite;}
+@keyframes sk-brillo{to{transform:translateX(100%);}}
+.sk-c{border-radius:50%;} .sk-p{border-radius:99px;} .sk-r{border-radius:10px;} .sk-m{border-radius:4px;}
+/* En el esqueleto no se resalta nada (ni el #1 ni la primera fila). */
+.sk .podium-card, .sk .podium-card.rank1{border-color:var(--border);}
+.sk .rank-row{background:none; cursor:default;}
+/* Piezas para armar esqueletos de página completa (perfil, tienda, versus…). */
+.sk-pagina{display:flex; flex-direction:column; gap:22px; padding:0 !important; text-align:left !important;}
+.sk-panel{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; display:flex; flex-direction:column; gap:12px; box-sizing:border-box; min-width:0;}
+.sk-fila{display:flex; align-items:center; gap:12px; min-width:0;}
+.sk-col{display:flex; flex-direction:column; gap:8px; flex:1; min-width:0;}
+.sk-centro{align-items:center; text-align:center;}
+.sk-crece{flex:1;}
+.sk-sep > * + *{border-top:1px solid var(--border); padding-top:12px;}
+.sk-rejilla{display:grid; grid-template-columns:repeat(var(--sk-cols, 4), minmax(0, 1fr)); gap:12px;}
+.sk-c2{--sk-cols:2;} .sk-c3{--sk-cols:3;} .sk-c5{--sk-cols:5;} .sk-c6{--sk-cols:6;}
+@media (max-width:760px){
+  .sk-rejilla{--sk-cols:2;}
+  .sk-c2, .sk-c3{--sk-cols:1;}
+  .sk-solo-pc{display:none !important;}
+}
+.sk-texto{font-size:13px; color:var(--text-faint); text-align:center; margin:0;}
+.sk-wrap{flex-wrap:wrap;} .sk-entre{justify-content:space-between;}
