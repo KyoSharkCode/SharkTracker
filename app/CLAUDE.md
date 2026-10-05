@@ -401,6 +401,15 @@ Decisiones de Alex (oct 2026). Se empieza después de probar la v0.8.
   el audio por aplicación) → C1 búfer + Ctrl+F8 → C2 eventos automáticos → C3 sección Clips + ajustes →
   C4 extras (resumen de la partida; base para leer el minimapa de los timers de campamentos).
   Meta: < 3 % de FPS, < 150 MB de RAM, < 5 % de CPU.
+- **C0 (prueba)**: `app/pruebas/prueba-clips-C0.bat` (un solo archivo: .bat + PowerShell embebido tras `#PS-INICIO`).
+  Pide admin (PresentMon lo necesita), baja FFmpeg LGPL (BtbN) y PresentMon a `%LOCALAPPDATA%\SharkTracker-prueba-clips`,
+  prueba qué codificador funciona (NVENC directo / con copia a memoria para laptops híbridas, AMF, QuickSync),
+  espera la partida (Live Client API, `gameTime` > 15 s) y mide 4 tramos de 75 s (sin / con / sin / con grabar):
+  FPS y 1 % bajo (PresentMon), CPU, GPU 3D y codificador (CIM, independiente del idioma de Windows), CPU y RAM de
+  FFmpeg. Graba como la app: `ddagrab` + trozos de 2 s en anillo; al final arma un clip con `-c copy`. Deja
+  `resultados-clips-C0.txt` y `clip-prueba-C0.mp4` junto al .bat. El audio por programa solo se comprueba por
+  versión de Windows (la prueba real va en C1 con el ayudante nativo). Equipos de prueba: RTX 3060 12 GB (Alex)
+  y RTX 4060 laptop (amigo); en el grupo hay una AMD (AMF), todos con Windows 11.
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)
