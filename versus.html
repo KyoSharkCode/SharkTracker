@@ -14,14 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
-    --border:#16324a; --text:#ffffff; --text-dim:#a9b7c6; --text-faint:#8696a8;
-    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
-    --danger:#ff5f3d; --gold:#facc15; --radius:16px;
-    /* Jugador 1 = azul y jugador 2 = rojo (como los equipos de LoL) */
-    --a:#4c9dff; --a-bg:rgba(76,157,255,.12); --b:#ff5f6d; --b-bg:rgba(255,95,109,.12);
-  }
+  :root{ /* colores propios de esta página (la paleta común está en assets/tema.css) */ --a:var(--blue); --a-bg:rgba(76,157,255,.12); --b:var(--red); --b-bg:rgba(255,95,109,.12); }
   *{box-sizing:border-box;}
   [hidden]{display:none !important;}
   body{margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
@@ -35,10 +28,10 @@
   h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
-  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:var(--placeholder); border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
   .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .avatar.pending{border-color:var(--gold); color:var(--gold);}
-  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+  .login-btn{background:var(--accent); color:var(--on-accent); font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
   .msg{padding:60px 20px; text-align:center; color:var(--text-dim); font-size:15px;}
   .section-title{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
   .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:none;}
@@ -48,9 +41,9 @@
 
   /* Selectores */
   .pickers{display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:end; margin-bottom:16px;}
-  .pick label{display:block; font-size:11px; font-weight:800; margin-bottom:6px;}
+  .pick label{display:block; font-size:12px; font-weight:800; margin-bottom:6px;}
   .pick.a label{color:var(--a);} .pick.b label{color:var(--b);} .pick.b{text-align:right;}
-  .sel{width:100%; appearance:none; background:#06111c url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%239db3c4' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center; border:1px solid var(--border); border-radius:11px; padding:11px 34px 11px 13px; color:#fff; font-weight:700; font-size:14px; outline:none; cursor:pointer; color-scheme:dark;}
+  .sel{width:100%; appearance:none; background:var(--field) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%239db3c4' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center; border:1px solid var(--border); border-radius:11px; padding:11px 34px 11px 13px; color:#fff; font-weight:700; font-size:14px; outline:none; cursor:pointer; color-scheme:dark;}
   .pick.a .sel:focus{border-color:var(--a);} .pick.b .sel:focus{border-color:var(--b);}
   .swap{width:44px; height:44px; border-radius:50%; border:1px solid var(--border); background:var(--panel); color:var(--text-dim); cursor:pointer; font-size:18px;}
   .swap:hover{border-color:var(--accent); color:#fff;}
@@ -61,14 +54,14 @@
 
   /* Cara a cara (héroes) */
   .duel{display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:stretch; margin-bottom:26px;}
-  .hero{position:relative; overflow:hidden; border-radius:18px; min-height:220px; border:1px solid var(--border); background:#06111c; display:flex; align-items:flex-end;}
+  .hero{position:relative; overflow:hidden; border-radius:18px; min-height:220px; border:1px solid var(--border); background:var(--field); display:flex; align-items:flex-end;}
   .hero.a{border-color:rgba(0,229,199,.5);} .hero.b{border-color:rgba(192,132,252,.5);}
   .hero .bgimg{position:absolute; inset:0; background-size:cover; background-position:center 22%;}
   .hero .bgimg::after{content:''; position:absolute; inset:0; background:linear-gradient(0deg, rgba(3,8,18,.96) 10%, rgba(3,8,18,.35) 65%, rgba(3,8,18,.15));}
   .hero.b .bgimg{transform:scaleX(-1);}
   .hero .body{position:relative; z-index:1; padding:18px; width:100%; display:flex; gap:12px; align-items:flex-end;}
   .hero.b .body{flex-direction:row-reverse; text-align:right;}
-  .hero .ic{width:62px; height:62px; border-radius:50%; object-fit:cover; border:3px solid var(--a); background:#0a1622; flex-shrink:0;}
+  .hero .ic{width:62px; height:62px; border-radius:50%; object-fit:cover; border:3px solid var(--a); background:var(--placeholder); flex-shrink:0;}
   .hero.b .ic{border-color:var(--b);}
   .hero .nm{font-family:'Rajdhani',sans-serif; font-size:26px; font-weight:800; line-height:1; text-transform:uppercase;}
   .hero .nm a{text-decoration:none;} .hero .nm a:hover{text-decoration:underline;}
@@ -80,14 +73,14 @@
   .mid .vs{font-family:'Rajdhani',sans-serif; font-size:40px; font-weight:800; line-height:1; color:var(--text-faint);}
   .mid .tally{font-family:'Rajdhani',sans-serif; font-size:34px; font-weight:800; line-height:1;}
   .mid .tally .ta{color:var(--a);} .mid .tally .tb{color:var(--b);} .mid .tally span.dash{color:var(--text-faint); margin:0 6px;}
-  .mid small{font-size:11px; font-weight:800; color:var(--text-faint); text-align:center;}
+  .mid small{font-size:12px; font-weight:800; color:var(--text-faint); text-align:center;}
 
   /* Filas de comparación */
   .rows{padding:6px 18px;}
   .row{display:grid; grid-template-columns:90px 1fr 170px 1fr 90px; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(22,50,74,.6);}
   .row:last-child{border-bottom:none;}
   .row .lbl{text-align:center; font-size:12px; font-weight:700; color:var(--text-dim);}
-  .row .lbl small{display:block; font-size:11px; color:var(--text-faint); font-weight:600;}
+  .row .lbl small{display:block; font-size:12px; color:var(--text-faint); font-weight:600;}
   .row .v{font-family:'Rajdhani',sans-serif; font-size:19px; font-weight:800; color:var(--text-dim);}
   .row .v.va{text-align:right;} .row .v.vb{text-align:left;}
   .row .v.win.va{color:var(--a);} .row .v.win.vb{color:var(--b);}
@@ -104,7 +97,7 @@
   .list{padding:8px 16px 12px;}
   .champ{display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid rgba(22,50,74,.5); font-size:13px;}
   .champ:last-child{border-bottom:none;}
-  .champ img{width:34px; height:34px; border-radius:8px; background:#0a1622;}
+  .champ img{width:34px; height:34px; border-radius:8px; background:var(--placeholder);}
   .champ .n{flex:1; min-width:0;} .champ .n b{display:block;} .champ .n small{color:var(--text-faint); font-size:12px;}
   .champ .s{text-align:right; font-size:12px; color:var(--text-dim); font-weight:700;} .champ .s small{display:block; color:var(--text-faint); font-weight:600;}
   .role{display:grid; grid-template-columns:70px 1fr 42px; align-items:center; gap:8px; padding:6px 0; font-size:12px; font-weight:700; color:var(--text-dim);}
@@ -117,7 +110,7 @@
   /* Historial entre ellos */
   .h2h{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
   .h2h-box{padding:18px; text-align:center;}
-  .h2h-box h4{margin:0 0 6px; font-size:11px; font-weight:800; color:var(--text-faint);}
+  .h2h-box h4{margin:0 0 6px; font-size:12px; font-weight:800; color:var(--text-faint);}
   .h2h-box .big{font-family:'Rajdhani',sans-serif; font-size:38px; font-weight:800; line-height:1.1;}
   .h2h-box .big .ta{color:var(--a);} .h2h-box .big .tb{color:var(--b);} .h2h-box .big .w{color:var(--accent);} .h2h-box .big .l{color:var(--danger);}
   .h2h-box p{margin:6px 0 0; font-size:12.5px; color:var(--text-dim);}
@@ -125,7 +118,7 @@
   .shared a:last-child{border-bottom:none;}
   .shared a:hover{background:rgba(0,229,199,.05);}
   .shared img{width:30px; height:30px; border-radius:7px;}
-  .shared .tag{font-size:11px; font-weight:800; padding:2px 8px; border-radius:99px;}
+  .shared .tag{font-size:12px; font-weight:800; padding:2px 8px; border-radius:99px;}
   .shared .tag.duo{background:rgba(0,229,199,.12); color:var(--accent);} .shared .tag.vs{background:rgba(250,204,21,.12); color:var(--gold);}
   .shared .res{margin-left:auto; font-weight:800; font-size:12px;}
   .shared .when{color:var(--text-faint); font-size:12px; width:90px; text-align:right;}
@@ -148,14 +141,14 @@
   .filters{justify-content:space-between; margin-bottom:18px;}
   .segmentos{display:flex; gap:2px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:3px;}
   .segmentos .chipbtn{border:0; background:none; border-radius:7px; padding:6px 12px; font-size:13px; font-weight:500; color:var(--text-dim);}
-  .segmentos .chipbtn.on{background:var(--accent); color:#04130f; font-weight:700;}
+  .segmentos .chipbtn.on{background:var(--accent); color:var(--on-accent); font-weight:700;}
   .filters .note{margin-left:0; font-size:13px;}
   .duelo{display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:24px; padding:26px 30px; border-radius:18px; margin-bottom:32px;}
   .lado{display:flex; align-items:center; gap:16px; min-width:0;}
   .lado.b{justify-content:flex-end; text-align:right;}
-  .lado .ic{width:84px; height:84px; border-radius:50%; object-fit:cover; border:3px solid var(--a); background:#0a1622; flex-shrink:0;}
+  .lado .ic{width:84px; height:84px; border-radius:50%; object-fit:cover; border:3px solid var(--a); background:var(--placeholder); flex-shrink:0;}
   .lado.b .ic{border-color:var(--b);}
-  .lado .ic[src=""]{visibility:hidden;}
+  .lado .ic:not([src]), .lado .ic[src=""]{visibility:hidden;}
   .lado .dato{display:flex; flex-direction:column; gap:4px; min-width:0;}
   .lado.b .dato{align-items:flex-end;}
   .lado label{font-size:12px; font-weight:600; color:var(--a);} .lado.b label{color:var(--b);}
@@ -163,7 +156,7 @@
   .lado.a .sel{align-self:flex-start;}
   .lado.b .sel{text-align:right; text-align-last:right;}
   .lado .sel:hover{background-color:rgba(255,255,255,.04);}
-  .lado .rk{display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#f3d36b;}
+  .lado .rk{display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--gold-soft);}
   .lado .rk img{width:20px; height:20px;}
   .lado .sub{font-size:13px; color:var(--text-dim);}
   .lado .sub a{color:var(--accent); text-decoration:none; font-weight:600;}
@@ -220,7 +213,7 @@
   <!-- Los dos jugadores en un solo panel: avatar, selector, rango y partidas -->
   <section class="card duelo">
     <div class="lado a">
-      <img class="ic" id="ic-a" src="" alt="">
+      <img class="ic" id="ic-a" alt="">
       <div class="dato">
         <label for="sel-a">Jugador 1</label>
         <select class="sel" id="sel-a"></select>
@@ -240,7 +233,7 @@
         <div class="rk" id="rk-b"></div>
         <div class="sub" id="sub-b"></div>
       </div>
-      <img class="ic" id="ic-b" src="" alt="">
+      <img class="ic" id="ic-b" alt="">
     </div>
   </section>
 
@@ -394,7 +387,7 @@ function draw() {
     const ic = $(`ic-${s}`);
     ic.onerror = () => { ic.onerror = null; ic.src = iconOr1(null); };
     ic.src = iconOr1(P.icon_id);
-    $(`rk-${s}`).innerHTML = `<img src="${emblemUrl(r?.tier)}" alt="" onerror="${HIDE}">${rankText(r)}${r?.tier ? ` · ${r.lp} LP` : ''}`;
+    $(`rk-${s}`).innerHTML = `<img loading="lazy" decoding="async" src="${emblemUrl(r?.tier)}" alt="" onerror="${HIDE}">${rankText(r)}${r?.tier ? ` · ${r.lp} LP` : ''}`;
     $(`sub-${s}`).innerHTML = `${g.games} partidas · ${pct(g.wr)} WR${roleLabel(P.primary_role) ? ' · ' + roleLabel(P.primary_role) : ''} · <a href="perfil.html?jugador=${encodeURIComponent(P.id)}">Perfil ›</a>`;
   };
   lado(A, ra, ga, 'a');
@@ -418,7 +411,7 @@ function draw() {
     const res = isDuo ? (s.a.win ? '<span style="color:var(--accent)">Victoria</span>' : '<span style="color:var(--danger)">Derrota</span>')
       : `<span style="color:${s.a.win ? 'var(--a)' : 'var(--b)'}">Ganó ${esc(nick(s.a.win ? A : B))}</span>`;
     return `<a href="partidas.html?id=${encodeURIComponent(s.a.match_id)}&jugador=${encodeURIComponent(A.id)}">
-      <img src="${champImg(s.a.champion)}" alt="" onerror="${HIDE}"><img src="${champImg(s.b.champion)}" alt="" onerror="${HIDE}">
+      <img loading="lazy" decoding="async" src="${champImg(s.a.champion)}" alt="" onerror="${HIDE}"><img loading="lazy" decoding="async" src="${champImg(s.b.champion)}" alt="" onerror="${HIDE}">
       <span class="tag ${isDuo ? 'duo' : 'vs'}">${isDuo ? 'Dúo' : 'Rivales'}</span>
       <span>${s.a.kills}/${s.a.deaths}/${s.a.assists} · ${s.b.kills}/${s.b.deaths}/${s.b.assists}</span>
       <span class="res">${res}</span>
@@ -429,11 +422,11 @@ function draw() {
   const champList = (list) => {
     const g = [...groupBy(list, m => m.champion).entries()].map(([c, ms]) => ({ c, ...aggregate(ms) }))
       .sort((x, y) => y.games - x.games || (y.wr ?? 0) - (x.wr ?? 0)).slice(0, 5);
-    return g.length ? g.map(x => `<div class="champ"><img src="${champImg(x.c)}" alt="" onerror="${HIDE}">
+    return g.length ? g.map(x => `<div class="champ"><img loading="lazy" decoding="async" src="${champImg(x.c)}" alt="" onerror="${HIDE}">
         <div class="n"><b>${esc(champName(x.c))}</b><small>${x.games} partida${x.games === 1 ? '' : 's'}</small></div>
         <div class="s">${pct(x.wr)} WR<small>${fix(x.kda, 2)} KDA</small></div></div>`).join('') : '<div class="empty">Sin partidas en este período.</div>';
   };
-  const colH = (P, side) => `<div class="col-h ${side}"><img src="${iconOr1(P.icon_id)}" alt="" style="width:22px;height:22px;border-radius:50%" onerror="${ICON_ONERROR()}">${esc(nick(P))}</div>`;
+  const colH = (P, side) => `<div class="col-h ${side}"><img loading="lazy" decoding="async" src="${iconOr1(P.icon_id)}" alt="" style="width:22px;height:22px;border-radius:50%" onerror="${ICON_ONERROR()}">${esc(nick(P))}</div>`;
   $('champs').innerHTML = `<div class="card">${colH(A, 'a')}<div class="list">${champList(pa)}</div></div>
     <div class="card">${colH(B, 'b')}<div class="list">${champList(pb)}</div></div>`;
 
@@ -447,7 +440,7 @@ function draw() {
   };
   const mastBlock = (P) => {
     const ms = st.masteries.get(P.id) ?? [];
-    return ms.length ? `<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:6px">${ms.map(m => `<div class="champ"><img src="${champImg(m.champion)}" alt="" onerror="${HIDE}">
+    return ms.length ? `<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:6px">${ms.map(m => `<div class="champ"><img loading="lazy" decoding="async" src="${champImg(m.champion)}" alt="" onerror="${HIDE}">
       <div class="n"><b>${esc(champName(m.champion))}</b><small>Maestría ${m.level}</small></div><div class="s">${kfmt(m.points)}<small>puntos</small></div></div>`).join('')}</div>` : '';
   };
   $('roles').innerHTML = `<div class="card a-col">${colH(A, 'a')}<div class="list">${roleBlock(pa)}${mastBlock(A)}</div></div>

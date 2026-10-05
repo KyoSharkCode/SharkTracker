@@ -321,6 +321,9 @@ Mockup: `https://claude.ai/artifact/6gK8Gg31m9YjTo1ptqaLt8`. Un solo PR con app 
   siguiente x 1385 y 996 / 250 px; quien ya movió una pieza conserva la suya). El Alma ya no
   brilla: solo borde dorado. ⭐ de lo adaptado pasó a "★" (toma el color dorado del texto).
 - **Web**: `assets/tema.css` (se carga después del `<style>` de cada página, excepto `overlay.html`)
+  - **Paleta única** en el `:root` de `tema.css` (`--bg`, `--panel`, `--field`, `--placeholder`, `--text-soft`, `--accent`, `--on-accent`, `--danger`, `--green`, `--gold`/`--gold-soft`, `--blue`/`--blue-soft`, `--red`/`--red-soft`, `--twitch`, `--discord`…). En el CSS de las páginas se usa `var(--…)`, nunca hex sueltos; el `:root` de cada página solo guarda sus colores propios (p. ej. `--a`/`--b` de Versus). Rojos: `--danger` (#ff5f3d, en vivo/errores) ≠ `--red` (#ff5f6d, equipo rojo).
+  - Texto mínimo 12 px; 11 px solo para etiquetas en MAYÚSCULAS / con letter-spacing. Imágenes que rellena el JS van sin `src` (tema.css las oculta hasta tenerlo), nunca `src=""`.
+  - Imágenes generadas por JS con `loading="lazy" decoding="async"`. Para desplegar algo, animar `grid-template-rows`/`opacity`, no márgenes.
   y `assets/iconos.js` (`icono(nombre, {size, color, title})`, reemplaza a los emoji). ❄️ es el
   indicador de **mala racha** (no un cosmético): en el ranking va en su propia columna
   "Racha · últimas 5". Los emoji de la tienda (cosméticos que eligió cada jugador) e insignias
@@ -363,6 +366,40 @@ grupo del mockup (no los de la app).
   `challenge_results`); resumen de tu semana el lunes ≥ 6:00 Madrid (hasta 3 días después): misiones,
   dientes y Top N (`wallet_tx` reason `top`, detalle "Top N de la semana"). Máx. 4 avisos por vuelta.
   Clic → abre la página en sharktracker.lol. Solo llegan con la app abierta o en la bandeja.
+
+## Motor de clips (Fase 2, bloque 5) — DECIDIDO, todavía sin empezar
+
+Decisiones de Alex (oct 2026). Se empieza después de probar la v0.8.
+- **Arquitectura**: FFmpeg (build LGPL recortado, ~20–30 MB) como proceso aparte e invisible dentro de la
+  carpeta de la app (como PowerShell para el LCU): la app lo abre al `GameStart` y lo cierra al terminar.
+  Captura por GPU (`ddagrab`, Desktop Duplication) + codificación por **hardware** (NVENC / AMF / QuickSync),
+  prioridad baja. Búfer en anillo de trozos de 2 s en disco (`-f segment -segment_wrap`), con margen para
+  30 s antes + 30 s después. Guardar = pegar trozos sin recodificar (`-c copy`): instantáneo, sin pérdida.
+  El overlay se excluye de la captura con `setContentProtection(true)` (opción para incluirlo).
+- **Audio** (Ajustes → Clips → Audio): juego (solo League), Discord, micrófono (elegir dispositivo) o todo el
+  PC (elegir salida), cada uno con on/off y volumen; opción de pistas separadas en el .mp4. Captura por
+  aplicación (WASAPI process loopback, Windows 10 2004+/11) con un ayudante nativo pequeño, también invisible
+  (FFmpeg no la trae). Avisar al grupo que se graban voces de Discord.
+- **Calidad**: Máxima (resolución de la pantalla hasta 1440p, 60 fps) · **Alta de fábrica (1080p60, H.264)** ·
+  Ligera (720p30). Sin GPU compatible → Ligera por defecto. HEVC/AV1 como opción si la GPU lo soporta.
+- **Todo opcional**: interruptor general en Ajustes → Clips, **apagado de fábrica**; la primera partida pregunta
+  una vez si se activa. Apagado = no se graba nada.
+- **Eventos (de fábrica, cada uno con interruptor)**, solo si participaste (autor, asistencia o víctima, según
+  la Live Client Data API): kill, multikill, muerte, objetivos (dragón, Barón, Heraldo, larvas) y estructuras
+  (torres, inhibidores). **Ulti**: la API no la avisa; se detecta la tecla de la R (uiohook, configurable si la
+  cambiaste) y cuenta solo si en los **10 s siguientes participas en una kill u objetivo**. Opción "cada ulti"
+  apagada de fábrica (Elise, Jayce, Nidalee, Karma la usan a cada rato).
+- **Duración**: **20 s antes y 15 s después** de fábrica; ajustable de 10 a 30 s en cada lado. Eventos
+  encadenados = un solo clip (del primero −antes al último +después), tope 2 min.
+- **Atajo manual: Ctrl + F8**.
+- **Espacio**: límite de **10 GB** para clips normales (se borran los más viejos); los **favoritos (★) no cuentan
+  ni se borran solos**. Aviso si el disco queda con menos de 15 GB libres.
+- **UI**: sección "Clips" (galería por partida con miniaturas, reproducir, renombrar, favorito, borrar, abrir
+  carpeta) + Ajustes → Clips.
+- **Fases**: C0 prueba (script que mide FPS/CPU/RAM con y sin grabar en la PC de Alex y la de un amigo, y valida
+  el audio por aplicación) → C1 búfer + Ctrl+F8 → C2 eventos automáticos → C3 sección Clips + ajustes →
+  C4 extras (resumen de la partida; base para leer el minimapa de los timers de campamentos).
+  Meta: < 3 % de FPS, < 150 MB de RAM, < 5 % de CPU.
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)

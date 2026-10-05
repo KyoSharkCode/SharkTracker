@@ -14,13 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
-    --border:#16324a; --text:#ffffff; --text-dim:#a9b7c6; --text-faint:#8696a8;
-    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
-    --danger:#ff5f3d; --danger-glow:rgba(255,95,61,.45); --gold:#facc15; --radius:16px;
-    --blue:#4c9dff; --blue-bg:rgba(76,157,255,.1); --red:#ff5f6d; --red-bg:rgba(255,95,109,.1);
-  }
+  :root{ /* colores propios de esta página (la paleta común está en assets/tema.css) */ --blue-bg:rgba(76,157,255,.1); --red-bg:rgba(255,95,109,.1); }
   *{box-sizing:border-box;}
   [hidden]{display:none !important;}
   body{margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
@@ -33,10 +27,10 @@
   h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
-  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:var(--placeholder); border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
   .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .avatar.pending{border-color:var(--gold); color:var(--gold);}
-  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+  .login-btn{background:var(--accent); color:var(--on-accent); font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
   .msg{padding:60px 20px; text-align:center; color:var(--text-dim); font-size:15px; line-height:1.6;}
   .msg b{display:block; color:#fff; font-size:18px; margin-bottom:4px;}
   .note{margin-top:26px; font-size:12px; color:var(--text-faint); text-align:center; line-height:1.6;}
@@ -51,13 +45,13 @@
   .gmeta b{display:block; font-family:'Rajdhani',sans-serif; font-size:22px; letter-spacing:.04em; text-transform:uppercase; line-height:1.1;}
   .gmeta small{color:var(--text-dim); font-size:12.5px;}
   .gclock{font-family:'Rajdhani',sans-serif; font-weight:800; font-size:40px; line-height:1; letter-spacing:.02em; font-variant-numeric:tabular-nums;}
-  .gclock small{display:block; font-family:'Inter',sans-serif; font-size:11px; font-weight:800; color:var(--text-faint); text-align:right;}
+  .gclock small{display:block; font-family:'Inter',sans-serif; font-size:12px; font-weight:800; color:var(--text-faint); text-align:right;}
   .grp{width:100%; display:flex; gap:8px; flex-wrap:wrap;}
   .grp span{font-size:12.5px; font-weight:700; border-radius:99px; padding:4px 12px; background:rgba(0,229,199,.1); color:var(--accent); border:1px solid rgba(0,229,199,.3);}
   .grp span.vs{background:rgba(250,204,21,.1); color:var(--gold); border-color:rgba(250,204,21,.35);}
   .ended-box{display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:rgba(0,229,199,.06); border:1px solid rgba(0,229,199,.35); border-radius:var(--radius); padding:14px 18px; margin-bottom:22px; font-size:14px; color:var(--text-dim);}
   .ended-box b{color:#fff;}
-  .btn{display:inline-block; border:none; border-radius:9px; padding:9px 16px; font-weight:800; font-size:13px; text-decoration:none; background:var(--accent); color:#032018; cursor:pointer;}
+  .btn{display:inline-block; border:none; border-radius:9px; padding:9px 16px; font-weight:800; font-size:13px; text-decoration:none; background:var(--accent); color:var(--on-accent); cursor:pointer;}
 
   /* ── Equipos ── */
   .team{margin-bottom:26px;}
@@ -66,14 +60,14 @@
   .thead h2 .bar{width:4px; height:16px; border-radius:2px;}
   .team.blue .bar{background:var(--blue); box-shadow:none;} .team.red .bar{background:var(--red); box-shadow:none;}
   .bans{margin-left:auto; display:flex; align-items:center; gap:6px;}
-  .bans small{font-size:11px; font-weight:800; color:var(--text-faint); margin-right:4px;}
-  .ban{position:relative; width:30px; height:30px; border-radius:7px; overflow:hidden; border:1px solid var(--border); background:#0a1622;}
+  .bans small{font-size:12px; font-weight:800; color:var(--text-faint); margin-right:4px;}
+  .ban{position:relative; width:30px; height:30px; border-radius:7px; overflow:hidden; border:1px solid var(--border); background:var(--placeholder);}
   .ban img{width:100%; height:100%; object-fit:cover; filter:grayscale(1) brightness(.6);}
   .ban::after{content:''; position:absolute; left:-4px; right:-4px; top:50%; height:2px; background:var(--danger); transform:rotate(-45deg); box-shadow:none;}
   .ban.none::after{display:none;}
 
   .cards{display:grid; grid-template-columns:repeat(5,1fr); gap:12px;}
-  .pc{position:relative; aspect-ratio:308/560; border-radius:14px; overflow:hidden; border:1px solid var(--border); background:#06111c; text-decoration:none; display:block;}
+  .pc{position:relative; aspect-ratio:308/560; border-radius:14px; overflow:hidden; border:1px solid var(--border); background:var(--field); text-decoration:none; display:block;}
   .team.blue .pc{border-color:rgba(76,157,255,.35);} .team.red .pc{border-color:rgba(255,95,109,.35);}
   .pc .art{position:absolute; inset:0; background-size:cover; background-position:center top; transition:transform .4s ease;}
   .pc:hover .art{transform:scale(1.04);}
@@ -85,20 +79,20 @@
   .pc .who span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .pc .who small{color:var(--text-faint); font-weight:600;}
   .pc .kit{display:flex; gap:4px; margin-top:8px;}
-  .pc .kit img{width:22px; height:22px; border-radius:5px; border:1px solid rgba(255,255,255,.12); background:#0a1622;}
+  .pc .kit img{width:22px; height:22px; border-radius:5px; border:1px solid rgba(255,255,255,.12); background:var(--placeholder);}
   .pc .kit img.rune{border-radius:50%; padding:1px; object-fit:contain;}
   .pc .kit img.sub{width:18px; height:18px; margin-top:2px;}
   /* Del grupo */
   .pc.mine{border:2px solid var(--accent); box-shadow:none;}
-  .pc .tag{position:absolute; top:10px; left:10px; z-index:2; font-size:11px; font-weight:900; letter-spacing:.06em; color:#032018; background:var(--accent); border-radius:99px; padding:3px 9px; box-shadow:0 2px 10px rgba(0,0,0,.4);}
-  .pc .rtag{position:absolute; top:10px; right:10px; z-index:2; font-size:11px; font-weight:900; color:#fff; background:rgba(3,8,18,.78); border:1px solid rgba(255,255,255,.28); border-radius:99px; padding:3px 9px; backdrop-filter:blur(4px);}
+  .pc .tag{position:absolute; top:10px; left:10px; z-index:2; font-size:11px; font-weight:900; letter-spacing:.06em; color:var(--on-accent); background:var(--accent); border-radius:99px; padding:3px 9px; box-shadow:0 2px 10px rgba(0,0,0,.4);}
+  .pc .rtag{position:absolute; top:10px; right:10px; z-index:2; font-size:12px; font-weight:900; color:#fff; background:rgba(3,8,18,.78); border:1px solid rgba(255,255,255,.28); border-radius:99px; padding:3px 9px; backdrop-filter:blur(4px);}
   .pc .rtag.unsure{color:var(--text-dim); border-style:dashed; border-color:rgba(157,179,196,.45);}
   .pc .st{margin-top:8px; font-size:12px; font-weight:700; color:var(--accent); line-height:1.35;}
-  .pc .st small{display:block; color:var(--text-faint); font-weight:600; font-size:11px;}
+  .pc .st small{display:block; color:var(--text-faint); font-weight:600; font-size:12px;}
 
   /* ── Lista de partidas (sin parámetro) ── */
   .glist{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px;}
-  .gcard{position:relative; display:block; overflow:hidden; border-radius:var(--radius); border:1px solid var(--border); background:#06111c; min-height:170px; text-decoration:none; transition:border-color .15s, box-shadow .15s;}
+  .gcard{position:relative; display:block; overflow:hidden; border-radius:var(--radius); border:1px solid var(--border); background:var(--field); min-height:170px; text-decoration:none; transition:border-color .15s, box-shadow .15s;}
   .gcard:hover{border-color:var(--accent); box-shadow:none;}
   .gcard .art{position:absolute; inset:0; background-size:cover; background-position:center 20%; opacity:.55;}
   .gcard::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(3,8,18,.95) 30%, rgba(3,8,18,.4));}
@@ -119,8 +113,8 @@
     .pc .info{top:0; display:flex; flex-direction:column; justify-content:center; padding:10px 14px; padding-right:110px;}
     .pc .kit{position:absolute; right:12px; top:50%; transform:translateY(-50%); margin:0;}
     .pc .st{margin-top:4px;} .pc .st small{display:inline; margin-left:4px;}
-    .pc .tag{top:auto; bottom:8px; left:auto; right:12px; font-size:11px;}
-    .pc .rtag{top:8px; right:12px; font-size:11px; padding:2px 8px;}
+    .pc .tag{top:auto; bottom:8px; left:auto; right:12px; font-size:12px;}
+    .pc .rtag{top:8px; right:12px; font-size:12px; padding:2px 8px;}
     .pc.mine{height:112px;}
     .pc.mine .kit{top:36%;}
     .bans{margin-left:0; width:100%;}
@@ -138,7 +132,7 @@
   .gbar{border-radius:18px; padding:20px 24px; gap:20px;}
   .gmeta b{font-size:18px; letter-spacing:0; text-transform:none; font-family:'Inter',sans-serif; font-weight:700;}
   .gmeta small{font-size:13px;}
-  .gclock{font-size:34px; font-weight:700; color:#6fdba8; white-space:nowrap;}
+  .gclock{font-size:34px; font-weight:700; color:var(--green); white-space:nowrap;}
   .gclock small{font-size:12px; font-weight:500;}
   .grp span{font-weight:600;}
   .equipos{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; align-items:start;}
@@ -146,7 +140,7 @@
   .team.blue{border-color:rgba(76,157,255,.3);} .team.red{border-color:rgba(255,95,109,.3);}
   .thead{margin:0; padding:12px 18px; border-bottom:1px solid rgba(255,255,255,.06);}
   .thead h2{font-family:'Inter',sans-serif; font-size:13px; font-weight:700; letter-spacing:0; text-transform:none;}
-  .team.blue .thead h2{color:#7cb8ff;} .team.red .thead h2{color:#ff8a94;}
+  .team.blue .thead h2{color:var(--blue-soft);} .team.red .thead h2{color:var(--red-soft);}
   .bans small{font-size:12px; font-weight:600;}
   .ban{width:28px; height:28px;}
   .cards{display:flex; flex-direction:column; gap:0;}
@@ -155,14 +149,14 @@
   .pc::after{display:none;}
   .pc.mine{background:rgba(0,229,199,.06);}
   a.pc:hover{background:rgba(0,229,199,.1);}
-  .pc .cimg{width:40px; height:40px; border-radius:10px; object-fit:cover; background:#0a1622; flex-shrink:0;}
+  .pc .cimg{width:40px; height:40px; border-radius:10px; object-fit:cover; background:var(--placeholder); flex-shrink:0;}
   .pc .info{position:static; padding:0; flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;}
   .pc .who{margin:0; font-size:14px; color:#eef3f8; display:flex; align-items:center; gap:6px; min-width:0;}
   .pc .who b{font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .pc .who img{width:18px; height:18px;}
-  .pc .tag{position:static; font-size:11px; letter-spacing:0; padding:1px 7px; box-shadow:none; flex-shrink:0;}
+  .pc .tag{position:static; font-size:12px; letter-spacing:0; padding:1px 7px; box-shadow:none; flex-shrink:0;}
   .pc .champ{font-family:'Inter',sans-serif; font-size:12px; font-weight:500; text-transform:none; letter-spacing:0; color:var(--text-dim); display:flex; align-items:center; gap:6px;}
-  .pc .rtag{position:static; font-size:11px; padding:0 6px; background:none;}
+  .pc .rtag{position:static; font-size:12px; padding:0 6px; background:none;}
   .pc .st{margin:2px 0 0; font-size:12px;}
   .pc .st small{display:inline; font-size:12px;}
   .pc .kit{margin:0; flex-shrink:0; position:static; transform:none;}
@@ -283,17 +277,17 @@ function cardHtml(pt) {
   const [g, t] = splitName(pt.nombre);
   const p = pt.player;
   const s = p ? st.stats.get(p.id + '|' + pt.campeon) : null;
-  const spells = (pt.hechizos ?? []).map(id => spellUrl(id)).filter(Boolean).map(u => `<img src="${u}" alt="" onerror="${HIDE}">`).join('');
+  const spells = (pt.hechizos ?? []).map(id => spellUrl(id)).filter(Boolean).map(u => `<img loading="lazy" decoding="async" src="${u}" alt="" onerror="${HIDE}">`).join('');
   const k1 = runeUrl(pt.runas?.principal), k2 = runeUrl(pt.runas?.secundario);
-  const runes = `${k1 ? `<img class="rune" src="${k1}" alt="" onerror="${HIDE}">` : ''}${k2 ? `<img class="rune sub" src="${k2}" alt="" onerror="${HIDE}">` : ''}`;
+  const runes = `${k1 ? `<img loading="lazy" decoding="async" class="rune" src="${k1}" alt="" onerror="${HIDE}">` : ''}${k2 ? `<img loading="lazy" decoding="async" class="rune sub" src="${k2}" alt="" onerror="${HIDE}">` : ''}`;
   const stats = p ? (s?.g ? `<span class="st">${s.g} partida${s.g === 1 ? '' : 's'} · ${s.wr}% WR · ${s.kda.toFixed(1)} KDA <small>con ${esc(champName(pt.campeon))}, últimos 30 días</small></span>`
                               : `<span class="st">Primera con ${esc(champName(pt.campeon))} <small>en los últimos 30 días</small></span>`) : '';
   const rol = pt.role ? `<span class="rtag ${pt.sure ? '' : 'unsure'}" title="${pt.sure ? 'Rol estimado' : 'Rol estimado, no seguro'}">${ROLE_SHORT[pt.role]}${pt.sure ? '' : '?'}</span>` : '';
   const tagName = p ? 'a' : 'div';
   return `<${tagName} class="pc ${p ? 'mine' : ''}" ${p ? `href="perfil.html?jugador=${encodeURIComponent(p.id)}" title="Ver perfil de ${esc(p.riot_game_name)}"` : ''}>
-    <img class="cimg" src="${champImg(pt.campeon)}" alt="" onerror="${HIDE}">
+    <img loading="lazy" decoding="async" class="cimg" src="${champImg(pt.campeon)}" alt="" onerror="${HIDE}">
     <div class="info">
-      <div class="who">${pt.icono_invocador ? `<img src="${profileIconUrl(pt.icono_invocador)}" alt="" onerror="${HIDE}">` : ''}<b>${esc(g)}</b>${t ? ` <small>#${esc(t)}</small>` : ''}${p ? '<span class="tag">Del grupo</span>' : ''}</div>
+      <div class="who">${pt.icono_invocador ? `<img loading="lazy" decoding="async" src="${profileIconUrl(pt.icono_invocador)}" alt="" onerror="${HIDE}">` : ''}<b>${esc(g)}</b>${t ? ` <small>#${esc(t)}</small>` : ''}${p ? '<span class="tag">Del grupo</span>' : ''}</div>
       <div class="champ">${esc(champName(pt.campeon))}${rol}</div>
       ${stats}
     </div>
@@ -302,7 +296,7 @@ function cardHtml(pt) {
 function teamHtml(game, side, list) {
   const bans = (game.bans ?? []).filter(b => b.equipo === side);
   const bansHtml = bans.length ? `<div class="bans"><small>Baneos</small>${bans.map(b => b.campeon
-      ? `<span class="ban" title="${esc(champName(b.campeon))}"><img src="${champImg(b.campeon)}" alt="${esc(champName(b.campeon))}" onerror="${HIDE}"></span>`
+      ? `<span class="ban" title="${esc(champName(b.campeon))}"><img loading="lazy" decoding="async" src="${champImg(b.campeon)}" alt="${esc(champName(b.campeon))}" onerror="${HIDE}"></span>`
       : '<span class="ban none" title="Sin baneo"></span>').join('')}</div>` : '';
   return `<section class="team ${side}">
     <div class="thead"><h2>Equipo ${side === 'blue' ? 'azul' : 'rojo'}</h2>${bansHtml}</div>
@@ -369,7 +363,7 @@ function renderList() {
       <div class="art" style="background-image:url('${splash(ls[0].champion)}')"></div>
       <div class="in">
         <div class="top"><span class="livechip"><i></i>EN VIVO</span><div class="gmeta"><b style="font-size:17px">${esc(g?.queue_type ?? 'Partida')}</b></div><span class="gclock" data-start="${g?.started_at ?? ''}">${clock(g?.started_at)}</span></div>
-        <div class="ppl">${ls.map(l => { const p = st.byId.get(l.player_id); return `<div class="pp"><img src="${champImg(l.champion)}" alt="" onerror="${HIDE}">${esc(p?.riot_game_name ?? '?')} <small>· ${esc(champName(l.champion))}</small></div>`; }).join('')}</div>
+        <div class="ppl">${ls.map(l => { const p = st.byId.get(l.player_id); return `<div class="pp"><img loading="lazy" decoding="async" src="${champImg(l.champion)}" alt="" onerror="${HIDE}">${esc(p?.riot_game_name ?? '?')} <small>· ${esc(champName(l.champion))}</small></div>`; }).join('')}</div>
         <span class="go">Ver partida →</span>
       </div></a>`;
   }).join('')}</div>`;

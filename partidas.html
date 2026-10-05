@@ -14,13 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#030812; --panel:rgba(10,22,34,.7); --panel-2:rgba(13,26,38,.75);
-    --border:#16324a; --text:#ffffff; --text-dim:#a9b7c6; --text-faint:#8696a8;
-    --accent:#00e5c7; --accent-glow:rgba(0,229,199,.45);
-    --danger:#ff5f3d; --gold:#facc15; --radius:16px;
-    --blue:#4c9dff; --blue-bg:rgba(76,157,255,.08); --red:#ff5f6d; --red-bg:rgba(255,95,109,.08);
-  }
+  :root{ /* colores propios de esta página (la paleta común está en assets/tema.css) */ --blue-bg:rgba(76,157,255,.08); --red-bg:rgba(255,95,109,.08); }
   *{box-sizing:border-box;}
   [hidden]{display:none !important;}
   body{margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
@@ -37,10 +31,10 @@
   h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
-  .avatar{width:40px; height:40px; border-radius:50%; background:#0a1622; border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:var(--placeholder); border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden;}
   .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .avatar.pending{border-color:var(--gold); color:var(--gold);}
-  .login-btn{background:var(--accent); color:#032018; font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+  .login-btn{background:var(--accent); color:var(--on-accent); font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
 
   .crumbs{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px; color:var(--text-faint); margin-bottom:18px;}
   .crumbs a{color:var(--accent); font-weight:700; text-decoration:none;}
@@ -62,15 +56,15 @@
   .result{font-family:'Rajdhani',sans-serif; font-size:34px; font-weight:800; letter-spacing:.03em; line-height:1; text-transform:uppercase;}
   .result.win{color:var(--accent);} .result.loss{color:var(--danger);} .result.neutral{color:var(--text-dim);}
   .meta{display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:8px; font-size:12.5px; color:var(--text-dim); font-weight:600;}
-  .chip{font-size:11px; font-weight:800; padding:3px 10px; border-radius:99px; background:rgba(0,229,199,.12); color:var(--accent);}
+  .chip{font-size:12px; font-weight:800; padding:3px 10px; border-radius:99px; background:rgba(0,229,199,.12); color:var(--accent);}
   .score{display:flex; align-items:center; gap:16px; font-family:'Rajdhani',sans-serif; font-weight:800;}
   .score .n{font-size:46px; line-height:1;}
   .score .b{color:var(--blue);} .score .r{color:var(--red);}
   .score .vs{font-size:14px; color:var(--text-faint); letter-spacing:.1em;}
-  .score-sub{text-align:center; font-size:11px; font-weight:800; color:var(--text-faint); margin-top:4px;}
+  .score-sub{text-align:center; font-size:12px; font-weight:800; color:var(--text-faint); margin-top:4px;}
   .objs{display:flex; flex-direction:column; gap:6px; justify-self:end;}
   .obj-row{display:flex; align-items:center; gap:10px; justify-content:flex-end; font-size:12.5px; font-weight:700;}
-  .obj-row .lbl{width:52px; text-align:right; font-size:11px; font-weight:800;}
+  .obj-row .lbl{width:52px; text-align:right; font-size:12px; font-weight:800;}
   .obj-row.b .lbl{color:var(--blue);} .obj-row.r .lbl{color:var(--red);}
   .obj{display:inline-flex; align-items:center; gap:4px; color:var(--text-dim); min-width:34px;}
 
@@ -80,7 +74,7 @@
   .gold-legend b{font-weight:800;}
   .gold-legend .b{color:var(--blue);} .gold-legend .r{color:var(--red);}
   .gold-svg{width:100%; height:auto; display:block; overflow:visible;}
-  .gold-svg text{font-family:Inter,system-ui,sans-serif; font-size:11px; fill:var(--text-faint);}
+  .gold-svg text{font-family:Inter,system-ui,sans-serif; font-size:12px; fill:var(--text-faint);}
   .gold-tip{position:absolute; pointer-events:none; background:rgba(3,8,18,.95); border:1px solid var(--border); border-radius:10px; padding:8px 11px; font-size:12px; line-height:1.5; white-space:nowrap; transform:translate(-50%,-110%); z-index:5;}
   .gold-tip b{font-family:'Rajdhani',sans-serif; font-size:15px;}
   .gold-wrap{position:relative;}
@@ -95,37 +89,37 @@
   .team.blue .team-head{background:var(--blue-bg);} .team.red .team-head{background:var(--red-bg);}
   .team-name{font-family:'Rajdhani',sans-serif; font-size:17px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;}
   .team.blue .team-name{color:var(--blue);} .team.red .team-name{color:var(--red);}
-  .team-res{font-size:11px; font-weight:800; padding:2px 9px; border-radius:99px;}
-  .team-res.win{background:rgba(76,157,255,.14); color:#7cb8ff;} .team-res.loss{background:rgba(255,95,109,.12); color:#ff8a94;}
+  .team-res{font-size:12px; font-weight:800; padding:2px 9px; border-radius:99px;}
+  .team-res.win{background:rgba(76,157,255,.14); color:var(--blue-soft);} .team-res.loss{background:rgba(255,95,109,.12); color:var(--red-soft);}
   .team-stats{font-size:12px; color:var(--text-dim); font-weight:700;}
-  .bans{margin-left:auto; display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-faint); font-weight:700;}
+  .bans{margin-left:auto; display:flex; align-items:center; gap:4px; font-size:12px; color:var(--text-faint); font-weight:700;}
   .bans img{width:24px; height:24px; border-radius:6px; filter:grayscale(1) brightness(.7); border:1px solid var(--border);}
   table{width:100%; border-collapse:collapse; font-size:12.5px;}
-  th{font-size:11px; font-weight:800; color:var(--text-faint); padding:8px 8px; text-align:left; white-space:nowrap;}
+  th{font-size:12px; font-weight:800; color:var(--text-faint); padding:8px 8px; text-align:left; white-space:nowrap;}
   td{padding:7px 8px; border-top:1px solid rgba(22,50,74,.6); vertical-align:middle;}
   tr.me td{background:rgba(250,204,21,.06);}
   tr.me td:first-child{box-shadow:inset 3px 0 0 var(--gold);}
   .c{text-align:center;} .r{text-align:right;}
   .loadout{display:flex; align-items:center; gap:4px;}
   .champ{position:relative; width:38px; height:38px; flex-shrink:0;}
-  .champ img{width:38px; height:38px; border-radius:9px; object-fit:cover; background:#0a1622; display:block;}
-  .champ .lvl{position:absolute; right:-4px; bottom:-4px; background:#030812; border:1px solid var(--border); border-radius:6px; font-size:11px; font-weight:800; padding:0 4px; line-height:15px;}
+  .champ img{width:38px; height:38px; border-radius:9px; object-fit:cover; background:var(--placeholder); display:block;}
+  .champ .lvl{position:absolute; right:-4px; bottom:-4px; background:var(--bg); border:1px solid var(--border); border-radius:6px; font-size:12px; font-weight:800; padding:0 4px; line-height:15px;}
   .stack{display:flex; flex-direction:column; gap:2px;}
-  .stack img{width:18px; height:18px; border-radius:4px; background:#0a1622; display:block;}
+  .stack img{width:18px; height:18px; border-radius:4px; background:var(--placeholder); display:block;}
   .stack img.rune{border-radius:50%;}
   .who{min-width:0; max-width:170px;}
   .who a, .who span.nm{display:block; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-decoration:none;}
   .who a{color:var(--accent);}
   .who a:hover{text-decoration:underline;}
-  .who small{display:block; color:var(--text-faint); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .kda b{font-weight:800;} .kda small{display:block; font-size:11px; color:var(--text-faint);}
+  .who small{display:block; color:var(--text-faint); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .kda b{font-weight:800;} .kda small{display:block; font-size:12px; color:var(--text-faint);}
   .kda .good{color:var(--accent);} .kda .great{color:var(--gold);}
   .dmg{min-width:90px;}
   .dmg .v{font-weight:700;}
   .bar{height:5px; border-radius:3px; background:rgba(255,255,255,.07); margin-top:3px; overflow:hidden;}
   .bar i{display:block; height:100%; border-radius:3px;}
   .team.blue .bar i{background:var(--blue);} .team.red .bar i{background:var(--red);}
-  .sub{display:block; font-size:11px; color:var(--text-faint);}
+  .sub{display:block; font-size:12px; color:var(--text-faint);}
   .items{display:flex; gap:2px;}
   .items span{width:24px; height:24px; border-radius:5px; background:rgba(255,255,255,.04); border:1px solid rgba(22,50,74,.7); overflow:hidden; flex-shrink:0;}
   .items span.trinket{border-radius:50%; margin-left:3px;}
@@ -144,16 +138,16 @@
   .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:16px;}
   .stat{background:var(--panel-2); border:1px solid var(--border); border-radius:12px; padding:10px 12px;}
   .stat b{display:block; font-family:'Rajdhani',sans-serif; font-size:22px; line-height:1.1;}
-  .stat small{display:block; font-size:11px; font-weight:800; color:var(--text-faint); margin-top:2px;}
+  .stat small{display:block; font-size:12px; font-weight:800; color:var(--text-faint); margin-top:2px;}
   .runes-card{padding:16px;}
   .rune-tree{display:flex; gap:10px; align-items:center; margin-bottom:12px;}
   .rune-tree .style{width:26px; height:26px;}
-  .rune-tree .keystone{width:46px; height:46px; border-radius:50%; background:#0a1622; border:2px solid var(--gold);}
-  .rune-tree .minor{width:30px; height:30px; border-radius:50%; background:#0a1622; border:1px solid var(--border); padding:2px;}
+  .rune-tree .keystone{width:46px; height:46px; border-radius:50%; background:var(--placeholder); border:2px solid var(--gold);}
+  .rune-tree .minor{width:30px; height:30px; border-radius:50%; background:var(--placeholder); border:1px solid var(--border); padding:2px;}
   .rune-name{font-size:12.5px; font-weight:700; color:var(--text-dim);}
   .rune-name b{color:#fff; display:block; font-size:14px;}
   .shards{display:flex; gap:6px; flex-wrap:wrap;}
-  .shard{font-size:11px; font-weight:700; color:var(--text-dim); background:var(--panel-2); border:1px solid var(--border); border-radius:99px; padding:3px 9px;}
+  .shard{font-size:12px; font-weight:700; color:var(--text-dim); background:var(--panel-2); border:1px solid var(--border); border-radius:99px; padding:3px 9px;}
   .spells-row{display:flex; gap:8px; align-items:center; margin-top:12px; font-size:12.5px; color:var(--text-dim); font-weight:700;}
   .spells-row img{width:28px; height:28px; border-radius:6px;}
 
@@ -161,7 +155,7 @@
   .ai-card{padding:20px; margin-top:16px; border-color:rgba(0,229,199,.35);}
   .ai-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
   .ai-head h3{margin:0; font-family:'Rajdhani',sans-serif; font-size:20px; letter-spacing:.04em; text-transform:uppercase;}
-  .ai-btn{margin-left:auto; border:none; border-radius:11px; padding:10px 16px; font-weight:800; font-size:13.5px; color:#032018; background:linear-gradient(90deg,var(--accent),#7cf5e4); box-shadow:0 6px 20px rgba(0,229,199,.25);}
+  .ai-btn{margin-left:auto; border:none; border-radius:11px; padding:10px 16px; font-weight:800; font-size:13.5px; color:var(--on-accent); background:linear-gradient(90deg,var(--accent),#7cf5e4); box-shadow:0 6px 20px rgba(0,229,199,.25);}
   .ai-btn:disabled{opacity:.6; cursor:wait;}
   .ai-note{font-size:12.5px; color:var(--text-faint); margin:8px 0 0;}
   .ai-body{margin-top:16px; display:grid; grid-template-columns:auto 1fr; gap:18px;}
@@ -170,7 +164,7 @@
   .ai-resumen{font-size:14.5px; line-height:1.6; color:#e6f1f7;}
   .ai-cols{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px;}
   .ai-box{background:var(--panel-2); border:1px solid var(--border); border-radius:12px; padding:12px 14px;}
-  .ai-box h4{margin:0 0 8px; font-size:11px; font-weight:800;}
+  .ai-box h4{margin:0 0 8px; font-size:12px; font-weight:800;}
   .ai-box.ok h4{color:var(--accent);} .ai-box.ko h4{color:var(--danger);} .ai-box.tip h4{color:var(--gold);} .ai-box.mo h4{color:var(--blue);}
   .ai-box ul{margin:0; padding-left:18px; font-size:13.5px; line-height:1.55; color:var(--text-dim);}
   .ai-box li{margin-bottom:4px;}
@@ -200,12 +194,12 @@
   .summary{border-radius:18px; padding:24px 28px;}
   .summary.win, .summary.loss{border-color:var(--border);}
   .result{text-transform:none; letter-spacing:0; font-weight:700;}
-  .result.win{color:#7cb8ff;} .result.loss{color:#ff8a94;}
+  .result.win{color:var(--blue-soft);} .result.loss{color:var(--red-soft);}
   .summary.dos{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); gap:24px;}
   .summary .eq{display:flex; flex-direction:column; gap:6px; min-width:0;}
   .summary .eq.r{align-items:flex-end; text-align:right;}
   .eq-nombre{font-size:13px; font-weight:700;}
-  .eq.b .eq-nombre, .eq.b .eq-res{color:#7cb8ff;} .eq.r .eq-nombre, .eq.r .eq-res{color:#ff8a94;}
+  .eq.b .eq-nombre, .eq.b .eq-res{color:var(--blue-soft);} .eq.r .eq-nombre, .eq.r .eq-res{color:var(--red-soft);}
   .eq-res{font-family:'Rajdhani',sans-serif; font-size:32px; font-weight:700; line-height:1;}
   .eq-oro{font-size:13px; color:var(--text-dim);}
   .eq .obj-row{justify-content:flex-start; flex-wrap:wrap; gap:8px 12px; font-size:13px;}
@@ -516,16 +510,16 @@ function playerRow(p, maxDmg, teamKills) {
   const ratio = p.deaths ? (p.kills + p.assists) / p.deaths : null;
   const ratioCls = ratio == null || ratio >= 5 ? 'great' : ratio >= 3 ? 'good' : '';
   const kp = teamKills ? Math.round(100 * (p.kills + p.assists) / teamKills) : null;
-  const sp = p.spells.map(id => catalogs.spells[id]).map(s => s ? `<img src="${s.img}" alt="" title="${esc(s.name)}" onerror="${HIDE}">` : '<img alt="">').join('');
+  const sp = p.spells.map(id => catalogs.spells[id]).map(s => s ? `<img loading="lazy" decoding="async" src="${s.img}" alt="" title="${esc(s.name)}" onerror="${HIDE}">` : '<img loading="lazy" decoding="async" alt="">').join('');
   const key = catalogs.runes[p.runes.primary?.[0]], sub = catalogs.runes[p.runes.subStyle];
-  const runes = `${key ? `<img class="rune" src="${key.img}" alt="" title="${esc(key.name)}" onerror="${HIDE}">` : ''}${sub ? `<img class="rune" src="${sub.img}" alt="" title="${esc(sub.name)}" style="padding:2px" onerror="${HIDE}">` : ''}`;
+  const runes = `${key ? `<img loading="lazy" decoding="async" class="rune" src="${key.img}" alt="" title="${esc(key.name)}" onerror="${HIDE}">` : ''}${sub ? `<img loading="lazy" decoding="async" class="rune" src="${sub.img}" alt="" title="${esc(sub.name)}" style="padding:2px" onerror="${HIDE}">` : ''}`;
   const items = p.items.map((id, i) => `<span class="${i === 6 ? 'trinket' : ''}">${id ? `<img src="${itemImg(id)}" alt="" loading="lazy" onerror="${HIDE}">` : ''}</span>`).join('');
   const name = r
     ? `<a href="perfil.html?jugador=${encodeURIComponent(r.id)}" title="Ver perfil">${esc(nameOf(p))}</a>`
     : `<span class="nm">${esc(p.riotIdGameName)}</span>`;
   return `<tr class="${me ? 'me' : ''}">
     <td><div class="loadout">
-      <div class="champ"><img src="${champImg(p.championName)}" alt="${esc(p.championName)}" title="${esc(p.championName)}" onerror="${HIDE}"><span class="lvl">${p.champLevel}</span></div>
+      <div class="champ"><img loading="lazy" decoding="async" src="${champImg(p.championName)}" alt="${esc(p.championName)}" title="${esc(p.championName)}" onerror="${HIDE}"><span class="lvl">${p.champLevel}</span></div>
       <div class="stack">${sp}</div><div class="stack hide-sm">${runes}</div></div></td>
     <td class="who">${name}<small>${esc(p.championName)}${p.teamPosition && ROLE[p.teamPosition] ? ' · ' + ROLE[p.teamPosition] : ''}</small></td>
     <td class="kda c"><b>${p.kills}/<span style="color:var(--danger)">${p.deaths}</span>/${p.assists}</b><small><span class="${ratioCls}">${ratio == null ? 'Perfecto' : ratio.toFixed(2)}</span>${kp != null ? ` · ${kp}%` : ''}</small></td>
@@ -546,7 +540,7 @@ function drawTeams() {
   const d = state.d;
   const maxDmg = Math.max(1, ...d.participants.map(p => p.damage));
   const banHtml = (t) => t?.bans?.length ? `<span class="bans">Baneos ${t.bans.map(id => {
-    const c = catalogs.champByKey[id]; return c ? `<img src="${champImg(c.id)}" alt="" title="${esc(c.name)}" onerror="${HIDE}">` : ''; }).join('')}</span>` : '';
+    const c = catalogs.champByKey[id]; return c ? `<img loading="lazy" decoding="async" src="${champImg(c.id)}" alt="" title="${esc(c.name)}" onerror="${HIDE}">` : ''; }).join('')}</span>` : '';
   if (isArena()) {
     const groups = new Map();
     d.participants.forEach(p => groups.set(p.subteamId, [...(groups.get(p.subteamId) ?? []), p]));
@@ -583,7 +577,7 @@ function drawPov() {
   $('pov-sec').hidden = false;
   $('pov').innerHTML = rosterHere.length > 1 ? rosterHere.map(p => {
     const r = state.roster.get(p.puuid);
-    return `<button type="button" class="${r.id === povId ? 'on' : ''}" data-pov="${r.id}"><img src="${champImg(p.championName)}" alt="" onerror="${HIDE}">${esc(nameOf(p))}</button>`;
+    return `<button type="button" class="${r.id === povId ? 'on' : ''}" data-pov="${r.id}"><img loading="lazy" decoding="async" src="${champImg(p.championName)}" alt="" onerror="${HIDE}">${esc(nameOf(p))}</button>`;
   }).join('') : '';
   const p = povP();
   const mins = Math.max(1, d.duration / 60);
@@ -613,7 +607,7 @@ function drawPov() {
 
   const R = (id) => catalogs.runes[id];
   const key = R(p.runes.primary[0]), pst = R(p.runes.primaryStyle), sst = R(p.runes.subStyle);
-  const img = (x, cls) => x ? `<img class="${cls}" src="${x.img}" alt="" title="${esc(x.name)}" onerror="${HIDE}">` : '';
+  const img = (x, cls) => x ? `<img loading="lazy" decoding="async" class="${cls}" src="${x.img}" alt="" title="${esc(x.name)}" onerror="${HIDE}">` : '';
   $('runes').innerHTML = `
     <h2 class="section-title" style="font-size:15px;margin-bottom:12px;"><span class="bar"></span>Runas y hechizos</h2>
     ${p.runes.primary.length ? `
@@ -621,7 +615,7 @@ function drawPov() {
     <div class="rune-tree">${img(pst, 'style')}${p.runes.primary.slice(1).map(id => img(R(id), 'minor')).join('')}</div>
     <div class="rune-tree">${img(sst, 'style')}${p.runes.secondary.map(id => img(R(id), 'minor')).join('')}<span class="rune-name">${esc(sst?.name ?? '')}</span></div>
     <div class="shards">${p.runes.shards.map(s => `<span class="shard">${SHARDS[s] ?? s}</span>`).join('')}</div>` : '<div class="rune-name">Este modo no usa runas.</div>'}
-    <div class="spells-row">${p.spells.map(id => catalogs.spells[id]).filter(Boolean).map(s => `<img src="${s.img}" alt="" onerror="${HIDE}">${esc(s.name)}`).join(' ')}</div>`;
+    <div class="spells-row">${p.spells.map(id => catalogs.spells[id]).filter(Boolean).map(s => `<img loading="lazy" decoding="async" src="${s.img}" alt="" onerror="${HIDE}">${esc(s.name)}`).join(' ')}</div>`;
   drawAi();
 }
 $('pov').addEventListener('click', (e) => {
