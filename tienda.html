@@ -85,6 +85,9 @@
   /* Premios reales: ícono + nombre, etiquetas y precio con su botón */
   .item.premio{align-items:stretch; text-align:left; padding:18px; gap:10px;}
   .item.premio.destacado{border-color:rgba(250,204,21,.4);}
+  /* Hover (solo con ratón): la tarjeta se eleva 2 px con sombra, para que se sienta "agarrable". */
+  .item{transition:translate 200ms cubic-bezier(.23,1,.32,1), box-shadow 200ms ease, scale 160ms cubic-bezier(.23,1,.32,1);}
+  @media (hover:hover) and (pointer:fine){ .item:hover{translate:0 -2px; box-shadow:0 10px 24px rgba(0,0,0,.4);} }
   .premio-cab{display:flex; align-items:center; gap:12px;}
   .premio-cab .prize-ic{width:48px; height:48px; border-radius:12px; background:rgba(0,229,199,.1); display:flex; align-items:center; justify-content:center; flex-shrink:0; padding:8px; box-sizing:border-box;}
   .premio-cab .prize-ic svg{width:100%; height:100%;}

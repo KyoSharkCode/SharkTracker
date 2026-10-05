@@ -137,3 +137,12 @@ html{scrollbar-color:#22364a var(--bg);}
 /* Imagen que todavía no tiene src (la rellena el JS): invisible hasta entonces,
    en vez de mostrar el ícono de imagen rota o el texto alternativo. */
 img:not([src]){visibility:hidden;}
+
+/* ============================================================
+   Botones que responden al clic: se hunden un poco (97 %) al presionar.
+   Se usa "scale" (no "transform") para no pisar transforms que ya tengan.
+   :where() = sin especificidad: si una página define su propia transición,
+   la suya manda (el botón igual se hunde, solo que sin suavizado).
+   ============================================================ */
+:where(button, .btn, .login-btn, .twitch-btn, .chipbtn, .chip, .tab){transition:scale 160ms cubic-bezier(.23,1,.32,1);}
+:where(button, .btn, .login-btn, .twitch-btn, .chipbtn, button.chip, .tab):active:not(:disabled){scale:.97;}
