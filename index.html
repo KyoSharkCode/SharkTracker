@@ -60,6 +60,12 @@
   .podium-card{flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:30px 14px 28px; min-height:250px; justify-content:center; position:relative; overflow:hidden;}
   .podium-card > *{position:relative; z-index:1;}
   .podium-card{box-shadow:var(--sombra);}
+  /* Entrada del podio (solo la primera carga): sube con un rebote leve, primero el #1 y luego #2 y #3.
+     fill "backwards": al terminar no deja transform puesto. */
+  @keyframes podio-entra{from{opacity:0; transform:translateY(28px) scale(.97);} to{opacity:1; transform:translateY(0) scale(1);}}
+  @keyframes podio-aparece{from{opacity:0;} to{opacity:1;}}
+  .podium-card.entra{animation:podio-entra 720ms cubic-bezier(.34,1.42,.64,1) backwards; animation-delay:calc(60ms + var(--i, 0) * 90ms);}
+  @media (prefers-reduced-motion:reduce){ .podium-card.entra{animation-name:podio-aparece; animation-duration:300ms;} }
   .podium-card.rank1{flex:1.4; padding:44px 14px 40px; min-height:300px; border-color:rgba(0,229,199,.5); background:var(--panel); box-shadow:0 16px 40px rgba(0,0,0,.5);}
   /* Fondo de la tarjeta = skin elegida (o campeón en vivo si está jugando) */
   .podium-splash{position:absolute; inset:0; z-index:0; background-size:cover; background-position:center 12%;}
@@ -101,6 +107,10 @@
   .twitch-preview iframe{position:absolute; inset:0; width:100%; height:100%; border:0; display:block;}
   .twitch-live-chip{position:absolute; top:12px; left:12px; display:flex; align-items:center; gap:6px; background:rgba(3,8,18,.75); padding:4px 10px; border-radius:6px;}
   .twitch-live-chip .pulse-dot{width:6px; height:6px; background:var(--danger); animation:pulse 2s infinite;}
+  /* Brillo suave del chip "En vivo": un halo rojo que aparece y se va (solo opacity: no repinta). */
+  .twitch-live-chip::after{content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    box-shadow:0 0 0 1px rgba(255,95,61,.55), 0 0 16px rgba(255,95,61,.45); opacity:0; animation:vivo-brillo 2.4s ease-in-out infinite;}
+  @keyframes vivo-brillo{0%,100%{opacity:0;} 50%{opacity:1;}}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,95,61,.6);} 70%{box-shadow:0 0 0 8px rgba(255,95,61,0);} 100%{box-shadow:0 0 0 0 rgba(255,95,61,0);}}
   .twitch-info{flex-grow:1; padding:22px 24px; display:flex; flex-direction:column; justify-content:center; gap:8px; min-width:0;}
   .twitch-label{font-size:15px; font-weight:700; color:#fff; display:flex; align-items:center; gap:10px;}
@@ -281,7 +291,18 @@
 
   /* Historial Individual — últimas 5 partidas SoloQ del jugador
      seleccionado en el ranking (click en una fila). */
-  .rank-row{cursor:pointer; transition:border-color .15s ease;}
+  .rank-row{cursor:pointer; transition:border-color .15s ease, box-shadow .2s ease;}
+  /* Hover (solo con ratón): la fila se aclara un poco y los cuadraditos de las últimas 5 crecen
+     en cascada. Al salir vuelven sin retraso. */
+  .ultimas i{transition:transform 180ms cubic-bezier(.23,1,.32,1);}
+  @media (hover:hover) and (pointer:fine){
+    .rank-row:hover{box-shadow:inset 0 0 0 999px rgba(255,255,255,.035);}
+    .rank-row:hover .ultimas i{transform:scale(1.05);}
+    .rank-row:hover .ultimas i:nth-child(2){transition-delay:20ms;}
+    .rank-row:hover .ultimas i:nth-child(3){transition-delay:40ms;}
+    .rank-row:hover .ultimas i:nth-child(4){transition-delay:60ms;}
+    .rank-row:hover .ultimas i:nth-child(5){transition-delay:80ms;}
+  }
   .rank-row.active{background:rgba(0,229,199,.08);}
   /* El aro de selección NO va como box-shadow de .rank-row: eso pinta
      por DEBAJO de .row-content (que tiene z-index:1 para ir encima de
@@ -980,6 +1001,7 @@ async function renderAuth() {
   authMenu.render(session, state.players, state.profiles);
 }
 
+let podioAnimado = false; // la entrada del podio solo se ve al cargar, no en cada actualización en vivo
 function renderPodium() {
   // Podio (top 3)
   const podiumEl = document.getElementById('podium');
@@ -990,6 +1012,7 @@ function renderPodium() {
     const rankNum = idx + 1;
     const div = document.createElement('div');
     div.className = `podium-card ${rankNum === 1 ? 'rank1' : rankNum === 2 ? 'silver-ring' : 'bronze-ring'}`;
+    if (!podioAnimado) { div.classList.add('entra'); div.style.setProperty('--i', rankNum - 1); }
     // Fondo del podio = SIEMPRE la skin elegida (favorite_champion/skin).
     // El swap a campeón en vivo solo pasa en la fila del ranking, no aquí.
     const champBg = p.profile?.favorite_champion || p.favorite_champion;
@@ -1025,6 +1048,7 @@ function renderPodium() {
       </div>`;
     podiumEl.appendChild(div);
   });
+  if (podiumEl.children.length) podioAnimado = true;
 }
 
 function renderTwitch() {
