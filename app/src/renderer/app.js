@@ -8,8 +8,37 @@ $('btn-close').addEventListener('click', () => window.sharkTracker.close());
 // --- Navegación entre páginas ---
 const navItems = document.querySelectorAll('.navitem:not(.disabled)');
 function goTo(page) {
-  navItems.forEach((n) => n.classList.toggle('active', n.dataset.page === page));
+  navItems.forEach((n) => {
+    n.classList.toggle('active', n.dataset.page === page);
+    if (n.dataset.page === page) n.setAttribute('aria-current', 'page'); else n.removeAttribute('aria-current');
+  });
   document.querySelectorAll('.page').forEach((p) => p.classList.toggle('active', p.id === 'page-' + page));
+  moverIndicadores();
+}
+
+// Indicadores deslizantes: el resaltado del menú lateral y el subrayado de las
+// pestañas de Ajustes se mueven al elegido (solo transform: no recalcula el layout).
+// La primera vez (o al cambiar de tamaño) se colocan sin animar.
+const indicadores = [
+  { caja: document.querySelector('.sidebar'), item: '.navitem.active', clase: 'nav-indicador',
+    poner: (ind, it) => { ind.style.transform = `translateY(${it.offsetTop}px)`; ind.style.height = `${it.offsetHeight}px`; } },
+  { caja: document.querySelector('.stabs'), item: '.stab.active', clase: 'stab-indicador',
+    poner: (ind, it) => { ind.style.transform = `translateX(${it.offsetLeft}px) scaleX(${it.offsetWidth})`; } },
+].filter((x) => x.caja);
+for (const x of indicadores) {
+  x.ind = document.createElement('span');
+  x.ind.className = x.clase;
+  x.ind.setAttribute('aria-hidden', 'true');
+  x.caja.prepend(x.ind);
+  x.caja.classList.add('con-indicador');
+  // Al hacerse visible (tras iniciar sesión) o cambiar de tamaño: colocar sin animar.
+  new ResizeObserver(() => { x.caja.classList.remove('listo'); moverIndicadores(); requestAnimationFrame(() => x.caja.classList.add('listo')); }).observe(x.caja);
+}
+function moverIndicadores() {
+  for (const x of indicadores) {
+    const it = x.caja.querySelector(x.item);
+    if (it && it.offsetWidth) x.poner(x.ind, it);
+  }
 }
 navItems.forEach((item) => item.addEventListener('click', () => {
   goTo(item.dataset.page);
@@ -118,7 +147,12 @@ window.sharkTracker.auth.getState()
 // --- Detección automática del cliente de LoL ---
 function renderGameStatus({ inGame }) {
   $('game-chip').classList.toggle('ingame', inGame);
-  $('game-chip-text').textContent = inGame ? 'En partida' : 'Sin partida';
+  const texto = inGame ? 'En partida' : 'Sin partida';
+  const t = $('game-chip-text');
+  if (t.textContent === texto) return;
+  t.textContent = texto;
+  // Cambio de estado: el texto entra con un fundido corto (se reinicia la animación).
+  t.classList.remove('cambia'); void t.offsetWidth; t.classList.add('cambia');
 }
 window.sharkTracker.onGameStatus(renderGameStatus);
 window.sharkTracker.getGameStatus().then(renderGameStatus);
@@ -137,7 +171,7 @@ async function checkLiveGame() {
   const result = await window.sharkTracker.checkLiveGame();
 
   if (result.inGame) {
-    statusEl.textContent = '✓ Conectado — hay una partida en curso y la app puede leer sus datos.';
+    statusEl.textContent = '✓ Conectado: hay una partida en curso y la app puede leer sus datos.';
     statusEl.className = 'livestatus ok';
     jsonEl.hidden = false;
     // Solo mostramos un resumen, el objeto completo es enorme
@@ -148,7 +182,7 @@ async function checkLiveGame() {
         activePlayer: g.activePlayer?.summonerName,
         jugadores: g.allPlayers?.map((p) => p.summonerName),
         // Eventos de la partida (para comprobar los nombres que usa Riot)
-        eventos: g.events?.Events?.map((e) => `${Math.floor(e.EventTime / 60)}:${String(Math.floor(e.EventTime % 60)).padStart(2, '0')} ${e.EventName}${e.DragonType ? ' (' + e.DragonType + ')' : ''}${e.KillerName ? ' — ' + e.KillerName : ''}`)
+        eventos: g.events?.Events?.map((e) => `${Math.floor(e.EventTime / 60)}:${String(Math.floor(e.EventTime % 60)).padStart(2, '0')} ${e.EventName}${e.DragonType ? ' (' + e.DragonType + ')' : ''}${e.KillerName ? ' · ' + e.KillerName : ''}`)
       },
       null,
       2
@@ -167,6 +201,7 @@ checkBtn.addEventListener('click', checkLiveGame);
 document.querySelectorAll('.stab:not(.disabled)').forEach((tab) => tab.addEventListener('click', () => {
   document.querySelectorAll('.stab').forEach((t) => t.classList.toggle('active', t === tab));
   document.querySelectorAll('.subpage').forEach((p) => p.classList.toggle('active', p.id === 'stab-' + tab.dataset.stab));
+  moverIndicadores();
 }));
 
 // --- Ajustes → Overlay: interruptores (se guardan en este PC y se aplican al instante) ---
@@ -266,7 +301,7 @@ $('btn-probar-aviso').addEventListener('click', async () => {
 
 // --- Versión (sale de package.json) y actualizaciones automáticas ---
 window.sharkTracker.app.version().then((v) => {
-  $('app-version').textContent = `— v${v.split('.').slice(0, 2).join('.')}`;
+  $('app-version').textContent = `v${v}`;
   $('acerca-version').textContent = v;
 });
 function renderActualizacion(e) {

@@ -38,6 +38,7 @@
     if (url) {
       const img = el('img');
       img.alt = '';
+      img.loading = 'lazy'; img.decoding = 'async';
       img.addEventListener('error', () => { img.remove(); caja.textContent = respaldo; });
       img.src = url;
       caja.append(img);
@@ -101,7 +102,7 @@
     const card = el('div', 'card card-radar');
     // Copias viejas (antes de las pestañas) solo traían SoloQ.
     const cola = p.rendimiento?.[pestana] ?? { nombre: 'SoloQ', grieta: true, resumen: p.resumen, radar: p.radar };
-    card.append(el('div', 'cardhd', `Rendimiento — últimas ${cola.resumen?.partidas ?? 0} ${cola.nombre}`));
+    card.append(el('div', 'cardhd', `Rendimiento · últimas ${cola.resumen?.partidas ?? 0} ${cola.nombre}`));
     if (p.rendimiento) card.append(pestanas(p));
     if (!cola.radar) {
       card.append(el('div', 'vacio', `Sin partidas de ${cola.nombre} en los últimos 30 días.`));
@@ -196,7 +197,7 @@
   // ── Historial de elo (SoloQ, últimos 30 días) ──
   function pintarElo(p) {
     const card = el('div', 'card card-elo');
-    card.append(el('div', 'cardhd', 'Historial de elo — SoloQ, últimos 30 días'));
+    card.append(el('div', 'cardhd', 'Historial de elo · SoloQ, últimos 30 días'));
     if (!p.elo) {
       card.append(el('div', 'vacio', 'Todavía no hay suficientes cambios de rango para la gráfica.'));
       return card;
@@ -216,7 +217,7 @@
   // ── Historial de partidas por cola ──
   function pintarHistorial(p) {
     const card = el('div', 'card card-hist');
-    card.append(el('div', 'cardhd', 'Historial de partidas — últimas 10 por cola (30 días)'));
+    card.append(el('div', 'cardhd', 'Historial de partidas · últimas 10 por cola (30 días)'));
     card.append(pestanas(p));
     const actual = p.historial.find((t) => t.clave === pestana) ?? p.historial[0];
     if (!actual.partidas.length) card.append(el('div', 'vacio', `Sin partidas de ${actual.nombre} en los últimos 30 días.`));
@@ -270,9 +271,22 @@
     return caja;
   }
 
+  // Cuando el contenido real reemplaza a la silueta de carga, entra con un fundido de 300 ms.
+  let observandoCuerpo = false;
+  function vigilarCuerpo(cuerpo) {
+    if (observandoCuerpo) return;
+    observandoCuerpo = true;
+    new MutationObserver((cambios) => {
+      const veniaDeCarga = cambios.some((c) => [...c.removedNodes].some((n) => n.classList?.contains('esq-perfil')));
+      if (!veniaDeCarga || cuerpo.querySelector('.esq-perfil')) return;
+      cuerpo.classList.remove('sk-entra'); void cuerpo.offsetWidth; cuerpo.classList.add('sk-entra');
+    }).observe(cuerpo, { childList: true });
+  }
+
   let ultimo = null; // última respuesta del main
   function pintar() {
     const cuerpo = byId('perfil-cuerpo');
+    vigilarCuerpo(cuerpo);
     const sub = byId('perfil-sub');
     const r = ultimo;
     if (!r) return;
@@ -288,14 +302,14 @@
       byId('perfil-cab').hidden = true;
       sub.textContent = cargando ? 'Cargando tu perfil…' : 'Sin conexión con SharkTracker';
       cuerpo.replaceChildren(cargando ? esqueleto()
-        : pintarMensaje('Error de conexión — no es tu culpa', 'Este tiburón perdió su rumbo. No pudimos conectar con SharkTracker para traer tu perfil. En cuanto vuelva la conexión, se actualiza solo.', true));
+        : pintarMensaje('Error de conexión: no es tu culpa', 'Este tiburón perdió su rumbo. No pudimos conectar con SharkTracker para traer tu perfil. En cuanto vuelva la conexión, se actualiza solo.', true));
       return;
     }
     perfil = datos;
     pintarCabecera(datos, conectado);
     if (!conectado) {
       sub.textContent = 'Mostrando la última información guardada en tu dispositivo';
-      cuerpo.replaceChildren(pintarMensaje('Error de conexión — no es tu culpa',
+      cuerpo.replaceChildren(pintarMensaje('Error de conexión: no es tu culpa',
         'Este tiburón perdió su rumbo. No pudimos conectar con SharkTracker para traer tu historial, gráfica de elo, etiquetas y maestrías actualizadas. Tu identidad y tu último rango guardado siguen visibles arriba.', true));
       return;
     }

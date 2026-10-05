@@ -47,6 +47,7 @@
     if (url) {
       const img = el('img');
       img.alt = '';
+      img.loading = 'lazy'; img.decoding = 'async'; // la tier list tiene 100+ íconos: solo se piden los que se ven
       img.addEventListener('error', () => { img.remove(); caja.textContent = respaldo; });
       img.src = url;
       caja.append(img);
@@ -236,7 +237,7 @@
     build.append(orden);
     const situ = [['4.º objeto', d.cuarto], ['5.º objeto', d.quinto], ['6.º objeto', d.sexto]].filter(([, l]) => l?.length);
     if (situ.length) {
-      build.append(el('div', 'mt-subt', 'Situacionales — según la partida'));
+      build.append(el('div', 'mt-subt', 'Situacionales, según la partida'));
       for (const [titulo, lista] of situ) {
         const f = el('div', 'mt-situ');
         f.append(el('span', 'mt-situt', titulo));
