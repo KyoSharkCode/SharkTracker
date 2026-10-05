@@ -547,6 +547,14 @@ Decisiones:
 - `prefers-reduced-motion`: todo lo que late en bucle da una sola pasada.
 - Íconos (`icono()` en meta.js, envivo.js y perfil.js) con `loading="lazy"`.
 - Nada de guiones largos (—) en los textos; se usa `:`, `·` o una coma. "—" solo como valor vacío en números.
+- **Movimiento** (sección final de style.css, criterio Emil Kowalski): curvas `--ease-out` / `--ease-in-out`; todo < 300 ms salvo el acento.
+  - Botones: hover 150 ms y `scale: .97` al presionar (`:where(button)`, sin especificidad). Interruptores: la bolita se desliza con `transform`.
+  - Menú lateral y pestañas de Ajustes: un indicador (`.nav-indicador` / `.stab-indicador`, creado en app.js) se desliza al activo; el contenido cambia al instante.
+  - `--acento` registrado con `@property`: se funde 300 ms al cambiarlo.
+  - En Vivo: `cascada()` hace entrar las tarjetas en cascada (al entrar a selección, fijar campeón o empezar la carga) y sigue donde iba si la vista se repinta; los botones de importar cambian de texto dentro del propio botón.
+  - Chip de estado con fundido al cambiar; chips que aparecen con `scale(.95)`; avisos que suben 4 px.
+  - Con reducir movimiento: sin desplazamientos, solo fundidos.
+  - No se animan: el contenido al cambiar de sección, las filas de la tier list, los relojes ni nada del teclado.
 
 ## Key de Riot y PUUID
 

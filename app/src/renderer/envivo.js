@@ -205,22 +205,33 @@
     return c;
   }
 
+  // El aviso entra con un fundido solo justo después de aparecer (la vista se repinta seguido).
+  const reciente = (a, ms = 400) => a?.t && Date.now() - a.t < ms;
   function aviso(tipo) {
     const a = avisos[tipo];
-    if (!a) return null;
-    return el('div', `ev-aviso ${a.ok ? 'ok' : 'mal'}`, a.texto);
+    if (!a || a.cargando) return null;
+    return el('div', `ev-aviso ${a.ok ? 'ok' : 'mal'}${reciente(a) ? ' entra' : ''}`, a.texto);
   }
+  // El botón muestra su propio estado: "Importando…" → "✓ Listo" (2,5 s) → su texto.
+  const textoBoton = {}; // último texto pintado por tipo, para animar solo cuando cambia
   function boton(texto, tipo, accion) {
-    const b = el('button', 'ev-btn', avisos[tipo]?.cargando ? 'Importando…' : texto);
+    const a = avisos[tipo];
+    const hecho = a?.ok && reciente(a, 2500);
+    const etiqueta = a?.cargando ? 'Importando…' : hecho ? '✓ Listo' : texto;
+    const b = el('button', `ev-btn${hecho ? ' hecho' : ''}`);
+    const span = el('span', textoBoton[tipo] !== undefined && textoBoton[tipo] !== etiqueta ? 'cambia' : null, etiqueta);
+    textoBoton[tipo] = etiqueta;
+    b.append(span);
     b.type = 'button';
-    b.disabled = !!avisos[tipo]?.cargando;
+    b.disabled = !!a?.cargando;
     b.addEventListener('click', async () => {
       avisos[tipo] = { cargando: true };
       pintar(true);
       const r = await accion();
       const texto = r?.reemplazada ? `✓ Página de runas creada en lugar de "${r.reemplazada}" (no había hueco).` : (TEXTO_OK[tipo] ?? TEXTO_OK.runas);
-      avisos[tipo] = r?.ok ? { ok: true, texto } : { ok: false, texto: r?.error ?? 'No se pudo.' };
+      avisos[tipo] = r?.ok ? { ok: true, texto, t: Date.now() } : { ok: false, texto: r?.error ?? 'No se pudo.', t: Date.now() };
       pintar(true);
+      if (r?.ok) setTimeout(() => pintar(true), 2600); // vuelve a su texto
     });
     return b;
   }
@@ -575,6 +586,7 @@
     const abajo = el('div', 'ev-grid');
     abajo.append(cardEquipo('Tu equipo', 'dot-pos', partida.carga?.aliados), cardEquipo('Rivales', 'dot-err', partida.carga?.rivales));
     caja.append(arriba, abajo);
+    cascada(caja);
   }
 
   function pintar(forzar = false) {
@@ -636,6 +648,26 @@
     const abajo = el('div', 'ev-grid');
     abajo.append(cardAliados(), cardRivales(miF));
     caja.append(arriba, abajo);
+    // Fijaste campeón: cambian las tarjetas de arriba (picks → runas y build), también entran.
+    const fijado = estado.yo?.bloqueado ? estado.yo.campeon : null;
+    if (fijado && fijado !== ultimoFijado) entrar();
+    ultimoFijado = fijado;
+    cascada(caja);
+  }
+
+  // Entrada en cascada de las tarjetas: al entrar a selección, al fijar tu campeón o al
+  // empezar la carga. La vista se repinta seguido (llegan datos de Meta, del cliente…):
+  // si se repinta durante la cascada, sigue donde iba (retraso negativo), no empieza de cero.
+  let cascadaDesde = 0;
+  let ultimoFijado = null;
+  const entrar = () => { cascadaDesde = performance.now(); };
+  function cascada(caja) {
+    const pasado = performance.now() - cascadaDesde;
+    if (pasado > 700) return;
+    [...caja.querySelectorAll(':scope > .ev-estado, :scope > .ev-grid > *')].forEach((c, i) => {
+      c.style.animationDelay = `${i * 40 - pasado}ms`;
+      c.classList.add('ev-entra');
+    });
   }
 
   let fueSeleccion = false;
@@ -645,6 +677,8 @@
     estado = e ?? { conectado: false };
     if (typeof estado.segundos === 'number') reloj = { segundos: estado.segundos, desde: Date.now() };
     if (entra) {
+      entrar();
+      ultimoFijado = null;
       await cargarMeta();
       // La app salta sola a En Vivo al entrar a selección.
       document.querySelector('.navitem[data-page="envivo"]')?.click();
@@ -661,7 +695,7 @@
       const empieza = !hayPartida() && !!datos?.carga?.aliados?.length;
       partida = datos ?? partida;
       // Al empezar la carga de una partida, la app salta sola a En Vivo (como en la selección).
-      if (empieza) document.querySelector('.navitem[data-page="envivo"]')?.click();
+      if (empieza) { entrar(); document.querySelector('.navitem[data-page="envivo"]')?.click(); }
       pintar(true);
     });
     api().partida().then((d) => { if (d) { partida = d; pintar(true); } });

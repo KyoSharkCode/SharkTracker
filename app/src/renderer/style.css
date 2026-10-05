@@ -78,6 +78,8 @@ html, body {
   color: var(--acento-claro);
   box-shadow: inset 2px 0 0 var(--acento);
 }
+/* Con el indicador deslizante listo (app.js), el fondo del activo lo pone él. */
+.sidebar.con-indicador .navitem.active { background: none; box-shadow: none; }
 .navitem.disabled { opacity: 0.5; cursor: default; }
 .navitem.disabled:hover { background: none; }
 .navdot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.7; }
@@ -262,6 +264,7 @@ html, body {
 }
 .stab:hover { color: var(--texto-tenue); }
 .stab.active { color: var(--acento-claro); border-bottom-color: var(--acento); }
+.stabs.con-indicador .stab.active { border-bottom-color: transparent; }
 .stab.disabled { cursor: default; opacity: 0.5; }
 .subpage { display: none; }
 .subpage.active { display: block; }
@@ -286,9 +289,9 @@ html, body {
   width: 32px; height: 17px; border-radius: 10px; position: relative; flex-shrink: 0; box-sizing: border-box; padding: 0; cursor: pointer;
   background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
 }
-.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--texto-apagado); transition: left .15s; }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--texto-apagado); transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out); }
 .sw.on { background: color-mix(in srgb, var(--acento) 30%, transparent); border-color: color-mix(in srgb, var(--acento) 55%, transparent); }
-.sw.on::after { left: 17px; background: var(--acento); box-shadow: none; }
+.sw.on::after { transform: translateX(15px); background: var(--acento); box-shadow: none; }
 span.sw { cursor: default; opacity: 0.6; }
 .previewbox {
   border-radius: 10px; border: 1px dashed color-mix(in srgb, var(--acento) 30%, transparent); background: color-mix(in srgb, var(--acento) 3%, transparent); min-height: 170px;
@@ -731,9 +734,12 @@ html, body { font-variant-numeric: tabular-nums; }
 :focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; border-radius: 6px; }
 
 /* Cargando: siluetas que "respiran" suave */
-.esqueleto { background: #121c2a; border-radius: 12px; animation: esqueleto 1.6s ease-in-out infinite; }
+.esqueleto { background: #121c2a; border-radius: 12px; position: relative; overflow: hidden; }
+.esqueleto::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  animation: brillo 1.6s cubic-bezier(.4,0,.2,1) infinite; }
+@keyframes brillo { to { transform: translateX(100%); } }
 @keyframes esqueleto { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
-@media (prefers-reduced-motion: reduce) { .esqueleto { animation: none; } }
 .esq-cab { height: 72px; margin-bottom: 12px; }
 .esq-card { height: 260px; }
 .esq-hist { height: 220px; }
@@ -780,4 +786,73 @@ html, body { font-variant-numeric: tabular-nums; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto !important; }
   *, *::before, *::after { animation-iteration-count: 1 !important; }
+}
+
+/* ============================================================
+   Movimiento de la app (v0.8.1, criterio de Emil Kowalski):
+   respuesta inmediata a lo que haces, nada de adornos en lo que se usa
+   cien veces al día. Solo transform/opacity (y color en los hovers).
+   ============================================================ */
+:root {
+  --ease-out: cubic-bezier(.23, 1, .32, 1);       /* entradas y respuestas */
+  --ease-in-out: cubic-bezier(.77, 0, .175, 1);  /* lo que se desliza en pantalla */
+}
+/* El acento se funde en 300 ms al cambiarlo en Apariencia (toda la app lo hereda). */
+@property --acento { syntax: '<color>'; inherits: true; initial-value: #00e5c7; }
+:root { transition: --acento 300ms ease; }
+
+/* Botones: hover suave y se hunden un poco al presionar. :where() = sin
+   especificidad, así un botón con transición propia la conserva. */
+:where(button, .mt-fila) {
+  transition: scale 160ms var(--ease-out), background-color 150ms ease, color 150ms ease,
+    border-color 150ms ease, filter 150ms ease, opacity 150ms ease;
+}
+:where(button):active:not(:disabled) { scale: .97; }
+.navitem:active:not(:disabled) { scale: .98; }
+.sw { transition: background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), scale 160ms var(--ease-out); }
+
+/* Menú lateral y pestañas de Ajustes: el resaltado se desliza al elegido;
+   el contenido cambia al instante (se usa mucho: animarlo la haría lenta). */
+.sidebar { position: relative; }
+.navitem { position: relative; z-index: 1; }
+.nav-indicador {
+  position: absolute; left: 12px; right: 12px; top: 0; height: 0; border-radius: 7px; pointer-events: none;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--acento) 14%, transparent), color-mix(in srgb, var(--acento) 3%, transparent));
+  box-shadow: inset 2px 0 0 var(--acento);
+}
+.stabs { position: relative; }
+.stab-indicador {
+  position: absolute; left: 0; bottom: -1px; width: 1px; height: 2px; background: var(--acento);
+  transform-origin: left center; pointer-events: none;
+}
+.con-indicador.listo .nav-indicador, .con-indicador.listo .stab-indicador {
+  transition: transform 220ms var(--ease-out), height 220ms var(--ease-out);
+}
+
+/* Chip de estado ("Sin partida" ↔ "En partida"): el texto cambia con un fundido. */
+.gamechip .gd { transition: background-color 200ms ease; }
+.cambia { animation: cambia 200ms var(--ease-out); }
+@keyframes cambia { from { opacity: 0; filter: blur(2px); } }
+
+/* Chips que aparecen (actualización lista, cuenta de Discord). */
+.updatechip:not([hidden]), .discordchip:not([hidden]) { animation: chip-entra 200ms var(--ease-out); }
+@keyframes chip-entra { from { opacity: 0; scale: .95; } }
+
+/* En Vivo: al entrar a selección (o al fijar tu campeón) las tarjetas entran en cascada. */
+.ev-entra { animation: ev-entra 250ms var(--ease-out) backwards; }
+@keyframes ev-entra { from { opacity: 0; transform: translateY(8px); } }
+/* Botones de importar: "Importando…" → "✓ Listo" cambia dentro del mismo botón. */
+.ev-btn.hecho { filter: none; background: color-mix(in srgb, var(--verde) 22%, transparent); color: var(--verde); }
+.ev-aviso.entra { animation: aviso-entra 200ms var(--ease-out); }
+@keyframes aviso-entra { from { opacity: 0; transform: translateY(4px); } }
+
+/* Contenido que reemplaza a la silueta de carga. */
+.sk-entra { animation: sk-entra 300ms ease; }
+@keyframes sk-entra { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Se quitan los desplazamientos; quedan los fundidos. */
+  .con-indicador.listo .nav-indicador, .con-indicador.listo .stab-indicador, .sw::after { transition: none; }
+  .ev-entra, .ev-aviso.entra { animation-name: sk-entra; }
+  .updatechip:not([hidden]), .discordchip:not([hidden]) { animation-name: sk-entra; }
 }

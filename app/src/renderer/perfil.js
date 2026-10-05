@@ -271,9 +271,22 @@
     return caja;
   }
 
+  // Cuando el contenido real reemplaza a la silueta de carga, entra con un fundido de 300 ms.
+  let observandoCuerpo = false;
+  function vigilarCuerpo(cuerpo) {
+    if (observandoCuerpo) return;
+    observandoCuerpo = true;
+    new MutationObserver((cambios) => {
+      const veniaDeCarga = cambios.some((c) => [...c.removedNodes].some((n) => n.classList?.contains('esq-perfil')));
+      if (!veniaDeCarga || cuerpo.querySelector('.esq-perfil')) return;
+      cuerpo.classList.remove('sk-entra'); void cuerpo.offsetWidth; cuerpo.classList.add('sk-entra');
+    }).observe(cuerpo, { childList: true });
+  }
+
   let ultimo = null; // última respuesta del main
   function pintar() {
     const cuerpo = byId('perfil-cuerpo');
+    vigilarCuerpo(cuerpo);
     const sub = byId('perfil-sub');
     const r = ultimo;
     if (!r) return;
