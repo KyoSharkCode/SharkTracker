@@ -8,9 +8,9 @@
 import { icono } from './iconos.js';
 
 const TIERS = {
-  easy:   { label: 'Fácil',   color: '#3DFFD2', pts: 1 },
-  medium: { label: 'Media',   color: '#FFB547', pts: 2 },
-  hard:   { label: 'Difícil', color: '#FF6F8E', pts: 3 },
+  easy:   { label: 'Fácil',   color: '#3DFFD2', pts: 1, diente: 'mision_facil' },
+  medium: { label: 'Media',   color: '#FFB547', pts: 2, diente: 'mision_media' },
+  hard:   { label: 'Difícil', color: '#FF6F8E', pts: 3, diente: 'mision_dificil' },
 };
 const TIER_ORDER = ['easy', 'medium', 'hard'];
 const GROUP_PTS = 2;
@@ -45,6 +45,8 @@ const CSS = `
 .mw-chip{font-size:11px; font-weight:800; padding:2px 8px; border-radius:99px; color:#03111A; background:var(--tc);}
 .mw-pts{margin-left:auto; font-size:12px; font-weight:800; color:var(--text-dim,#A7D3CF);}
 .mw-card.done .mw-pts{color:var(--gold,#FFB547);}
+.mw-teeth{color:var(--gold,#FFB547); white-space:nowrap;}
+.mw-teeth .ico-svg{vertical-align:-2px;}
 .mw-card .ttl{font-size:14px; font-weight:700; margin:7px 0 2px; line-height:1.35;}
 .mw-card .note{font-size:11px; color:var(--text-faint,#7FAFAD);}
 .mw-bar{display:flex; align-items:center; gap:8px; margin-top:8px;}
@@ -132,14 +134,17 @@ export function createMissionsWidget({ supabase, profileIconUrl }) {
     const week = weeks?.[0];
     if (!week) { st.data = null; removeDom(); return; }
     const since = new Date(Math.max(new Date(week.week_start).getTime(), new Date(settings.enabled_at ?? week.week_start).getTime())).toISOString();
-    const [{ data: missions }, { data: catalog }, { data: rerolls }, { data: players }, { data: profiles }, { data: played }] = await Promise.all([
+    const [{ data: missions }, { data: catalog }, { data: rerolls }, { data: players }, { data: profiles }, { data: played }, { data: rewards }] = await Promise.all([
       supabase.from('player_missions').select('*').eq('week_start', week.week_start),
       supabase.from('mission_catalog').select('*'),
       supabase.from('player_rerolls').select('*'),
       supabase.from('players').select('id, riot_game_name, icon_id, user_id'),
       supabase.from('player_profiles').select('player_id, display_name'),
       supabase.from('match_participants').select('player_id, matches!inner(ended_at)').gte('matches.ended_at', since),
+      supabase.from('reward_settings').select('enabled, amounts').maybeSingle(),
     ]);
+    // Dientes que da cada misión (solo si la tienda está activa).
+    st.dientes = rewards?.enabled ? (rewards.amounts ?? {}) : null;
     const cat = new Map((catalog ?? []).map(c => [c.code, c]));
     const nick = new Map((profiles ?? []).map(p => [p.player_id, p.display_name]));
     const contributors = new Set((played ?? []).filter(x => x.matches && x.matches.ended_at >= since).map(x => x.player_id));
@@ -161,6 +166,11 @@ export function createMissionsWidget({ supabase, profileIconUrl }) {
     draw();
   }
 
+  // «· +10 🦷»: los dientes que da la misión, con el ícono de diente.
+  function dientes(n, extra = '') {
+    return n ? `<span class="mw-teeth"> · +${n} ${icono('diente', { size: 13, title: 'dientes' })}${extra}</span>` : '';
+  }
+
   function missionCard(m, own) {
     const t = TIERS[m.tier];
     const target = m.cat?.target ?? 1, prog = Math.min(m.progress, target);
@@ -169,7 +179,7 @@ export function createMissionsWidget({ supabase, profileIconUrl }) {
     return `<div class="mw-card ${done ? 'done' : ''}" style="--tc:${t.color}">
       <div class="top"><span class="mw-chip">${t.label}</span>
         ${own && !done && st.data.mine.rerolls > 0 && !confirming ? `<button class="mw-reroll" type="button" data-reroll="${m.id}" title="Cambiar por otra misión ${t.label.toLowerCase()}">${icono('dado', { size: 13 })} Cambiar</button>` : ''}
-        <span class="mw-pts">${done ? '✓ ' : ''}+${m.cat?.points ?? t.pts} pt${(m.cat?.points ?? t.pts) === 1 ? '' : 's'}</span></div>
+        <span class="mw-pts">${done ? '✓ ' : ''}+${m.cat?.points ?? t.pts} pt${(m.cat?.points ?? t.pts) === 1 ? '' : 's'}${dientes(st.dientes?.[t.diente])}</span></div>
       <div class="ttl">${esc(m.cat?.title ?? m.code)}</div>
       ${m.cat?.rift_only ? '<div class="note">Solo cuenta en la Grieta del Invocador</div>' : ''}
       <div class="mw-bar"><div class="tr"><i style="width:${Math.round(100 * prog / target)}%"></i></div><span>${prog}/${target}</span></div>
@@ -198,7 +208,7 @@ export function createMissionsWidget({ supabase, profileIconUrl }) {
           : `<div class="mw-login">${d.loggedIn ? 'Tu cuenta de LoL todavía no está vinculada: <a href="login.html">termina de vincularla</a> para tener misiones.' : '<a href="login.html">Inicia sesión</a> para ver tus misiones y usar rerolls.'}</div>`}
         ${g ? `<section class="mw-sec"><h3>Misión grupal</h3>
           <div class="mw-card mw-group ${d.groupDone ? 'done' : ''}" style="--tc:#5AA9FF">
-            <div class="top"><span class="mw-chip">Grupo</span><span class="mw-pts">${d.groupDone ? '✓ ' : ''}+${g.points} pts a quien juegue</span></div>
+            <div class="top"><span class="mw-chip">Grupo</span><span class="mw-pts">${d.groupDone ? '✓ ' : ''}+${g.points} pts a quien juegue${dientes(st.dientes?.grupal_top, ' al que más aporte')}</span></div>
             <div class="ttl">${esc(g.title)}</div>
             <div class="mw-bar"><div class="tr"><i style="width:${Math.round(100 * gProg / gTarget)}%"></i></div><span>${gProg}/${gTarget}</span></div>
           </div></section>` : ''}
@@ -211,7 +221,7 @@ export function createMissionsWidget({ supabase, profileIconUrl }) {
               <span class="pt">${r.pts}</span></button>
             ${st.expanded === r.id ? `<div class="mw-detail">${r.ms.map(m => `<div style="--tc:${TIERS[m.tier].color}"><i></i>${esc(m.cat?.title ?? m.code)} <span style="color:var(--text-faint,#7FAFAD)">${Math.min(m.progress, m.cat?.target ?? 1)}/${m.cat?.target ?? 1}</span>${m.completed_at ? '<span class="ok">✓</span>' : ''}</div>`).join('')}
               <div style="color:var(--text-faint,#7FAFAD)">${r.rerolls}/2 rerolls</div></div>` : ''}`).join('')}</div></section>
-        <p class="mw-foot">Cuentan todas las colas (sin remakes). Fácil 1 pt · Media 2 · Difícil 3. Todos empiezan la semana con 1 reroll; se gana otro (máximo 2) con una pentakill, una victoria sin morir o subiendo de liga.</p>
+        <p class="mw-foot">Cuentan todas las colas menos ARAM Caos (y sin remakes). Fácil 1 pt · Media 2 · Difícil 3. Todos empiezan la semana con 1 reroll; se gana otro (máximo 2) con una pentakill, una victoria sin morir o subiendo de liga.</p>
       </div>`;
   }
 

@@ -469,7 +469,7 @@ const EARN = [
   ['diana', 'Misión fácil / media / difícil', 'Tus 3 misiones semanales.', (a) => `${a.mision_facil} / ${a.mision_media} / ${a.mision_dificil}`],
   ['grupo', 'Misión grupal', `El que más aportó se lleva el premio entero; otro premio se reparte entre los demás según lo que aportó cada uno.`, (a) => `${a.grupal_top} + ${a.grupal_resto}`],
   ['trofeo', 'Top 1 / 2 / 3 de la semana', 'Por puntos de misiones, al cerrar la semana (lunes 6:00).', (a) => `${a.top1} / ${a.top2} / ${a.top3}`],
-  ['check', 'Cada victoria', 'Cualquier cola (no cuentan los remakes).', (a) => `${a.victoria}`],
+  ['check', 'Cada victoria', 'Cualquier cola menos ARAM Caos (no cuentan los remakes).', (a) => `${a.victoria}`],
   ['amanecer', 'Tu primera victoria del día', 'El día empieza a las 6:00 (hora de Madrid).', (a) => `${a.primera_victoria}`],
   ['destello', 'Partida Perfecta', 'Cuando consigues el logro de partida perfecta.', (a) => `${a.perfecta}`],
   ['mano', 'Pentakill', 'Por cada partida con pentakill.', (a) => `${a.pentakill}`],
@@ -484,7 +484,7 @@ function drawEarn() {
       <ul>
         <li><b>Los dientes se reinician a 0 al terminar cada split.</b> Lo que compras (marcos, efectos, banners…) y las insignias son tuyos para siempre.</li>
         <li>Los dientes se suman solos cada pocos minutos; no tienes que hacer nada.</li>
-        <li>Cuentan todas las colas; los remakes no cuentan.</li>
+        <li>Cuentan todas las colas <b>menos ARAM Caos</b>, que no da dientes ni avanza misiones. Los remakes tampoco cuentan.</li>
         <li>Los <b>premios reales</b> los entrega la admin a mano. Si no se puede entregar, te devuelve los dientes.</li>
       </ul>
       <div style="margin-top:10px">Para hacerte una idea, en un split de unas 15 semanas: jugando <b>1 partida al día</b> juntas unos <b>850–1.200 dientes</b>; jugando <b>3 al día</b>, unos <b>2.900 dientes</b>.</div>

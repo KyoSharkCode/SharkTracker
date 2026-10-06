@@ -28,6 +28,23 @@ const AI_VERSION = 1;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+// Jerga de LoL como la dice el grupo (español latino). La IA a veces traduce
+// literal ("selva", "carril"): se le pide en el prompt y además se corrige "selva"
+// en la respuesta, también en los análisis ya guardados.
+const JERGA_PROMPT = 'Usa la jerga de League of Legends como se habla en Latinoamérica: "jungla" y "jungla/jungler" (NUNCA "selva" ni "selvático"), "línea" (no "carril"), "farmear", "rotar", "wards", "early/mid/late game" o "inicio/mitad/final de la partida", y los nombres de campeones, objetos y objetivos tal cual (Barón, Dragón, Heraldo, Vacuolarvas).';
+const JERGA_FIX: [RegExp, string][] = [
+  [/\bselv[aá]tic[oa]s?\b/gi, 'de la jungla'], [/\bselvas\b/gi, 'junglas'], [/\bselva\b/gi, 'jungla'],
+];
+function corregirJerga(v: any): any {
+  if (typeof v === 'string') {
+    return JERGA_FIX.reduce((t, [re, por]) => t.replace(re, (m) => (m[0] === m[0].toUpperCase() ? por[0].toUpperCase() + por.slice(1) : por)), v);
+  }
+  if (Array.isArray(v)) return v.map(corregirJerga);
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, corregirJerga(x)]));
+  return v;
+}
+
+
 // CORS: solo la web de SharkTracker puede llamar a esta función desde un
 // navegador. (No frena a scripts fuera del navegador: eso lo cubren las
 // comprobaciones de más abajo.) La app de escritorio llama desde el proceso
@@ -126,6 +143,10 @@ function trimMatch(md: any) {
       killParticipation: ch.killParticipation ?? null,
       soloKills: ch.soloKills ?? null,
       csAt10: ch.laneMinionsFirst10Minutes ?? null,
+      // CS total al minuto 10 (súbditos + monstruos de la jungla). csAt10 solo trae
+      // los súbditos de línea, por eso a un jungla le salía 0.
+      cs10: ch.laneMinionsFirst10Minutes == null && ch.jungleCsBefore10Minutes == null ? null
+        : Math.round((ch.laneMinionsFirst10Minutes ?? 0) + (ch.jungleCsBefore10Minutes ?? 0)),
       goldPerMinute: ch.goldPerMinute ?? null,
       damagePerMinute: ch.damagePerMinute ?? null,
       visionPerMinute: ch.visionScorePerMinute ?? null,
@@ -238,7 +259,7 @@ const EVENT_ES: Record<string, string> = {
 
 async function analisis(matchId: string, playerId: string) {
   const { data: prev } = await supabase.from('match_ai').select('analysis, version').eq('match_id', matchId).eq('player_id', playerId).maybeSingle();
-  if (prev && prev.version === AI_VERSION) return { analysis: prev.analysis, cached: true };
+  if (prev && prev.version === AI_VERSION) return { analysis: corregirJerga(prev.analysis), cached: true };
   if (!GEMINI_API_KEY) throw new HttpError(503, 'Falta configurar GEMINI_API_KEY.');
 
   const { data: player } = await supabase.from('players').select('id, puuid, riot_game_name, primary_role').eq('id', playerId).maybeSingle();
@@ -273,14 +294,14 @@ async function analisis(matchId: string, playerId: string) {
     if (muertes.length) objetivos += `\nMinutos en los que murió: ${muertes.join(', ')}`;
   }
 
-  const prompt = `Eres un coach de League of Legends que habla en español neutro, directo y amable.
+  const prompt = `Eres un coach de League of Legends que habla en español latino, directo y amable. ${JERGA_PROMPT}
 Analiza la actuación de ${player.riot_game_name} en ESTA partida concreta. Basate SOLO en estos datos (no inventes lo que no está).
 
 Modo: ${d.queueName}. Duración: ${fmtMin(d.duration)}. Resultado: ${me.win ? 'VICTORIA' : 'DERROTA'}${arena ? `, puesto ${me.placement}` : ''}.
 Rol principal habitual: ${player.primary_role ?? 'desconocido'}. Rol en esta partida: ${me.teamPosition || 'sin rol fijo'}.
 Su partida: ${fila(me)}. Nivel ${me.champLevel}. Participación en kills: ${me.killParticipation != null ? Math.round(me.killParticipation * 100) + '%' : '?'}.
 Daño recibido ${me.damageTaken}, mitigado ${me.mitigated}, curación ${me.heal}, CC ${me.ccTime}s. Wards: ${me.wardsPlaced} puestas, ${me.wardsKilled} destruidas, ${me.controlWards} de control.
-CS a los 10 min: ${me.csAt10 ?? '?'}. Kills en solitario: ${me.soloKills ?? '?'}. Daño a objetivos: ${me.damageToObjectives}.
+CS a los 10 min (súbditos + monstruos): ${me.cs10 ?? (me.teamPosition === 'JUNGLE' ? '?' : me.csAt10 ?? '?')}. Kills en solitario: ${me.soloKills ?? '?'}. Daño a objetivos: ${me.damageToObjectives}.
 ${rivalCarril ? `Rival directo: ${fila(rivalCarril)}.` : ''}
 Aliados: ${aliados.map(fila).join(' | ')}
 Rivales: ${rivales.map(fila).join(' | ')}
@@ -312,7 +333,7 @@ Responde SOLO con JSON válido, sin texto extra, con esta forma:
   const out = await res.json();
   const texto: string = out?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
   let analysis: any = null;
-  try { analysis = JSON.parse(texto.replace(/^```(?:json)?\s*|\s*```$/g, '')); } catch { /* formato raro */ }
+  try { analysis = corregirJerga(JSON.parse(texto.replace(/^```(?:json)?\s*|\s*```$/g, ''))); } catch { /* formato raro */ }
   if (!analysis || typeof analysis.resumen !== 'string' || !Array.isArray(analysis.consejos)) {
     throw new HttpError(502, 'La IA devolvió un formato inesperado, prueba de nuevo en un rato.');
   }

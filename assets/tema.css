@@ -67,6 +67,11 @@ body{
   font-variant-numeric:tabular-nums;
 }
 
+/* Controles nativos en oscuro. Sin esto, la lista de un <select> abre blanca en
+   Windows y sus opciones (texto claro heredado) no se leen. */
+:root{color-scheme:dark;}
+select option, select optgroup{background:var(--panel); color:var(--text);}
+
 body{font-family:var(--f-ui);}
 
 /* Título de la página: Unbounded en MAYÚSCULAS, color sólido (sin degradado). */

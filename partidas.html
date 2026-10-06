@@ -597,7 +597,9 @@ function drawPov() {
     stat(k(p.damage), `Daño · ${Math.round(p.damage / mins)}/min`),
     stat(k(p.gold), `Oro · ${Math.round(p.gold / mins)}/min`),
     stat(p.cs, `CS · ${(p.cs / mins).toFixed(1)}/min`),
-    stat(p.csAt10 ?? '—', 'CS a los 10 min'),
+    // CS al minuto 10 (súbditos + monstruos). Las partidas guardadas antes de v0.9 solo
+    // traen los súbditos de línea (csAt10): para un jungla eso no sirve y se muestra —.
+    stat(p.cs10 ?? (p.teamPosition === 'JUNGLE' ? '—' : p.csAt10 ?? '—'), 'CS a los 10 min'),
     stat(p.vision, `Visión · ${(p.vision / mins).toFixed(2)}/min`),
     stat(`${p.wardsPlaced}/${p.wardsKilled}/${p.controlWards}`, 'Wards puestas/rotas/control'),
     stat(k(p.damageTaken), `Daño recibido · ${k(p.mitigated)} mitigado`),

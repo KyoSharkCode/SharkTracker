@@ -22,6 +22,23 @@ const GEMINI_API_KEY = (Deno.env.get('GEMINI_API_KEY') ?? '').trim();
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+// Jerga de LoL como la dice el grupo (español latino). La IA a veces traduce
+// literal ("selva", "carril"): se le pide en el prompt y además se corrige "selva"
+// en la respuesta, también en los análisis ya guardados.
+const JERGA_PROMPT = 'Usa la jerga de League of Legends como se habla en Latinoamérica: "jungla" y "jungla/jungler" (NUNCA "selva" ni "selvático"), "línea" (no "carril"), "farmear", "rotar", "wards", "early/mid/late game" o "inicio/mitad/final de la partida", y los nombres de campeones, objetos y objetivos tal cual (Barón, Dragón, Heraldo, Vacuolarvas).';
+const JERGA_FIX: [RegExp, string][] = [
+  [/\bselv[aá]tic[oa]s?\b/gi, 'de la jungla'], [/\bselvas\b/gi, 'junglas'], [/\bselva\b/gi, 'jungla'],
+];
+function corregirJerga(v: any): any {
+  if (typeof v === 'string') {
+    return JERGA_FIX.reduce((t, [re, por]) => t.replace(re, (m) => (m[0] === m[0].toUpperCase() ? por[0].toUpperCase() + por.slice(1) : por)), v);
+  }
+  if (Array.isArray(v)) return v.map(corregirJerga);
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, corregirJerga(x)]));
+  return v;
+}
+
+
 // CORS: solo la web de SharkTracker puede llamar a esta función desde un
 // navegador. (No frena a scripts fuera del navegador: eso lo cubren las
 // comprobaciones de más abajo.) La app de escritorio llama desde el proceso
@@ -126,7 +143,7 @@ async function handle(req: Request): Promise<Response> {
     const { data: cached } = await supabase
       .from('profile_ai_advice').select('*').eq('player_id', playerId).maybeSingle();
     if (cached && cached.last_match_id === lastMatchId && cached.advice?.v === ADVICE_VERSION) {
-      return json({ status: 'ok', cached: true, advice: cached.advice, generated_at: cached.generated_at, last_match_id: lastMatchId });
+      return json({ status: 'ok', cached: true, advice: corregirJerga(cached.advice), generated_at: cached.generated_at, last_match_id: lastMatchId });
     }
 
     if (!GEMINI_API_KEY) {
@@ -187,7 +204,7 @@ async function handle(req: Request): Promise<Response> {
 
     const prompt = `Eres un coach amistoso dentro de un tracker de estadísticas de League of Legends para un grupo pequeño de amigos que juega SoloQ.
 
-Analiza el PERFIL de este jugador a partir de sus últimas ${partidas.length} partidas de SoloQ y sus insignias. Escribe en español, tono cercano y motivador, sin tecnicismos exagerados. No puedes ver las partidas (ni video ni replay), solo estos números: no inventes jugadas ni datos que no te doy. Sé honesto pero nunca cruel.
+Analiza el PERFIL de este jugador a partir de sus últimas ${partidas.length} partidas de SoloQ y sus insignias. Escribe en español latino, tono cercano y motivador, sin tecnicismos exagerados. ${JERGA_PROMPT} No puedes ver las partidas (ni video ni replay), solo estos números: no inventes jugadas ni datos que no te doy. Sé honesto pero nunca cruel.
 
 Jugador: ${player.riot_game_name}
 Rol principal (el que más juega): ${rolPrincipal ?? 'desconocido'}
@@ -241,7 +258,7 @@ Responde SOLO con un objeto JSON con esta forma exacta:
 
     let advice: any;
     try {
-      advice = JSON.parse(texto.replace(/^```(?:json)?\s*|\s*```$/g, ''));
+      advice = corregirJerga(JSON.parse(texto.replace(/^```(?:json)?\s*|\s*```$/g, '')));
     } catch {
       advice = null;
     }
