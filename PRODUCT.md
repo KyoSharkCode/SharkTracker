@@ -77,6 +77,14 @@ Tan útil y completo como OP.GG, Porofessor o League of Graphs, pero con dos dif
 - **Dirección elegida: «Abisal»** (06/10/2026). Fondo abisal, verde agua bioluminiscente (#3DFFD2), violeta medusa (#A98BFF), ámbar señuelo (#FFB547) y coral (#FF6F8E). Fuentes: Unbounded (títulos), Albert Sans (interfaz) y Red Hat Mono (cifras). Símbolo: aleta sobre la línea de agua con ondas de sonar.
 - **Logo:** se rediseña desde cero. Mismo concepto de tiburón, con un símbolo más limpio que funcione a 16px (favicon, ícono de la app) y en grande.
 - **Personalidad:** competitiva, motivante, útil, limpia.
+- **Vocabulario marino** (elegido por Alex el 06/10/2026). Solo estas cinco palabras; no se agrega más jerga marina sin preguntar, para que no se vuelva disfraz:
+  - **Sonar**: reemplaza a «Actualizado» (por ejemplo, «Sonar · hace 28 s»);
+  - **Frenesí**: racha de victorias;
+  - **Marea baja**: mala racha;
+  - **Emergió**: subió de división (por ejemplo, «Emergió a Oro I»);
+  - **Se hundió**: bajó de división.
+
+  Los nombres de los destacados e insignias del grupo no se cambian.
 - **Voz, mezclada según el contexto:**
   - técnica y precisa en estadísticas, meta, builds y recomendaciones de la app;
   - burlona y juguetona en las insignias y en la web, donde el grupo se pica.

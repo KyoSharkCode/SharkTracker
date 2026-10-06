@@ -84,9 +84,27 @@ tono oscuro con acento turquesa `#00e5c7`) al construir cada pantalla real.
   la marca por su cuenta.
 - **Stack**: web y app en HTML, CSS y JavaScript sin frameworks (nada de React/Next/Tailwind).
   Alex lo conoce y aporta lógica e ideas en ese formato.
-- **Rebranding pendiente**: en cuanto termine la auditoría de prompts, sesión de rebranding completo de
-  web + app (tipografía, paleta, íconos, logo). **Inter (y Rajdhani) no son definitivas**: se pueden
-  cambiar. Hasta entonces se sigue con lo actual.
+- **Rebranding «Abisal» en curso (v0.9.0)**. El detalle de la marca está en `PRODUCT.md` (raíz) y los
+  tableros en el canvas `https://claude.ai/artifact/TXBprLRBTFAGZVEA5SGcnG`.
+  - **Se conserva el layout** de la web y la app. Cambian colores, vocabulario, fuentes, íconos y logo.
+  - **Fuentes**: Unbounded en títulos, Albert Sans en la interfaz y Red Hat Mono en las cifras.
+    Reemplazan a Inter y Rajdhani.
+  - **Fases**:
+    1. Brief (hecho).
+    2. Dirección (hecho: Abisal).
+    3. Logo vectorizado (trazo más «dibujado», no geométrico de código) e íconos en Figma, más el brandkit.
+    4. Aplicarlo en el código.
+    5. Auditoría y release.
+  - **Prototipo de la capa Abisal de la app**: tokens de `:root` más fuentes, probado sobre la app
+    real. La Fase 4 lo pasa a `renderer/style.css`.
+  - **Pendiente para la Fase 4 (Mi Perfil)**:
+    - quitar la etiqueta «Conectado a SharkTracker» / «Sin conexión» de la cabecera del perfil
+      (amontonaba el rango);
+    - el punto del chip de Discord (barra de título) pasa a ser el indicador de conexión con
+      SharkTracker: verde si está conectado; salmón con el tooltip «Sin conexión: mostrando datos
+      guardados» si no. Hoy ese punto siempre es verde y no indica nada;
+    - en modo sin conexión, la cabecera sigue con su tono salmón y el aviso «Reintentar conexión»;
+    - «Actualizar» se queda junto al rango.
 - **Íconos**: SVG propios para lo que no existe en librerías (íconos de LoL: dragón, Barón, torre…) y
   para lo que es identidad; para íconos utilitarios se puede usar una librería con el mismo trazo.
   Figma (conectado) se usa cuando ayuda a diseñar mejor (íconos en grilla, logo, tableros).
