@@ -8,20 +8,20 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://mvupiohecvoiwuxwjdrt.supabase.co wss://mvupiohecvoiwuxwjdrt.supabase.co https://ddragon.leagueoflegends.com https://raw.communitydragon.org https://cdn.merakianalytics.com https://cdn.jsdelivr.net; frame-src 'self' https://player.twitch.tv; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" type="image/png" href="logo/FlaviIconLogo.png">
+<link rel="icon" type="image/svg+xml" href="logo/favicon.svg">
 <link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
 <title>Reto · SharkTracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Albert+Sans:wght@400;500;600;700;800&family=Red+Hat+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-  :root{ /* colores propios de esta página (la paleta común está en assets/tema.css) */ --gold-glow:rgba(250,204,21,.35); --silver:#cbd5e1; --bronze:#d9955b; }
+  :root{ /* colores propios de esta página (la paleta común está en assets/tema.css) */ --gold-glow:rgba(255,181,71,.35); --silver:#cbd5e1; --bronze:#d9955b; }
   *{box-sizing:border-box;}
   [hidden]{display:none !important;}
   body{
-    margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,sans-serif;
+    margin:0; min-height:100vh; color:var(--text); font-family:'Albert Sans',system-ui,sans-serif;
     background:
-      radial-gradient(1000px 460px at 15% -6%, rgba(0,229,199,.14), transparent 60%),
-      radial-gradient(1000px 460px at 85% 6%, rgba(250,204,21,.07), transparent 60%),
+      radial-gradient(1000px 460px at 15% -6%, rgba(61,255,210,.14), transparent 60%),
+      radial-gradient(1000px 460px at 85% 6%, rgba(255,181,71,.07), transparent 60%),
       var(--bg);
   }
   a{color:inherit;}
@@ -31,48 +31,48 @@
   .logo-slot{display:flex; align-items:center; gap:14px;}
   .logo-slot img{height:40px; width:auto; display:block;}
   .back{font-size:13px; font-weight:700; color:var(--text-dim); text-decoration:none;}
-  .back:hover{color:#fff;}
-  h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
+  .back:hover{color:#E6FBF8;}
+  h1{grid-column:2; margin:0; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700; font-size:clamp(19px,3vw,28px); letter-spacing:.01em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
-  .avatar{width:40px; height:40px; border-radius:50%; background:var(--placeholder); border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden; transition:transform .15s, box-shadow .15s;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:var(--placeholder); border:2px solid var(--accent); box-shadow:none; display:flex; align-items:center; justify-content:center; font-family:'Albert Sans',system-ui,sans-serif; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden; transition:transform .15s, box-shadow .15s;}
   .avatar:hover{transform:scale(1.06);}
   .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .avatar.pending{border-color:var(--gold); color:var(--gold);}
-  .login-btn{background:var(--accent); color:var(--on-accent); font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+  .login-btn{background:var(--accent); color:var(--on-accent); font-family:'Albert Sans',system-ui,sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
 
   .msg{padding:70px 20px; text-align:center; color:var(--text-dim); font-size:15px; line-height:1.6;}
-  .msg b{display:block; color:#fff; font-family:'Rajdhani',sans-serif; font-size:26px; letter-spacing:.04em; text-transform:uppercase; margin-bottom:6px;}
+  .msg b{display:block; color:#E6FBF8; font-family:'Unbounded',sans-serif; font-size:19px; letter-spacing:.01em; text-transform:uppercase; margin-bottom:6px;}
 
-  .section-title{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
+  .section-title{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:'Unbounded',sans-serif; font-size:15px; font-weight:700; letter-spacing:.01em; text-transform:uppercase;}
   .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:none;}
   section{margin-bottom:38px;}
 
   /* ── Hero ── */
   .hero{position:relative; border-radius:22px; overflow:hidden; min-height:380px; border:1px solid var(--border); background:var(--field); display:flex; align-items:flex-end; margin-bottom:26px;}
-  .hero.win{border-color:rgba(250,204,21,.55); box-shadow:none;}
+  .hero.win{border-color:rgba(255,181,71,.55); box-shadow:none;}
   .hero.live{border-color:var(--accent); box-shadow:none;}
   .hero-bg{position:absolute; inset:0; background-size:cover; background-position:center 20%;}
-  .hero-bg::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(3,8,18,.95) 0%, rgba(3,8,18,.7) 45%, rgba(3,8,18,.15) 100%), linear-gradient(0deg, rgba(3,8,18,.9) 0%, transparent 55%);}
+  .hero-bg::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(3,17,26,.95) 0%, rgba(3,17,26,.7) 45%, rgba(3,17,26,.15) 100%), linear-gradient(0deg, rgba(3,17,26,.9) 0%, transparent 55%);}
   .hero-body{position:relative; z-index:1; padding:34px 36px; width:100%;}
   .kicker{display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:800; padding:5px 12px; border-radius:99px;}
-  .kicker.gold{background:rgba(250,204,21,.14); color:var(--gold-soft); border:1px solid rgba(250,204,21,.4);}
-  .kicker.live{background:rgba(0,229,199,.16); color:var(--accent); border:1px solid rgba(0,229,199,.4);}
-  .kicker.soon{background:rgba(250,204,21,.14); color:var(--gold); border:1px solid rgba(250,204,21,.4);}
-  .reto-name{margin:14px 0 4px; font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim);}
-  .champ-name{margin:0; font-family:'Rajdhani',sans-serif; font-weight:800; font-size:clamp(40px,7vw,72px); line-height:.95; letter-spacing:.01em; text-transform:uppercase;}
-  .hero.win .champ-name{background:linear-gradient(90deg,#fff3b0 0%,var(--gold) 60%,#f59e0b 100%); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 4px 18px rgba(250,204,21,.35));}
+  .kicker.gold{background:rgba(255,181,71,.14); color:var(--gold-soft); border:1px solid rgba(255,181,71,.4);}
+  .kicker.live{background:rgba(61,255,210,.16); color:var(--accent); border:1px solid rgba(61,255,210,.4);}
+  .kicker.soon{background:rgba(255,181,71,.14); color:var(--gold); border:1px solid rgba(255,181,71,.4);}
+  .reto-name{margin:14px 0 4px; font-family:'Unbounded',sans-serif; font-size:15px; font-weight:700; letter-spacing:.01em; text-transform:uppercase; color:var(--text-dim);}
+  .champ-name{margin:0; font-family:'Unbounded',sans-serif; font-weight:700; font-size:clamp(30px,5.2vw,53px); line-height:.95; letter-spacing:.01em; text-transform:uppercase;}
+  .hero.win .champ-name{background:linear-gradient(90deg,#fff3b0 0%,var(--gold) 60%,#f59e0b 100%); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 4px 18px rgba(255,181,71,.35));}
   .riot-id{margin-top:6px; font-size:14px; font-weight:700; color:var(--text-dim);}
   .hero-stats{display:flex; gap:12px; flex-wrap:wrap; margin-top:20px;}
-  .hs{display:flex; align-items:center; gap:10px; background:rgba(3,8,18,.72); border:1px solid var(--border); border-radius:14px; padding:10px 16px; backdrop-filter:blur(6px);}
+  .hs{display:flex; align-items:center; gap:10px; background:rgba(3,17,26,.72); border:1px solid var(--border); border-radius:14px; padding:10px 16px; backdrop-filter:blur(6px);}
   .hs img{width:34px; height:34px;}
-  .hs b{display:block; font-family:'Rajdhani',sans-serif; font-size:22px; line-height:1; color:#fff;}
+  .hs b{display:block; font-family:'Red Hat Mono',ui-monospace,monospace; font-size:18px; line-height:1; color:#E6FBF8;}
   .hs small{display:block; font-size:12px; font-weight:800; color:var(--text-faint); margin-top:3px;}
   .hs.gold b{color:var(--gold);}
   .dates{margin-top:16px; font-size:12.5px; color:var(--text-faint); font-weight:600;}
   .big-count{display:flex; gap:14px; margin-top:18px;}
-  .big-count div{text-align:center; min-width:62px; background:rgba(3,8,18,.72); border:1px solid var(--border); border-radius:14px; padding:10px 8px;}
-  .big-count b{display:block; font-family:'Rajdhani',sans-serif; font-size:34px; line-height:1; color:var(--accent);}
+  .big-count div{text-align:center; min-width:62px; background:rgba(3,17,26,.72); border:1px solid var(--border); border-radius:14px; padding:10px 8px;}
+  .big-count b{display:block; font-family:'Red Hat Mono',ui-monospace,monospace; font-size:29px; line-height:1; color:var(--accent);}
   .big-count small{font-size:12px; font-weight:800; color:var(--text-faint);}
   .leader-note{margin-top:16px; font-size:14px; color:var(--text-dim);}
   .leader-note b{color:var(--gold);}
@@ -81,10 +81,10 @@
   .podium{display:grid; grid-template-columns:1fr 1.15fr 1fr; gap:14px; align-items:end;}
   .pod{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:22px 14px 18px; text-align:center; position:relative;}
   .pod .medal{line-height:0; display:flex; justify-content:center;}
-  .pod .medal .num{font-family:'Rajdhani',sans-serif; font-size:24px; font-weight:700; line-height:1; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;}
-  .pod .medal .n2{color:#d7e0ea; background:rgba(255,255,255,.1);} .pod .medal .n3{color:#e8b48a; background:rgba(205,127,50,.18);}
+  .pod .medal .num{font-family:'Red Hat Mono',ui-monospace,monospace; font-size:20px; font-weight:600; line-height:1; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;}
+  .pod .medal .n2{color:#D2EEEA; background:rgba(120,220,210,.1);} .pod .medal .n3{color:#e8b48a; background:rgba(205,127,50,.18);}
   .pod img.ic{width:66px; height:66px; border-radius:50%; object-fit:cover; margin:10px auto 8px; display:block; border:3px solid var(--border); background:var(--placeholder);}
-  .pod.p1{border-color:rgba(250,204,21,.55); padding-top:30px; box-shadow:none;}
+  .pod.p1{border-color:rgba(255,181,71,.55); padding-top:30px; box-shadow:none;}
   .pod.p1 img.ic{width:84px; height:84px; border-color:var(--gold);}
   .pod.p2 img.ic{border-color:var(--silver);}
   .pod.p3 img.ic{border-color:var(--bronze);}
@@ -111,10 +111,10 @@
   th{text-align:left; font-size:12px; font-weight:800; color:var(--text-faint); padding:12px 14px; border-bottom:1px solid var(--border); white-space:nowrap;}
   td{padding:11px 14px; border-bottom:1px solid var(--border); vertical-align:middle;}
   tr:last-child td{border-bottom:none;}
-  tr.first td{background:rgba(250,204,21,.05);}
+  tr.first td{background:rgba(255,181,71,.05);}
   .num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
   th.num{text-align:right;}
-  .pos{font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:800; color:var(--text-faint); width:40px;}
+  .pos{font-family:'Red Hat Mono',ui-monospace,monospace; font-size:17px; font-weight:600; color:var(--text-faint); width:40px;}
   tr.first .pos{color:var(--gold);}
   .pl{display:flex; align-items:center; gap:10px; min-width:0;}
   .pl img{width:32px; height:32px; border-radius:50%; object-fit:cover; border:2px solid var(--border); background:var(--placeholder); flex-shrink:0;}
@@ -148,7 +148,7 @@
   @media (max-width:860px){ .awards{grid-template-columns:repeat(2,1fr);} }
   @media (max-width:700px){
     header{grid-template-columns:auto 1fr auto;}
-    h1{font-size:24px;} .back{display:none;}
+    h1{font-size:18px;} .back{display:none;}
     .hero{min-height:340px;} .hero-body{padding:24px 20px;}
     .podium{grid-template-columns:1fr; } .pod.p1{order:-1;}
     .hide-sm{display:none;}
@@ -165,8 +165,8 @@
 
   /* ── Rediseño (tablero "Web: reto propuesto") ── */
   /* Cabecera compacta: datos a la izquierda y cuenta atrás a la derecha */
-  .hero{min-height:0; border-radius:18px; border-color:rgba(250,204,21,.35);}
-  .hero.live{border-color:rgba(250,204,21,.35);}
+  .hero{min-height:0; border-radius:18px; border-color:rgba(255,181,71,.35);}
+  .hero.live{border-color:rgba(255,181,71,.35);}
   .hero-bg{opacity:.35;}
   .hero-body{display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:24px; row-gap:6px; align-items:center; padding:26px 30px;}
   .hero-body > *{grid-column:1;}
@@ -192,9 +192,9 @@
   .award span{color:var(--gold-soft);}
   th{font-size:12px; font-weight:600; padding:12px 14px;}
   th:first-child, td:first-child{padding-left:20px;} th:last-child, td:last-child{padding-right:20px;}
-  td{border-bottom-color:rgba(255,255,255,.06);}
+  td{border-bottom-color:rgba(120,220,210,.06);}
   .pos{font-weight:700; font-size:18px;}
-  tr:nth-child(2) .pos{color:#c9d4de;} tr:nth-child(3) .pos{color:#e8b48a;}
+  tr:nth-child(2) .pos{color:#C3E4E0;} tr:nth-child(3) .pos{color:#e8b48a;}
   .pos-lp{color:var(--green); font-weight:700;} .neg-lp{color:var(--red-soft); font-weight:700;}
   .fame a{border-radius:14px; padding:16px 18px;}
   .fame img{border-width:0; width:44px; height:44px;}
@@ -206,7 +206,7 @@
 <div class="wrap">
   <header>
     <div class="logo-slot">
-      <a href="index.html"><img src="logo/FlaviIconLogo.webp" alt="SharkTracker"></a>
+      <a href="index.html"><img src="logo/simbolo.svg" alt="SharkTracker"></a>
     </div>
     <h1>SoloQ Reto</h1>
     <div class="auth-slot" id="auth-slot"></div>
@@ -320,7 +320,7 @@ async function drawFinished(ch) {
   const splash = w ? splashUrl(w.favorite_champion, w.favorite_skin) : null;
   $('hero').innerHTML = `
     <div class="hero win">
-      <div class="hero-bg" style="${splash ? `background-image:url('${splash}')` : 'background:linear-gradient(135deg,#1a1300,#06111c)'}"></div>
+      <div class="hero-bg" style="${splash ? `background-image:url('${splash}')` : 'background:linear-gradient(135deg,#1a1300,#051823)'}"></div>
       <div class="hero-body">
         <span class="kicker gold">${icono('trofeo', { size: 15 })} ${w ? 'Ganador del reto' : 'Reto terminado'}</span>
         <div class="reto-name">${esc(ch.name)}</div>
@@ -388,7 +388,7 @@ async function drawOpen(ch, players, profiles) {
   countdownTarget = new Date(live ? ch.ends_at : ch.starts_at).getTime();
   $('hero').innerHTML = `
     <div class="hero ${live ? 'live' : ''}">
-      <div class="hero-bg" style="${splash ? `background-image:url('${splash}')` : 'background:linear-gradient(135deg,#032a26,#06111c)'}"></div>
+      <div class="hero-bg" style="${splash ? `background-image:url('${splash}')` : 'background:linear-gradient(135deg,#032a26,#051823)'}"></div>
       <div class="hero-body">
         <span class="kicker ${live ? 'live' : 'soon'}">${live ? '● En curso' : `${icono('reloj_arena', { size: 14 })} Próximamente`}</span>
         <h2 class="champ-name" style="margin-top:14px;">${esc(ch.name)}</h2>
@@ -425,7 +425,7 @@ function playerLink(r, inner) {
 function drawPodium(top) {
   $('podium-sec').hidden = !top.length;
   // #1 con corona; #2 y #3 con su número en plata/bronce (antes 🥇🥈🥉).
-  const medal = (n) => n === 1 ? icono('corona', { size: 30, color: '#facc15', title: 'Primer lugar' }) : `<span class="num n${n}">${n}</span>`;
+  const medal = (n) => n === 1 ? icono('corona', { size: 30, color: '#FFB547', title: 'Primer lugar' }) : `<span class="num n${n}">${n}</span>`;
   const card = (r, n) => {
     if (!r) return `<div class="pod p${n} empty"><div class="medal">${medal(n)}</div><div class="nm">—</div></div>`;
     return `<div class="pod p${n}">

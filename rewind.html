@@ -8,56 +8,56 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://mvupiohecvoiwuxwjdrt.supabase.co wss://mvupiohecvoiwuxwjdrt.supabase.co https://ddragon.leagueoflegends.com https://raw.communitydragon.org https://cdn.merakianalytics.com https://cdn.jsdelivr.net; frame-src 'self' https://player.twitch.tv; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" type="image/png" href="logo/FlaviIconLogo.png">
+<link rel="icon" type="image/svg+xml" href="logo/favicon.svg">
 <link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
 <title>SoloQ Rewind · SharkTracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Albert+Sans:wght@400;500;600;700;800&family=Red+Hat+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-  :root{ /* colores propios de esta página (la paleta común está en assets/tema.css) */ --pink:#ff5fa8; --violet:#a66bff; }
+  :root{ /* colores propios de esta página (la paleta común está en assets/tema.css) */ --pink:#ff5fa8; --violet:#A98BFF; }
   *{box-sizing:border-box;}
   [hidden]{display:none !important;}
   html,body{height:100%;}
-  body{margin:0; color:var(--text); font-family:'Inter',system-ui,sans-serif; background:var(--bg); overflow-x:hidden;}
+  body{margin:0; color:var(--text); font-family:'Albert Sans',system-ui,sans-serif; background:var(--bg); overflow-x:hidden;}
   a{color:inherit;}
 
   /* ── Selector (sin jugador) ── */
   .wrap{max-width:1000px; margin:0 auto; padding:44px 20px 80px;}
   header{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:26px; padding-bottom:24px; border-bottom:1px solid var(--border);}
   .logo-slot{display:flex; align-items:center; gap:14px;} .logo-slot img{height:40px; display:block;}
-  h1{grid-column:2; margin:0; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(26px,4vw,38px); letter-spacing:.03em; text-transform:uppercase;
+  h1{grid-column:2; margin:0; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700; font-size:clamp(19px,3vw,28px); letter-spacing:.01em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 60%,var(--pink) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
-  .avatar{width:40px; height:40px; border-radius:50%; background:var(--placeholder); border:2px solid var(--accent); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; color:var(--accent); text-decoration:none; overflow:hidden;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:var(--placeholder); border:2px solid var(--accent); display:flex; align-items:center; justify-content:center; font-family:'Albert Sans',system-ui,sans-serif; font-weight:700; color:var(--accent); text-decoration:none; overflow:hidden;}
   .avatar img{width:100%; height:100%; object-fit:cover;} .avatar.pending{border-color:var(--gold); color:var(--gold);}
-  .login-btn{background:var(--accent); color:var(--on-accent); font-family:'Rajdhani',sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+  .login-btn{background:var(--accent); color:var(--on-accent); font-family:'Albert Sans',system-ui,sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
   .lead{color:var(--text-dim); font-size:14.5px; line-height:1.6; text-align:center; margin:0 auto 22px; max-width:620px;}
   .splits{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:24px;}
-  .chip{border:1px solid var(--border); background:var(--panel); color:var(--text-dim); border-radius:99px; padding:8px 15px; font:700 13px Inter,sans-serif; cursor:pointer;}
-  .chip.on{border-color:var(--accent); color:#fff; background:rgba(0,229,199,.12);}
+  .chip{border:1px solid var(--border); background:var(--panel); color:var(--text-dim); border-radius:99px; padding:8px 15px; font:700 13px 'Albert Sans',system-ui,sans-serif; cursor:pointer;}
+  .chip.on{border-color:var(--accent); color:#E6FBF8; background:rgba(61,255,210,.12);}
   .chip small{color:var(--text-faint); font-weight:600; margin-left:4px;}
   .who-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px;}
   .who{position:relative; display:block; overflow:hidden; border-radius:16px; border:1px solid var(--border); min-height:150px; text-decoration:none; background:var(--field); transition:border-color .15s, transform .15s;}
   .who:hover{border-color:var(--accent); transform:translateY(-2px);}
   .who .art{position:absolute; inset:0; background-size:cover; background-position:center 20%;}
-  .who::after{content:''; position:absolute; inset:0; background:linear-gradient(0deg, rgba(3,8,18,.95) 15%, rgba(3,8,18,.2));}
+  .who::after{content:''; position:absolute; inset:0; background:linear-gradient(0deg, rgba(3,17,26,.95) 15%, rgba(3,17,26,.2));}
   .who .in{position:absolute; left:14px; right:14px; bottom:12px; z-index:1;}
-  .who b{display:block; font-family:'Rajdhani',sans-serif; font-size:21px; letter-spacing:.03em;}
+  .who b{display:block; font-family:'Unbounded',sans-serif; font-size:16px; letter-spacing:.01em; text-transform:uppercase;}
   .who small{color:var(--text-dim); font-size:12px;}
   .msg{padding:60px 20px; text-align:center; color:var(--text-dim);}
 
   /* ── Historias ── */
   .stage{position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; background:#01040a;}
   .stage .blur{position:absolute; inset:-40px; background-size:cover; background-position:center; filter:blur(40px) brightness(.35) saturate(1.3); transition:background-image .4s;}
-  .story{position:relative; width:min(100vw, calc(100dvh * 9 / 16), 480px); height:min(100dvh, 853px); overflow:hidden; border-radius:22px; background:#050b16; box-shadow:0 30px 80px rgba(0,0,0,.6);}
+  .story{position:relative; width:min(100vw, calc(100dvh * 9 / 16), 480px); height:min(100dvh, 853px); overflow:hidden; border-radius:22px; background:#03111A; box-shadow:0 30px 80px rgba(0,0,0,.6);}
   @media (max-width:520px){ .story{width:100vw; height:100dvh; border-radius:0;} }
   .bars{position:absolute; top:12px; left:12px; right:12px; z-index:6; display:flex; gap:4px;}
-  .bars i{flex:1; height:3px; border-radius:3px; background:rgba(255,255,255,.25); overflow:hidden; position:relative;}
+  .bars i{flex:1; height:3px; border-radius:3px; background:rgba(120,220,210,.25); overflow:hidden; position:relative;}
   .bars i.done::after, .bars i.on::after{content:''; position:absolute; inset:0; background:#fff;}
   .topline{position:absolute; top:24px; left:14px; right:14px; z-index:6; display:flex; align-items:center; gap:10px; font-size:12.5px; font-weight:700;}
-  .topline img{width:28px; height:28px; border-radius:50%; border:2px solid rgba(255,255,255,.6);}
-  .topline small{color:rgba(255,255,255,.7); font-weight:600;}
-  .topline .x{margin-left:auto; width:34px; height:34px; border-radius:50%; border:none; background:rgba(0,0,0,.35); color:#fff; font-size:20px; cursor:pointer; text-decoration:none; display:flex; align-items:center; justify-content:center;}
+  .topline img{width:28px; height:28px; border-radius:50%; border:2px solid rgba(120,220,210,.6);}
+  .topline small{color:rgba(120,220,210,.7); font-weight:600;}
+  .topline .x{margin-left:auto; width:34px; height:34px; border-radius:50%; border:none; background:rgba(0,0,0,.35); color:#E6FBF8; font-size:20px; cursor:pointer; text-decoration:none; display:flex; align-items:center; justify-content:center;}
   .tap{position:absolute; top:70px; bottom:0; z-index:5; width:35%; cursor:pointer; background:none; border:none;}
   .tap.prev{left:0;} .tap.next{right:0; width:65%;}
   .slide{position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; padding:90px 28px 70px; text-align:left;}
@@ -65,17 +65,17 @@
   .slide .shade{position:absolute; inset:0; z-index:0;}
   .slide > .c{position:relative; z-index:1; display:flex; flex-direction:column; gap:14px;}
   .k{font-size:12px; font-weight:900; color:var(--accent);}
-  .big{font-family:'Rajdhani',sans-serif; font-weight:800; font-size:78px; line-height:.9; letter-spacing:.01em;}
-  .mid{font-family:'Rajdhani',sans-serif; font-weight:800; font-size:40px; line-height:1; letter-spacing:.02em; text-transform:uppercase;}
-  .t{font-size:17px; line-height:1.45; color:#e6f1f8;} .t b{color:#fff;}
+  .big{font-family:'Red Hat Mono',ui-monospace,monospace; font-weight:600; font-size:66px; line-height:.9; letter-spacing:0;}
+  .mid{font-family:'Unbounded',sans-serif; font-weight:700; font-size:30px; line-height:1; letter-spacing:.01em; text-transform:uppercase;}
+  .t{font-size:17px; line-height:1.45; color:#e6f1f8;} .t b{color:#E6FBF8;}
   .sub{font-size:13.5px; color:var(--text-dim); line-height:1.5;}
   .grad{background:linear-gradient(90deg,#fff, var(--accent) 60%, var(--pink)); -webkit-background-clip:text; background-clip:text; color:transparent;}
-  .gold{color:var(--gold);} .pink{color:var(--pink);} .red{color:#ff8a6b;} .teal{color:var(--accent);}
+  .gold{color:var(--gold);} .pink{color:var(--pink);} .red{color:#FF8FA6;} .teal{color:var(--accent);}
   .row{display:flex; gap:10px; flex-wrap:wrap;}
-  .pill{background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:12px; padding:10px 12px; min-width:92px;}
-  .pill b{display:block; font-family:'Rajdhani',sans-serif; font-size:26px; line-height:1;} .pill small{font-size:12px; color:var(--text-dim); font-weight:700;}
+  .pill{background:rgba(120,220,210,.08); border:1px solid rgba(120,220,210,.14); border-radius:12px; padding:10px 12px; min-width:92px;}
+  .pill b{display:block; font-family:'Red Hat Mono',ui-monospace,monospace; font-size:22px; line-height:1;} .pill small{font-size:12px; color:var(--text-dim); font-weight:700;}
   .mini{display:flex; align-items:center; gap:10px; font-size:14px; font-weight:700;}
-  .mini img{width:40px; height:40px; border-radius:10px; border:1px solid rgba(255,255,255,.2);}
+  .mini img{width:40px; height:40px; border-radius:10px; border:1px solid rgba(120,220,210,.2);}
   .mini small{color:var(--text-dim); font-weight:600;}
   .rolebar{display:grid; grid-template-columns:70px 1fr 44px; align-items:center; gap:10px; font-size:13px; font-weight:700;}
   .rolebar i{display:block; height:12px; border-radius:99px; background:linear-gradient(90deg,var(--accent),var(--violet));}
@@ -85,18 +85,18 @@
   .ranks .r b{display:block; font-size:14px;} .ranks .r small{font-size:12px; color:var(--text-dim); font-weight:800;}
   .ranks .ar{font-size:20px; color:var(--text-faint);}
   .people{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
-  .person{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:6px;}
+  .person{background:rgba(120,220,210,.06); border:1px solid rgba(120,220,210,.14); border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:6px;}
   .person img{width:54px; height:54px; border-radius:50%; border:2px solid var(--accent);}
   .person.nem img{border-color:var(--danger);}
   .person b{font-size:16px;} .person small{font-size:12px; color:var(--text-dim); line-height:1.4;}
   .summary{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
-  .summary div{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:10px 12px;}
+  .summary div{background:rgba(120,220,210,.06); border:1px solid rgba(120,220,210,.12); border-radius:12px; padding:10px 12px;}
   .summary small{display:block; font-size:12px; font-weight:800; color:var(--text-faint);}
   .summary b{font-size:15px;}
   .btns{display:flex; gap:8px; flex-wrap:wrap; position:relative; z-index:7;}
-  .btn{border:none; border-radius:10px; padding:11px 16px; font:800 13.5px Inter,sans-serif; background:var(--accent); color:var(--on-accent); cursor:pointer; text-decoration:none;}
-  .btn.ghost{background:rgba(255,255,255,.1); color:#fff; border:1px solid rgba(255,255,255,.2);}
-  .hint{position:absolute; bottom:18px; left:0; right:0; z-index:6; text-align:center; font-size:12px; color:rgba(255,255,255,.55); pointer-events:none;}
+  .btn{border:none; border-radius:10px; padding:11px 16px; font:800 13.5px 'Albert Sans',system-ui,sans-serif; background:var(--accent); color:var(--on-accent); cursor:pointer; text-decoration:none;}
+  .btn.ghost{background:rgba(120,220,210,.1); color:#E6FBF8; border:1px solid rgba(120,220,210,.2);}
+  .hint{position:absolute; bottom:18px; left:0; right:0; z-index:6; text-align:center; font-size:12px; color:rgba(120,220,210,.55); pointer-events:none;}
   .badge-now{display:inline-block; align-self:flex-start; font-size:11px; font-weight:900; letter-spacing:.08em; color:var(--on-accent); background:var(--gold); border-radius:99px; padding:4px 10px;}
   /* Animación de entrada */
   .slide .c > *{opacity:0; transform:translateY(16px); animation:up .55s cubic-bezier(.2,.8,.2,1) forwards;}
@@ -109,7 +109,7 @@
   /* ── Rediseño del selector (tablero "Web: SoloQ Rewind propuesto") ── */
   #picker .lead{text-align:left; margin:0 0 18px; max-width:620px; font-size:16px; color:var(--text-soft);}
   #picker .splits{justify-content:flex-start;}
-  .chip{font:500 13px Inter,sans-serif; padding:7px 14px; border-color:rgba(255,255,255,.1);}
+  .chip{font:500 13px 'Albert Sans',system-ui,sans-serif; padding:7px 14px; border-color:rgba(120,220,210,.1);}
   .chip.on{background:var(--accent); color:var(--on-accent); font-weight:700; border-color:var(--accent);}
   .chip.on small{color:var(--on-accent); opacity:.7;}
   .who-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
@@ -117,7 +117,7 @@
   .who::after{display:none;}
   .who .ic{width:40px; height:40px; border-radius:50%; object-fit:cover; background:var(--placeholder); flex-shrink:0;}
   .who .in{position:static; display:flex; flex-direction:column; min-width:0;}
-  .who b{font-family:'Inter',sans-serif; font-size:14px; font-weight:700; letter-spacing:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .who b{font-family:'Albert Sans',system-ui,sans-serif; font-size:14px; font-weight:700; letter-spacing:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .who small{font-size:12px;}
   @media (max-width:820px){ .who-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
   @media (max-width:480px){ .who-grid{grid-template-columns:minmax(0,1fr);} }
@@ -127,7 +127,7 @@
 <body>
 <div class="wrap" id="picker">
   <header>
-    <div class="logo-slot"><a href="index.html"><img src="logo/FlaviIconLogo.webp" alt="SharkTracker"></a></div>
+    <div class="logo-slot"><a href="index.html"><img src="logo/simbolo.svg" alt="SharkTracker"></a></div>
     <h1>SoloQ Rewind</h1>
     <div class="auth-slot" id="auth-slot"></div>
   </header>
@@ -264,16 +264,16 @@ function compute(p, ranks) {
 function slides(R, sp) {
   const p = R.p, name = esc(p.riot_game_name), fav = favSplash(p);
   const S = [];
-  const bg = (url, shade = 'linear-gradient(0deg, rgba(3,8,18,.96) 25%, rgba(3,8,18,.55) 60%, rgba(3,8,18,.3))') =>
+  const bg = (url, shade = 'linear-gradient(0deg, rgba(3,17,26,.96) 25%, rgba(3,17,26,.55) 60%, rgba(3,17,26,.3))') =>
     `${url ? `<div class="bg" style="background-image:url('${url}')"></div>` : ''}<div class="shade" style="background:${shade}"></div>`;
-  const glow = (a, b) => `<div class="shade" style="background:radial-gradient(600px 400px at 20% 10%, ${a}, transparent 60%), radial-gradient(600px 500px at 90% 90%, ${b}, transparent 60%), #050b16"></div>`;
+  const glow = (a, b) => `<div class="shade" style="background:radial-gradient(600px 400px at 20% 10%, ${a}, transparent 60%), radial-gradient(600px 500px at 90% 90%, ${b}, transparent 60%), #03111A"></div>`;
   S.push({ bgimg: fav, html: `${bg(fav)}<div class="c">
       ${isCurrent(sp) ? '<span class="badge-now">AVANCE · EL SPLIT SIGUE EN CURSO</span>' : ''}
       <div class="k">SoloQ Rewind</div>
       <div class="mid grad">${esc(sp.name)}</div>
       <div class="big">${name}</div>
       <div class="t">Esto fue tu split en la Grieta. ¿Listo?</div></div>` });
-  S.push({ html: `${glow('rgba(0,229,199,.35)', 'rgba(166,107,255,.3)')}<div class="c">
+  S.push({ html: `${glow('rgba(61,255,210,.35)', 'rgba(169,139,255,.3)')}<div class="c">
       <div class="k">Tiempo en la Grieta</div>
       <div class="t">Este split jugaste</div>
       <div class="big grad">${R.games}</div>
@@ -291,16 +291,16 @@ function slides(R, sp) {
       <div class="sub">Jugaste <b>${R.uniqueChamps}</b> campeón${R.uniqueChamps === 1 ? '' : 'es'} distinto${R.uniqueChamps === 1 ? '' : 's'}.</div></div>` });
   if (R.roles.length) {
     const tot = R.roles.reduce((a, r) => a + r[1], 0), ES = { TOP: 'Top', JUNGLE: 'Jungla', MID: 'Mid', ADC: 'ADC', SUPPORT: 'Support' };
-    S.push({ html: `${glow('rgba(166,107,255,.35)', 'rgba(255,95,168,.25)')}<div class="c">
+    S.push({ html: `${glow('rgba(169,139,255,.35)', 'rgba(255,95,168,.25)')}<div class="c">
       <div class="k">Tu lugar en el mapa</div>
       <div class="mid">Fuiste <span class="grad">${ES[R.roles[0][0]]}</span></div>
       <div class="t">${Math.round(100 * R.roles[0][1] / tot)}% de tus partidas.</div>
       ${R.roles.map(([r, n]) => `<div class="rolebar"><span>${ES[r]}</span><i style="width:${Math.max(4, Math.round(100 * n / tot))}%"></i><span>${n}</span></div>`).join('')}</div>` });
   }
-  S.push({ html: `${glow('rgba(250,204,21,.28)', 'rgba(255,95,61,.25)')}<div class="c">
+  S.push({ html: `${glow('rgba(255,181,71,.28)', 'rgba(255,111,142,.25)')}<div class="c">
       <div class="k">Rachas</div>
-      ${R.best.n ? `<div class="t">${icono('fuego', { size: 18, color: '#ffb38a' })} Tu mejor racha</div><div class="big gold">${R.best.n}</div><div class="t">victorias seguidas <span class="sub">· ${fmtDate(R.best.from)}${fmtDate(R.best.from) !== fmtDate(R.best.to) ? ' → ' + fmtDate(R.best.to) : ''}</span></div>` : ''}
-      ${R.worst.n ? `<div class="t" style="margin-top:14px">${icono('copo', { size: 18, color: '#7dd3fc' })} Y la que prefieres olvidar</div><div class="mid red">${R.worst.n} derrotas seguidas</div><div class="sub">${fmtDate(R.worst.from)}${fmtDate(R.worst.from) !== fmtDate(R.worst.to) ? ' → ' + fmtDate(R.worst.to) : ''}</div>` : ''}</div>` });
+      ${R.best.n ? `<div class="t">${icono('fuego', { size: 18, color: '#FFB547' })} Tu mejor racha</div><div class="big gold">${R.best.n}</div><div class="t">victorias seguidas <span class="sub">· ${fmtDate(R.best.from)}${fmtDate(R.best.from) !== fmtDate(R.best.to) ? ' → ' + fmtDate(R.best.to) : ''}</span></div>` : ''}
+      ${R.worst.n ? `<div class="t" style="margin-top:14px">${icono('copo', { size: 18, color: '#7FD4FF' })} Y la que prefieres olvidar</div><div class="mid red">${R.worst.n} derrotas seguidas</div><div class="sub">${fmtDate(R.worst.from)}${fmtDate(R.worst.from) !== fmtDate(R.worst.to) ? ' → ' + fmtDate(R.worst.to) : ''}</div>` : ''}</div>` });
   if (R.top) {
     const g = R.top;
     S.push({ bgimg: splashUrl(g.champion, 0), html: `${bg(splashUrl(g.champion, 0))}<div class="c">
@@ -312,7 +312,7 @@ function slides(R, sp) {
   }
   if (R.duo || R.nem) {
     const card = (x, cls, title, line) => `<div class="person ${cls}"><img loading="lazy" decoding="async" src="${profileIconUrl(x.p?.icon_id) ?? profileIconUrl(29)}" alt=""><small>${title}</small><b>${esc(x.p?.riot_game_name ?? '?')}</b><small>${line}</small></div>`;
-    S.push({ html: `${glow('rgba(0,229,199,.3)', 'rgba(255,95,61,.3)')}<div class="c">
+    S.push({ html: `${glow('rgba(61,255,210,.3)', 'rgba(255,111,142,.3)')}<div class="c">
       <div class="k">Tu gente</div>
       <div class="mid">Amigos y <span class="red">rivales</span></div>
       <div class="people">
@@ -323,13 +323,13 @@ function slides(R, sp) {
   if (R.rank) {
     const r = (x, lbl) => `<div class="r"><img loading="lazy" decoding="async" src="${emblemUrl(x.tier)}" alt=""><b>${esc(rankText(x))}</b><small>${lbl}</small></div>`;
     const up = (R.rank.last.elo ?? 0) - (R.rank.first.elo ?? 0);
-    S.push({ bgimg: emblemUrl(R.rank.last.tier), html: `${glow('rgba(250,204,21,.25)', 'rgba(0,229,199,.3)')}<div class="c">
+    S.push({ bgimg: emblemUrl(R.rank.last.tier), html: `${glow('rgba(255,181,71,.25)', 'rgba(61,255,210,.3)')}<div class="c">
       <div class="k">Tu camino</div>
       <div class="mid">${up > 0 ? 'Subiste <span class="gold">✦</span>' : up < 0 ? 'Fue un split duro' : 'Te mantuviste firme'}</div>
       <div class="ranks">${r(R.rank.first, 'Empezaste')}<span class="ar">→</span>${r(R.rank.peak, 'Pico')}<span class="ar">→</span>${r(R.rank.last, isCurrent(sp) ? 'Ahora' : 'Terminaste')}</div>
       <div class="t">LP neto del split: <b class="${R.lpNet >= 0 ? 'teal' : 'red'}">${R.lpNet >= 0 ? '+' : ''}${R.lpNet} LP</b></div></div>` });
   }
-  S.push({ html: `${glow('rgba(255,95,168,.3)', 'rgba(166,107,255,.3)')}<div class="c">
+  S.push({ html: `${glow('rgba(255,95,168,.3)', 'rgba(169,139,255,.3)')}<div class="c">
       <div class="k">Datos curiosos</div>
       <div class="row"><div class="pill"><b>${nInt(R.kills)}</b><small>asesinatos</small></div><div class="pill"><b>${nInt(R.deaths)}</b><small>muertes</small></div><div class="pill"><b>${nInt(R.assists)}</b><small>asistencias</small></div></div>
       ${R.pentas ? `<div class="t">${icono('mano', { size: 18 })} <b>${R.pentas} pentakill${R.pentas === 1 ? '' : 's'}</b>. Leyenda.</div>` : ''}
@@ -337,14 +337,14 @@ function slides(R, sp) {
       ${R.longest ? `<div class="t">La más larga duró <b>${Math.floor(R.longest.duration_seconds / 60)} minutos</b>.</div>` : ''}
       <div class="t">Tu hora favorita para jugar: <b>${String(R.favHour).padStart(2, '0')}:00</b>.</div></div>` });
   const url = `${location.origin}${location.pathname}?jugador=${encodeURIComponent(p.id)}&split=${sp.id}`;
-  S.push({ bgimg: fav, final: true, html: `${bg(fav, 'linear-gradient(0deg, rgba(3,8,18,.97) 45%, rgba(3,8,18,.6))')}<div class="c">
+  S.push({ bgimg: fav, final: true, html: `${bg(fav, 'linear-gradient(0deg, rgba(3,17,26,.97) 45%, rgba(3,17,26,.6))')}<div class="c">
       <div class="k">${esc(sp.name)}</div>
       <div class="mid">${name}</div>
       <div class="summary">
         <div><small>Partidas</small><b>${R.games} · ${R.wr}% WR</b></div>
         <div><small>Horas</small><b>${n1(R.hours)} h</b></div>
         <div><small>Campeón</small><b>${esc(champName(R.champs[0].c))}</b></div>
-        <div><small>Mejor racha</small><b>${icono('fuego', { size: 16, color: '#ffb38a' })} ${R.best.n}</b></div>
+        <div><small>Mejor racha</small><b>${icono('fuego', { size: 16, color: '#FFB547' })} ${R.best.n}</b></div>
         <div><small>Dúo</small><b>${esc(R.duo?.p?.riot_game_name ?? '—')}</b></div>
         <div><small>Némesis</small><b>${esc(R.nem?.p?.riot_game_name ?? '—')}</b></div>
         ${R.rank ? `<div><small>Rango</small><b>${esc(rankText(R.rank.last))}</b></div><div><small>LP neto</small><b>${R.lpNet >= 0 ? '+' : ''}${R.lpNet}</b></div>` : ''}
@@ -388,7 +388,7 @@ async function play(p) {
   $('picker').hidden = true; $('stage').hidden = false; document.body.style.overflow = 'hidden';
   $('topline').innerHTML = `<img loading="lazy" decoding="async" src="${profileIconUrl(p.icon_id) ?? profileIconUrl(29)}" alt=""><div>${esc(p.riot_game_name)}<br><small>${esc(st.split.name)}</small></div>
     <a class="x" href="rewind.html?split=${st.split.id}" aria-label="Cerrar">×</a>`;
-  deck = R ? slides(R, st.split) : [{ final: true, html: `<div class="shade" style="background:#050b16"></div><div class="c">
+  deck = R ? slides(R, st.split) : [{ final: true, html: `<div class="shade" style="background:#03111A"></div><div class="c">
       <div class="k">SoloQ Rewind · ${esc(st.split.name)}</div><div class="mid">${esc(p.riot_game_name)}</div>
       <div class="t">No hay partidas de SoloQ guardadas en este split.</div>
       <div class="sub">El Rewind guarda datos desde finales de agosto de 2026: los splits anteriores no tienen partidas.</div>
