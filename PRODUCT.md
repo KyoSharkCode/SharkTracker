@@ -72,7 +72,7 @@ Tan útil y completo como OP.GG, Porofessor o League of Graphs, pero con dos dif
 - **Nombre:** "SharkTracker".
 - **Símbolo:** el tiburón, que se queda. Todo lo que hace Alex lleva la marca Tiburón/Shark.
 - **Independiente de la marca "KyoSumi"** (Marea Nocturna): no se usa esa guía.
-- **Estética base:** neón / cyberpunk futurista. Todo lo demás (paleta, tipografía, logo, íconos) cambia en el rebranding de oct 2026.
+- **Estética base:** neón / cyberpunk futurista. La paleta, la tipografía, el logo y los íconos cambiaron en el rebranding de oct 2026 (aplicado en v0.9.0).
 - **El layout actual se conserva** (decisión de Alex, 06/10/2026): el rebranding cambia colores, vocabulario, fuentes, íconos y logo, pero no la estructura ni la forma de comunicar de la web y la app. Por ejemplo, la web mantiene el menú hamburguesa, el título centrado, el podio con splash art y el orden de sus secciones. La barra de enlaces arriba al estilo OP.GG es justo lo que NO se busca.
 - **Dirección elegida: «Abisal»** (06/10/2026). Fondo abisal, verde agua bioluminiscente (#3DFFD2), violeta medusa (#A98BFF), ámbar señuelo (#FFB547) y coral (#FF6F8E). Fuentes: Unbounded (títulos), Albert Sans (interfaz) y Red Hat Mono (cifras). Símbolo: aleta sobre la línea de agua con ondas de sonar.
 - **Logo: «Tiburón sonar»** (elegido el 06/10/2026). El tiburón se curva en una «C» y su cola se convierte en ondas de sonar, con un degradado de verde agua a violeta.
@@ -109,7 +109,7 @@ Tan útil y completo como OP.GG, Porofessor o League of Graphs, pero con dos dif
 
 ## Evidence on Hand
 
-- **Logos actuales** en `logo/` (`MainLogo.webp`, `HorizontalLogo.webp`, `FlaviIconLogo.*`): tiburón con degradado cian→magenta y wordmark en cursiva. Es la referencia a reemplazar.
+- **Logos** en `logo/`: `simbolo*.svg`, `favicon.svg`, `logotipo.svg` (horizontal, en el pie de la web) y `logotipo-vertical.svg` (login de la web y de la app). `FlaviIconLogo.png` (512 px) sigue con ese nombre porque lo usan los avisos de Discord desde Supabase, pero ya tiene el logo nuevo. Los logos viejos (cian→magenta, cursiva) se borraron en la Fase 4.
 - **Moodboard:** https://claude.ai/artifact/YZ6x5iK3Wi8xB4a2U6Mf3q
 - **Canvas de mockups** de la app y la web, y el de pulido visual: https://claude.ai/artifact/6gK8Gg31m9YjTo1ptqaLt8
 - **Brandkit «SharkTracker · Abisal»**, la guía oficial de la marca (tokens, logo, íconos, voz, vocabulario y componentes de muestra): https://claude.ai/artifact/YcCHQQLcgoXPxHes6AB3UH. Hay que leerla antes de diseñar cualquier pieza nueva.

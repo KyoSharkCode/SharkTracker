@@ -61,8 +61,10 @@ La carpeta `app/` contiene **la app de escritorio de SharkTracker** (Electron), 
 assets/
   supabase.js             Conexión a Supabase (URL, anon key y versión de supabase-js)
   lol-data.js             Datos de LoL compartidos (Data Dragon, rangos, roles, esc())
+  tema.css                Tema común: paleta y fuentes de la identidad «Abisal»
   auth-menu.js, nav-menu.js, cosmetics.js, missions-widget.js, rank-history.js, …
-logo/                     Logos
+logo/                     Logo «Tiburón sonar» (símbolo, logotipos, favicon)
+assets/iconos/            Íconos Abisal (SVG 24×24 con currentColor)
 app/                      App de escritorio (Electron)
 supabase/
   functions/<nombre>/     Edge Functions (una carpeta por función, con su index.ts)
