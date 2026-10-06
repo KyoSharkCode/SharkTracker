@@ -28,11 +28,11 @@ vez haciendo una app de escritorio).
 - **Login:** Discord vía Supabase Auth. El proveedor Discord **ya está
   activado** en el proyecto de Supabase de SharkTracker (Client ID/Secret ya
   cargados) — no hace falta crear una app nueva en el Discord Developer
-  Portal. Lo que sí falta configurar:
-  1. Agregar el redirect URL propio `sharktracker://auth-callback` en
-     Supabase → Authentication → URL Configuration → Redirect URLs.
-  2. Registrar ese esquema en Electron (`app.setAsDefaultProtocolClient`).
-  3. Manejar el deep link entrante en el proceso main y pasárselo al cliente
+  Portal. Configurado y funcionando:
+  1. Redirect URL propio `sharktracker://auth-callback` en Supabase →
+     Authentication → URL Configuration → Redirect URLs.
+  2. Esquema registrado en Electron (`app.setAsDefaultProtocolClient`, main.js).
+  3. El deep link entrante lo recibe el proceso main y se lo pasa al cliente
      de Supabase.
   - Usar el flujo **PKCE** de Supabase Auth: por el deep link llega un código
     de un solo uso (`exchangeCodeForSession`), no el token en la URL.
@@ -60,10 +60,8 @@ vez haciendo una app de escritorio).
 - ✅ "Ajustes → Overlay": toggles reales + reposicionar elementos.
 
 **Se deja para después (no construir todavía):**
-- "En Vivo" (selección de campeones) — necesita integrarse con el LCU API
-  del cliente de League, es una pieza aparte.
-- "Meta" (tier list, counters, tendencias) — necesita una fuente de datos
-  externa o que Alex la mantenga.
+- ~~"En Vivo" (selección de campeones)~~ — hecho en la v0.4.0 (Fase 2, bloque 3; LCU en `src/lcu.js`).
+- ~~"Meta" (tier list, counters, tendencias)~~ — hecho en la v0.3.0 (Fase 2, bloque 2; datos de OP.GG).
 - ~~"Ajustes → Apariencia" y "Ajustes → Notificaciones"~~ — hechas en la v0.8.0 (Fase 2, bloque 4).
 - El motor de clips.
 
@@ -92,9 +90,9 @@ de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no
 ## Versión, empaquetado y publicación (Fase 2, bloques 0 y 1)
 
 - **Versión**: sale de `package.json` (`app.getVersion()`); la barra de título muestra
-  "vX.Y" y Ajustes → Cuenta → "Acerca de" la versión completa + el aviso legal de Riot
+  "vX.Y.Z" y Ajustes → Cuenta → "Acerca de" la versión completa + el aviso legal de Riot
   (también en el pie de index.html y perfil.html de la web).
-- **Electron 44** (antes 33; Node más nuevo). supabase-js sigue recibiendo `ws` como
+- **Electron 44**. supabase-js sigue recibiendo `ws` como
   transporte de realtime.
 - **Empaquetado**: electron-builder (campo `build` de package.json): instalador NSIS de un
   clic por usuario, `SharkTracker-Setup.exe` (nombre fijo, sin versión: así
@@ -152,6 +150,9 @@ app/
     overlay-config.js    → ajustes del overlay (qué se ve, dónde, tamaño y opacidad) en userData/overlay.json,
                            y la captura de fondo opcional del editor
     preload-editor.js    → contextBridge (window.editor) de la ventana "Reposicionar elementos"
+    lcu.js               → API local del cliente de LoL (En Vivo): fase, selección, runas, build, hechizos
+    meta.js              → Meta: catálogos de DDragon y llamadas a la Edge Function `meta`
+    build-adaptada.js    → build contra el equipo rival y "siguiente compra" (sin Electron, se prueba en Node)
     editor/              → ventana "Reposicionar elementos" (pantalla emulada del juego)
     overlay/             → ventana transparente sobre el juego (index.html, overlay.css,
                            overlay.js, icons.js). Coordenadas a 1920×1080 escaladas con
@@ -165,6 +166,10 @@ app/
       style.css          → estilos del mockup (Login y Ajustes → Cuenta incluidos)
       app.js             → navegación, login/cierre de sesión, chips, Ajustes, diagnóstico
       perfil.js          → dibuja Mi Perfil (y su estado "sin conexión")
+      envivo.js          → dibuja En Vivo (selección de campeones y partida en curso)
+      meta.js            → dibuja Meta (tier list, ficha, tendencias)
+  pruebas/
+    prueba-clips-C0.bat  → prueba C0 del motor de clips (ver "Motor de clips")
 ```
 
 Para correrla: abrir el repo en VS Code, y en la terminal `cd app`,
@@ -174,8 +179,7 @@ Notas técnicas:
 - Nombre visible "SharkTracker" (`productName`), AppUserModelId `lol.sharktracker.app`.
 - El renderer tiene una CSP estricta (sin scripts inline): no usar `onclick="…"` ni
   `<script>` dentro del HTML; los eventos se enganchan desde `app.js`.
-- El Node de Electron 33 no trae WebSocket: supabase-js recibe `ws` como
-  `realtime.transport`.
+- supabase-js recibe `ws` como `realtime.transport` (ver "Electron 44" arriba).
 - Live Client Data API: `activePlayer.summonerName` trae el Riot ID completo
   (`Nombre#TAG`); los bots no tienen `#tag` (ignorarlos al buscar rangos).
 - Íconos de invocador sin versión de parche: CommunityDragon `latest`.
@@ -309,7 +313,7 @@ que pulse un botón.
 
 Mockup: `https://claude.ai/artifact/6gK8Gg31m9YjTo1ptqaLt8`. Un solo PR con app + web + overlay OBS.
 - **App** (`renderer/style.css`, bloque "v0.7" al final): tarjetas sólidas `#0c131d` sin la franja de
-  color de arriba ni brillos; títulos sin degradado; textos ≥ 11 px y grises más claros
+  color de arriba ni brillos; títulos sin degradado; grises más claros (texto mínimo: ver v0.8.1)
   (`#8696a8` / `#7d8ea0` / `#a9b7c6`); números tabulares; íconos SVG en el menú lateral (`.navico`);
   foco visible (`:focus-visible` turquesa); siluetas `.esqueleto` mientras carga Mi Perfil.
   Mi Perfil: las etiquetas van en fila debajo del nombre (ya no hay tarjeta "Etiquetas") y el radar
@@ -368,9 +372,9 @@ grupo del mockup (no los de la app).
   dientes y Top N (`wallet_tx` reason `top`, detalle "Top N de la semana"). Máx. 4 avisos por vuelta.
   Clic → abre la página en sharktracker.lol. Solo llegan con la app abierta o en la bandeja.
 
-## Motor de clips (Fase 2, bloque 5) — DECIDIDO, todavía sin empezar
+## Motor de clips (Fase 2, bloque 5) — en curso (fase C0)
 
-Decisiones de Alex (oct 2026). Se empieza después de probar la v0.8.
+Decisiones de Alex (oct 2026).
 - **Arquitectura**: FFmpeg (build LGPL recortado, ~20–30 MB) como proceso aparte e invisible dentro de la
   carpeta de la app (como PowerShell para el LCU): la app lo abre al `GameStart` y lo cierra al terminar.
   Captura por GPU (`ddagrab`, Desktop Duplication) + codificación por **hardware** (NVENC / AMF / QuickSync),
@@ -431,15 +435,14 @@ visual" y "Overlay — estructuras" del canvas)
 1. ✅ Ventana del overlay + Barón/Ancestral + anuncios de objetivos + toasts de
    dragón/alma, Vacuolarvas (x de 3, una sola aparición a las 8:00) y Heraldo.
    Probado en partida real. Atakhan ya no existe en el juego (quitado). **Barón aparece a
-   las 20:00** (visto en partida real; antes estaba a 25:00).
+   las 20:00** (visto en partida real).
    ✅ Estructuras: toast de torre/inhibidor destruido (qué nivel y carril) y aviso
    1:00 antes de que reaparezca un inhibidor (5:00 tras caer).
 2. ✅ Diferencia de oro **solo con Tab pulsado**:
    `uiohook-napi` en el proceso main escucha SOLO la tecla Tab mientras hay partida.
    Oro = suma de `items[].price × count` (lo visible en el Tab). Fila i = i-ésimo
    aliado vs i-ésimo enemigo (orden de `allPlayers`). La flecha **apunta al jugador
-   con más oro** ("◀ 425" = el de la izquierda, "425 ▶" = el de la derecha; antes era al
-   revés y confundía) y el color dice de quién es: azul tu equipo, rojo el rival. Filas a y = 352/428/501/577/653 (1920×1080),
+   con más oro** ("◀ 425" = el de la izquierda, "425 ▶" = el de la derecha) y el color dice de quién es: azul tu equipo, rojo el rival. Filas a y = 352/428/501/577/653 (1920×1080),
    medidas sobre una captura real del Tab.
    En el Tab el **lado azul va siempre a la izquierda** y el rojo a la derecha
    (confirmado por Alex): si juegas en rojo, la flecha se invierte (sigue apuntando a
@@ -540,10 +543,7 @@ no salen en el "espectador" de Riot).
 - "Nivel" del mockup no está (la base no lo guarda); "Autorrelleno" tampoco (LCU).
 
 Decisiones:
-- **"Tu build"**: se deja para cuando exista "Meta" (hace falta la build de referencia).
-- **Meta**: el MCP oficial de OP.GG (`https://mcp-api.op.gg/mcp`) tiene tier list, builds y
-  counters; es la fuente candidata para Meta y "Tu build" (no documenta límites de uso).
-  Alternativa: un recolector propio como `referencias-elo`, rotando por parche.
+- **"Tu build"** y **Meta**: hechos con el MCP de OP.GG (ver "Meta" y "Build adaptada y build en partida").
 - **Timers de campamentos**: SÍ se quieren, solo de campamentos cuya muerte se vio
   (como Blitz/Porofessor/Itero). La API local no tiene eventos de campamentos: hay
   que leer el minimapa por captura de pantalla → se hace después, reutilizando la
@@ -577,7 +577,7 @@ que se arreglan en cuanto corre (cada minuto). Si algún día se cambia la key, 
 
 - ✅ Dominio `sharktracker.lol` (GitHub Pages, HTTPS) activo; Site URL de Supabase y
   SQL de Discord aplicados. `kyosharkcode.github.io` ya se quitó del CORS de las Edge Functions (v0.2.0).
-- Actualizar Electron (el de la v33 trae Node 20 y supabase-js avisa que lo dejará).
+- ✅ Electron actualizado a la v44.
 
 ## Estilo de comunicación de Alex
 
