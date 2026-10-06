@@ -73,6 +73,8 @@ Tan útil y completo como OP.GG, Porofessor o League of Graphs, pero con dos dif
 - **Símbolo:** el tiburón, que se queda. Todo lo que hace Alex lleva la marca Tiburón/Shark.
 - **Independiente de la marca "KyoSumi"** (Marea Nocturna): no se usa esa guía.
 - **Estética base:** neón / cyberpunk futurista. Todo lo demás (paleta, tipografía, logo, íconos) cambia en el rebranding de oct 2026.
+- **El layout actual se conserva** (decisión de Alex, 06/10/2026): el rebranding cambia colores, vocabulario, fuentes, íconos y logo, pero no la estructura ni la forma de comunicar de la web y la app. Por ejemplo, la web mantiene el menú hamburguesa, el título centrado, el podio con splash art y el orden de sus secciones. La barra de enlaces arriba al estilo OP.GG es justo lo que NO se busca.
+- **Dirección elegida: «Abisal»** (06/10/2026). Fondo abisal, verde agua bioluminiscente (#3DFFD2), violeta medusa (#A98BFF), ámbar señuelo (#FFB547) y coral (#FF6F8E). Fuentes: Unbounded (títulos), Albert Sans (interfaz) y Red Hat Mono (cifras). Símbolo: aleta sobre la línea de agua con ondas de sonar.
 - **Logo:** se rediseña desde cero. Mismo concepto de tiburón, con un símbolo más limpio que funcione a 16px (favicon, ícono de la app) y en grande.
 - **Personalidad:** competitiva, motivante, útil, limpia.
 - **Voz, mezclada según el contexto:**
