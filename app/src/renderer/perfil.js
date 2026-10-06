@@ -52,6 +52,14 @@
   const nombreCampeon = (p, clave) => p.iconos?.campeones?.[clave] ?? clave ?? '?';
 
   // ── Cabecera ──
+  // Punto del chip de Discord (barra de título) = estado de conexión con SharkTracker.
+  function marcarConexion(conectado) {
+    const chip = byId('discord-chip');
+    if (!chip) return;
+    chip.classList.toggle('offline', !conectado);
+    chip.title = conectado ? 'Conectado a SharkTracker · ver tu cuenta' : 'Sin conexión: mostrando datos guardados';
+  }
+
   function pintarCabecera(p, conectado) {
     const cab = byId('perfil-cab');
     cab.classList.toggle('offline', !conectado);
@@ -74,14 +82,14 @@
       badges.append(b);
     }
 
-    const estado = el('span', conectado ? 'detectag' : 'syncedtag');
-    estado.append(el('span', 'pd'), document.createTextNode(conectado ? 'Conectado a SharkTracker' : 'Sin conexión con SharkTracker'));
-    const actualizar = el('button', 'refreshbtn', cargando ? 'Actualizando…' : 'Actualizar');
+    // v0.9 (Abisal): sin etiqueta «Conectado a SharkTracker»; el estado lo muestra el
+    // punto del chip de Discord (marcarConexion). Sin conexión, el botón invita a reintentar.
+    const actualizar = el('button', 'refreshbtn', cargando ? 'Actualizando…' : conectado ? 'Actualizar' : 'Reintentar conexión');
     actualizar.type = 'button';
     actualizar.disabled = cargando;
     actualizar.addEventListener('click', () => cargar(true));
 
-    cab.replaceChildren(imagen(j.icono, 'avatar', iniciales(j.nombre)), ident, badges, estado, actualizar);
+    cab.replaceChildren(imagen(j.icono, 'avatar', iniciales(j.nombre)), ident, badges, actualizar);
     cab.hidden = false;
   }
 
@@ -150,12 +158,28 @@
   }
 
   // ── Etiquetas: fila de píldoras bajo el nombre (según tus últimas 30 SoloQ) ──
+  // Íconos de racha del set Abisal (assets/iconos/frenesi.svg y congelado.svg de la web).
+  const ICONO_RACHA = {
+    fuego: 'M8.3 22.9C7.7 22.7 7.7 22.5 8.3 21.0C9.2 18.8 10.4 17.1 11.9 15.7C12.8 15.0 12.9 15.2 12.1 16.1C10.7 17.7 9.6 19.7 9.0 22.1C8.9 22.7 8.7 23.0 8.6 23.0C8.6 23.0 8.4 22.9 8.3 22.9ZM6.1 22.0C4.7 21.0 3.5 19.0 3.2 17.3C3.2 16.5 3.3 16.4 3.7 16.9C4.1 17.3 4.2 17.3 4.0 16.6C3.4 14.2 4.1 11.5 5.8 9.4C6.3 8.8 6.4 8.8 6.3 10.1C6.2 12.2 7.6 13.4 8.9 12.2C9.6 11.6 9.7 10.6 9.2 9.2C8.2 6.2 9.2 3.2 11.7 1.5C12.4 1.0 12.5 1.0 12.3 1.8C11.6 3.8 12.1 5.5 13.8 7.4C14.7 8.3 15.2 9.1 15.5 9.8C15.9 11.0 16.6 10.3 16.7 8.5C16.8 7.4 17.0 6.9 17.6 6.4C18.2 5.9 18.2 5.9 18.3 7.3C18.3 8.7 18.3 8.8 19.4 11.2C21.1 14.6 21.2 16.7 20.0 19.1C18.3 22.5 16.3 22.8 15.6 19.7C15.4 18.8 15.2 18.6 14.8 18.6C14.4 18.6 14.4 18.4 14.9 18.0C15.3 17.7 15.3 17.7 15.4 16.4C15.4 15.7 15.6 14.7 15.7 14.2C16.1 12.7 16.1 12.7 14.8 13.1C12.4 14.0 10.1 16.0 8.4 18.9C7.8 19.8 7.6 20.3 7.1 21.8C6.9 22.4 6.8 22.4 6.1 22.0Z',
+    hielo: 'M11.8 22.5C11.8 22.3 11.3 20.4 10.9 18.2C9.9 13.7 9.9 13.9 9.7 13.9C9.6 13.9 9.6 13.8 9.1 17.1C8.7 19.5 8.7 19.8 8.5 19.7C8.5 19.6 8.1 17.9 7.7 15.8C6.8 11.0 7.0 11.5 5.9 9.6C4.7 7.8 4.7 7.9 5.5 7.4C6.3 6.9 6.3 6.8 5.8 6.4C5.1 6.0 4.8 5.4 5.1 5.2C5.3 5.1 6.0 5.1 6.4 5.3C6.9 5.6 7.0 5.6 7.0 4.8C7.1 3.8 7.1 3.7 7.7 4.0C8.2 4.2 8.2 4.2 8.4 5.2C8.5 6.2 8.7 6.3 10.4 7.2C11.0 7.5 11.0 7.4 11.0 6.1C11.0 4.9 11.0 4.8 10.1 4.0C9.4 3.5 9.4 3.5 9.4 3.0C9.5 2.4 9.6 2.4 10.4 2.8C11.2 3.2 11.3 3.1 11.4 2.4C11.4 1.9 11.8 1.2 12.0 1.2C12.2 1.2 12.6 1.9 12.6 2.4C12.7 3.1 12.8 3.2 13.6 2.8C14.4 2.4 14.5 2.4 14.6 3.0C14.6 3.5 14.6 3.5 13.9 4.1C13.1 4.7 13.0 5.0 13.0 5.7C13.1 6.4 13.2 6.4 13.5 5.8C13.8 5.2 14.5 4.6 14.7 4.7C14.9 4.9 14.9 5.6 14.7 6.4C14.4 7.4 14.6 7.5 15.2 6.5C15.5 6.1 15.5 5.8 15.8 4.5C15.8 4.2 15.9 4.2 16.3 4.0C16.9 3.7 17.0 3.9 17.0 4.8C17.0 5.6 17.0 5.6 17.8 5.3C18.4 5.1 19.1 5.1 19.1 5.3C19.1 5.6 18.7 6.1 18.2 6.4C17.7 6.8 17.7 6.9 18.4 7.3C19.1 7.8 19.1 7.9 18.5 8.6C17.7 9.5 17.7 9.6 16.8 13.8C16.4 16.0 16.0 17.9 16.0 18.0C15.8 18.4 15.8 18.2 15.3 15.9C14.8 13.6 14.8 13.6 14.5 13.8C14.2 14.0 14.0 14.6 13.2 18.4C12.1 23.2 12.1 23.4 11.8 22.5ZM13.0 15.0C13.4 13.5 13.5 13.3 13.9 13.1C14.1 13.0 14.3 12.7 14.4 12.5C14.7 12.0 14.8 11.9 15.1 12.2C15.4 12.5 15.4 12.3 15.1 11.3C14.8 10.1 14.7 10.1 14.2 11.3C13.9 12.2 13.8 12.3 13.3 12.6C12.7 12.9 12.8 12.8 12.6 15.0C12.4 17.1 12.6 17.1 13.0 15.0ZM7.7 9.2C7.7 8.6 7.8 8.5 8.8 8.5C9.6 8.5 9.6 8.4 8.9 8.0C8.2 7.6 8.1 7.6 7.2 8.0C6.4 8.4 6.4 8.4 7.1 9.1C7.8 9.8 7.8 9.8 7.7 9.2Z',
+  };
+  function iconoEtiqueta(icono) {
+    if (!ICONO_RACHA[icono]) return el('span', 'pic', icono);
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('class', 'pic pic-svg'); svg.setAttribute('aria-hidden', 'true');
+    const path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', ICONO_RACHA[icono]); path.setAttribute('fill', 'currentColor'); path.setAttribute('fill-rule', 'evenodd');
+    svg.append(path);
+    return svg;
+  }
+
   function filaEtiquetas(p) {
     const fila = el('div', 'ptagrow');
     fila.title = 'Según tus últimas 30 SoloQ: rachas, tilt, lado del mapa y campeones.';
     for (const t of p.etiquetas) {
       const tag = el('span', `ptag ${t.tipo}`);
-      tag.append(el('span', 'pic', t.icono), document.createTextNode(t.texto + ' '), el('span', 'ptag-det', t.detalle));
+      tag.append(iconoEtiqueta(t.icono), document.createTextNode(t.texto + ' '), el('span', 'ptag-det', t.detalle));
       fila.append(tag);
     }
     return fila;
@@ -297,6 +321,7 @@
       return;
     }
     const conectado = r.estado === 'ok';
+    if (!cargando || conectado) marcarConexion(conectado);
     const datos = conectado ? r : r.cache;
     if (!datos) {
       byId('perfil-cab').hidden = true;
@@ -313,7 +338,7 @@
         'Este tiburón perdió su rumbo. No pudimos conectar con SharkTracker para traer tu historial, gráfica de elo, etiquetas y maestrías actualizadas. Tu identidad y tu último rango guardado siguen visibles arriba.', true));
       return;
     }
-    sub.textContent = `Tu cuenta vinculada en SharkTracker · actualizado ${haceCuanto(datos.actualizado)}`;
+    sub.textContent = `Tu cuenta vinculada en SharkTracker · Sonar · ${haceCuanto(datos.actualizado)}`;
     const fila = el('div', 'perfil-fila');
     fila.append(pintarRadar(datos), pintarMaestrias(datos));
     cuerpo.replaceChildren(fila, pintarElo(datos), pintarHistorial(datos));

@@ -531,7 +531,7 @@
       const tags = [];
       if (j.main === true) tags.push(['main', 'Main']);
       if (j.main === false) tags.push(['fuera', 'Fuera de su main']);
-      if (j.rango?.racha) tags.push(['main', 'En racha']);
+      if (j.rango?.racha) tags.push(['main', 'Frenesí']);
       if (j.sharktracker) tags.push(['st', 'SharkTracker']);
       if (tags.length) {
         const fila = el('div', 'ev-tags');

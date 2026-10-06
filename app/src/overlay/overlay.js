@@ -224,7 +224,7 @@ function filaCarga(j, equipo, verRango, verWinrate) {
     const tags = [];
     if (j.main === true) tags.push(['main', 'Main del campeón']);
     if (j.main === false) tags.push(['fuera', 'Fuera de su main']);
-    if (j.rango?.racha) tags.push(['racha', 'En racha']);
+    if (j.rango?.racha) tags.push(['racha', 'Frenesí']);
     if (j.sharktracker) tags.push(['st', 'SharkTracker']);
     if (tags.length) {
       const fila2 = el('div', 'carga-tags');
