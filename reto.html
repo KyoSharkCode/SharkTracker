@@ -12,6 +12,7 @@
 <link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
 <title>Reto · SharkTracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Albert+Sans:wght@400;500;600;700;800&family=Red+Hat+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{ /* colores propios de esta página (la paleta común está en assets/tema.css) */ --gold-glow:rgba(255,181,71,.35); --silver:#cbd5e1; --bronze:#d9955b; }
@@ -31,7 +32,7 @@
   .logo-slot{display:flex; align-items:center; gap:14px;}
   .logo-slot img{height:40px; width:auto; display:block;}
   .back{font-size:13px; font-weight:700; color:var(--text-dim); text-decoration:none;}
-  .back:hover{color:#E6FBF8;}
+  .back:hover{color:var(--text);}
   h1{grid-column:2; margin:0; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700; font-size:clamp(19px,3vw,28px); letter-spacing:.01em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
@@ -42,7 +43,7 @@
   .login-btn{background:var(--accent); color:var(--on-accent); font-family:'Albert Sans',system-ui,sans-serif; font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
 
   .msg{padding:70px 20px; text-align:center; color:var(--text-dim); font-size:15px; line-height:1.6;}
-  .msg b{display:block; color:#E6FBF8; font-family:'Unbounded',sans-serif; font-size:19px; letter-spacing:.01em; text-transform:uppercase; margin-bottom:6px;}
+  .msg b{display:block; color:var(--text); font-family:'Unbounded',sans-serif; font-size:19px; letter-spacing:.01em; text-transform:uppercase; margin-bottom:6px;}
 
   .section-title{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:'Unbounded',sans-serif; font-size:15px; font-weight:700; letter-spacing:.01em; text-transform:uppercase;}
   .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); box-shadow:none;}
@@ -66,7 +67,7 @@
   .hero-stats{display:flex; gap:12px; flex-wrap:wrap; margin-top:20px;}
   .hs{display:flex; align-items:center; gap:10px; background:rgba(3,17,26,.72); border:1px solid var(--border); border-radius:14px; padding:10px 16px; backdrop-filter:blur(6px);}
   .hs img{width:34px; height:34px;}
-  .hs b{display:block; font-family:'Red Hat Mono',ui-monospace,monospace; font-size:18px; line-height:1; color:#E6FBF8;}
+  .hs b{display:block; font-family:'Red Hat Mono',ui-monospace,monospace; font-size:18px; line-height:1; color:var(--text);}
   .hs small{display:block; font-size:12px; font-weight:800; color:var(--text-faint); margin-top:3px;}
   .hs.gold b{color:var(--gold);}
   .dates{margin-top:16px; font-size:12.5px; color:var(--text-faint); font-weight:600;}

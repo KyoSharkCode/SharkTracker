@@ -12,6 +12,7 @@
 <link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
 <title>Estadísticas · SharkTracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Albert+Sans:wght@400;500;600;700;800&family=Red+Hat+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   
@@ -44,10 +45,10 @@
   .toolbar{position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; padding:10px 0; margin-bottom:22px; background:linear-gradient(180deg, rgba(3,17,26,.97) 70%, rgba(3,17,26,0));}
   .grp{display:flex; gap:6px; flex-wrap:wrap;}
   .chipbtn{border:1px solid var(--border); background:var(--panel); color:var(--text-dim); border-radius:99px; padding:6px 13px; font-size:12.5px; font-weight:700; cursor:pointer;}
-  .chipbtn.on{border-color:var(--accent); color:#E6FBF8; background:rgba(61,255,210,.1);}
+  .chipbtn.on{border-color:var(--accent); color:var(--text); background:rgba(61,255,210,.1);}
   .jump{margin-left:auto; display:flex; gap:4px; flex-wrap:wrap;}
   .jump a{font-size:12px; font-weight:700; color:var(--text-faint); text-decoration:none; padding:5px 9px; border-radius:8px;}
-  .jump a:hover{color:#E6FBF8; background:rgba(120,220,210,.05);}
+  .jump a:hover{color:var(--text); background:rgba(120,220,210,.05);}
 
   /* Resumen */
   .tiles{display:grid; grid-template-columns:repeat(6,1fr); gap:12px;}
@@ -61,7 +62,7 @@
   .tbl-wrap{overflow-x:auto;}
   table{width:100%; border-collapse:collapse; font-size:13px;}
   th{font-size:12px; font-weight:800; color:var(--text-faint); padding:11px 12px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--border); user-select:none;}
-  th[data-k]{cursor:pointer;} th[data-k]:hover{color:#E6FBF8;}
+  th[data-k]{cursor:pointer;} th[data-k]:hover{color:var(--text);}
   th.on{color:var(--accent);} th.on::after{content:' ▼'; font-size:12px;} th.on.asc::after{content:' ▲';}
   th:first-child, td:first-child{text-align:left;}
   td{padding:9px 12px; border-top:1px solid rgba(21,65,82,.55); text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums;}
@@ -76,7 +77,7 @@
   .mini img{width:22px; height:22px; border-radius:50%; border:1px solid var(--border);}
   .best{display:inline-flex; align-items:center; gap:6px; font-weight:700;}
   .best img{width:22px; height:22px; border-radius:50%;}
-  .search{background:var(--field); border:1px solid var(--border); border-radius:10px; padding:7px 11px; color:#E6FBF8; font-size:13px; font-weight:600; outline:none; width:200px;}
+  .search{background:var(--field); border:1px solid var(--border); border-radius:10px; padding:7px 11px; color:var(--text); font-size:13px; font-weight:600; outline:none; width:200px;}
   .search:focus{border-color:var(--accent);}
   .more{display:block; width:100%; background:none; border:none; border-top:1px solid var(--border); color:var(--accent); font-weight:700; font-size:13px; padding:10px; cursor:pointer;}
 
@@ -113,7 +114,7 @@
   .hgrid .hl{font-size:12px; color:var(--text-faint); text-align:center;}
   .hgrid .c{aspect-ratio:1; border-radius:4px; background:rgba(120,220,210,.04);}
   .heat-foot{display:flex; flex-wrap:wrap; gap:10px 22px; margin-top:14px; font-size:12.5px; color:var(--text-dim);}
-  .heat-foot b{color:#E6FBF8;}
+  .heat-foot b{color:var(--text);}
   .slots{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:14px;}
   .slot{background:var(--panel-2); border:1px solid var(--border); border-radius:12px; padding:10px 12px;}
   .slot small{display:block; font-size:12px; font-weight:800; color:var(--text-faint);}
@@ -132,7 +133,7 @@
 
   /* ── Rediseño (tablero "Web: estadísticas propuesto") ── */
   .toolbar{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:12px 16px; gap:12px 16px; top:8px;}
-  .grp{gap:2px; background:#051823; border-radius:10px; padding:3px;}
+  .grp{gap:2px; background:var(--field); border-radius:10px; padding:3px;}
   .grp .chipbtn{border:0; background:none; border-radius:7px; padding:6px 12px; font-size:13px; font-weight:500; color:var(--text-dim);}
   .grp .chipbtn.on{background:var(--accent); color:var(--on-accent); font-weight:700;}
   .jump{gap:14px;}

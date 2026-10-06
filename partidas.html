@@ -12,6 +12,7 @@
 <link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
 <title>Partida · SharkTracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Albert+Sans:wght@400;500;600;700;800&family=Red+Hat+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{ /* colores propios de esta página (la paleta común está en assets/tema.css) */ --blue-bg:rgba(90,169,255,.08); --red-bg:rgba(255,111,142,.08); }
@@ -27,7 +28,7 @@
   .logo-slot{display:flex; align-items:center; gap:14px;}
   .logo-slot img{height:40px; width:auto; display:block;}
   .back{font-size:13px; font-weight:700; color:var(--text-dim); text-decoration:none;}
-  .back:hover{color:#E6FBF8;}
+  .back:hover{color:var(--text);}
   h1{grid-column:2; margin:0; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700; font-size:clamp(19px,3vw,28px); letter-spacing:.01em; text-transform:uppercase;
      background:linear-gradient(90deg,#fff 0%,var(--accent) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .auth-slot{grid-column:3; justify-self:end;}
@@ -39,7 +40,7 @@
   .crumbs{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px; color:var(--text-faint); margin-bottom:18px;}
   .crumbs a{color:var(--accent); font-weight:700; text-decoration:none;}
   .msg{padding:70px 20px; text-align:center; color:var(--text-dim); font-size:15px; line-height:1.6;}
-  .msg b{display:block; color:#E6FBF8; font-family:'Unbounded',sans-serif; font-size:18px; letter-spacing:.01em; text-transform:uppercase; margin-bottom:6px;}
+  .msg b{display:block; color:var(--text); font-family:'Unbounded',sans-serif; font-size:18px; letter-spacing:.01em; text-transform:uppercase; margin-bottom:6px;}
   .spinner{width:34px; height:34px; border-radius:50%; border:3px solid var(--border); border-top-color:var(--accent); margin:0 auto 14px; animation:spin .9s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
@@ -133,7 +134,7 @@
   .pov{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
   .pov button{display:inline-flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--border); border-radius:99px; padding:4px 14px 4px 4px; color:var(--text-dim); font-weight:700; font-size:13px;}
   .pov button img{width:28px; height:28px; border-radius:50%;}
-  .pov button.on{border-color:var(--gold); color:#E6FBF8; background:rgba(255,181,71,.08);}
+  .pov button.on{border-color:var(--gold); color:var(--text); background:rgba(255,181,71,.08);}
   .detail{display:grid; grid-template-columns:1.4fr 1fr; gap:16px;}
   .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:16px;}
   .stat{background:var(--panel-2); border:1px solid var(--border); border-radius:12px; padding:10px 12px;}
@@ -145,7 +146,7 @@
   .rune-tree .keystone{width:46px; height:46px; border-radius:50%; background:var(--placeholder); border:2px solid var(--gold);}
   .rune-tree .minor{width:30px; height:30px; border-radius:50%; background:var(--placeholder); border:1px solid var(--border); padding:2px;}
   .rune-name{font-size:12.5px; font-weight:700; color:var(--text-dim);}
-  .rune-name b{color:#E6FBF8; display:block; font-size:14px;}
+  .rune-name b{color:var(--text); display:block; font-size:14px;}
   .shards{display:flex; gap:6px; flex-wrap:wrap;}
   .shard{font-size:12px; font-weight:700; color:var(--text-dim); background:var(--panel-2); border:1px solid var(--border); border-radius:99px; padding:3px 9px;}
   .spells-row{display:flex; gap:8px; align-items:center; margin-top:12px; font-size:12.5px; color:var(--text-dim); font-weight:700;}
@@ -168,7 +169,7 @@
   .ai-box.ok h4{color:var(--accent);} .ai-box.ko h4{color:var(--danger);} .ai-box.tip h4{color:var(--gold);} .ai-box.mo h4{color:var(--blue);}
   .ai-box ul{margin:0; padding-left:18px; font-size:13.5px; line-height:1.55; color:var(--text-dim);}
   .ai-box li{margin-bottom:4px;}
-  .ai-box .mm{font-family:'Red Hat Mono',ui-monospace,monospace; font-weight:600; color:#E6FBF8; margin-right:6px;}
+  .ai-box .mm{font-family:'Red Hat Mono',ui-monospace,monospace; font-weight:600; color:var(--text); margin-right:6px;}
   .ai-err{color:var(--danger); font-size:13px; font-weight:600; margin-top:10px;}
   .ai-foot{margin-top:12px; font-size:12px; color:var(--text-faint);}
 
@@ -462,8 +463,8 @@ function drawGold() {
         <linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF6F8E" stop-opacity=".05"/><stop offset="1" stop-color="#FF6F8E" stop-opacity=".55"/></linearGradient>
       </defs>
       ${grid}
-      <text x="${PL + 6}" y="${PT + 12}" style="fill:#5AA9FF;font-weight:800">AZUL ADELANTE</text>
-      <text x="${PL + 6}" y="${H - PB - 6}" style="fill:#FF6F8E;font-weight:800">ROJO ADELANTE</text>
+      <text x="${PL + 6}" y="${PT + 12}" style="fill:var(--blue);font-weight:800">AZUL ADELANTE</text>
+      <text x="${PL + 6}" y="${H - PB - 6}" style="fill:var(--red);font-weight:800">ROJO ADELANTE</text>
       <path d="${area}" fill="url(#gB)" clip-path="url(#cAbove)"/>
       <path d="${area}" fill="url(#gR)" clip-path="url(#cBelow)"/>
       <path d="${line}" fill="none" stroke="#5AA9FF" stroke-width="2.2" clip-path="url(#cAbove)" stroke-linejoin="round"/>
