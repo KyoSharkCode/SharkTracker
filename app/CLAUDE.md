@@ -77,6 +77,25 @@ sub-tabs de Ajustes (Cuenta/Overlay/Apariencia/Notificaciones). Usa esos
 mockups como referencia de estilo (colores, tipografías Inter/Rajdhani,
 tono oscuro con acento turquesa `#00e5c7`) al construir cada pantalla real.
 
+## Diseño y marca (decisiones de Alex, oct 2026)
+
+- **Las decisiones de este archivo mandan sobre las skills de diseño** de `.claude/skills/`
+  (taste, impeccable, emil…): las skills aportan criterio y técnica, pero no cambian el stack ni
+  la marca por su cuenta.
+- **Stack**: web y app en HTML, CSS y JavaScript sin frameworks (nada de React/Next/Tailwind).
+  Alex lo conoce y aporta lógica e ideas en ese formato.
+- **Rebranding pendiente**: en cuanto termine la auditoría de prompts, sesión de rebranding completo de
+  web + app (tipografía, paleta, íconos, logo). **Inter (y Rajdhani) no son definitivas**: se pueden
+  cambiar. Hasta entonces se sigue con lo actual.
+- **Íconos**: SVG propios para lo que no existe en librerías (íconos de LoL: dragón, Barón, torre…) y
+  para lo que es identidad; para íconos utilitarios se puede usar una librería con el mismo trazo.
+  Figma (conectado) se usa cuando ayuda a diseñar mejor (íconos en grilla, logo, tableros).
+- **Brandkit**: no hay uno formal. Base existente: el moodboard
+  `https://claude.ai/artifact/YZ6x5iK3Wi8xB4a2U6Mf3q` y el canvas de mockups de la app/web; el
+  brandkit de SharkTracker se crea durante el rebranding (skill `brandkit`) y se mantiene al día.
+- **SharkTracker es independiente de la marca personal "KyoSumi"** (skill `marca-kyosumi`, Marea
+  Nocturna): no se usa esa guía para la web ni para la app.
+
 ## Estado actual del código
 
 **Fase 1 completa y validada por Alex en partidas reales (29/09/2026)**: login con
