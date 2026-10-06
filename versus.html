@@ -12,6 +12,7 @@
 <link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
 <title>Versus · SharkTracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Albert+Sans:wght@400;500;600;700;800&family=Red+Hat+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{ /* colores propios de esta página (la paleta común está en assets/tema.css) */ --a:var(--blue); --a-bg:rgba(90,169,255,.12); --b:var(--red); --b-bg:rgba(255,111,142,.12); }
@@ -43,13 +44,13 @@
   .pickers{display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:end; margin-bottom:16px;}
   .pick label{display:block; font-size:12px; font-weight:800; margin-bottom:6px;}
   .pick.a label{color:var(--a);} .pick.b label{color:var(--b);} .pick.b{text-align:right;}
-  .sel{width:100%; appearance:none; background:var(--field) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%239db3c4' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center; border:1px solid var(--border); border-radius:11px; padding:11px 34px 11px 13px; color:#E6FBF8; font-weight:700; font-size:14px; outline:none; cursor:pointer; color-scheme:dark;}
+  .sel{width:100%; appearance:none; background:var(--field) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%239db3c4' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center; border:1px solid var(--border); border-radius:11px; padding:11px 34px 11px 13px; color:var(--text); font-weight:700; font-size:14px; outline:none; cursor:pointer; color-scheme:dark;}
   .pick.a .sel:focus{border-color:var(--a);} .pick.b .sel:focus{border-color:var(--b);}
   .swap{width:44px; height:44px; border-radius:50%; border:1px solid var(--border); background:var(--panel); color:var(--text-dim); cursor:pointer; font-size:18px;}
-  .swap:hover{border-color:var(--accent); color:#E6FBF8;}
+  .swap:hover{border-color:var(--accent); color:var(--text);}
   .filters{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:22px;}
   .chipbtn{border:1px solid var(--border); background:var(--panel); color:var(--text-dim); border-radius:99px; padding:6px 13px; font-size:12.5px; font-weight:700; cursor:pointer;}
-  .chipbtn.on{border-color:var(--accent); color:#E6FBF8; background:rgba(61,255,210,.1);}
+  .chipbtn.on{border-color:var(--accent); color:var(--text); background:rgba(61,255,210,.1);}
   .filters .note{margin-left:auto; font-size:12px; color:var(--text-faint);}
 
   /* Cara a cara (héroes) */
@@ -161,7 +162,7 @@
   .lado .sub{font-size:13px; color:var(--text-dim);}
   .lado .sub a{color:var(--accent); text-decoration:none; font-weight:600;}
   .duelo .mid{min-width:0; gap:8px;}
-  .duelo .swap{width:48px; height:48px; display:flex; align-items:center; justify-content:center; background:#0A2533; border-color:rgba(120,220,210,.14);}
+  .duelo .swap{width:48px; height:48px; display:flex; align-items:center; justify-content:center; background:var(--panel-2); border-color:rgba(120,220,210,.14);}
   .duelo .tally{font-size:28px;}
   .duelo .mid small{font-size:12px; font-weight:500;}
   .rows{padding:8px 24px; border-radius:16px;}
@@ -169,7 +170,7 @@
   .row .lbl{font-size:13px; font-weight:500;}
   .row .lbl small{font-size:12px; font-weight:400;}
   .row .v{font-family:'Albert Sans',system-ui,sans-serif; font-size:15px; font-weight:700; color:var(--text-dim);}
-  .row .v.win.va, .row .v.win.vb{color:#E6FBF8;}
+  .row .v.win.va, .row .v.win.vb{color:var(--text);}
   .row .track{border-radius:4px; background:rgba(120,220,210,.06);}
   .row .track i{opacity:.6;}
   .h2h-box{text-align:left; padding:18px 20px;}

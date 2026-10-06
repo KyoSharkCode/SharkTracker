@@ -12,6 +12,7 @@
 <link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
 <title>Tienda · SharkTracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Albert+Sans:wght@400;500;600;700;800&family=Red+Hat+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   
@@ -39,7 +40,7 @@
   .section-title .aside{margin-left:auto; font-family:'Albert Sans',system-ui,sans-serif; font-size:12px; font-weight:600; letter-spacing:0; text-transform:none; color:var(--text-faint);}
   section{margin-bottom:32px;}
   .card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);}
-  .toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%); z-index:99; background:var(--field); border:1px solid var(--accent); color:#E6FBF8; font-weight:700; font-size:13.5px; padding:10px 18px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.5);}
+  .toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%); z-index:99; background:var(--field); border:1px solid var(--accent); color:var(--text); font-weight:700; font-size:13.5px; padding:10px 18px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.5);}
 
   /* Barra de saldo (rediseño): diente + saldo a la izquierda, semana e insignias a la derecha */
   .wallet{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:24px; align-items:center; padding:22px 26px; margin-bottom:22px; border-radius:18px;}
@@ -51,15 +52,15 @@
   .wallet .bal small{font-size:13px; color:var(--text-faint);}
   .wallet .bal small.warn{color:var(--gold-soft); font-weight:600;}
   .wallet .der{display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--text-dim); text-align:right;}
-  .wallet .der b{color:#E6FBF8;} .wallet .der b.mas{color:var(--green);}
+  .wallet .der b{color:var(--text);} .wallet .der b.mas{color:var(--green);}
   .notice{padding:14px 18px; margin-bottom:18px; font-size:14px; line-height:1.55; color:var(--text-dim); border-color:rgba(61,255,210,.35);}
-  .notice b{color:#E6FBF8;}
+  .notice b{color:var(--text);}
 
   /* Pestañas: subrayado, como en el resto del sitio */
   .tabs{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:18px; border-bottom:1px solid var(--border);}
   .tab{border:0; border-bottom:2px solid transparent; background:none; color:var(--text-dim); padding:10px 14px; font-size:14px; font-weight:500; display:inline-flex; align-items:center; gap:7px; margin-bottom:-1px; cursor:pointer;}
-  .tab:hover{color:#E6FBF8;}
-  .tab.on{color:#E6FBF8; font-weight:700; border-bottom-color:var(--accent);}
+  .tab:hover{color:var(--text);}
+  .tab.on{color:var(--text); font-weight:700; border-bottom-color:var(--accent);}
   .filters{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px;}
   .chipbtn{border:1px solid rgba(120,220,210,.1); background:var(--panel); color:var(--text-soft); border-radius:99px; padding:6px 14px; font-size:13px; font-weight:500; cursor:pointer;}
   .chipbtn:hover{border-color:rgba(120,220,210,.25);}
@@ -100,12 +101,12 @@
   .price{display:inline-flex; align-items:center; gap:6px; font-family:'Red Hat Mono',ui-monospace,monospace; font-size:18px; font-weight:600; color:var(--gold-soft); white-space:nowrap;}
   .btn{border:none; border-radius:10px; padding:8px 16px; font-weight:700; font-size:14px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; white-space:nowrap;}
   .btn.ok{background:var(--accent); color:var(--on-accent);} .btn.ok:hover{filter:brightness(1.08);}
-  .btn.ghost{background:#0A2533; border:1px solid var(--border); color:var(--text-faint);} .btn.ghost:not(:disabled):hover{border-color:var(--accent); color:#E6FBF8;}
+  .btn.ghost{background:var(--panel-2); border:1px solid var(--border); color:var(--text-faint);} .btn.ghost:not(:disabled):hover{border-color:var(--accent); color:var(--text);}
   .btn.eq{background:var(--accent); color:var(--on-accent);}
   .btn:disabled{cursor:default;}
   .owned{font-size:14px; font-weight:700; color:var(--green); white-space:nowrap;}
   .confirm{margin-top:8px; padding:10px 12px; border-radius:10px; background:rgba(255,181,71,.07); border:1px solid rgba(255,181,71,.3); font-size:13px; color:var(--text-dim); line-height:1.5; text-align:left;}
-  .confirm b{color:#E6FBF8;} .confirm .row{display:flex; gap:6px; margin-top:8px;}
+  .confirm b{color:var(--text);} .confirm .row{display:flex; gap:6px; margin-top:8px;}
   .err{color:var(--danger); font-size:13px; font-weight:700; margin-top:6px;} .err:empty{display:none;}
   /* Inventario: misma tarjeta centrada, con "Puesto" y los botones de ponerse o quitar */
   .item .body{display:flex; flex-direction:column; align-items:center; gap:8px; width:100%;}
@@ -125,7 +126,7 @@
   .pv-name{font-weight:800; font-size:21px; text-align:center; line-height:1.5;}
   .swatches{display:flex; gap:7px; flex-wrap:wrap; justify-content:center; margin-top:8px;}
   .sw{width:22px; height:22px; border-radius:50%; border:2px solid rgba(120,220,210,.18); padding:0;}
-  .sw.on{border-color:#E6FBF8; box-shadow:0 0 0 2px var(--accent);}
+  .sw.on{border-color:var(--text); box-shadow:0 0 0 2px var(--accent);}
   .emojis{display:flex; gap:4px; flex-wrap:wrap; justify-content:center; max-width:220px; margin-top:6px;}
   .em{font-size:20px; background:transparent; border:1px solid transparent; border-radius:8px; padding:2px 4px; line-height:1.2;}
   .em.on{border-color:var(--accent); background:rgba(61,255,210,.12);}
@@ -147,7 +148,7 @@
   .earn .e b{display:block; font-size:13.5px;} .earn .e small{display:block; font-size:12px; color:var(--text-faint); margin-top:1px; line-height:1.4;}
   .earn .e .amt{margin-left:auto; font-family:'Red Hat Mono',ui-monospace,monospace; font-size:17px; font-weight:600; color:var(--gold-soft); white-space:nowrap;}
   .rules{padding:16px 18px; font-size:13px; color:var(--text-dim); line-height:1.65;}
-  .rules b{color:#E6FBF8;} .rules ul{margin:6px 0 0; padding-left:18px;}
+  .rules b{color:var(--text);} .rules ul{margin:6px 0 0; padding-left:18px;}
 
   /* Insignias */
   .badges{display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px;}
@@ -162,7 +163,7 @@
   .tx .ic{width:30px; display:flex; justify-content:center; color:var(--text-dim);} .tx .d{flex:1; min-width:0;} .tx .d b{display:block;} .tx .d small{color:var(--text-faint);}
   .tx .a{font-weight:600; font-family:'Red Hat Mono',ui-monospace,monospace; font-size:14px;} .tx .a.p{color:var(--green);} .tx .a.n{color:var(--red-soft);}
   .claim-st{font-size:12px; font-weight:800; border-radius:99px; padding:2px 9px;}
-  .claim-st.pendiente{background:rgba(255,181,71,.14); color:var(--gold);} .claim-st.entregado{background:rgba(61,255,210,.14); color:#3DFFD2;} .claim-st.rechazado{background:rgba(255,111,142,.14); color:#FF8FA6;}
+  .claim-st.pendiente{background:rgba(255,181,71,.14); color:var(--gold);} .claim-st.entregado{background:rgba(61,255,210,.14); color:var(--accent);} .claim-st.rechazado{background:rgba(255,111,142,.14); color:#FF8FA6;}
 
   @media (max-width:1000px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr));} .grid.g3{grid-template-columns:repeat(2,minmax(0,1fr));} }
   @media (max-width:700px){

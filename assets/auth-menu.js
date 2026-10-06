@@ -46,7 +46,7 @@ const CSS = `
 .am-tw-status .tag.ok{background:rgba(145,70,255,.25); color:#C9B8FF;}
 .am-tw-status .tag.warn{background:rgba(255,181,71,.15); color:var(--gold,#FFB547);}
 .am-btn{display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:13px 16px; border:none; border-radius:12px; font:800 14px 'Albert Sans',system-ui,sans-serif; cursor:pointer; margin-bottom:8px;}
-.am-btn.twitch{background:#9146ff; color:#E6FBF8; box-shadow:0 8px 24px rgba(145,70,255,.35);}
+.am-btn.twitch{background:#9146ff; color:#fff; box-shadow:0 8px 24px rgba(145,70,255,.35);}
 .am-btn.twitch:hover{background:#a970ff;}
 .am-btn.twitch svg{width:18px; height:18px; fill:#fff;}
 .am-btn.ghost{background:transparent; border:1px solid var(--border,#154152); color:var(--text-dim,#A7D3CF);}

@@ -199,7 +199,7 @@ html, body {
 .discordbtn {
   width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
   background: linear-gradient(135deg,var(--discord),#4752c4); border: none; border-radius: 10px; padding: 13px 0; cursor: pointer;
-  font-family:'Albert Sans',system-ui,sans-serif; font-size: 14px; font-weight: 700; color: #E6FBF8; letter-spacing: 0.01em;
+  font-family:'Albert Sans',system-ui,sans-serif; font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.01em;
   box-shadow: none;
 }
 .discordbtn:hover { filter: brightness(1.1); }

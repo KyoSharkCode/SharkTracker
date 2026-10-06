@@ -12,6 +12,7 @@
 <link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
 <title>SharkTracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Albert+Sans:wght@400;500;600;700;800&family=Red+Hat+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   
@@ -103,7 +104,7 @@
   .twitch-inner > .twitch-card{margin-bottom:28px;}
   .twitch-inner{min-height:0; overflow:hidden;}
   .twitch-card{width:100%; display:flex; background:var(--panel); border:1px solid rgba(255,111,142,.4); box-shadow:var(--sombra); border-radius:var(--radius); overflow:hidden;}
-  .twitch-preview{flex:0 0 480px; aspect-ratio:16/9; position:relative; background:#051823; border-right:1px solid var(--border);}
+  .twitch-preview{flex:0 0 480px; aspect-ratio:16/9; position:relative; background:var(--field); border-right:1px solid var(--border);}
   .twitch-preview iframe{position:absolute; inset:0; width:100%; height:100%; border:0; display:block;}
   .twitch-live-chip{position:absolute; top:12px; left:12px; display:flex; align-items:center; gap:6px; background:rgba(3,17,26,.75); padding:4px 10px; border-radius:6px;}
   .twitch-live-chip .pulse-dot{width:6px; height:6px; background:var(--danger); animation:pulse 2s infinite;}
@@ -113,9 +114,9 @@
   @keyframes vivo-brillo{0%,100%{opacity:0;} 50%{opacity:1;}}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,111,142,.6);} 70%{box-shadow:0 0 0 8px rgba(255,111,142,0);} 100%{box-shadow:0 0 0 0 rgba(255,111,142,0);}}
   .twitch-info{flex-grow:1; padding:22px 24px; display:flex; flex-direction:column; justify-content:center; gap:8px; min-width:0;}
-  .twitch-label{font-size:15px; font-weight:700; color:#E6FBF8; display:flex; align-items:center; gap:10px;}
+  .twitch-label{font-size:15px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:10px;}
   .twitch-label img{width:34px; height:34px; border-radius:50%;}
-  .twitch-btn{align-self:flex-start; margin-top:6px; font-size:14px; font-weight:700; color:#E6FBF8; background:var(--twitch); border-radius:10px; padding:9px 16px; text-decoration:none;}
+  .twitch-btn{align-self:flex-start; margin-top:6px; font-size:14px; font-weight:700; color:#fff; background:var(--twitch); border-radius:10px; padding:9px 16px; text-decoration:none;}
   .twitch-btn:hover{background:#7c3aed;}
   .twitch-head{display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:10px;}
   .twitch-head b{display:flex; align-items:center; gap:7px; color:var(--red-soft);}
@@ -238,7 +239,7 @@
   /* Racha (🔥/❄️ de antes) + últimas 5: columna propia, ya no pegada al nombre. */
   .col-forma{width:168px; flex-shrink:0; display:flex; align-items:center; gap:8px;}
   .racha{width:52px; display:flex; align-items:center; gap:4px; font-size:13px; font-weight:700; white-space:nowrap;}
-  .racha.fire{color:#FFB547;} .racha.ice{color:#7FD4FF;}
+  .racha.fire{color:var(--gold);} .racha.ice{color:#7FD4FF;}
   .ultimas{display:flex; gap:4px;}
   .ultimas i{width:15px; height:15px; border-radius:4px; background:rgba(120,220,210,.08);}
   .ultimas i.w{background:var(--blue);} .ultimas i.l{background:var(--red);}
@@ -268,10 +269,10 @@
   .lp-delta.up{color:var(--green);} .lp-delta.down{color:var(--red-soft);}
   .col-rank{width:150px; display:flex; align-items:center; gap:8px;}
   .rank-emblem{width:18px; height:18px; flex-shrink:0;}
-  .col-rank .tier-lp .tier{font-size:14px; color:#E6FBF8; font-weight:700; line-height:1.25;}
+  .col-rank .tier-lp .tier{font-size:14px; color:var(--text); font-weight:700; line-height:1.25;}
   .col-rank .tier-lp .lp{font-size:13px; color:var(--text-dim); font-weight:600; line-height:1.25;}
   .col-wr{width:110px;}
-  .wr-pct{font-size:14px; font-weight:600; color:#E6FBF8; margin-bottom:5px;}
+  .wr-pct{font-size:14px; font-weight:600; color:var(--text); margin-bottom:5px;}
   .wr-bar{height:4px; background:rgba(120,220,210,.08); border-radius:99px; overflow:hidden;}
   .wr-fill{height:100%; background:var(--accent);}
   @media (max-width:760px){
@@ -339,7 +340,7 @@
   .match-spells img{width:16px; height:16px; border-radius:4px; border:1px solid var(--border); background:var(--placeholder);}
   .match-runes{display:flex; flex-direction:column; gap:3px;}
   .match-runes img{width:16px; height:16px; border-radius:50%; border:1px solid var(--border); background:var(--placeholder); object-fit:contain; padding:1px;}
-  .match-champ{font-size:14px; font-weight:700; color:#E6FBF8;}
+  .match-champ{font-size:14px; font-weight:700; color:var(--text);}
   .match-kda{font-size:13px; color:var(--text-dim);}
   .match-duo{font-size:12px; font-weight:600; color:var(--accent); margin-top:2px; display:flex; align-items:center; gap:5px;}
   .match-result-block{display:flex; flex-direction:column; align-items:flex-end; gap:4px;}
@@ -361,7 +362,7 @@
   .logro-icon{width:34px; height:34px; border-radius:50%; background:color-mix(in srgb, var(--c, var(--text-dim)) 14%, transparent); color:var(--c, var(--text-dim)); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
   .logro-icon img{width:20px; height:20px;}
   .logro-text{font-size:14px; font-weight:500; color:var(--text-dim);}
-  .logro-text b{color:#E6FBF8; font-weight:700;}
+  .logro-text b{color:var(--text); font-weight:700;}
   .logro-detail{font-size:13px; color:var(--text-dim); font-weight:500; margin-top:2px;}
   .logro-time{font-size:13px; color:var(--text-faint); flex-shrink:0;}
   .empty{padding:24px; text-align:center; color:var(--text-faint); font-size:13px;}
@@ -1120,7 +1121,7 @@ function renderTwitch() {
       const parentDomain = window.location.hostname || 'localhost';
       card.innerHTML = `
       <div class="twitch-preview">
-        <div class="twitch-live-chip"><span class="pulse-dot"></span><span style="font-size:11px;font-weight:800;color:#E6FBF8;text-transform:uppercase;">En vivo</span></div>
+        <div class="twitch-live-chip"><span class="pulse-dot"></span><span style="font-size:11px;font-weight:800;color:var(--text);text-transform:uppercase;">En vivo</span></div>
         <iframe src="https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parentDomain}&muted=true" allowfullscreen></iframe>
       </div>
       <div class="twitch-info">
@@ -1183,7 +1184,7 @@ function renderFirstWin() {
             ${pvDuracion ? `<span>${pvDuracion}</span>` : ''}
           </div>
         </div>
-        <div style="margin-left:auto;font-size:13px;color:#FFC86B;font-weight:700;">
+        <div style="margin-left:auto;font-size:13px;color:var(--gold-soft);font-weight:700;">
           ${new Date(firstWin.won_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
         </div>
       </div>`;
@@ -1241,7 +1242,7 @@ function renderBadges() {
         <div style="min-width:0;flex-grow:1;">
           <div class="rey-label">${icono('corona', { size: 15, color: '#FFB547' })}Rey de la Temporada</div>
           <div style="font-size:15px;font-weight:800;margin-top:3px;">${esc(reyNombre)}</div>
-          <div style="font-size:13px;color:#FFC86B;font-weight:600;margin-top:2px;">${esc(rey.detail)}</div>
+          <div style="font-size:13px;color:var(--gold-soft);font-weight:600;margin-top:2px;">${esc(rey.detail)}</div>
         </div>
       </div>`;
   } else {
