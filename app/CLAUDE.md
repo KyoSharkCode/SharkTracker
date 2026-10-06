@@ -84,7 +84,7 @@ tono oscuro con acento turquesa `#00e5c7`) al construir cada pantalla real.
   la marca por su cuenta.
 - **Stack**: web y app en HTML, CSS y JavaScript sin frameworks (nada de React/Next/Tailwind).
   Alex lo conoce y aporta lógica e ideas en ese formato.
-- **Identidad «Abisal» (v0.9.0)**. La guía oficial es el brandkit
+- **Identidad «Abisal» (v0.9.0, publicada con notas del parche en descargar.html)**. La guía oficial es el brandkit
   `https://claude.ai/artifact/YcCHQQLcgoXPxHes6AB3UH` (tokens, logo, íconos, voz, vocabulario y
   componentes de muestra): **leerla antes de diseñar algo nuevo**. Resumen en `PRODUCT.md` (raíz);
   tableros del proceso en el canvas `https://claude.ai/artifact/TXBprLRBTFAGZVEA5SGcnG`.
