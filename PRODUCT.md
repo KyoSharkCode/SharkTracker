@@ -75,7 +75,15 @@ Tan útil y completo como OP.GG, Porofessor o League of Graphs, pero con dos dif
 - **Estética base:** neón / cyberpunk futurista. Todo lo demás (paleta, tipografía, logo, íconos) cambia en el rebranding de oct 2026.
 - **El layout actual se conserva** (decisión de Alex, 06/10/2026): el rebranding cambia colores, vocabulario, fuentes, íconos y logo, pero no la estructura ni la forma de comunicar de la web y la app. Por ejemplo, la web mantiene el menú hamburguesa, el título centrado, el podio con splash art y el orden de sus secciones. La barra de enlaces arriba al estilo OP.GG es justo lo que NO se busca.
 - **Dirección elegida: «Abisal»** (06/10/2026). Fondo abisal, verde agua bioluminiscente (#3DFFD2), violeta medusa (#A98BFF), ámbar señuelo (#FFB547) y coral (#FF6F8E). Fuentes: Unbounded (títulos), Albert Sans (interfaz) y Red Hat Mono (cifras). Símbolo: aleta sobre la línea de agua con ondas de sonar.
-- **Logo:** se rediseña desde cero. Mismo concepto de tiburón, con un símbolo más limpio que funcione a 16px (favicon, ícono de la app) y en grande.
+- **Logo: «Tiburón sonar»** (elegido el 06/10/2026). El tiburón se curva en una «C» y su cola se convierte en ondas de sonar, con un degradado de verde agua a violeta.
+  - Se generó con la IA de Figma y se vectorizó.
+  - Archivos en `logo/`:
+    - `simbolo.svg`: color, para fondos oscuros;
+    - `simbolo-oscuro.svg`: para fondos claros;
+    - `simbolo-claro.svg`: una tinta;
+    - `favicon.svg`: sin las ondas, para tamaños de 24 px o menos.
+  - Fuente editable: archivo de Figma «SharkTracker — Marca».
+  - Logotipo: símbolo + «SHARKTRACKER» en Unbounded Bold, con «TRACKER» en verde agua.
 - **Personalidad:** competitiva, motivante, útil, limpia.
 - **Vocabulario marino** (elegido por Alex el 06/10/2026). Solo estas cinco palabras; no se agrega más jerga marina sin preguntar, para que no se vuelva disfraz:
   - **Sonar**: reemplaza a «Actualizado» (por ejemplo, «Sonar · hace 28 s»);
