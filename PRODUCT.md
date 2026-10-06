@@ -112,6 +112,7 @@ Tan útil y completo como OP.GG, Porofessor o League of Graphs, pero con dos dif
 - **Logos actuales** en `logo/` (`MainLogo.webp`, `HorizontalLogo.webp`, `FlaviIconLogo.*`): tiburón con degradado cian→magenta y wordmark en cursiva. Es la referencia a reemplazar.
 - **Moodboard:** https://claude.ai/artifact/YZ6x5iK3Wi8xB4a2U6Mf3q
 - **Canvas de mockups** de la app y la web, y el de pulido visual: https://claude.ai/artifact/6gK8Gg31m9YjTo1ptqaLt8
+- **Brandkit «SharkTracker · Abisal»**, la guía oficial de la marca (tokens, logo, íconos, voz, vocabulario y componentes de muestra): https://claude.ai/artifact/YcCHQQLcgoXPxHes6AB3UH. Hay que leerla antes de diseñar cualquier pieza nueva.
 - **Datos reales** en Supabase (jugadores, rangos, partidas, insignias). No inventar jugadores, estadísticas ni testimonios.
 
 ## Product Principles
