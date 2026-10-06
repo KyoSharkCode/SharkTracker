@@ -84,15 +84,29 @@ tono oscuro con acento turquesa `#00e5c7`) al construir cada pantalla real.
   la marca por su cuenta.
 - **Stack**: web y app en HTML, CSS y JavaScript sin frameworks (nada de React/Next/Tailwind).
   Alex lo conoce y aporta lógica e ideas en ese formato.
-- **Rebranding pendiente**: en cuanto termine la auditoría de prompts, sesión de rebranding completo de
-  web + app (tipografía, paleta, íconos, logo). **Inter (y Rajdhani) no son definitivas**: se pueden
-  cambiar. Hasta entonces se sigue con lo actual.
+- **Identidad «Abisal» (v0.9.0, publicada con notas del parche en descargar.html)**. La guía oficial es el brandkit
+  `https://claude.ai/artifact/YcCHQQLcgoXPxHes6AB3UH` (tokens, logo, íconos, voz, vocabulario y
+  componentes de muestra): **leerla antes de diseñar algo nuevo**. Resumen en `PRODUCT.md` (raíz);
+  tableros del proceso en el canvas `https://claude.ai/artifact/TXBprLRBTFAGZVEA5SGcnG`.
+  - **Se conserva el layout** de la web y la app. Cambiaron colores, vocabulario, fuentes, íconos y logo.
+  - **Fuentes**: Unbounded en títulos (mayúsculas), Albert Sans en la interfaz y Red Hat Mono en las
+    cifras (LP, KDA, winrate, tiempos, versión). Los nombres de rango («Oro II») van en Albert Sans 800.
+  - **Fases**: 1 brief, 2 dirección, 3 logo + íconos + brandkit y 4 aplicado en el código (hechas).
+    Falta la 5: auditoría y release v0.9.0.
+  - **En la app**: los tokens de `:root` de `renderer/style.css` tienen los valores Abisal y al final
+    del archivo está el bloque «v0.9 — identidad Abisal». Los acentos de Apariencia conservan sus
+    claves (`turquesa`, `lila`…) con los tonos nuevos.
+  - **Mi Perfil**: sin la etiqueta «Conectado a SharkTracker». El punto del chip de Discord
+    (`.discordchip .dcdot`) es el indicador de conexión: `marcarConexion()` en `renderer/perfil.js`
+    le pone la clase `offline` (salmón, tooltip «Sin conexión: mostrando datos guardados»). Sin
+    conexión, el botón junto al rango dice «Reintentar conexión».
+  - **Rachas**: «Frenesí» (ícono de fuego, `--frenesi`) y «Marea baja» (hielo, `--helado`), en
+    `perfil-calculos.js` (íconos `fuego` / `hielo`) y en las etiquetas de En Vivo y la pantalla de carga.
 - **Íconos**: SVG propios para lo que no existe en librerías (íconos de LoL: dragón, Barón, torre…) y
   para lo que es identidad; para íconos utilitarios se puede usar una librería con el mismo trazo.
   Figma (conectado) se usa cuando ayuda a diseñar mejor (íconos en grilla, logo, tableros).
-- **Brandkit**: no hay uno formal. Base existente: el moodboard
-  `https://claude.ai/artifact/YZ6x5iK3Wi8xB4a2U6Mf3q` y el canvas de mockups de la app/web; el
-  brandkit de SharkTracker se crea durante el rebranding (skill `brandkit`) y se mantiene al día.
+- **Íconos Abisal**: siluetas en `assets/iconos/*.svg` (raíz del repo); los de objetivos están
+  copiados en `src/overlay/icons.js` y en `assets/lol-icons.js` de la web.
 - **SharkTracker es independiente de la marca personal "KyoSumi"** (skill `marca-kyosumi`, Marea
   Nocturna): no se usa esa guía para la web ni para la app.
 

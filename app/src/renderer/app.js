@@ -253,7 +253,7 @@ window.sharkTracker.overlayConfig.onChanged(renderApariencia);
 window.sharkTracker.overlayConfig.get().then(renderApariencia);
 
 // --- Ajustes → Apariencia (acento, ventana) y Notificaciones: userData/ajustes.json ---
-const ACENTOS = [['turquesa', 'Turquesa', '#00e5c7'], ['lila', 'Lila', '#c19bf2'], ['dorado', 'Dorado', '#e8c766'], ['azul', 'Azul', '#7db3f0'], ['rojo', 'Rojo', '#ea8a8a']];
+const ACENTOS = [['turquesa', 'Turquesa', '#3DFFD2'], ['lila', 'Lila', '#A98BFF'], ['dorado', 'Dorado', '#FFB547'], ['azul', 'Azul', '#5AA9FF'], ['rojo', 'Rojo', '#FF8FA6']];
 const acentosEl = $('acentos');
 for (const [clave, nombre, color] of ACENTOS) {
   const b = document.createElement('button');
@@ -276,7 +276,7 @@ function marcar(sw, on) {
 function renderAjustes(aj) {
   if (!aj) return;
   // El acento se aplica a toda la ventana con la variable --acento (style.css).
-  const color = ACENTOS.find(([c]) => c === aj.acento)?.[2] ?? '#00e5c7';
+  const color = ACENTOS.find(([c]) => c === aj.acento)?.[2] ?? '#3DFFD2';
   document.documentElement.style.setProperty('--acento', color);
   acentosEl.querySelectorAll('.acento').forEach((b) => {
     const on = b.dataset.acento === aj.acento;

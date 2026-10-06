@@ -282,7 +282,8 @@
     if (datos.childNodes.length) c.append(datos);
     if (m.consejo) {
       const tip = el('div', 'ev-tip');
-      tip.append(el('div', 'mt-subt', 'Consejo de OP.GG (en inglés)'), el('div', null, m.consejo));
+      // v0.9: la función meta lo traduce al español (consejo_idioma: 'es'); si no pudo, queda en inglés.
+      tip.append(el('div', 'mt-subt', m.consejo_idioma === 'es' ? 'Consejo de OP.GG' : 'Consejo de OP.GG (en inglés)'), el('div', null, m.consejo));
       c.append(tip);
     }
     // Lo que más se usa contra él.
@@ -531,7 +532,7 @@
       const tags = [];
       if (j.main === true) tags.push(['main', 'Main']);
       if (j.main === false) tags.push(['fuera', 'Fuera de su main']);
-      if (j.rango?.racha) tags.push(['main', 'En racha']);
+      if (j.rango?.racha) tags.push(['main', 'Frenesí']);
       if (j.sharktracker) tags.push(['st', 'SharkTracker']);
       if (tags.length) {
         const fila = el('div', 'ev-tags');

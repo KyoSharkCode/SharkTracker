@@ -7,8 +7,11 @@
 //
 // Con rival_id (body { champion_id, posicion, rival_id }) devuelve el
 // enfrentamiento contra ese campeón (lol_get_lane_matchup_guide): quién tiene
-// ventaja en línea, consejo de OP.GG (en inglés: la herramienta solo acepta
-// en_US / ko_KR), hechizos, botas, objetos, inicio y varias páginas de runas.
+// ventaja en línea, consejo de OP.GG, hechizos, botas, objetos, inicio y varias
+// páginas de runas. El consejo llega en inglés (la herramienta solo acepta
+// en_US / ko_KR): se descarta si nombra a un campeón que no es ninguno de los
+// dos, y se traduce al español con Gemini (GEMINI_API_KEY, el mismo secreto de
+// las otras funciones). Si Gemini falla, queda en inglés (consejo_idioma: 'en').
 // Todos los elos (esa herramienta no filtra por elo). Misma caché, con
 // elo = "vs_<rival_id>".
 //
@@ -23,6 +26,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const GEMINI_API_KEY = (Deno.env.get('GEMINI_API_KEY') ?? '').trim();
 
 const MCP_URL = 'https://mcp-api.op.gg/mcp';
 const ELO = 'emerald_plus';
@@ -146,6 +150,52 @@ async function nombresOpgg(championId: number): Promise<string[]> {
   return [...new Set([snake, c.id.toUpperCase(), snake.replace(/_/g, '')])];
 }
 
+// Jerga de LoL como la dice el grupo (español latino). La IA a veces traduce
+// literal ("selva", "carril"): se le pide en el prompt y además se corrige "selva"
+// en la respuesta, también en los análisis ya guardados.
+const JERGA_PROMPT = 'Usa la jerga de League of Legends como se habla en Latinoamérica: "jungla" y "jungla/jungler" (NUNCA "selva" ni "selvático"), "línea" (no "carril"), "farmear", "rotar", "wards", "early/mid/late game" o "inicio/mitad/final de la partida", y los nombres de campeones, objetos y objetivos tal cual (Barón, Dragón, Heraldo, Vacuolarvas).';
+const JERGA_FIX: [RegExp, string][] = [
+  [/\bselv[aá]tic[oa]s?\b/gi, 'de la jungla'], [/\bselvas\b/gi, 'junglas'], [/\bselva\b/gi, 'jungla'],
+];
+function corregirJerga(v: any): any {
+  if (typeof v === 'string') {
+    return JERGA_FIX.reduce((t, [re, por]) => t.replace(re, (m) => (m[0] === m[0].toUpperCase() ? por[0].toUpperCase() + por.slice(1) : por)), v);
+  }
+  if (Array.isArray(v)) return v.map(corregirJerga);
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, corregirJerga(x)]));
+  return v;
+}
+
+// El consejo de OP.GG a veces es de otro enfrentamiento (p. ej. habla de Volibear
+// cuando el rival es Warwick). Si nombra a un campeón que no es ninguno de los dos,
+// no se muestra. Nombres con mayúscula, tal como los escribe OP.GG.
+function consejoValido(tip: string | null, ids: number[]): string | null {
+  if (!tip || !campeones) return tip;
+  for (const [key, c] of campeones) {
+    if (ids.includes(key)) continue;
+    const nombre = c.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if (new RegExp(`(^|[^A-Za-z])${nombre}([^A-Za-z]|$)`).test(tip)) return null;
+  }
+  return tip;
+}
+
+// Traduce el consejo al español latino. null si no hay clave o la IA falla.
+async function traducirConsejo(tip: string, mio: string, rival: string): Promise<string | null> {
+  if (!GEMINI_API_KEY) return null;
+  try {
+    const prompt = `Traduce al español latino este consejo de League of Legends para jugar ${mio} contra ${rival}. ${JERGA_PROMPT} Deja los nombres de las habilidades como vienen y la tecla entre paréntesis, por ejemplo (E). Responde SOLO con la traducción, sin comillas.\n\n${tip}`;
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 300 } }),
+    });
+    if (!res.ok) return null;
+    const out = await res.json();
+    const texto = String(out?.candidates?.[0]?.content?.parts?.[0]?.text ?? '').trim().replace(/^["«]|["»]$/g, '');
+    return texto ? corregirJerga(texto) : null;
+  } catch { return null; }
+}
+
 // Porcentaje con victorias ÷ partidas (OP.GG redondea los suyos a 2 decimales).
 const wr = (g: any) => (g?.play ? g.win / g.play : null);
 const grupo = (g: any) => (g?.ids?.length
@@ -267,7 +317,13 @@ Deno.serve(async (req) => {
           }
         }
         if (!respuesta) throw ultimoError ?? new Error('OP.GG no tiene ese enfrentamiento');
-        const datos = armarMatchup(respuesta, parche);
+        const datos: any = armarMatchup(respuesta, parche);
+        datos.consejo = consejoValido(datos.consejo, [championId, rivalId]);
+        datos.consejo_idioma = 'en';
+        if (datos.consejo) {
+          const es = await traducirConsejo(datos.consejo, campeones?.get(championId)?.name ?? '', campeones?.get(rivalId)?.name ?? '');
+          if (es) { datos.consejo = es; datos.consejo_idioma = 'es'; }
+        }
         const actualizado = new Date().toISOString();
         await supabase.from('meta_campeon').upsert({ champion_id: championId, posicion, elo, parche, datos, actualizado });
         return json({ estado: 'ok', datos, actualizado });

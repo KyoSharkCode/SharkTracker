@@ -101,8 +101,8 @@ function etiquetas(partidas, ahora = Date.now()) {
     let n = 0;
     for (const p of lista) { if (p.win === primero) n++; else break; }
     if (n >= 3) tags.push(primero
-      ? { tipo: 'racha-buena', icono: '▲', texto: 'Buena racha', detalle: `${n} victorias` }
-      : { tipo: 'racha-mala', icono: '▼', texto: 'Mala racha', detalle: `${n} derrotas` });
+      ? { tipo: 'racha-buena', icono: 'fuego', texto: 'Frenesí', detalle: `${n} victorias` }
+      : { tipo: 'racha-mala', icono: 'hielo', texto: 'Marea baja', detalle: `${n} derrotas` });
   }
   const ultima = lista[0];
   if (ultima && !ultima.win && ahora - new Date(ultima.terminada).getTime() < 12 * 3600 * 1000) {

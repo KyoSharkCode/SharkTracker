@@ -144,7 +144,7 @@ function createWindow() {
     frame: false, // dibujamos nuestra propia barra de título, como en el mockup
     title: 'SharkTracker',
     icon: path.join(__dirname, 'assets', 'icon.png'),
-    backgroundColor: '#05070c',
+    backgroundColor: '#03111A',
     // Abierta por Windows al iniciar sesión y con la bandeja activada: empieza escondida.
     show: !(process.argv.includes(ARG_AL_INICIAR) && ajustesApp.leer().ventana.bandeja),
     webPreferences: {
@@ -683,7 +683,7 @@ ipcMain.on('editor:abrir', () => {
     minHeight: 640,
     title: 'SharkTracker — Reposicionar elementos',
     icon: path.join(__dirname, 'assets', 'icon.png'),
-    backgroundColor: '#05070c',
+    backgroundColor: '#03111A',
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload-editor.js'),

@@ -9,11 +9,11 @@ const path = require('path');
 
 // Colores de acento del mockup (Ajustes → Apariencia). Turquesa = el de SharkTracker.
 const ACENTOS = {
-  turquesa: '#00e5c7',
-  lila: '#c19bf2',
-  dorado: '#e8c766',
-  azul: '#7db3f0',
-  rojo: '#ea8a8a',
+  turquesa: '#3DFFD2',
+  lila: '#A98BFF',
+  dorado: '#FFB547',
+  azul: '#5AA9FF',
+  rojo: '#FF8FA6',
 };
 
 // Avisos de Windows (Ajustes → Notificaciones), los del mockup.
