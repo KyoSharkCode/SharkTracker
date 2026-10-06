@@ -96,9 +96,16 @@ Tan útil y completo como OP.GG, Porofessor o League of Graphs, pero con dos dif
 - **Voz, mezclada según el contexto:**
   - técnica y precisa en estadísticas, meta, builds y recomendaciones de la app;
   - burlona y juguetona en las insignias y en la web, donde el grupo se pica.
-- **Íconos:**
-  - SVG propios para lo de LoL (dragón, Barón, torre…) y para lo de identidad;
-  - una librería con el mismo trazo para los utilitarios.
+- **Íconos (Abisal, 06/10/2026):**
+  - Generados con la IA de Figma, aprobados por Alex y vectorizados en `assets/iconos/*.svg`.
+  - Son siluetas sólidas de 24×24 con `currentColor`, legibles a 16 px porque se usan en la web, la app y el overlay.
+  - El set:
+    - **objetivos:** dragón, Barón, Heraldo, Vacuolarvas, torre e inhibidor;
+    - **roles:** top, jungla, medio, ADC y soporte;
+    - **interfaz:** diente (moneda), Frenesí (fuego, ámbar #FFB547) y racha de derrotas (hielo, cian helado #7FD4FF).
+  - **Estética de las rachas:** la de victorias es caliente (fuego) y la de derrotas es fría (congelada). Nada de olas para las derrotas.
+  - Los íconos utilitarios (cerrar, flechas, ajustes) salen de una librería de trazo similar.
+  - Fuente editable: archivo de Figma «SharkTracker — Marca», página «Íconos — Abisal».
 
 ## Evidence on Hand
 
