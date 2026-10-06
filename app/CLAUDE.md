@@ -44,8 +44,8 @@ vez haciendo una app de escritorio).
   debe funcionar para todo el grupo. Arquitectura decidida: Electron como
   orquestador/UI + un proceso nativo aparte (FFmpeg con codificación por
   hardware, o un módulo nativo) que hace la captura + buffer circular,
-  disparado por eventos de la Live Client Data API. **Esto va en una fase
-  posterior a la Fase 1, no la toques todavía.**
+  disparado por eventos de la Live Client Data API. En curso (fase C0): ver
+  "Motor de clips (Fase 2, bloque 5)".
 
 ## Alcance de la Fase 1 (lo único que se construye ahora)
 
@@ -63,7 +63,7 @@ vez haciendo una app de escritorio).
 - ~~"En Vivo" (selección de campeones)~~ — hecho en la v0.4.0 (Fase 2, bloque 3; LCU en `src/lcu.js`).
 - ~~"Meta" (tier list, counters, tendencias)~~ — hecho en la v0.3.0 (Fase 2, bloque 2; datos de OP.GG).
 - ~~"Ajustes → Apariencia" y "Ajustes → Notificaciones"~~ — hechas en la v0.8.0 (Fase 2, bloque 4).
-- El motor de clips.
+- ~~El motor de clips~~: en curso (Fase 2, bloque 5; fase C0).
 
 ## Referencia visual
 
