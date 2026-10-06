@@ -596,16 +596,16 @@ function drawPov() {
     stat(`${dmgShare}%`, 'Daño del equipo'),
     stat(k(p.damage), `Daño · ${Math.round(p.damage / mins)}/min`),
     stat(k(p.gold), `Oro · ${Math.round(p.gold / mins)}/min`),
-    stat(p.cs, `CS · ${(p.cs / mins).toFixed(1)}/min`),
-    // CS al minuto 10 (súbditos + monstruos). Las partidas guardadas antes de v0.9 solo
-    // traen los súbditos de línea (csAt10): para un jungla eso no sirve y se muestra —.
-    stat(p.cs10 ?? (p.teamPosition === 'JUNGLE' ? '—' : p.csAt10 ?? '—'), 'CS a los 10 min'),
+    // CS = súbditos + monstruos. El del minuto 10 va en la misma casilla (cs10 desde v0.9;
+    // las partidas guardadas antes solo traen súbditos de línea, así que no se muestra).
+    stat(p.cs, `CS · ${(p.cs / mins).toFixed(1)}/min${p.cs10 != null ? ` · ${p.cs10} al min 10` : ''}`),
     stat(p.vision, `Visión · ${(p.vision / mins).toFixed(2)}/min`),
     stat(`${p.wardsPlaced}/${p.wardsKilled}/${p.controlWards}`, 'Wards puestas/rotas/control'),
     stat(k(p.damageTaken), `Daño recibido · ${k(p.mitigated)} mitigado`),
     stat(k(p.heal + (p.shield ?? 0)), 'Curación + escudos'),
     stat(`${p.ccTime}s`, 'Control de masas'),
     stat(k(p.damageToObjectives), 'Daño a objetivos'),
+    stat(k(p.damageToBuildings ?? 0), 'Daño a estructuras'),
     stat(p.soloKills ?? '—', 'Kills en solitario'),
     stat(p.pentas ? 'Penta' : p.quadras ? 'Quadra' : p.triples ? 'Triple' : p.doubles ? 'Doble' : '—', 'Mejor multikill'),
   ].join('');
