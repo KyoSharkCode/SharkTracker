@@ -447,6 +447,27 @@ function pintarEstado(estado) {
   }
 }
 
+// ── Clips (Ctrl + F8): aviso corto en la columna de avisos ──
+// "Guardando clip…" mientras se graban los segundos de después; "Clip guardado" 3 s.
+const TEXTO_CLIP = {
+  guardando: (d) => ['Guardando clip…', `${d.segundos} s más y listo`],
+  guardado: (d) => ['Clip guardado', `${d.segundos} s · Videos › SharkTracker`],
+  error: () => ['No se pudo guardar', 'Revisa Ajustes › Clips'],
+  apagado: () => ['Clips apagados', 'Actívalos en Ajustes › Clips'],
+};
+let clipTimer = null;
+function pintarClip(d) {
+  const nodo = $('clip');
+  const texto = TEXTO_CLIP[d?.estado];
+  clearTimeout(clipTimer);
+  if (!texto) { mostrar(nodo, false); return; }
+  const [titulo, sub] = texto(d);
+  pintarAviso(nodo, { icon: 'clip', claseColor: `c-clip${d.estado === 'error' ? ' error' : ''}`, titulo, sub });
+  mostrar(nodo, true, d.estado !== 'guardando');
+  if (d.estado !== 'guardando') clipTimer = setTimeout(() => mostrar(nodo, false), 3000);
+}
+window.overlay.onClip?.(pintarClip);
+
 window.overlay.onState(pintarEstado);
 window.overlay.onConfig?.(aplicarConfig);
 window.overlay.getConfig?.().then(aplicarConfig);

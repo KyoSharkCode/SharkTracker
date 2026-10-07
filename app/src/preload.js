@@ -63,6 +63,15 @@ contextBridge.exposeInMainWorld('sharkTracker', {
     probarAviso: () => ipcRenderer.invoke('ajustes:probarAviso'),
   },
 
+  // Clips (Ajustes → Clips): FFmpeg, codificador y carpeta. Ctrl + F8 vive en el proceso main.
+  clips: {
+    estado: () => ipcRenderer.invoke('clips:estado'),
+    preparar: () => ipcRenderer.invoke('clips:preparar'),
+    abrirCarpeta: () => ipcRenderer.invoke('clips:abrirCarpeta'),
+    onProgreso: (callback) => ipcRenderer.on('clips:progreso', (_e, p) => callback(p)),
+    onGuardado: (callback) => ipcRenderer.on('clips:guardado', (_e, r) => callback(r)),
+  },
+
   // Sesión de Discord
   auth: {
     getState: () => ipcRenderer.invoke('auth:getState'),

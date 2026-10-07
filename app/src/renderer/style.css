@@ -881,3 +881,12 @@ html, body { font-variant-numeric: tabular-nums; }
 .ptag.racha-buena { background: rgba(255,181,71,0.1); color: var(--frenesi); border-color: rgba(255,181,71,0.35); }
 .ptag.racha-mala { background: rgba(127,212,255,0.1); color: var(--helado); border-color: rgba(127,212,255,0.35); }
 .ptag .pic-svg { width: 14px; height: 14px; flex-shrink: 0; vertical-align: -2px; }
+
+/* Ajustes → Clips (C1) */
+.clips-progreso { display: flex; align-items: center; gap: 12px; padding: 4px 2px 10px; }
+.clips-barra { flex: 1; height: 6px; border-radius: 3px; background: rgba(120,220,210,0.12); overflow: hidden; }
+.clips-barra i { display: block; height: 100%; width: 0; background: var(--acento); transition: width 200ms var(--ease-out); }
+.clips-progreso span { font-size: 12px; color: var(--texto-tenue); white-space: nowrap; }
+.clips-info { margin: 4px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 1.5; color: var(--texto-tenue); }
+.clips-info b { color: var(--texto); font-weight: 600; }
+#stab-clips .ovgrid { max-width: 980px; }

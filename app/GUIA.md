@@ -33,6 +33,8 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
 - **Tab**: diferencia de oro por fila (la flecha apunta a quien tiene más oro).
 - Arriba a la derecha, **Tu rendimiento** contra la división de arriba de la tuya.
 - **Ajustes → Overlay**: apagar piezas y moverlas ("Reposicionar elementos").
+- **Ctrl + F8**: guarda un clip con los 20 s anteriores y los 15 s siguientes (si activaste los
+  clips en Ajustes → Clips). Arriba a la derecha sale "Guardando clip…" y luego "Clip guardado".
 
 ## Ajustes a tu gusto
 - **Ajustes → Apariencia**: color de acento de la app, tamaño y opacidad del overlay en partida
@@ -41,6 +43,11 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
 - **Ajustes → Notificaciones**: avisos de Windows con tus dientes, misiones, retos del grupo y el
   resumen de tu semana (el lunes). Llegan mientras la app esté abierta o en la bandeja; un clic
   abre la página en la web. "Probar un aviso" muestra uno de ejemplo.
+
+- **Ajustes → Clips** (apagado de fábrica): al activarlo, la primera vez descarga FFmpeg (unos
+  80 MB) y prueba tu tarjeta gráfica. Desde ahí graba solo durante la partida, sin llenar el disco,
+  y Ctrl + F8 guarda el clip en **Videos › SharkTracker**. Por ahora sin sonido. Calidad Alta (60 fps)
+  o Ligera (30 fps), y si quieres que el overlay salga en el clip.
 
 ## Actualizaciones
 Son **automáticas**: la app busca versiones nuevas al abrirse, las descarga sola y las
