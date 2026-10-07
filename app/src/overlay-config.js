@@ -26,7 +26,7 @@ const POSICIONES_FABRICA = {
   carga:       { x: 1484, y: 60 },   // panel de la pantalla de carga (420 px de ancho)
   build:       { x: 16,   y: 16 },   // build en partida, arriba a la izquierda (452 px de ancho)
   siguiente:   { x: 1385, y: 996 },  // siguiente compra, a la izquierda del minimapa (250 px de ancho)
-  habilidad:   { x: 768,  y: 902 },  // "sube esta", justo encima de las habilidades (Q W E R)
+  habilidad:   { x: 744,  y: 902 },  // "sube esta": encima de las flechitas de subir nivel (Q W E R)
 };
 
 // Ajustes → Apariencia: tamaño del overlay (sobre el escalado a tu pantalla) y

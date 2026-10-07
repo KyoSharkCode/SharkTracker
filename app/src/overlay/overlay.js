@@ -396,7 +396,10 @@ function pintarSiguiente() {
   nodo.replaceChildren(...partes);
 }
 
-// ── Sube esta: al tener un punto de habilidad sin gastar, la tecla que toca (orden de OP.GG) ──
+// ── Sube esta: al tener un punto de habilidad sin gastar, una flecha hacia abajo justo
+// encima de las flechitas doradas de subir nivel del juego, sobre la habilidad que toca
+// (orden de OP.GG). La pieza son 4 huecos (Q W E R) con la separación de las habilidades
+// del HUD; solo el que toca lleva la flecha (en el editor se ven los 4 para alinearlos).
 // Solo entra y sale (sin bucles). Desaparece en cuanto subes la habilidad.
 let habilidad = null;
 function pintarHabilidad() {
@@ -406,27 +409,25 @@ function pintarHabilidad() {
   const firma = JSON.stringify(habilidad);
   if (nodo._firma === firma) return;
   nodo._firma = firma;
-  const etq = el('div', 'hab-etq');
-  etq.append(document.createTextNode('Sube '), el('b', null, habilidad.tecla),
-    document.createTextNode(habilidad.pendientes > 1 ? ` · ${habilidad.pendientes} puntos` : ` · nivel ${habilidad.nivel}`));
-  const teclas = el('div', 'hab-teclas');
-  for (const k of ['Q', 'W', 'E', 'R']) {
-    const t = el('div', `hab-tecla${k === habilidad.tecla ? ' toca' : ''}`, k);
-    if (habilidad.puntos?.[k]) t.append(el('span', 'pts', String(habilidad.puntos[k])));
+  const huecos = ['Q', 'W', 'E', 'R'].map((k) => {
+    const h = el('div', `hab-hueco${k === habilidad.tecla ? ' toca' : ''}`);
+    h.append(el('span', 'hab-letra', k));
     if (k === habilidad.tecla) {
       const NS = 'http://www.w3.org/2000/svg';
       const svg = document.createElementNS(NS, 'svg');
-      svg.setAttribute('viewBox', '0 0 14 10');
+      svg.setAttribute('viewBox', '0 0 28 22');
       svg.setAttribute('class', 'hab-flecha');
       svg.setAttribute('aria-hidden', 'true');
       const p = document.createElementNS(NS, 'path');
-      p.setAttribute('d', 'M0 0h14L7 10z');
+      p.setAttribute('d', 'M2 2h24L14 20z');
       svg.append(p);
-      t.append(svg);
+      h.append(svg);
+      // Con varios puntos sin gastar (subiste dos niveles de golpe), cuántos faltan.
+      if (habilidad.pendientes > 1) h.append(el('span', 'hab-pend', `×${habilidad.pendientes}`));
     }
-    teclas.append(t);
-  }
-  nodo.replaceChildren(etq, teclas);
+    return h;
+  });
+  nodo.replaceChildren(...huecos);
 }
 
 window.overlay.onTab((pulsado) => { tab = pulsado; pintarOro(); });

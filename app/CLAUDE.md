@@ -314,9 +314,11 @@ que pulse un botón.
   donde más se juega (`meta_tier.role_rate`). Interruptor "Tu build" en Ajustes → Overlay.
 - **Habilidades**: En Vivo muestra "Subir primero" y el **orden por nivel** (cuadrícula de 18, la
   misma de Meta) en la tarjeta de runas y hechizos de tu campeón. En partida, la pieza **"Sube esta"**
-  (`#habilidad`, zona centro, x 768 y 902, justo encima de Q W E R; movible en el editor e
-  interruptor en Ajustes → Overlay) aparece solo con un punto de habilidad sin gastar y señala con
-  una flecha la tecla que toca. `habilidades.js` (`siguienteHabilidad`, se prueba en Node): con
+  (`#habilidad`, zona centro, x 744 y 902; movible en el editor e interruptor en Ajustes → Overlay)
+  aparece solo con un punto de habilidad sin gastar: una flecha hacia abajo justo encima de las
+  flechitas doradas de subir nivel del juego, sobre la habilidad que toca (como pidió Alex, sin
+  panel ni texto; "×2" al lado si hay más de un punto). Son 4 huecos de 44 px (separación de Q W E R
+  medida en una captura del HUD de Alex); en el editor se ven los 4 huecos punteados para alinearlos. `habilidades.js` (`siguienteHabilidad`, se prueba en Node): con
   `activePlayer.level` y `abilities.{Q,W,E,R}.abilityLevel`, recorre el orden de OP.GG
   (`ficha.habilidades.orden`, guardado en main.js `ordenHabilidades` al preparar la build) y elige
   la primera que va atrasada y se puede subir (R a los 6/11/16; básicas hasta 5 y la mitad del

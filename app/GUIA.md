@@ -28,8 +28,8 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
 - **Ctrl + X en partida**: tu build completa en orden, arriba a la izquierda (lo que ya
   compraste sale con ✓; lo marcado con ★ está adaptado a los rivales). Solo en la Grieta.
 - **Junto al minimapa**: el siguiente objeto de tu build (o el componente que toca) y el oro que te falta.
-- **Al subir de nivel**: encima de tus habilidades aparece "Sube E" con una flecha en la tecla que
-  toca según el orden de OP.GG. Se va en cuanto la subes. En En Vivo también está el orden completo
+- **Al subir de nivel**: encima de las flechitas doradas del juego aparece una flecha hacia abajo
+  sobre la habilidad que toca según el orden de OP.GG. Se va en cuanto la subes. En En Vivo también está el orden completo
   nivel por nivel.
 - **Con un segundo monitor**: la página **En Vivo** de la app muestra durante toda la partida a los 10
   jugadores (como en la pantalla de carga) y tu build, sin tener que pulsar Ctrl + X.
