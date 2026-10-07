@@ -114,7 +114,8 @@ function vigilarRam(pid) {
   clearInterval(vigilancia);
   vigilancia = setInterval(() => {
     execFile('tasklist', ['/FI', `PID eq ${pid}`, '/FO', 'CSV', '/NH'], { windowsHide: true, timeout: 5000 }, (err, salida) => {
-      const kb = !err && (salida ?? '').match(/"([\d.,\s]+)\s*K"\s*$/m);
+      // Última columna: "123,456 K" (inglés), "123.456 KB" (español), "123 456 Ko" (francés)…
+      const kb = !err && (salida ?? '').match(/"([\d.,\s]+)\s*[A-Za-z]+"\s*$/m);
       if (kb) log(`FFmpeg en uso: ${Math.round(Number(kb[1].replace(/[^\d]/g, '')) / 1024)} MB de RAM`);
     });
   }, 60000);

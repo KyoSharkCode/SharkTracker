@@ -490,6 +490,12 @@ Decisiones de Alex (oct 2026).
   - Ajustes → Clips (`ajustes.json` → `clips`: activo, calidad, antes 20, despues 15, overlayEnClip),
     apagado de fábrica. Al activar descarga FFmpeg con barra de progreso y prueba la gráfica.
   - Falta: audio (C1b, ayudante nativo), eventos automáticos (C2), galería y límite de 10 GB (C3).
+  - **Prueba real de v0.9.1 (Alex y Ostia, una partida cada uno)**: sin bajón de rendimiento, clips fluidos,
+    Ctrl + F8 bien. PC de Alex: NVENC directo, 7 clips de 36 s (45–65 MB) guardados en 0,6–0,8 s; el
+    último, pulsado justo al final, se terminó antes de parar el búfer. Laptop de Ostia: NVENC y AMF fallan
+    ("no packets", la pantalla está en la Intel) y gana QuickSync sin copia; 1 clip de 63,5 MB en 1,4 s.
+    La línea de RAM no salía: el regex de `tasklist` buscaba "K" y Windows en español escribe "KB"
+    (corregido en v0.9.2: acepta cualquier unidad).
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)
