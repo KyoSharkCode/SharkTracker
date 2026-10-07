@@ -197,7 +197,7 @@ async function checkLiveGame() {
 
 checkBtn.addEventListener('click', checkLiveGame);
 
-// --- Ajustes: pestañas (Cuenta / Overlay / Apariencia / Notificaciones) ---
+// --- Ajustes: pestañas (Cuenta / Overlay / Apariencia / Notificaciones / Clips) ---
 document.querySelectorAll('.stab:not(.disabled)').forEach((tab) => tab.addEventListener('click', () => {
   document.querySelectorAll('.stab').forEach((t) => t.classList.toggle('active', t === tab));
   document.querySelectorAll('.subpage').forEach((p) => p.classList.toggle('active', p.id === 'stab-' + tab.dataset.stab));
@@ -325,3 +325,75 @@ window.sharkTracker.app.onActualizacion(renderActualizacion);
 window.sharkTracker.app.estadoActualizacion().then(renderActualizacion);
 $('btn-actualizar').addEventListener('click', () => window.sharkTracker.app.instalarActualizacion());
 $('update-chip').addEventListener('click', () => window.sharkTracker.app.instalarActualizacion());
+
+// --- Ajustes → Clips (C1): activar (descarga FFmpeg y prueba el codificador la primera vez),
+// calidad, overlay en el clip y carpeta. Ctrl + F8 lo escucha el proceso main en partida.
+const swClips = $('sw-clips');
+const swClipsOverlay = $('sw-clips-overlay');
+const calidadClipsEl = $('clips-calidad');
+for (const [valor, texto] of [['alta', 'Alta'], ['ligera', 'Ligera']]) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'segmento';
+  b.dataset.calidad = valor;
+  b.setAttribute('role', 'radio');
+  b.textContent = texto;
+  b.addEventListener('click', async () => renderClips(await window.sharkTracker.ajustes.set({ clips: { calidad: valor } })));
+  calidadClipsEl.append(b);
+}
+let estadoClips = null;
+let preparandoClips = false;
+async function renderClips(aj) {
+  const c = aj?.clips;
+  if (!c) return;
+  estadoClips = await window.sharkTracker.clips.estado();
+  marcar(swClips, c.activo);
+  marcar(swClipsOverlay, c.overlayEnClip);
+  calidadClipsEl.querySelectorAll('.segmento').forEach((b) => {
+    const on = b.dataset.calidad === c.calidad;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-checked', String(on));
+  });
+  $('clips-duracion').textContent = `${c.antes} s antes de pulsar Ctrl + F8 y ${c.despues} s después`;
+  if (preparandoClips) return;
+  swClips.disabled = !estadoClips.windows;
+  $('clips-estado').textContent = !estadoClips.windows ? 'Solo funciona en Windows.'
+    : !c.activo ? 'Apagado: no se graba nada.'
+    : estadoClips.grabando ? `Grabando el búfer · ${estadoClips.codificador ?? ''}`
+    : `Activo: empieza a grabar al empezar la partida${estadoClips.codificador ? ` · ${estadoClips.codificador}` : ''}`;
+}
+const TEXTO_PASO = { descargando: 'Descargando FFmpeg', descomprimiendo: 'Descomprimiendo…', probando: 'Probando la tarjeta gráfica…' };
+window.sharkTracker.clips.onProgreso((p) => {
+  $('clips-progreso').hidden = false;
+  $('clips-barra').style.width = p.paso === 'descargando' ? `${Math.round((p.avance ?? 0) * 100)}%` : '100%';
+  $('clips-progreso-txt').textContent = p.paso === 'descargando' ? `${TEXTO_PASO.descargando} · ${Math.round((p.avance ?? 0) * 100)} %` : TEXTO_PASO[p.paso] ?? '';
+});
+swClips.addEventListener('click', async () => {
+  if (preparandoClips) return;
+  const activar = !swClips.classList.contains('on');
+  if (activar && (!estadoClips?.ffmpeg || !estadoClips?.codificador)) {
+    preparandoClips = true;
+    swClips.disabled = true;
+    $('clips-estado').textContent = 'Preparando la grabación…';
+    const r = await window.sharkTracker.clips.preparar();
+    preparandoClips = false;
+    swClips.disabled = false;
+    $('clips-progreso').hidden = true;
+    if (!r.ok) {
+      $('clips-estado').textContent = r.motivo === 'sin-codificador'
+        ? 'Tu tarjeta gráfica no pudo grabar (ver registro.txt en la carpeta de datos de la app).'
+        : 'No se pudo descargar FFmpeg. Revisa tu conexión y vuelve a intentar.';
+      return;
+    }
+  }
+  renderClips(await window.sharkTracker.ajustes.set({ clips: { activo: activar } }));
+});
+swClipsOverlay.addEventListener('click', async () => {
+  renderClips(await window.sharkTracker.ajustes.set({ clips: { overlayEnClip: !swClipsOverlay.classList.contains('on') } }));
+});
+$('btn-clips-carpeta').addEventListener('click', () => window.sharkTracker.clips.abrirCarpeta());
+window.sharkTracker.clips.onGuardado((r) => {
+  $('clips-ultimo').textContent = r.ok ? `Último clip: ${r.segundos} s, guardado a las ${new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}` : 'El último clip no se pudo guardar.';
+});
+window.sharkTracker.ajustes.onChanged(renderClips);
+window.sharkTracker.ajustes.get().then(renderClips);

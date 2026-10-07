@@ -108,13 +108,14 @@
 
       <section class="page" id="page-ajustes">
         <div class="h1">Ajustes</div>
-        <div class="h1sub">Cuenta, overlay, apariencia y notificaciones de la app</div>
+        <div class="h1sub">Cuenta, overlay, apariencia, notificaciones y clips de la app</div>
 
         <div class="stabs">
           <button class="stab active" type="button" data-stab="cuenta">Cuenta</button>
           <button class="stab" type="button" data-stab="overlay">Overlay</button>
           <button class="stab" type="button" data-stab="apariencia">Apariencia</button>
           <button class="stab" type="button" data-stab="avisos">Notificaciones</button>
+          <button class="stab" type="button" data-stab="clips">Clips</button>
         </div>
 
         <div class="subpage active" id="stab-cuenta">
@@ -261,6 +262,37 @@
               <div class="swrow"><div><div class="swnm">Resumen semanal</div><div class="swsub">El lunes: tus misiones, dientes y puesto de la semana que cerró</div></div><button class="sw" type="button" role="switch" data-aviso="semana"></button></div>
               <div class="swrow"><div><div class="swnm">Retos del grupo</div><div class="swsub">Cuando empieza un reto y cuando termina (ganador y tu puesto)</div></div><button class="sw" type="button" role="switch" data-aviso="retos"></button></div>
               <div class="avisos-pie"><button id="btn-probar-aviso" class="checkbtn" type="button">Probar un aviso</button><span id="probar-aviso-txt" class="swsub"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clips (C1): búfer durante la partida + Ctrl + F8. Ver src/clips.js -->
+        <div class="subpage" id="stab-clips">
+          <div class="ovgrid">
+            <div class="card">
+              <div class="cardhd">Clips</div>
+              <div class="cardsub">Durante la partida, SharkTracker guarda los últimos segundos en un búfer. Con <b>Ctrl + F8</b> se convierten en un clip.</div>
+              <div class="swrow"><div><div class="swnm">Grabar clips</div><div class="swsub" id="clips-estado">Apagado: no se graba nada.</div></div><button class="sw" type="button" role="switch" id="sw-clips" aria-label="Grabar clips"></button></div>
+              <div class="clips-progreso" id="clips-progreso" hidden><div class="clips-barra"><i id="clips-barra"></i></div><span id="clips-progreso-txt"></span></div>
+              <div class="ajrow">
+                <div><div class="swnm">Calidad</div><div class="swsub">Alta: 60 fps · Ligera: 30 fps y menos de la mitad de peso</div></div>
+                <div class="segmentos" id="clips-calidad" role="radiogroup" aria-label="Calidad de los clips"></div>
+              </div>
+              <div class="ajrow">
+                <div><div class="swnm">Duración</div><div class="swsub" id="clips-duracion">20 s antes de pulsar Ctrl + F8 y 15 s después</div></div>
+              </div>
+              <div class="swrow"><div><div class="swnm">Incluir el overlay</div><div class="swsub">De fábrica, los paneles de SharkTracker no salen en tus clips</div></div><button class="sw" type="button" role="switch" id="sw-clips-overlay" aria-label="Incluir el overlay en los clips"></button></div>
+              <div class="avisos-pie"><button id="btn-clips-carpeta" class="checkbtn" type="button">Abrir carpeta de clips</button><span id="clips-ultimo" class="swsub"></span></div>
+            </div>
+            <div class="card">
+              <div class="cardhd">Cómo funciona</div>
+              <ul class="clips-info">
+                <li>Solo graba durante la partida. Lo de antes se va pisando, así que no llena el disco.</li>
+                <li>La primera vez descarga FFmpeg (unos 80 MB), el programa que graba. Queda en la carpeta de la app.</li>
+                <li>Graba con la tarjeta gráfica, no con el procesador: el juego casi no lo nota.</li>
+                <li>Por ahora los clips van <b>sin sonido</b>. El audio llega en la próxima versión.</li>
+                <li>Los clips quedan en <b>Videos › SharkTracker</b>.</li>
+              </ul>
             </div>
           </div>
         </div>

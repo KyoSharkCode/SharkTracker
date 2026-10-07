@@ -203,6 +203,8 @@ app/
       meta.js            → dibuja Meta (tier list, ficha, tendencias)
   pruebas/
     prueba-clips-C0.bat  → prueba C0 del motor de clips (ver "Motor de clips")
+  src/clips-motor.js     → motor de clips: codificador, búfer en anillo y guardar (sin Electron)
+  src/clips.js           → clips en la app: descarga de FFmpeg, partida, Ctrl + F8, registro
 ```
 
 Para correrla: abrir el repo en VS Code, y en la terminal `cd app`,
@@ -405,7 +407,7 @@ grupo del mockup (no los de la app).
   dientes y Top N (`wallet_tx` reason `top`, detalle "Top N de la semana"). Máx. 4 avisos por vuelta.
   Clic → abre la página en sharktracker.lol. Solo llegan con la app abierta o en la bandeja.
 
-## Motor de clips (Fase 2, bloque 5) — en curso (fase C0)
+## Motor de clips (Fase 2, bloque 5) — en curso (C0 hecha, C1 en v0.9.1)
 
 Decisiones de Alex (oct 2026).
 - **Arquitectura**: FFmpeg (build LGPL recortado, ~20–30 MB) como proceso aparte e invisible dentro de la
@@ -437,7 +439,7 @@ Decisiones de Alex (oct 2026).
 - **Fases**: C0 prueba (script que mide FPS/CPU/RAM con y sin grabar en la PC de Alex y la de un amigo, y valida
   el audio por aplicación) → C1 búfer + Ctrl+F8 → C2 eventos automáticos → C3 sección Clips + ajustes →
   C4 extras (resumen de la partida; base para leer el minimapa de los timers de campamentos).
-  Meta: < 3 % de FPS, < 150 MB de RAM, < 5 % de CPU.
+  Meta: < 3 % de FPS, < 200 MB de RAM (antes 150: abrir el codificador de la GPU ya pesa ~120–150 MB), < 5 % de CPU.
 - **C0 (prueba)**: `app/pruebas/prueba-clips-C0.bat` (un solo archivo: .bat + PowerShell embebido tras `#PS-INICIO`).
   Pide admin (PresentMon lo necesita), baja FFmpeg LGPL (BtbN) y PresentMon a `%LOCALAPPDATA%\SharkTracker-prueba-clips`,
   prueba qué codificador funciona (NVENC directo / con copia a memoria para laptops híbridas, AMF, QuickSync),
@@ -447,6 +449,35 @@ Decisiones de Alex (oct 2026).
   `resultados-clips-C0.txt` y `clip-prueba-C0.mp4` junto al .bat. El audio por programa solo se comprueba por
   versión de Windows (la prueba real va en C1 con el ayudante nativo). Equipos de prueba: RTX 3060 12 GB (Alex)
   y RTX 4060 laptop (amigo); en el grupo hay una AMD (AMF), todos con Windows 11.
+- **Resultados C0 (07/10/2026)**, los dos clips fluidos:
+  - Alex (Ryzen 7 5800X + RTX 3060): NVENC directo. FPS sin cambio, +0,7 puntos de CPU, 178 MB de RAM
+    (con los clips de Discord grabando a la vez).
+  - Ostia (laptop i7-13620H + RTX 4060, híbrida: la pantalla va por la Intel): NVENC directo FALLA; NVENC
+    con copia a memoria costó −28 % de FPS, +7,6 de CPU y 498 MB. QuickSync (sin copia, `hwmap`) funcionó.
+    Alex decidió: en laptops híbridas, **QuickSync sin copia** (sin prueba C0b). Overwolf de Ostia no graba.
+- **C1 (v0.9.1): búfer + Ctrl + F8**. Sin audio todavía (necesita el ayudante nativo WASAPI).
+  - `src/clips-motor.js` (sin Electron, se prueba en Node con `testsrc2` y un codificador por software):
+    detecta el codificador (orden: NVENC directo, AMF directo, **QuickSync sin copia**, NVENC con copia,
+    AMF con copia; guarda el elegido en `userData/clips/codificador.json` y lo vuelve a detectar si deja
+    de arrancar), graba `ddagrab` en trozos de 2 s en anillo de 40 (80 s) con lista csv
+    (`-segment_list`; el trozo más viejo de la lista nunca se usa porque es el que se está reescribiendo),
+    y guarda esperando los segundos de "después" + 2,5 s y pegando con `-f concat -c copy -movflags +faststart`.
+    Un guardado a la vez; al detener espera el guardado pendiente. Prioridad baja (`os.setPriority`).
+    Calidad: Alta 60 fps 15 Mbps · Ligera 30 fps 6 Mbps (resolución de la pantalla; el escalado por GPU
+    queda para después).
+  - `src/clips.js` (Electron): FFmpeg **no viene en el instalador**: se descarga al activar
+    (`ffmpeg-master-latest-win64-lgpl-shared.zip` de BtbN, ~80 MB) a `userData/clips/ffmpeg`
+    (solo ffmpeg.exe + DLL). Búfer en `userData/clips/bufer` (se borra al terminar la partida). Clips en
+    `Videos\SharkTracker`, nombre "AAAA-MM-DD HH-MM-SS Campeón.mp4". Registro en
+    `userData/clips/registro.txt`: codificador elegido (con los intentos), RAM de FFmpeg cada minuto,
+    clips guardados y errores. Sirve para comprobar el consumo en la laptop de Ostia.
+  - main.js: empieza el búfer con `GameStart` y lo para al terminar; **Ctrl + F8** por uiohook (mismo
+    hook que Tab y Ctrl + X); el overlay avisa "Guardando clip…" → "Clip guardado" (`overlay:clip`, pieza
+    `#clip` en la columna de avisos). `setContentProtection(true)` en el overlay mientras los clips estén
+    activos y no se pida "Incluir el overlay".
+  - Ajustes → Clips (`ajustes.json` → `clips`: activo, calidad, antes 20, despues 15, overlayEnClip),
+    apagado de fábrica. Al activar descarga FFmpeg con barra de progreso y prueba la gráfica.
+  - Falta: audio (C1b, ayudante nativo), eventos automáticos (C2), galería y límite de 10 GB (C3).
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)

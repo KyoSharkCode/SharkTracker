@@ -9,6 +9,7 @@ const { siguienteCompra } = require('./build-adaptada');
 const ajustesOverlay = require('./overlay-config');
 const ajustesApp = require('./ajustes-app');
 const notificaciones = require('./notificaciones');
+const clips = require('./clips');
 
 // La Live Client Data API de League usa un certificado autofirmado local,
 // así que hay que decirle a Node que no lo rechace (127.0.0.1:2999, nunca sale de tu PC).
@@ -128,8 +129,10 @@ function aplicarVentana(ajustes) {
 
 ipcMain.handle('ajustes:get', () => ajustesApp.leer());
 ipcMain.handle('ajustes:set', (_e, cambios) => {
+  const antes = ajustesApp.leer().clips;
   const ajustes = ajustesApp.guardar(cambios);
   aplicarVentana(ajustes);
+  if (cambios?.clips) aplicarClips(antes, ajustes.clips);
   mainWindow?.webContents.send('ajustes:changed', ajustes);
   return ajustes;
 });
@@ -296,7 +299,7 @@ function startGameWatcher() {
       if (lastInGame === true && !inGame) partidaTerminada = true;
       lastInGame = inGame;
       mainWindow?.webContents.send('game:status', { inGame });
-      if (inGame) { detenerCarga(); startOverlay(); } else stopOverlay();
+      if (inGame) { detenerCarga(); startOverlay(); clips.iniciarPartida(ajustesApp.leer().clips); } else { stopOverlay(); clips.detenerPartida(); }
     }
     // Pantalla de carga: el juego ya está abierto pero el reloj de la partida no arrancó.
     if (!inGame) {
@@ -407,6 +410,7 @@ function createOverlayWindow() {
   });
   overlayWindow.setIgnoreMouseEvents(true);
   overlayWindow.setAlwaysOnTop(true, 'screen-saver');
+  protegerOverlay(ajustesApp.leer().clips);
   // Toda la pantalla, incluida la zona de la barra de tareas (el juego la tapa en "Sin bordes").
   overlayWindow.setBounds(bounds);
   overlayWindow.loadFile(path.join(__dirname, 'overlay', 'index.html'));
@@ -455,6 +459,7 @@ let hook = null;
 let hookEncendido = false;
 let tabPulsado = false;
 let xPulsada = false;
+let f8Pulsada = false;
 function iniciarTeclado() {
   try {
     if (!hook) {
@@ -473,10 +478,16 @@ function iniciarTeclado() {
           if (cargaActiva) alternarPanelCarga();
           else if (overlayTimer) alternarBuild();
         }
+        // Ctrl + F8: guardar un clip (solo en partida).
+        if (e.keycode === UiohookKey.F8 && e.ctrlKey && !f8Pulsada) {
+          f8Pulsada = true;
+          if (overlayTimer) guardarClip();
+        }
       });
       uIOhook.on('keyup', (e) => {
         if (e.keycode === UiohookKey.Tab) avisarTab(false);
         if (e.keycode === UiohookKey.X) xPulsada = false;
+        if (e.keycode === UiohookKey.F8) f8Pulsada = false;
       });
       hook = uIOhook;
     }
@@ -491,6 +502,7 @@ function detenerTeclado() {
   hookEncendido = false;
   tabPulsado = false;
   xPulsada = false;
+  f8Pulsada = false;
 }
 // Guarda la decisión (visible u oculto) para las próximas partidas.
 function alternarPanelCarga() {
@@ -517,6 +529,7 @@ function startOverlay() {
     if (!res.inGame || !overlayWindow) return;
     estadoPartida.setPrecios(preciosItems);
     const yo = jugadorPropio(res.data);
+    campeonActual = yo?.championName ?? campeonActual;
     if (yo && !buildPreparando && (!buildPartida || buildPartida.estado === 'error') && Date.now() - buildIntento > 30000) {
       prepararBuild(res.data, yo);
     }
@@ -535,6 +548,7 @@ function limpiarOverlay() {
 }
 
 function stopOverlay() {
+  campeonActual = null;
   if (!cargaActiva) detenerTeclado();
   reiniciarBuild();
   reiniciarPartidaApp(); // terminó la partida: la app deja de mostrarla
@@ -545,6 +559,41 @@ function stopOverlay() {
   if (!cargaActiva) overlayWindow?.hide();
 }
 ipcMain.handle('game:getStatus', () => ({ inGame: !!lastInGame }));
+
+// ── Clips (C1): búfer durante la partida + Ctrl + F8 (ver clips.js) ──
+let campeonActual = null;
+// El overlay de SharkTracker no sale en los clips (salvo que se pida en Ajustes → Clips).
+function protegerOverlay(c) {
+  overlayWindow?.setContentProtection(!!c?.activo && !c.overlayEnClip);
+}
+function avisarClip(datos) {
+  overlayWindow?.webContents.send('overlay:clip', datos);
+}
+async function guardarClip() {
+  const c = ajustesApp.leer().clips;
+  if (!c.activo || !clips.grabando()) {
+    avisarClip({ estado: 'apagado' });
+    return;
+  }
+  avisarClip({ estado: 'guardando', segundos: c.despues });
+  const r = await clips.guardarAhora(c, campeonActual);
+  if (r.motivo === 'ocupado') return; // ya se está guardando uno
+  avisarClip(r.ok ? { estado: 'guardado', segundos: r.segundos } : { estado: 'error' });
+  mainWindow?.webContents.send('clips:guardado', r);
+}
+// Al cambiar los ajustes: protección del overlay y, si hay partida, empezar o parar el búfer.
+function aplicarClips(antes, ahora) {
+  protegerOverlay(ahora);
+  if (!lastInGame) return;
+  if (ahora.activo && (!antes.activo || antes.calidad !== ahora.calidad)) {
+    clips.detenerPartida().then(() => clips.iniciarPartida(ahora));
+  } else if (!ahora.activo && antes.activo) {
+    clips.detenerPartida();
+  }
+}
+ipcMain.handle('clips:estado', () => clips.estado());
+ipcMain.handle('clips:preparar', () => clips.preparar((p) => mainWindow?.webContents.send('clips:progreso', p)));
+ipcMain.handle('clips:abrirCarpeta', () => clips.abrirCarpeta());
 
 // ── Mi Perfil (datos de SharkTracker + copia local para "sin conexión") ──
 const perfil = require('./perfil');
@@ -711,7 +760,7 @@ ipcMain.handle('editor:elegirFondo', async () => {
 });
 ipcMain.handle('editor:quitarFondo', () => { ajustesOverlay.quitarFondo(); return null; });
 
-app.on('will-quit', detenerTeclado);
+app.on('will-quit', () => { detenerTeclado(); clips.detenerPartida(); });
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
