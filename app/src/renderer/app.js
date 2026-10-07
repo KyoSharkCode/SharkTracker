@@ -309,7 +309,7 @@ function renderActualizacion(e) {
   const textos = {
     desarrollo: 'Modo desarrollo (npm start): las actualizaciones solo funcionan en la app instalada.',
     buscando: 'Buscando actualizaciones…',
-    al_dia: 'Estás al día ✓',
+    al_dia: 'Estás al día ✓ (se revisa sola cada 4 h)',
     descargando: `Descargando la versión ${e.version ?? 'nueva'}… ${e.porcentaje ?? 0}%`,
     lista: `La versión ${e.version} está lista: se instala al cerrar la app, o ahora mismo:`,
     error: 'No se pudo buscar actualizaciones (sin conexión). Se vuelve a intentar más tarde.',
@@ -317,6 +317,8 @@ function renderActualizacion(e) {
   txt.textContent = textos[e?.estado] ?? '';
   txt.className = `accsub${e?.estado === 'al_dia' ? ' ok' : e?.estado === 'lista' ? ' nueva' : ''}`;
   $('btn-actualizar').hidden = e?.estado !== 'lista';
+  // "Buscar actualizaciones": cuando está al día o falló (en desarrollo no hay actualizaciones).
+  $('btn-buscar-update').hidden = !['al_dia', 'error'].includes(e?.estado);
   // Barra de título: aviso visible cuando la versión nueva ya está descargada.
   $('update-chip').hidden = e?.estado !== 'lista';
   $('update-chip-text').textContent = e?.estado === 'lista' ? `v${e.version} lista · Reiniciar` : '';
@@ -324,6 +326,11 @@ function renderActualizacion(e) {
 window.sharkTracker.app.onActualizacion(renderActualizacion);
 window.sharkTracker.app.estadoActualizacion().then(renderActualizacion);
 $('btn-actualizar').addEventListener('click', () => window.sharkTracker.app.instalarActualizacion());
+$('btn-buscar-update').addEventListener('click', async () => {
+  // El resultado llega por onActualizacion (buscando → al día / descargando / error).
+  renderActualizacion({ estado: 'buscando' });
+  await window.sharkTracker.app.buscarActualizacion();
+});
 $('update-chip').addEventListener('click', () => window.sharkTracker.app.instalarActualizacion());
 
 // --- Ajustes → Clips (C1): activar (descarga FFmpeg y prueba el codificador la primera vez),

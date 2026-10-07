@@ -11,6 +11,7 @@ const PIEZAS = [
   'oro', 'buffs', 'anuncios', 'toasts', 'rendimiento',
   'build', // build completa en partida (se muestra u oculta con Ctrl + X)
   'siguiente', // siguiente compra de la build, junto al minimapa
+  'habilidad', // flecha "sube esta" sobre las habilidades al subir de nivel
   // Pantalla de carga
   'carga', // el panel entero (se alterna con Ctrl + X durante la carga)
   'cargaRangoAliados', 'cargaWinrateAliados', 'cargaRangoRivales', 'cargaWinrateRivales', 'cargaEtiquetas',
@@ -25,6 +26,7 @@ const POSICIONES_FABRICA = {
   carga:       { x: 1484, y: 60 },   // panel de la pantalla de carga (420 px de ancho)
   build:       { x: 16,   y: 16 },   // build en partida, arriba a la izquierda (452 px de ancho)
   siguiente:   { x: 1385, y: 996 },  // siguiente compra, a la izquierda del minimapa (250 px de ancho)
+  habilidad:   { x: 768,  y: 902 },  // "sube esta", justo encima de las habilidades (Q W E R)
 };
 
 // Ajustes → Apariencia: tamaño del overlay (sobre el escalado a tu pantalla) y

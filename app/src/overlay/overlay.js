@@ -396,6 +396,39 @@ function pintarSiguiente() {
   nodo.replaceChildren(...partes);
 }
 
+// ── Sube esta: al tener un punto de habilidad sin gastar, la tecla que toca (orden de OP.GG) ──
+// Solo entra y sale (sin bucles). Desaparece en cuanto subes la habilidad.
+let habilidad = null;
+function pintarHabilidad() {
+  const nodo = $('habilidad');
+  mostrar(nodo, !!habilidad);
+  if (!habilidad) return;
+  const firma = JSON.stringify(habilidad);
+  if (nodo._firma === firma) return;
+  nodo._firma = firma;
+  const etq = el('div', 'hab-etq');
+  etq.append(document.createTextNode('Sube '), el('b', null, habilidad.tecla),
+    document.createTextNode(habilidad.pendientes > 1 ? ` · ${habilidad.pendientes} puntos` : ` · nivel ${habilidad.nivel}`));
+  const teclas = el('div', 'hab-teclas');
+  for (const k of ['Q', 'W', 'E', 'R']) {
+    const t = el('div', `hab-tecla${k === habilidad.tecla ? ' toca' : ''}`, k);
+    if (habilidad.puntos?.[k]) t.append(el('span', 'pts', String(habilidad.puntos[k])));
+    if (k === habilidad.tecla) {
+      const NS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('viewBox', '0 0 14 10');
+      svg.setAttribute('class', 'hab-flecha');
+      svg.setAttribute('aria-hidden', 'true');
+      const p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', 'M0 0h14L7 10z');
+      svg.append(p);
+      t.append(svg);
+    }
+    teclas.append(t);
+  }
+  nodo.replaceChildren(etq, teclas);
+}
+
 window.overlay.onTab((pulsado) => { tab = pulsado; pintarOro(); });
 window.overlay.onCarga?.((datos) => { carga = datos; pintarCarga(); });
 
@@ -437,6 +470,8 @@ function pintarEstado(estado) {
   pintarRendimiento();
   siguiente = ver('siguiente') ? (estado.siguiente ?? null) : null;
   pintarSiguiente();
+  habilidad = ver('habilidad') ? (estado.habilidad ?? null) : null;
+  pintarHabilidad();
   // Objetos comprados: solo se redibuja la build si cambian.
   const objetos = (estado.misObjetos ?? []).map(Number);
   const firma = objetos.slice().sort().join(',');

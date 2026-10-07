@@ -205,3 +205,21 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .sig-nombre { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sig-oro { font-family:'Red Hat Mono',ui-monospace,monospace; font-size:12px; font-weight:600; color: var(--dorado); white-space: nowrap; }
 .sig-oro.listo { color: var(--acento); }
+
+/* ── Sube esta (flecha sobre la habilidad que toca al subir de nivel) ── */
+.habilidad {
+  position: absolute; left: 768px; top: 902px;
+  display: flex; flex-direction: column; align-items: center; gap: 15px;
+  background: var(--panel); border: 1px solid var(--borde); border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35); padding: 6px 10px 8px;
+}
+.hab-etq { font-family:'Albert Sans',system-ui,sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--tenue); white-space: nowrap; }
+.hab-etq b { color: var(--acento); font-weight: 800; }
+.hab-teclas { display: flex; gap: 6px; }
+.hab-tecla { position: relative; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-family:'Red Hat Mono',ui-monospace,monospace; font-size: 16px; font-weight: 600; color: var(--tenue);
+  border: 1px solid var(--borde); background: rgba(120,220,210,.04); }
+.hab-tecla.toca { color: #03111A; background: var(--acento); border-color: var(--acento); }
+/* Flecha que apunta hacia abajo, a la habilidad del juego, encima de la tecla que toca */
+.hab-flecha { position: absolute; top: -13px; left: 50%; width: 14px; height: 10px; margin-left: -7px; fill: var(--acento); }
+.hab-tecla .pts { position: absolute; bottom: 1px; right: 3px; font-size: 9px; color: inherit; opacity: .7; }

@@ -6,6 +6,7 @@ const cfg = require('./config');
 const auth = require('./auth');
 const { crearEstadoPartida } = require('./game-state');
 const { siguienteCompra } = require('./build-adaptada');
+const { siguienteHabilidad } = require('./habilidades');
 const ajustesOverlay = require('./overlay-config');
 const ajustesApp = require('./ajustes-app');
 const notificaciones = require('./notificaciones');
@@ -207,6 +208,12 @@ function iniciarActualizaciones() {
   const buscar = () => autoUpdater.checkForUpdates().catch(() => avisarActualizacion({ estado: 'error' }));
   buscar();
   setInterval(buscar, 4 * 3600 * 1000);
+  // Botón "Buscar actualizaciones" (Ajustes → Cuenta): no hace falta cerrar y abrir la app.
+  // Si ya está buscando, descargando o lista, no se vuelve a pedir.
+  ipcMain.handle('update:buscar', () => {
+    if (!['buscando', 'descargando', 'lista'].includes(estadoActualizacion.estado)) buscar();
+    return estadoActualizacion;
+  });
   ipcMain.on('update:instalar', () => { saliendo = true; autoUpdater.quitAndInstall(); });
 }
 ipcMain.handle('update:estado', () => estadoActualizacion);
@@ -537,7 +544,9 @@ function startOverlay() {
     // Siguiente compra según la build (junto al minimapa).
     const siguiente = buildPartida?.estado === 'ok' && objetosBuild
       ? siguienteCompra(buildOrden, misObjetos, res.data?.activePlayer?.currentGold, objetosBuild) : null;
-    overlayWindow.webContents.send('overlay:state', { ...estadoPartida.actualizar(res.data), ddVersion, misObjetos, siguiente });
+    // Punto de habilidad sin gastar → cuál subir según el orden de OP.GG (flecha en el overlay).
+    const habilidad = ordenHabilidades ? siguienteHabilidad(res.data?.activePlayer, ordenHabilidades) : null;
+    overlayWindow.webContents.send('overlay:state', { ...estadoPartida.actualizar(res.data), ddVersion, misObjetos, siguiente, habilidad });
     avisarPartidaApp({ misObjetos, siguiente });
   }, 1000);
 }
@@ -643,6 +652,7 @@ let buildIntento = 0;
 let buildVisible = false;     // Ctrl + X; empieza oculta en cada partida
 let buildOrden = [];          // ids de la build sin el inicio (para "siguiente compra")
 let objetosBuild = null;      // catálogo de objetos (recetas y precios)
+let ordenHabilidades = null;  // orden de OP.GG nivel por nivel (para la flecha "sube esta")
 
 function jugadorPropio(datos) {
   const a = datos?.activePlayer ?? {};
@@ -656,6 +666,7 @@ function enviarBuild() {
 function reiniciarBuild() {
   buildPartida = null;
   buildOrden = [];
+  ordenHabilidades = null;
   buildVisible = false;
   buildIntento = 0;
   enviarBuild();
@@ -684,6 +695,7 @@ async function prepararBuild(datos, yo) {
     if (ficha?.estado !== 'ok') return fijar({ estado: 'error' });
     const a = await meta.adaptarBuild(ficha.datos, miCampeon, rivales);
     objetosBuild = cat.objetos;
+    ordenHabilidades = ficha.datos.habilidades?.orden?.length ? ficha.datos.habilidades.orden.slice(0, 18) : null;
     buildOrden = a.orden.filter((p) => p.titulo !== 'Inicio').flatMap((p) => p.items);
     const objeto = (id) => ({ id, nombre: cat.objetos[id]?.nombre ?? '', img: cat.objetos[id]?.img ?? null });
     fijar({

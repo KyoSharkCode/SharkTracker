@@ -3,7 +3,7 @@
 // Arrastras cada pieza; al guardar, el overlay se actualiza al instante.
 (() => {
   const byId = (id) => document.getElementById(id);
-  const PIEZAS = { baron: 'Barón', ancestral: 'Ancestral', rendimiento: 'Tu rendimiento', avisos: 'Avisos', carga: 'Pantalla de carga', build: 'Build (Ctrl + X)', siguiente: 'Siguiente compra' };
+  const PIEZAS = { baron: 'Barón', ancestral: 'Ancestral', rendimiento: 'Tu rendimiento', avisos: 'Avisos', carga: 'Pantalla de carga', build: 'Build (Ctrl + X)', siguiente: 'Siguiente compra', habilidad: 'Sube esta (habilidades)' };
   const escenario = byId('escenario');
   const marco = byId('marco');
   const caja = byId('caja');
@@ -38,6 +38,7 @@
       { diferencia: 30, aliado: 'Garen', enemigo: 'Darius' }, { diferencia: 1120, aliado: 'Jinx', enemigo: 'Kai\'Sa' },
       { diferencia: -400, aliado: 'Thresh', enemigo: 'Nautilus' }],
     aliadoIzquierda: true,
+    habilidad: { tecla: 'E', nivel: 7, pendientes: 1, puntos: { Q: 4, W: 1, E: 1, R: 1 } },
     siguiente: {
       componente: { id: 0, nombre: 'Códice diabólico', img: null, coste: 900, falta: 350 },
       objetivo: { id: 0, nombre: 'Morellonomicon', img: null, coste: 2150, falta: 1600 } },

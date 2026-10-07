@@ -135,7 +135,9 @@ de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no
 - **Actualizaciones**: electron-updater desde **GitHub Releases** (repo público): busca al
   abrir y cada 4 h, descarga sola, instala al cerrar o con "Reiniciar y actualizar". Cuando la
   versión nueva está descargada, la barra de título muestra "vX.Y.Z lista · Reiniciar" (`#update-chip`).
-  Solo en la app instalada (con `npm start` no).
+  Solo en la app instalada (con `npm start` no). En Ajustes → Cuenta → "Acerca de" hay un botón
+  **"Buscar actualizaciones"** (IPC `update:buscar`; se ve cuando está al día o falló) para no tener
+  que cerrar y abrir la app.
 - **Publicar una versión**: subir `version` en app/package.json (merge) → pestaña Actions
   del repo → **"App: publicar versión"** → Run workflow (`.github/workflows/app-publicar.yml`,
   arma en windows-latest, sube a un Release en borrador y lo publica como `vX.Y.Z`; GitHub
@@ -310,6 +312,16 @@ que pulse un botón.
   los 30 s si falla), solo en la Grieta (mapa 11). Campeón por `rawChampionName`; rol: el de la
   partida (`position`), si no el de la última selección (lcu) con ese campeón, si no el rol
   donde más se juega (`meta_tier.role_rate`). Interruptor "Tu build" en Ajustes → Overlay.
+- **Habilidades**: En Vivo muestra "Subir primero" y el **orden por nivel** (cuadrícula de 18, la
+  misma de Meta) en la tarjeta de runas y hechizos de tu campeón. En partida, la pieza **"Sube esta"**
+  (`#habilidad`, zona centro, x 768 y 902, justo encima de Q W E R; movible en el editor e
+  interruptor en Ajustes → Overlay) aparece solo con un punto de habilidad sin gastar y señala con
+  una flecha la tecla que toca. `habilidades.js` (`siguienteHabilidad`, se prueba en Node): con
+  `activePlayer.level` y `abilities.{Q,W,E,R}.abilityLevel`, recorre el orden de OP.GG
+  (`ficha.habilidades.orden`, guardado en main.js `ordenHabilidades` al preparar la build) y elige
+  la primera que va atrasada y se puede subir (R a los 6/11/16; básicas hasta 5 y la mitad del
+  nivel redondeada hacia arriba). Si te desviaste del orden, señala la que quedó pendiente. Solo en
+  la Grieta (como la build en partida).
 
 ## Feedback de la v0.5 (v0.6.0)
 

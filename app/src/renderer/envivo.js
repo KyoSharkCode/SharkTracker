@@ -359,6 +359,22 @@
       c.append(h);
       const a = aviso('hechizos'); if (a) c.append(a);
     }
+    // Habilidades: cuál subir primero y el orden nivel por nivel (mismo dibujo que Meta).
+    // En partida, el overlay señala la que toca al subir de nivel.
+    if (f.maximizar) {
+      const ord = el('div', 'mt-max');
+      f.maximizar.orden.forEach((k, i) => { if (i) ord.append(el('span', 'mt-flecha', '›')); ord.append(el('span', 'mt-tecla', k)); });
+      c.append(el('div', 'mt-subt', 'Subir primero'), ord);
+    }
+    if (f.habilidades?.orden?.length) {
+      const niv = el('div', 'mt-niveles');
+      f.habilidades.orden.slice(0, 18).forEach((k, i) => {
+        const n = el('div', `mt-nivel k${k}`);
+        n.append(el('span', null, String(i + 1)), el('b', null, k));
+        niv.append(n);
+      });
+      c.append(el('div', 'mt-subt', 'Orden por nivel'), niv);
+    }
     return c;
   }
 
