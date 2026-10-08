@@ -320,7 +320,10 @@ que pulse un botón.
   panel ni texto; "×2" al lado si hay más de un punto). Son 4 huecos de 44 px (separación de Q W E R
   medida en una captura del HUD de Alex); en el editor se ven los 4 huecos punteados para alinearlos.
   La flecha rebota suave (1,1 s, solo transform, nada con reduced motion): **única excepción**
-  pedida por Alex a la regla de "sin bucles" del overlay. `habilidades.js` (`siguienteHabilidad`, se prueba en Node): con
+  pedida por Alex a la regla de "sin bucles" del overlay.
+  Editor (v0.9.3): las 3 `.zona` ocupan 1920×1080 y se apilan, así que la derecha se quedaba con el
+  clic y no se podían arrastrar las piezas del centro ni de la izquierda (habilidad, barón, ancestral,
+  build). `editor.css`: `.editor .zona { pointer-events: none }` y `> * { auto }`. `habilidades.js` (`siguienteHabilidad`, se prueba en Node): con
   `activePlayer.level` y `abilities.{Q,W,E,R}.abilityLevel`, recorre el orden de OP.GG
   (`ficha.habilidades.orden`, guardado en main.js `ordenHabilidades` al preparar la build) y elige
   la primera que va atrasada y se puede subir (R a los 6/11/16; básicas hasta 5 y la mitad del
