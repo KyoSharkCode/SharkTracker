@@ -225,12 +225,38 @@ function leerIndice() {
 function guardarIndice() {
   try { fs.mkdirSync(dir(), { recursive: true }); fs.writeFileSync(archivoIndice(), JSON.stringify(indice, null, 1)); } catch { /* sin disco */ }
 }
-// Solo nombres de archivo de la carpeta de clips (nada de rutas: viene de la ventana).
+// Un clip se nombra relativo a la carpeta de clips: "archivo.mp4" (sueltos, de antes de la
+// v0.9.4) o "Carpeta de la partida/archivo.mp4" (un nivel). Viene de la ventana, así que
+// nada de "..", unidades ni separadores raros.
+const parteValida = (p) => !!p && !p.startsWith('.') && !/[\\/:*?"<>|\u0000-\u001f]/.test(p);
 function nombreSeguro(nombre) {
-  const base = path.basename(String(nombre ?? ''));
-  return base === nombre && /\.mp4$/i.test(base) && !base.startsWith('.') && !/[\\/:]/.test(base) ? base : null;
+  const s = String(nombre ?? '');
+  const partes = s.split('/');
+  return partes.length <= 2 && partes.every(parteValida) && /\.mp4$/i.test(partes[partes.length - 1]) ? s : null;
 }
-const rutaMini = (archivo) => path.join(dirMinis(), archivo.replace(/\.mp4$/i, '.jpg'));
+const rutaClip = (rel) => path.join(carpetaClips(), ...rel.split('/'));
+const rutaMini = (rel) => path.join(dirMinis(), ...rel.replace(/\.mp4$/i, '.jpg').split('/'));
+const carpetaDe = (rel) => (rel.includes('/') ? rel.split('/')[0] : null);
+const limpiarNombre = (t) => String(t ?? '').replace(/[\\/:*?"<>|\u0000-\u001f]/g, '').trim();
+
+// Carpeta de una partida: "Briar 2026-10-08" (y "(2)", "(3)"… si ese día ya hubo otra con él).
+function nombreCarpetaPartida(campeon, cuando, ocupada) {
+  const d = new Date(cuando);
+  const p = (n) => String(n).padStart(2, '0');
+  const base = `${limpiarNombre(campeon) || 'Partida'} ${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  let nombre = base;
+  for (let k = 2; ocupada(nombre); k++) nombre = `${base} (${k})`;
+  return nombre;
+}
+
+// Si al borrar o mover un clip su carpeta de partida queda vacía, se quita (y la de miniaturas).
+function quitarCarpetaVacia(rel) {
+  const c = carpetaDe(rel);
+  if (!c) return;
+  for (const d of [path.join(carpetaClips(), c), path.join(dirMinis(), c)]) {
+    try { if (!fs.readdirSync(d).length) fs.rmdirSync(d); } catch { /* no existe o no está vacía */ }
+  }
+}
 
 // ── Partida ──
 let vigilancia = null;
@@ -254,8 +280,7 @@ function alGuardado(fn) { alGuardarClip = fn; }
 function nombreClip(campeon, titulo) {
   const d = new Date();
   const p = (n) => String(n).padStart(2, '0');
-  const limpio = (t) => String(t ?? '').replace(/[\\/:*?"<>|]/g, '').trim();
-  const extra = [limpio(campeon), titulo && titulo !== 'Clip' ? limpio(titulo) : ''].filter(Boolean);
+  const extra = [limpiarNombre(campeon), titulo && titulo !== 'Clip' ? limpiarNombre(titulo) : ''].filter(Boolean);
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}${extra.length ? ` ${extra.join(' - ')}` : ''}.mp4`;
 }
 
@@ -273,7 +298,7 @@ async function iniciarPartida(ajustes) {
   }
   if (!ok) return false;
   vigilarRam(motor.estado()?.pid);
-  partida = { id: Date.now(), campeon: null };
+  partida = { id: Date.now(), campeon: null, carpeta: null };
   agenda = crearAgenda({ alGuardar: (j) => guardarJugada(j, ajustes) });
   return true;
 }
@@ -302,16 +327,21 @@ function marcar(jugada, ajustes) {
 async function guardarJugada({ segundos, fin, etiquetas, manual }, ajustes) {
   const titulo = tituloJugada(etiquetas.filter((e) => e !== 'Clip'));
   const campeon = partida?.campeon;
-  const archivo = nombreClip(campeon, titulo);
-  const r = await motor.guardar({ segundos, fin, destino: path.join(carpetaClips(), archivo) });
+  // Cada partida, su carpeta (se elige con el primer clip, cuando ya se sabe el campeón).
+  if (partida && !partida.carpeta) {
+    partida.carpeta = nombreCarpetaPartida(campeon, partida.id, (n) => fs.existsSync(path.join(carpetaClips(), n)));
+  }
+  const archivo = `${partida?.carpeta ? `${partida.carpeta}/` : ''}${nombreClip(campeon, titulo)}`;
+  const r = await motor.guardar({ segundos, fin, destino: rutaClip(archivo) });
   if (r.ok) {
+    // Momento de la jugada dentro del clip (después de los segundos de "antes"): miniatura y vista previa.
+    const momento = Math.max(0, Math.min(ajustes.antes, r.segundos - 1));
     leerIndice().archivos[archivo] = {
       partida: partida?.id ?? Date.now(), campeon: campeon ?? null, titulo, manual: !!manual,
-      creado: Date.now(), segundos: r.segundos, favorito: false,
+      creado: Date.now(), segundos: r.segundos, momento, favorito: false,
     };
     guardarIndice();
-    // Miniatura en el momento de la jugada (después de los segundos de "antes").
-    motor.miniatura(r.archivo, rutaMini(archivo), Math.min(ajustes.antes, r.segundos - 1)).catch(() => {});
+    motor.miniatura(r.archivo, rutaMini(archivo), momento).catch(() => {});
     aplicarLimite(ajustes.limiteGB);
   }
   alGuardarClip?.({ ...r, titulo, manual: !!manual });
@@ -319,16 +349,35 @@ async function guardarJugada({ segundos, fin, etiquetas, manual }, ajustes) {
 }
 
 // ── Galería ──
+// Los .mp4 sueltos en Videos › SharkTracker y los de cada carpeta de partida (un nivel).
+function nombresEnDisco() {
+  let entradas = [];
+  try { entradas = fs.readdirSync(carpetaClips(), { withFileTypes: true }); } catch { return []; }
+  const lista = [];
+  for (const e of entradas) {
+    if (!parteValida(e.name)) continue;
+    if (e.isFile() && /\.mp4$/i.test(e.name)) lista.push(e.name);
+    else if (e.isDirectory()) {
+      try {
+        for (const n of fs.readdirSync(path.join(carpetaClips(), e.name))) {
+          if (/\.mp4$/i.test(n) && parteValida(n)) lista.push(`${e.name}/${n}`);
+        }
+      } catch { /* sin permiso */ }
+    }
+  }
+  return lista;
+}
+
 function clipsEnDisco() {
-  let nombres = [];
-  try { nombres = fs.readdirSync(carpetaClips()).filter((n) => /\.mp4$/i.test(n)); } catch { return []; }
   const idx = leerIndice().archivos;
-  return nombres.map((archivo) => {
+  return nombresEnDisco().map((archivo) => {
     let st;
-    try { st = fs.statSync(path.join(carpetaClips(), archivo)); } catch { return null; }
+    try { st = fs.statSync(rutaClip(archivo)); } catch { return null; }
     const i = idx[archivo] ?? {};
     return {
       archivo,
+      carpeta: carpetaDe(archivo),
+      momento: i.momento ?? null,
       titulo: i.titulo ?? null,
       renombrado: !!i.renombrado, // el nombre lo puso la persona: se muestra el del archivo
       campeon: i.campeon ?? null,
@@ -351,9 +400,10 @@ function aplicarLimite(limiteGB = 10) {
   for (const c of normales) {
     if (usado <= limite) break;
     try {
-      fs.rmSync(path.join(carpetaClips(), c.archivo));
+      fs.rmSync(rutaClip(c.archivo));
       fs.rmSync(rutaMini(c.archivo), { force: true });
       delete leerIndice().archivos[c.archivo];
+      quitarCarpetaVacia(c.archivo);
       usado -= c.tamano;
       log(`Límite de ${limiteGB} GB: se borró ${c.archivo}`);
     } catch { /* en uso: se intenta la próxima vez */ }
@@ -378,13 +428,44 @@ async function completarMiniaturas(alTerminar) {
     let hizo = false;
     for (const c of clipsEnDisco().filter((x) => !x.mini).slice(0, 30)) {
       const en = Math.min(leerIndice().archivos[c.archivo] ? 20 : 2, Math.max(0, (c.segundos ?? 4) - 1));
-      if (await motor.miniatura(path.join(carpetaClips(), c.archivo), rutaMini(c.archivo), en)) hizo = true;
+      if (await motor.miniatura(rutaClip(c.archivo), rutaMini(c.archivo), c.momento ?? en)) hizo = true;
     }
     if (hizo) alTerminar?.();
   } finally { haciendoMinis = false; }
 }
 
+// Clips sueltos de la v0.9.3 (antes de las carpetas): los que se sabe de qué partida son
+// se mueven a la carpeta de esa partida, una vez.
+let migrado = false;
+function migrarSueltos() {
+  if (migrado) return;
+  migrado = true;
+  const idx = leerIndice().archivos;
+  const carpetas = new Map(); // partida → carpeta
+  let cambio = false;
+  for (const archivo of nombresEnDisco().filter((n) => !n.includes('/'))) {
+    const i = idx[archivo];
+    if (!i?.partida) continue;
+    let c = carpetas.get(i.partida);
+    if (!c) {
+      c = nombreCarpetaPartida(i.campeon, i.partida, (n) => fs.existsSync(path.join(carpetaClips(), n)) || [...carpetas.values()].includes(n));
+      carpetas.set(i.partida, c);
+    }
+    const nuevo = `${c}/${archivo}`;
+    try {
+      fs.mkdirSync(path.join(carpetaClips(), c), { recursive: true });
+      fs.renameSync(rutaClip(archivo), rutaClip(nuevo));
+      try { fs.mkdirSync(path.dirname(rutaMini(nuevo)), { recursive: true }); fs.renameSync(rutaMini(archivo), rutaMini(nuevo)); } catch { /* sin miniatura */ }
+      idx[nuevo] = i;
+      delete idx[archivo];
+      cambio = true;
+    } catch (e) { log(`No se pudo mover ${archivo} a su carpeta: ${e.message}`); }
+  }
+  if (cambio) { guardarIndice(); log(`Clips sueltos ordenados en ${carpetas.size} carpeta(s) de partida.`); }
+}
+
 function galeria(ajustes) {
+  migrarSueltos();
   const clips = clipsEnDisco();
   const usado = clips.filter((c) => !c.favorito).reduce((s, c) => s + c.tamano, 0);
   const favoritos = clips.filter((c) => c.favorito).reduce((s, c) => s + c.tamano, 0);
@@ -408,12 +489,13 @@ function renombrar(archivo, nuevoNombre) {
   const n = nombreSeguro(archivo);
   const limpio = String(nuevoNombre ?? '').replace(/[\\/:*?"<>|\u0000-\u001f]/g, '').replace(/\.mp4$/i, '').trim().slice(0, 120);
   if (!n || !limpio) return { ok: false, motivo: 'nombre' };
-  const nuevo = `${limpio}.mp4`;
+  const c = carpetaDe(n);
+  const nuevo = `${c ? `${c}/` : ''}${limpio}.mp4`;
   if (nuevo === n) return { ok: true, archivo: n };
-  const destino = path.join(carpetaClips(), nuevo);
+  const destino = rutaClip(nuevo);
   if (fs.existsSync(destino)) return { ok: false, motivo: 'existe' };
   try {
-    fs.renameSync(path.join(carpetaClips(), n), destino);
+    fs.renameSync(rutaClip(n), destino);
     try { fs.renameSync(rutaMini(n), rutaMini(nuevo)); } catch { /* sin miniatura */ }
     const idx = leerIndice().archivos;
     idx[nuevo] = { ...(idx[n] ?? { creado: Date.now() }), renombrado: true };
@@ -430,17 +512,18 @@ async function borrar(archivo) {
   const n = nombreSeguro(archivo);
   if (!n) return false;
   try {
-    await shell.trashItem(path.join(carpetaClips(), n));
+    await shell.trashItem(rutaClip(n));
     fs.rmSync(rutaMini(n), { force: true });
     delete leerIndice().archivos[n];
     guardarIndice();
+    quitarCarpetaVacia(n);
     return true;
   } catch { return false; }
 }
 
 function mostrarEnCarpeta(archivo) {
   const n = nombreSeguro(archivo);
-  if (n) shell.showItemInFolder(path.join(carpetaClips(), n));
+  if (n) shell.showItemInFolder(rutaClip(n));
 }
 
 // Protocolo sharkclip:// para la ventana: sharkclip://video/<archivo> y
@@ -450,7 +533,7 @@ async function servir(request) {
   const url = new URL(request.url);
   const archivo = nombreSeguro(decodeURIComponent(url.pathname.replace(/^\//, '')));
   if (!archivo) return new Response('', { status: 404 });
-  const ruta = url.hostname === 'video' ? path.join(carpetaClips(), archivo)
+  const ruta = url.hostname === 'video' ? rutaClip(archivo)
     : url.hostname === 'mini' ? rutaMini(archivo) : null;
   let st;
   try { st = ruta && fs.statSync(ruta); } catch { st = null; }
@@ -487,9 +570,11 @@ function estado() {
   };
 }
 
-function abrirCarpeta() {
+// Abre Videos › SharkTracker, o la carpeta de una partida.
+function abrirCarpeta(carpeta) {
   fs.mkdirSync(carpetaClips(), { recursive: true });
-  return shell.openPath(carpetaClips());
+  const sub = carpeta && parteValida(carpeta) ? path.join(carpetaClips(), carpeta) : null;
+  return shell.openPath(sub && fs.existsSync(sub) ? sub : carpetaClips());
 }
 
 module.exports = {

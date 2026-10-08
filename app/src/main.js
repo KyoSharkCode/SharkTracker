@@ -649,7 +649,7 @@ function aplicarClips(antes, ahora) {
 }
 ipcMain.handle('clips:estado', () => clips.estado());
 ipcMain.handle('clips:preparar', () => clips.preparar((p) => mainWindow?.webContents.send('clips:progreso', p)));
-ipcMain.handle('clips:abrirCarpeta', () => clips.abrirCarpeta());
+ipcMain.handle('clips:abrirCarpeta', (_e, carpeta) => clips.abrirCarpeta(carpeta));
 ipcMain.handle('clips:dispositivos', () => clips.dispositivos());
 ipcMain.handle('clips:probarAudio', () => clips.probarAudio(ajustesApp.leer().clips.audio));
 // Galería: la lista y, de fondo, las miniaturas que falten (avisa cuando estén).

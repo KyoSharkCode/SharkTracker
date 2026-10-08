@@ -38,7 +38,7 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
 - **Ajustes → Overlay**: apagar piezas y moverlas ("Reposicionar elementos").
 - **Clips** (si los activaste en Ajustes → Clips): tus kills, asistencias, muertes, objetivos,
   torres y ultis que terminan en algo se guardan solos. **Ctrl + F8** guarda lo que quieras (20 s
-  antes y 15 s después). Jugadas seguidas van en un solo clip. Arriba a la derecha sale un aviso.
+  antes y 15 s después). Jugadas seguidas van en un solo clip. Arriba a la derecha sale "Clip creado".
 
 ## Ajustes a tu gusto
 - **Ajustes → Apariencia**: color de acento de la app, tamaño y opacidad del overlay en partida
@@ -53,8 +53,12 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
   Ahí eliges qué jugadas se guardan solas, cuántos segundos antes y después, el audio (juego,
   Discord, micrófono o todo el PC, cada uno con su volumen; si grabas Discord, avisa al grupo) y el
   espacio máximo (10 GB de fábrica; los favoritos ★ no cuentan).
-- **Clips** (menú lateral): tus clips por partida. Clic para verlos, ★ para guardarlos para
-  siempre, renombrar, mostrar en la carpeta o borrar (van a la papelera). Están en **Videos › SharkTracker**.
+- **Clips** (menú lateral): una carpeta por partida ("Briar 2026-10-08", también en **Videos ›
+  SharkTracker**). Dentro, al pasar el mouse por un clip ves unos segundos de la jugada; clic para
+  verlo, ★ para guardarlo para siempre, renombrar, mostrar en la carpeta o borrar (va a la papelera).
+- **Audio de los clips**: en Ajustes → Clips → Audio, "Probar audio" dice qué fuente se oye. Si usas
+  Wave Link o Voicemeeter, usa "Juego" y "Discord" (graban el programa, sin importar por dónde
+  sale) en lugar de "Todo el PC".
 
 ## Actualizaciones
 Son **automáticas**: la app busca versiones nuevas al abrirse (y cada 4 h), las descarga sola y las

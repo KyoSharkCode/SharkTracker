@@ -70,7 +70,7 @@ contextBridge.exposeInMainWorld('sharkTracker', {
   clips: {
     estado: () => ipcRenderer.invoke('clips:estado'),
     preparar: () => ipcRenderer.invoke('clips:preparar'),
-    abrirCarpeta: () => ipcRenderer.invoke('clips:abrirCarpeta'),
+    abrirCarpeta: (carpeta) => ipcRenderer.invoke('clips:abrirCarpeta', carpeta), // sin nada: Videos › SharkTracker
     dispositivos: () => ipcRenderer.invoke('clips:dispositivos'),
     probarAudio: () => ipcRenderer.invoke('clips:probarAudio'),
     galeria: () => ipcRenderer.invoke('clips:galeria'),

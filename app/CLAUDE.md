@@ -558,6 +558,33 @@ Decisiones de Alex (oct 2026).
   - **Ajustes → Clips**: duración antes/después (10–30 s), tarjeta "Clips automáticos" (interruptor por
     tipo, tecla de la ulti, aviso en partida `avisoAuto`), "Audio" (juego/Discord/micrófono/PC con volumen
     0–200 % y dispositivo; pistas separadas) y "Espacio". Cambiar calidad o audio en partida reinicia el búfer.
+- **Prueba de v0.9.3 (Alex, 08/10/2026)**: clips fluidos, sin impacto en el juego, 23 clips automáticos en una
+  partida, guardados en 0,25–0,46 s, RAM ~190 MB. **El audio no se oía**: Alex usa Wave Link (micrófono "Chat Mix
+  (Elgato Virtual Audio)" + "Todo el PC" en los auriculares G733) y el ayudante no dejaba rastro en el registro.
+- **v0.9.4 (feedback de esa prueba)**:
+  - **Audio**: el micrófono y "Todo el PC" se capturan en el formato propio del dispositivo (`GetMixFormat`, sin
+    AUTOCONVERTPCM) y el ayudante convierte: 16/24/32 bits o float, mono/estéreo/cuadra/5.1/7.1 a estéreo, y
+    otra frecuencia a 48 kHz (lineal). La captura por proceso sigue en PCM 16 bits 48 kHz. Todo lo que dice el
+    ayudante va a registro.txt ("Audio · PC: capturando Speakers (…) (48000 Hz, 2 canales, float)", errores
+    con la fuente delante) y cada 30 s "Niveles (30 s): League of Legends -18 dB · Micrófono silencio · PC no
+    llega nada" (`--niveles N`). **Probar audio** (Ajustes → Clips → Audio, `clips.probarAudio`): abre el
+    ayudante con las fuentes de ahora y `--niveles 4`, y muestra por fuente se oye / silencio / no llega nada /
+    sin capturar. Con Wave Link o Voicemeeter se recomienda "Juego" y "Discord" (por proceso, no dependen
+    del dispositivo de salida).
+  - **Aviso único**: "Clip creado" en el overlay al pasar la jugada (`avisarJugada`, solo si abre un clip
+    nuevo, no al alargar uno) o al pulsar Ctrl + F8; al guardarse el archivo solo se avisa si falló.
+  - **Carpetas por partida**: cada partida guarda en `Videos\SharkTracker\<Campeón AAAA-MM-DD>` (con
+    " (2)", " (3)" si ese día ya hubo otra con ese campeón); se elige con el primer clip. Los clips se
+    nombran relativos ("Carpeta/archivo.mp4", un nivel; `nombreSeguro` rechaza "..", unidades y más
+    niveles); miniaturas en la misma estructura. `migrarSueltos`: al abrir la galería, los clips sueltos de
+    la v0.9.3 con partida en el índice se mueven a su carpeta (una vez por arranque). Al quedar vacía, la
+    carpeta se borra. "Abrir carpeta" abre la de la partida abierta.
+  - **Galería**: portada de cada partida (la del primer favorito o del último clip, con "pila" de hojas
+    detrás, ★ y cantidad de clips); al entrar, sus clips con "‹ Partidas". Al pasar el mouse el clip se levanta
+    4 px y, tras 350 ms, reproduce sin sonido ~8 s desde el momento de la jugada (`momento` en el índice; el
+    video se suelta al salir). "★ Favoritos" muestra todos los favoritos juntos.
+  - **Mi Perfil**: tarjeta "Más jugados · 30 días" a la derecha de las maestrías (`calc.masJugados`, top 5 de
+    las partidas guardadas en todas las colas, sin remakes; ícono, nombre y partidas; el winrate en el title).
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)
