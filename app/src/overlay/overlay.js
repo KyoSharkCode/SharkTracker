@@ -206,6 +206,14 @@ const AVISO_CARGA = {
   sin_sesion: 'Inicia sesión en la app de SharkTracker para ver los rangos.',
   sin_cuenta: 'Vincula tu cuenta de LoL en la web de SharkTracker para ver los rangos.',
 };
+// Relación del jugador con su campeón (la calcula la Edge Function pantalla-carga).
+const ETIQUETA_RELACION = {
+  primera: ['nuevo', 'Primera vez'],
+  nuevo: ['nuevo', 'Nuevo con el campeón'],
+  main: ['main', 'Jugando su Main'],
+  volviendo: ['volviendo', 'Volviendo a su main'],
+  fuera: ['fuera', 'Fuera de su main'],
+};
 let carga = null;
 function textoRango(j) {
   if (j.pendiente) return 'Rango pendiente…';
@@ -222,8 +230,8 @@ function filaCarga(j, equipo, verRango, verWinrate) {
   else quien.append(el('div', 'carga-rango', j.campeon));
   if (ver('cargaEtiquetas')) {
     const tags = [];
-    if (j.main === true) tags.push(['main', 'Main del campeón']);
-    if (j.main === false) tags.push(['fuera', 'Fuera de su main']);
+    const rel = j.relacion ?? (j.main === true ? 'main' : j.main === false ? 'fuera' : null);
+    if (ETIQUETA_RELACION[rel]) tags.push(ETIQUETA_RELACION[rel]);
     if (j.rango?.racha) tags.push(['racha', 'Frenesí']);
     if (j.sharktracker) tags.push(['st', 'SharkTracker']);
     if (tags.length) {

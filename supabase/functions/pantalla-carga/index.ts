@@ -2,8 +2,9 @@
 //
 // La llama la app (con tu sesión de Discord) mientras carga la partida y
 // devuelve el panel listo para dibujar: los 10 jugadores con su campeón,
-// rango, LP, winrate de la temporada y etiquetas ("Main del campeón",
-// "En racha").
+// rango, LP, winrate de la temporada y etiquetas (la relación con su
+// campeón: "Primera vez", "Nuevo con el campeón", "Jugando su Main",
+// "Volviendo a su main", "Fuera de su main"; y "Frenesí").
 //
 // "Verify JWT" va ENCENDIDO (default): la llama un usuario con sesión, y
 // además solo responde a cuentas vinculadas en SharkTracker (así nadie de
@@ -13,7 +14,7 @@
 //  - Lo esencial (quiénes juegan + rango) se pide mientras la key esté por
 //    debajo del 85 % de su límite de 2 min; lo que falte queda "pendiente" y
 //    la app vuelve a llamar a los ~15 s para completarlo.
-//  - Lo extra (maestría → "Main del campeón") solo si está por debajo del 60 %.
+//  - Lo extra (maestría → relación con el campeón) solo si está por debajo del 60 %.
 //  - Primero los rivales, después tu equipo. Los de SharkTracker salen de la
 //    base de datos (0 peticiones).
 //  - Caché: el panel de una partida 10 min (si varios de SharkTracker están
@@ -33,12 +34,21 @@ const CACHE_PARTIDA_MS = 10 * 60 * 1000;
 const CACHE_RANGO_MS = 30 * 60 * 1000;
 const BLOQUEO_MS = 30 * 1000;
 
+// Relación del jugador con el campeón que lleva (ver relacionRiot / relacionST).
+const MAESTRIA_TOP = 10;            // "su main" = uno de sus 10 campeones con más puntos
+const MAESTRIA_PUNTOS_NUEVO = 2000; // por debajo de esto, el campeón le es nuevo
+const DIAS_RECIENTE = 30;           // "lo jugó hace poco"
+const PARTIDAS_MAIN = 5;            // SharkTracker: partidas de este mes para contar como main
+// Colas que cuentan para los de SharkTracker (sin ARAM, Arena ni modos rotativos):
+// normales, clasificatorias, Partida Rápida y Clash.
+const COLAS_MAIN = [400, 420, 430, 440, 490, 700];
+
 const COLAS: Record<number, string> = {
   420: 'Clasificatoria Solo/Duo', 440: 'Clasificatoria Flex', 400: 'Normal (reclutamiento)', 430: 'Normal',
   490: 'Partida Rápida', 450: 'ARAM', 2400: 'ARAM', 700: 'Clash', 1700: 'Arena', 1710: 'Arena', 1720: 'Arena', 1750: 'Arena',
 };
-// Colas con campeón al azar o sin roles fijos: "Main del campeón" / "Fuera de su main"
-// no dicen nada, así que ni se muestran ni se gasta la key pidiendo maestrías.
+// Colas con campeón al azar o sin roles fijos: las etiquetas de main no dicen
+// nada, así que ni se muestran ni se gasta la key pidiendo maestrías.
 const SIN_MAINS = new Set([450, 2400, 1700, 1710, 1720, 1750, 900, 1900]);
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -88,6 +98,28 @@ const rangoDe = (e: any, cola: string) => e ? {
   cola, tier: e.tier, division: e.rank ?? e.division ?? '', lp: e.leaguePoints ?? e.lp ?? 0,
   victorias: e.wins ?? 0, derrotas: e.losses ?? 0, racha: !!e.hotStreak,
 } : null;
+
+type Relacion = 'primera' | 'nuevo' | 'main' | 'volviendo' | 'fuera';
+// Maestrías de Riot, en compacto: [championId, puntos, última partida (ms)], de más a menos puntos.
+type Maestrias = [number, number, number][];
+
+// Jugadores de fuera: solo se sabe lo que dice la maestría (puntos y fecha de la última partida).
+function relacionRiot(lista: Maestrias, championId: number, ahora: number): Relacion {
+  const i = lista.findIndex((m) => m[0] === championId);
+  if (i < 0) return 'primera';                     // nunca lo ha jugado
+  const [, puntos, ultima] = lista[i];
+  if (puntos < MAESTRIA_PUNTOS_NUEVO) return 'nuevo';
+  if (i >= MAESTRIA_TOP) return 'fuera';
+  return ahora - ultima <= DIAS_RECIENTE * 86_400_000 ? 'main' : 'volviendo';
+}
+
+// Jugadores de SharkTracker: las partidas del último mes salen de la base (exactas, sin ARAM).
+// Si eso no basta para decidir, se completa con la maestría de Riot (si la hay).
+function relacionST(partidas: number, enTop3: boolean, lista: Maestrias | null, championId: number, ahora: number): Relacion | null {
+  if (partidas >= PARTIDAS_MAIN) return 'main';
+  if (enTop3) return 'volviendo';
+  return lista ? relacionRiot(lista, championId, ahora) : null;
+}
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'Método no permitido' }, 405);
@@ -155,6 +187,21 @@ async function armarPanel(req: Request): Promise<Response> {
   const { data: maestriasST } = ids.length
     ? await supabase.from('player_masteries').select('player_id, champion').in('player_id', ids)
     : { data: [] };
+  // Partidas del último mes de los de SharkTracker con el campeón que llevan (1 consulta, solo colas de COLAS_MAIN).
+  const clavesEnJuego = [...new Set(jugadores.map((j: any) => j.clave).filter(Boolean))];
+  const { data: partidasMes } = ids.length && clavesEnJuego.length && !sinMains
+    ? await supabase.from('match_participants')
+        .select('player_id, champion, matches!inner(queue_id, ended_at)')
+        .in('player_id', ids).in('champion', clavesEnJuego)
+        .in('matches.queue_id', COLAS_MAIN)
+        .gte('matches.ended_at', new Date(ahora - DIAS_RECIENTE * 86_400_000).toISOString())
+    : { data: [] };
+  const partidasPorPar = new Map<string, number>();
+  for (const p of partidasMes ?? []) {
+    const k = `${p.player_id}|${p.champion}`;
+    partidasPorPar.set(k, (partidasPorPar.get(k) ?? 0) + 1);
+  }
+  const partidasDe = (j: any) => partidasPorPar.get(`${idPorPuuid.get(j.puuid)}|${j.clave}`) ?? 0;
 
   // Caché de rangos (30 min) para el resto.
   const { data: cacheRangos } = await supabase.from('carga_rangos').select('puuid, datos, updated_at').in('puuid', puuids);
@@ -162,7 +209,7 @@ async function armarPanel(req: Request): Promise<Response> {
     .filter((c: any) => ahora - new Date(c.updated_at).getTime() < CACHE_RANGO_MS)
     .map((c: any) => [c.puuid, c.datos]));
 
-  const info = new Map<string, any>(); // puuid → { solo, flex, maestria: [championIds] | null }
+  const info = new Map<string, any>(); // puuid → { solo, flex, maestrias: Maestrias | null }
   for (const j of jugadores) {
     if (!j.puuid) continue;
     const pid = idPorPuuid.get(j.puuid);
@@ -188,7 +235,7 @@ async function armarPanel(req: Request): Promise<Response> {
       const entradas = await riot(`https://${REGION_GAME}.api.riotgames.com/lol/league/v4/entries/by-puuid/${j.puuid}`, CUPO_ESENCIAL) ?? [];
       const solo = entradas.find((e: any) => e.queueType === 'RANKED_SOLO_5x5');
       const flex = entradas.find((e: any) => e.queueType === 'RANKED_FLEX_SR');
-      const datos = { solo: rangoDe(solo, 'Solo/Duo'), flex: rangoDe(flex, 'Flex'), maestria: null };
+      const datos = { solo: rangoDe(solo, 'Solo/Duo'), flex: rangoDe(flex, 'Flex'), maestrias: null };
       info.set(j.puuid, datos);
       nuevos.push({ puuid: j.puuid, datos });
     }
@@ -196,13 +243,19 @@ async function armarPanel(req: Request): Promise<Response> {
     if (!(e instanceof Ocupado)) throw e;
   }
 
-  // Extra: maestría (top 3) solo si la key va holgada (y si la cola tiene mains).
+  // Extra: maestrías de Riot (lista completa, 1 petición por jugador) solo si la key va holgada
+  // (y si la cola tiene mains). Los de SharkTracker solo la piden si la base no basta para decidir.
+  const necesitaLista = (j: any, d: any) => d.sharktracker
+    ? partidasDe(j) < PARTIDAS_MAIN && !(d.mainsNombres ?? []).includes(j.clave)
+    : true;
   try {
     for (const j of sinMains ? [] : orden) {
       const d = j.puuid ? info.get(j.puuid) : null;
-      if (!d || d.sharktracker || Array.isArray(d.maestria)) continue;
-      const top = await riot(`https://${REGION_GAME}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${j.puuid}/top?count=3`, CUPO_EXTRA) ?? [];
-      d.maestria = top.map((m: any) => m.championId);
+      if (!d || Array.isArray(d.maestrias) || !necesitaLista(j, d)) continue;
+      const todas = await riot(`https://${REGION_GAME}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${j.puuid}`, CUPO_EXTRA) ?? [];
+      d.maestrias = todas.map((m: any) => [m.championId, m.championPoints, m.lastPlayTime])
+        .sort((a: number[], b: number[]) => b[1] - a[1]) as Maestrias;
+      if (d.sharktracker) continue; // los de SharkTracker no se guardan en la caché de rangos
       const previo = nuevos.find((n) => n.puuid === j.puuid);
       if (previo) previo.datos = d; else nuevos.push({ puuid: j.puuid, datos: d });
     }
@@ -219,16 +272,20 @@ async function armarPanel(req: Request): Promise<Response> {
     jugadores: jugadores.map((j: any) => {
       const d = j.puuid ? info.get(j.puuid) : null;
       const rango = d ? (esFlex ? d.flex ?? d.solo : d.solo ?? d.flex) : null;
-      let main: boolean | null = null;
-      if (sinMains) main = null;
-      else if (d?.sharktracker && d.mainsNombres?.length) main = d.mainsNombres.includes(j.clave);
-      else if (Array.isArray(d?.maestria) && d.maestria.length) main = d.maestria.includes(j.championId);
+      let relacion: Relacion | null = null;
+      if (!sinMains && d?.sharktracker) {
+        relacion = relacionST(partidasDe(j), (d.mainsNombres ?? []).includes(j.clave), d.maestrias ?? null, j.championId, ahora);
+      } else if (!sinMains && Array.isArray(d?.maestrias)) {
+        relacion = relacionRiot(d.maestrias, j.championId, ahora);
+      }
       return {
         puuid: j.puuid, equipo: j.equipo, nombre: j.nombre, campeon: j.campeon, clave: j.clave,
         sharktracker: !!d?.sharktracker,
         pendiente: !!j.puuid && !d,
         rango,
-        main,
+        relacion,
+        // Para versiones viejas de la app, que solo conocen "main" / "fuera de su main".
+        main: relacion === null ? null : relacion === 'main',
       };
     }),
   };

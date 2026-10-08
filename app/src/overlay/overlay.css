@@ -156,6 +156,8 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .carga-tag { font-size: 11px; font-weight: 600; border-radius: 5px; padding: 1px 6px; white-space: nowrap; }
 .carga-tag.main { background: rgba(70,200,140,.14); color: #3DFFD2; }
 .carga-tag.fuera { background: rgba(230,180,60,.14); color: #FFB547; }
+.carga-tag.nuevo { background: rgba(169,139,255,.14); color: #A98BFF; }
+.carga-tag.volviendo { background: rgba(255,169,138,.14); color: #FFA98A; }
 .carga-tag.racha { background: rgba(255,181,71,.14); color: #FFB547; }
 .carga-tag.st { background: color-mix(in srgb, var(--acento) 14%, transparent); color: var(--acento); }
 /* Atajo Ctrl + X: recordatorio en la cabecera y versión mini cuando el panel está oculto */
