@@ -16,6 +16,8 @@
 //       volumen: 0–200 (%).
 //       Sin --separadas: 2 canales (la mezcla). Con --separadas: 2 + 2 por fuente
 //       (la mezcla y luego cada fuente, en el orden de los argumentos).
+//       --niveles N: cada N s (30 de fábrica) avisa qué llegó de cada fuente (nivel en dB,
+//       "silencio" o "no llega nada"); la app lo guarda en registro.txt.
 //
 // El audio sale al ritmo del reloj del PC (QueryPerformanceCounter), con 50 ms de
 // retraso fijo para tener margen: si una fuente no manda nada (silencio, programa
@@ -131,7 +133,7 @@ static std::wstring minusculas(std::wstring s) {
   return s;
 }
 
-// Formato que le pedimos a Windows para todas las fuentes: PCM 16 bits, 48 kHz, estéreo.
+// Formato que se pide para la captura por proceso: PCM 16 bits, 48 kHz, estéreo.
 static WAVEFORMATEX formato() {
   WAVEFORMATEX f = {};
   f.wFormatTag = WAVE_FORMAT_PCM;
@@ -194,6 +196,54 @@ static IAudioClient* clienteDeProceso(DWORD pid, HRESULT* error) {
   return cliente;
 }
 
+// ── Formato de una captura y conversión a float estéreo 48 kHz ──
+// Los dispositivos se capturan en su propio formato (el de la mezcla de Windows):
+// pedirle a Windows que convierta falla con algunos dispositivos virtuales (Wave Link,
+// Voicemeeter…). La captura por proceso sí se pide en PCM 16 bits 48 kHz estéreo.
+struct Formato {
+  enum Tipo { I16, I24, I32, F32 } tipo = I16;
+  int canales = 2;
+  int hz = HZ;
+  int bytesMuestra = 2;
+  int bloque = 4;
+};
+
+static Formato leerFormato(const WAVEFORMATEX* w) {
+  Formato f;
+  f.canales = std::max<int>(1, w->nChannels);
+  f.hz = (int)w->nSamplesPerSec;
+  f.bloque = w->nBlockAlign;
+  f.bytesMuestra = std::max(1, f.bloque / f.canales);
+  WORD etiqueta = w->wFormatTag;
+  if (etiqueta == WAVE_FORMAT_EXTENSIBLE && w->cbSize >= 22) {
+    // El subformato es un GUID cuyo primer campo es la etiqueta clásica (1 = PCM, 3 = float).
+    etiqueta = (WORD)reinterpret_cast<const WAVEFORMATEXTENSIBLE*>(w)->SubFormat.Data1;
+  }
+  if (etiqueta == WAVE_FORMAT_IEEE_FLOAT) f.tipo = Formato::F32;
+  else f.tipo = f.bytesMuestra == 2 ? Formato::I16 : f.bytesMuestra == 3 ? Formato::I24 : Formato::I32;
+  return f;
+}
+
+static std::wstring describir(const Formato& f) {
+  const wchar_t* t = f.tipo == Formato::F32 ? L"float" : f.tipo == Formato::I16 ? L"16 bits" : f.tipo == Formato::I24 ? L"24 bits" : L"32 bits";
+  return std::to_wstring(f.hz) + L" Hz, " + std::to_wstring(f.canales) + L" canales, " + t;
+}
+
+static inline float muestra(const BYTE* p, Formato::Tipo t) {
+  switch (t) {
+    case Formato::I16: { int16_t v; memcpy(&v, p, 2); return v / 32768.f; }
+    case Formato::I24: { int32_t v = (int32_t)((uint32_t)p[0] << 8 | (uint32_t)p[1] << 16 | (uint32_t)p[2] << 24); return v / 2147483648.f; }
+    case Formato::I32: { int32_t v; memcpy(&v, p, 4); return v / 2147483648.f; }
+    default: { float v; memcpy(&v, p, 4); return v; }
+  }
+}
+
+// Lo que se recibió de una fuente (para el registro y "Probar audio").
+struct Medida {
+  long long frames = 0;  // frames recibidos
+  float pico = 0.f;      // nivel máximo (0–1)
+};
+
 // ── Una captura (un proceso o un dispositivo) ──
 struct Captura {
   IAudioClient* cliente = nullptr;
@@ -201,6 +251,11 @@ struct Captura {
   HANDLE evento = nullptr;
   DWORD pid = 0;          // si es de un programa
   bool viva = true;
+  Formato fmt;
+  // Cambio de frecuencia (si el dispositivo no va a 48 kHz): interpolación lineal.
+  double pos = 0.0;
+  float prevL = 0.f, prevR = 0.f;
+  bool hayPrev = false;
 
   ~Captura() {
     if (cliente) cliente->Stop();
@@ -209,12 +264,23 @@ struct Captura {
     if (evento) CloseHandle(evento);
   }
 
-  bool iniciar(IAudioClient* c, DWORD flags, std::wstring* error) {
+  // propio = true: en el formato del dispositivo (GetMixFormat). false: PCM 16 bits 48 kHz estéreo.
+  bool iniciar(IAudioClient* c, DWORD flags, bool propio, std::wstring* error) {
     cliente = c;
-    WAVEFORMATEX f = formato();
+    WAVEFORMATEX fijo = formato();
+    WAVEFORMATEX* mezcla = nullptr;
+    const WAVEFORMATEX* pedido = &fijo;
+    HRESULT hr = S_OK;
+    if (propio) {
+      hr = cliente->GetMixFormat(&mezcla);
+      if (FAILED(hr) || !mezcla) { *error = L"sin formato: " + hex(hr); return false; }
+      pedido = mezcla;
+    }
+    fmt = leerFormato(pedido);
     evento = CreateEventW(nullptr, FALSE, FALSE, nullptr);
-    HRESULT hr = cliente->Initialize(AUDCLNT_SHAREMODE_SHARED, flags | AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
-                                     2000000 /* 200 ms */, 0, &f, nullptr);
+    hr = cliente->Initialize(AUDCLNT_SHAREMODE_SHARED, flags | AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
+                             2000000 /* 200 ms */, 0, pedido, nullptr);
+    if (mezcla) CoTaskMemFree(mezcla);
     if (SUCCEEDED(hr)) hr = cliente->SetEventHandle(evento);
     if (SUCCEEDED(hr)) hr = cliente->GetService(__uuidof(IAudioCaptureClient), (void**)&captura);
     if (SUCCEEDED(hr)) hr = cliente->Start();
@@ -222,9 +288,26 @@ struct Captura {
     return true;
   }
 
-  // Pasa lo capturado a la cola de la fuente (float estéreo).
-  void leer(std::deque<float>& cola) {
+  // Un frame ya en estéreo, a 48 kHz.
+  inline void meter(std::deque<float>& cola, float l, float r) {
+    if (fmt.hz == HZ) { cola.push_back(l); cola.push_back(r); return; }
+    if (!hayPrev) { prevL = l; prevR = r; hayPrev = true; pos = 0.0; return; }
+    const double paso = (double)fmt.hz / HZ;
+    while (pos <= 1.0) {
+      cola.push_back(prevL + (l - prevL) * (float)pos);
+      cola.push_back(prevR + (r - prevR) * (float)pos);
+      pos += paso;
+    }
+    pos -= 1.0;
+    prevL = l;
+    prevR = r;
+  }
+
+  // Pasa lo capturado a la cola de la fuente (float estéreo 48 kHz).
+  void leer(std::deque<float>& cola, Medida& m) {
     if (!viva) return;
+    const int ch = fmt.canales;
+    float s[8];
     for (;;) {
       UINT32 paquete = 0;
       HRESULT hr = captura->GetNextPacketSize(&paquete);
@@ -235,9 +318,27 @@ struct Captura {
       DWORD flags = 0;
       hr = captura->GetBuffer(&datos, &frames, &flags, nullptr, nullptr);
       if (FAILED(hr)) { viva = false; return; }
-      const int16_t* m = reinterpret_cast<const int16_t*>(datos);
-      for (UINT32 i = 0; i < frames * 2; i++) {
-        cola.push_back((flags & AUDCLNT_BUFFERFLAGS_SILENT) ? 0.f : m[i] / 32768.f);
+      const bool silencio = (flags & AUDCLNT_BUFFERFLAGS_SILENT) != 0;
+      m.frames += frames;
+      for (UINT32 i = 0; i < frames; i++) {
+        float l = 0.f, r = 0.f;
+        if (!silencio) {
+          const BYTE* fila = datos + (size_t)i * fmt.bloque;
+          const int n = std::min(ch, 8);
+          for (int k = 0; k < n; k++) s[k] = muestra(fila + (size_t)k * fmt.bytesMuestra, fmt.tipo);
+          if (ch == 1) { l = r = s[0]; }
+          else if (ch == 2) { l = s[0]; r = s[1]; }
+          else if (ch == 4) { l = s[0] + 0.5f * s[2]; r = s[1] + 0.5f * s[3]; }  // cuadrafónico
+          else {
+            // 5.1 / 7.1 (FL FR FC LFE BL BR SL SR): centro y traseros a los dos lados.
+            l = s[0] + 0.707f * s[2];
+            r = s[1] + 0.707f * s[2];
+            if (ch >= 6) { l += 0.5f * s[4]; r += 0.5f * s[5]; }
+            if (ch >= 8) { l += 0.5f * s[6]; r += 0.5f * s[7]; }
+          }
+          m.pico = std::max(m.pico, std::max(std::fabs(l), std::fabs(r)));
+        }
+        meter(cola, l, r);
       }
       captura->ReleaseBuffer(frames);
     }
@@ -256,7 +357,22 @@ struct Fuente {
   std::deque<float> cola;                      // muestras estéreo intercaladas
   ULONGLONG ultimoIntento = 0;
   bool avisoAusente = false;
+  Medida medida;                               // lo recibido desde el último informe
+  std::wstring etiqueta;                       // para los avisos: "Juego", "PC", "Micrófono"
 };
+
+static std::wstring nombreDispositivo(IMMDevice* d) {
+  std::wstring nombre = L"(sin nombre)";
+  IPropertyStore* ps = nullptr;
+  if (SUCCEEDED(d->OpenPropertyStore(STGM_READ, &ps))) {
+    PROPVARIANT v;
+    PropVariantInit(&v);
+    if (SUCCEEDED(ps->GetValue(PKEY_Device_FriendlyName, &v)) && v.vt == VT_LPWSTR) nombre = v.pwszVal;
+    PropVariantClear(&v);
+    ps->Release();
+  }
+  return nombre;
+}
 
 static IMMDeviceEnumerator* enumerador = nullptr;
 
@@ -272,21 +388,21 @@ static void abrirDispositivo(Fuente& f) {
   std::wstring error;
   IMMDevice* d = dispositivo(f.tipo, f.valor);
   if (!d) {
-    if (!f.avisoAusente) aviso(L"No hay dispositivo de sonido para " + std::wstring(f.tipo == Tipo::Mic ? L"el micrófono" : L"el PC"));
+    if (!f.avisoAusente) aviso(f.etiqueta + L": no hay dispositivo de sonido");
     f.avisoAusente = true;
     return;
   }
   f.avisoAusente = false;
+  const std::wstring nombre = nombreDispositivo(d);
   IAudioClient* c = nullptr;
   HRESULT hr = d->Activate(__uuidof(IAudioClient), CLSCTX_ALL, nullptr, (void**)&c);
   d->Release();
-  if (FAILED(hr)) { aviso(L"No se pudo abrir el dispositivo: " + hex(hr)); return; }
+  if (FAILED(hr)) { aviso(f.etiqueta + L": no se pudo abrir " + nombre + L" (" + hex(hr) + L")"); return; }
   auto cap = std::make_unique<Captura>();
-  DWORD flags = AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM | AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY;
-  if (f.tipo == Tipo::Pc) flags |= AUDCLNT_STREAMFLAGS_LOOPBACK;
-  if (!cap->iniciar(c, flags, &error)) { aviso(L"No se pudo capturar el dispositivo: " + error); return; }
+  DWORD flags = f.tipo == Tipo::Pc ? AUDCLNT_STREAMFLAGS_LOOPBACK : 0;
+  if (!cap->iniciar(c, flags, true, &error)) { aviso(f.etiqueta + L": no se pudo capturar " + nombre + L" (" + error + L")"); return; }
+  aviso(f.etiqueta + L": capturando " + nombre + L" (" + describir(cap->fmt) + L")");
   f.capturas.push_back(std::move(cap));
-  aviso(f.tipo == Tipo::Mic ? L"Micrófono: capturando" : L"PC: capturando");
 }
 
 // Procesos "raíz" del programa (su padre no es el mismo programa): con el árbol
@@ -330,16 +446,16 @@ static void revisarPrograma(Fuente& f) {
     HRESULT hr = S_OK;
     IAudioClient* c = clienteDeProceso(pid, &hr);
     std::wstring error;
-    if (!c) { aviso(L"No se pudo capturar " + f.valor + L" (pid " + std::to_wstring(pid) + L"): " + hex(hr)); continue; }
+    if (!c) { aviso(f.etiqueta + L": no se pudo capturar " + f.valor + L" (pid " + std::to_wstring(pid) + L"): " + hex(hr)); continue; }
     auto cap = std::make_unique<Captura>();
     cap->pid = pid;
-    if (!cap->iniciar(c, AUDCLNT_STREAMFLAGS_LOOPBACK, &error)) { aviso(L"No se pudo capturar " + f.valor + L": " + error); continue; }
+    if (!cap->iniciar(c, AUDCLNT_STREAMFLAGS_LOOPBACK, false, &error)) { aviso(f.etiqueta + L": no se pudo capturar " + f.valor + L" (" + error + L")"); continue; }
     f.capturas.push_back(std::move(cap));
-    aviso(L"Capturando " + f.valor + L" (pid " + std::to_wstring(pid) + L")");
+    aviso(f.etiqueta + L": capturando " + f.valor + L" (pid " + std::to_wstring(pid) + L")");
     f.avisoAusente = false;
   }
   if (f.capturas.empty() && !f.avisoAusente) {
-    aviso(L"Esperando a que se abra " + f.valor);
+    aviso(f.etiqueta + L": esperando a que se abra " + f.valor);
     f.avisoAusente = true;
   }
 }
@@ -370,15 +486,7 @@ static void listar(EDataFlow flujo, std::string& out) {
       if (FAILED(col->Item(i, &d))) continue;
       LPWSTR id = nullptr;
       d->GetId(&id);
-      std::wstring nombre = L"(sin nombre)";
-      IPropertyStore* ps = nullptr;
-      if (SUCCEEDED(d->OpenPropertyStore(STGM_READ, &ps))) {
-        PROPVARIANT v;
-        PropVariantInit(&v);
-        if (SUCCEEDED(ps->GetValue(PKEY_Device_FriendlyName, &v)) && v.vt == VT_LPWSTR) nombre = v.pwszVal;
-        PropVariantClear(&v);
-        ps->Release();
-      }
+      const std::wstring nombre = nombreDispositivo(d);
       if (out.back() != '[') out += ",";
       out += "{\"id\":" + json(id ? id : L"") + ",\"nombre\":" + json(nombre) + ",\"defecto\":" + (id && defecto == id ? "true" : "false") + "}";
       if (id) CoTaskMemFree(id);
@@ -413,7 +521,26 @@ static bool escribir(HANDLE salida, const std::vector<float>& buf) {
   return true;
 }
 
-static int modoCapturar(std::deque<Fuente>& fuentes, bool separadas) {
+// Informe para el registro de la app: qué llegó de cada fuente desde el último.
+static void informarNiveles(std::deque<Fuente>& fuentes, int segundos) {
+  std::wstring t = L"Niveles (" + std::to_wstring(segundos) + L" s):";
+  for (size_t i = 0; i < fuentes.size(); i++) {
+    auto& f = fuentes[i];
+    t += (i ? L" ·" : L"") + std::wstring(L" ") + f.etiqueta + L" ";
+    if (f.capturas.empty()) t += L"sin capturar";
+    else if (!f.medida.frames) t += L"no llega nada";
+    else if (f.medida.pico < 0.0001f) t += L"silencio";
+    else {
+      wchar_t b[32];
+      swprintf(b, 32, L"%.0f dB", 20.0 * std::log10((double)f.medida.pico));
+      t += b;
+    }
+    f.medida = Medida();
+  }
+  aviso(t);
+}
+
+static int modoCapturar(std::deque<Fuente>& fuentes, bool separadas, int cadaNiveles) {
   HANDLE salida = GetStdHandle(STD_OUTPUT_HANDLE);
   SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS); // pesa casi nada; que no se corte
   for (auto& f : fuentes) {
@@ -427,11 +554,16 @@ static int modoCapturar(std::deque<Fuente>& fuentes, bool separadas) {
   QueryPerformanceCounter(&t0);
   long long enviados = 0;
   std::vector<float> buf;
+  ULONGLONG ultimoInforme = GetTickCount64();
   timeBeginPeriod(1);
   for (;;) {
     Sleep(10);
+    if (cadaNiveles > 0 && GetTickCount64() - ultimoInforme >= (ULONGLONG)cadaNiveles * 1000) {
+      ultimoInforme = GetTickCount64();
+      informarNiveles(fuentes, cadaNiveles);
+    }
     for (auto& f : fuentes) {
-      for (auto& c : f.capturas) c->leer(f.cola);
+      for (auto& c : f.capturas) c->leer(f.cola, f.medida);
       if (GetTickCount64() - f.ultimoIntento > 3000) {
         f.ultimoIntento = GetTickCount64();
         if (f.tipo == Tipo::Programa) revisarPrograma(f); else revisarDispositivo(f);
@@ -484,9 +616,11 @@ int wmain(int argc, wchar_t** argv) {
   }
   std::deque<Fuente> fuentes; // deque: las fuentes no se mueven al agregar otra
   bool separadas = false;
+  int cadaNiveles = 30; // informe de niveles por la salida de errores (0 = nunca)
   for (int i = 2; i < argc; i++) {
     std::wstring a = argv[i];
     if (a == L"--separadas") { separadas = true; continue; }
+    if (a == L"--niveles" && i + 1 < argc) { cadaNiveles = std::clamp(_wtoi(argv[++i]), 0, 3600); continue; }
     if (a != L"--fuente" || i + 1 >= argc) { aviso(L"Argumento desconocido: " + a); return 1; }
     std::wstring v = argv[++i];
     size_t p1 = v.find(L':'), p2 = p1 == std::wstring::npos ? p1 : v.find(L':', p1 + 1);
@@ -507,7 +641,15 @@ int wmain(int argc, wchar_t** argv) {
         ini = c + 1;
       }
     }
+    // Nombre para los avisos: "League of Legends", "Discord", "Micrófono", "PC".
+    if (f.tipo == Tipo::Mic) f.etiqueta = L"Micrófono";
+    else if (f.tipo == Tipo::Pc) f.etiqueta = L"PC";
+    else {
+      std::wstring n = f.valor.substr(0, f.valor.find(L','));
+      if (n.size() > 4 && minusculas(n.substr(n.size() - 4)) == L".exe") n.resize(n.size() - 4);
+      f.etiqueta = n;
+    }
   }
   if (fuentes.empty()) { aviso(L"Sin fuentes de audio"); return 1; }
-  return modoCapturar(fuentes, separadas);
+  return modoCapturar(fuentes, separadas, cadaNiveles);
 }

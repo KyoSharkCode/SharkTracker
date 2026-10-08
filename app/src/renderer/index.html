@@ -351,7 +351,7 @@
                 <div><div class="swnm">Tecla de tu ulti</div><div class="swsub">Cámbiala si no usas la R en el juego</div></div>
                 <select id="clips-tecla" class="selector" aria-label="Tecla de tu ulti"></select>
               </div>
-              <div class="swrow"><div><div class="swnm">Avisar en partida</div><div class="swsub">Un aviso pequeño cuando se guarda un clip automático</div></div><button class="sw" type="button" role="switch" id="sw-clips-aviso" aria-label="Avisar en partida al guardar un clip automático"></button></div>
+              <div class="swrow"><div><div class="swnm">Avisar en partida</div><div class="swsub">"Clip creado" en el momento de la jugada (Ctrl + F8 siempre avisa)</div></div><button class="sw" type="button" role="switch" id="sw-clips-aviso" aria-label="Avisar en partida al crear un clip automático"></button></div>
             </div>
 
             <div class="card">
@@ -365,16 +365,22 @@
                 <div class="swrow"><div><div class="swnm">Discord</div><div class="swsub">Las voces del grupo. Avísales que salen en tus clips</div></div><button class="sw" type="button" role="switch" aria-label="Grabar Discord"></button></div>
                 <div class="rango vol"><input type="range" min="0" max="200" step="10" aria-label="Volumen de Discord"><output></output></div>
               </div>
+              <div class="fuente" data-fuente="musica">
+                <div class="swrow"><div><div class="swnm">Música</div><div class="swsub">Solo Spotify (de fábrica más bajo, de fondo)</div></div><button class="sw" type="button" role="switch" aria-label="Grabar la música de Spotify"></button></div>
+                <div class="rango vol"><input type="range" min="0" max="200" step="10" aria-label="Volumen de la música"><output></output></div>
+              </div>
               <div class="fuente" data-fuente="mic">
                 <div class="swrow"><div><div class="swnm">Micrófono</div><div class="swsub">Tu voz</div></div><button class="sw" type="button" role="switch" aria-label="Grabar el micrófono"></button></div>
                 <select class="selector" aria-label="Micrófono"></select>
                 <div class="rango vol"><input type="range" min="0" max="200" step="10" aria-label="Volumen del micrófono"><output></output></div>
               </div>
               <div class="fuente" data-fuente="pc">
-                <div class="swrow"><div><div class="swnm">Todo el PC</div><div class="swsub">Todo lo que suena (música incluida). Reemplaza a Juego y Discord</div></div><button class="sw" type="button" role="switch" aria-label="Grabar todo el sonido del PC"></button></div>
+                <div class="swrow"><div><div class="swnm">Todo el PC</div><div class="swsub">Todo lo que suena. Reemplaza a Juego, Discord y Música</div></div><button class="sw" type="button" role="switch" aria-label="Grabar todo el sonido del PC"></button></div>
                 <select class="selector" aria-label="Salida de sonido"></select>
                 <div class="rango vol"><input type="range" min="0" max="200" step="10" aria-label="Volumen del PC"><output></output></div>
               </div>
+              <div class="avisos-pie"><button id="btn-probar-audio" class="btn-sec" type="button">Probar audio</button><span class="swsub">Pon algo a sonar mientras prueba (4 s). El juego solo se oye con League abierto.</span></div>
+              <ul id="audio-prueba" class="audio-prueba" hidden></ul>
               <div class="swrow"><div><div class="swnm">Pistas separadas</div><div class="swsub">Además de la mezcla, cada fuente en su pista (para editar)</div></div><button class="sw" type="button" role="switch" id="sw-audio-separadas" aria-label="Pistas de audio separadas"></button></div>
             </div>
 

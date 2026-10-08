@@ -976,3 +976,54 @@ html, body { font-variant-numeric: tabular-nums; }
 .visor-acciones { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
 .visor-sep { flex: 1; }
 #visor-fav.on { color: var(--dorado); }
+
+/* Mi Perfil: más jugados en 30 días (a la derecha de las maestrías) */
+.card-masjugados { display: flex; flex-direction: column; }
+.mj-lista { display: flex; flex-direction: column; gap: 8px; flex: 1; justify-content: center; }
+.mj-fila { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 10px; background: #051823; border: 1px solid rgba(120,220,210,0.06); }
+.mj-icono { width: 40px; height: 40px; flex-shrink: 0; border-radius: 9px; overflow: hidden; background: #10303D;
+  display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--texto-tenue); }
+.mj-icono img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mj-info { min-width: 0; }
+.mj-nombre { font-size: 14px; font-weight: 700; color: var(--texto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mj-sub { font-family:'Red Hat Mono',ui-monospace,monospace; font-size: 12px; color: var(--texto-tenue); margin-top: 1px; }
+.audio-prueba { list-style: none; margin: 4px 0 8px; padding: 10px 12px; border-radius: 10px; background: #051823; display: flex; flex-direction: column; gap: 6px; font-size: 13px; line-height: 1.45; color: var(--texto-tenue); }
+.audio-prueba b { color: var(--texto); font-weight: 600; }
+.audio-prueba li.bien::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--verde); margin-right: 8px; vertical-align: 1px; }
+.audio-prueba li.mal::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--salmon); margin-right: 8px; vertical-align: 1px; }
+
+/* Galería por partidas (carpetas) y vista previa al pasar el mouse */
+.gal-carpetas { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.gal-carpeta { font: inherit; color: inherit; text-align: left; padding: 0; border: 0; background: none; cursor: pointer; display: flex; flex-direction: column; gap: 10px; }
+/* Pila: la portada con dos "hojas" detrás, como una carpeta de clips */
+.gal-pila { position: relative; display: block; aspect-ratio: 16 / 9; margin-top: 8px; }
+.gal-pila::before, .gal-pila::after { content: ""; position: absolute; left: 8%; right: 8%; top: -8px; height: 20px; border-radius: 10px 10px 0 0;
+  background: #0E2C3A; border: 1px solid rgba(120,220,210,0.08); border-bottom: 0; }
+.gal-pila::after { left: 4%; right: 4%; top: -4px; background: #123545; }
+.gal-portada { position: absolute; inset: 0; z-index: 1; border-radius: 12px; overflow: hidden; background: #051823; border: 1px solid rgba(120,220,210,0.1);
+  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out), border-color 200ms var(--ease-out); }
+.gal-portada img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gal-portada .sin-mini { position: absolute; inset: 0; display: grid; place-items: center; color: var(--texto-mudo); }
+.gal-portada .sin-mini svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.gal-cuantos, .gal-favs { position: absolute; z-index: 2; bottom: 8px; font-family:'Red Hat Mono',ui-monospace,monospace; font-size: 12px; font-weight: 600;
+  background: rgba(3,17,26,0.82); border-radius: 6px; padding: 2px 7px; transition: transform 200ms var(--ease-out); }
+.gal-cuantos { right: 8px; color: var(--texto); }
+.gal-favs { left: 8px; color: var(--dorado); }
+.gal-carpeta .gal-info { padding: 0 2px; display: flex; flex-direction: column; }
+.gal-carpeta .gal-tit { font-size: 14px; }
+.gal-carpeta:hover .gal-portada, .gal-carpeta:focus-visible .gal-portada { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.38); border-color: rgba(120,220,210,0.28); }
+.gal-carpeta:hover .gal-cuantos, .gal-carpeta:hover .gal-favs { transform: translateY(-4px); }
+.gal-cab-carpeta { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.gal-cab-tit { display: flex; flex-direction: column; gap: 2px; }
+.gal-cab-tit .gal-grupo-tit { font-size: 18px; margin: 0; }
+/* Clip: se levanta un poco y reproduce sin sonido unos segundos de la jugada */
+.gal-clip { transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out), border-color 150ms var(--ease-out); }
+.gal-clip:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.38); }
+.gal-previa { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 150ms var(--ease-out); pointer-events: none; }
+.gal-previa.on { opacity: 1; }
+.gal-mini:has(.gal-previa.on) .gal-play { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .gal-clip:hover, .gal-carpeta:hover .gal-portada, .gal-carpeta:focus-visible .gal-portada,
+  .gal-carpeta:hover .gal-cuantos, .gal-carpeta:hover .gal-favs { transform: none; }
+}
+.gal-dur { z-index: 2; }

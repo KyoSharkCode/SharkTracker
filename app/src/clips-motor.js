@@ -134,7 +134,14 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
     let erroresAy = '';
     if (audio) {
       ay = spawn(audio.comando[0], audio.comando.slice(1), { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
-      ay.stderr.on('data', (d) => { erroresAy = (erroresAy + d).slice(-2000); });
+      // Lo que avisa el ayudante (qué captura, qué falla, niveles cada 30 s) va al registro.
+      let resto = '';
+      ay.stderr.on('data', (d) => {
+        erroresAy = (erroresAy + d).slice(-2000);
+        const lineas = (resto + d).split(/\r?\n/);
+        resto = lineas.pop();
+        for (const l of lineas) if (l.trim()) log(`Audio · ${l.trim()}`);
+      });
       ay.on('error', (e) => { erroresAy += e.message; });
     }
     const p = spawn(ffmpeg(), args, { windowsHide: true, stdio: ['pipe', 'ignore', 'pipe'] });

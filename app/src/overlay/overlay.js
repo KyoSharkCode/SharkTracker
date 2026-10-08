@@ -495,9 +495,9 @@ function pintarEstado(estado) {
 // ── Clips (Ctrl + F8): aviso corto en la columna de avisos ──
 // "Guardando clip…" mientras se graban los segundos de después; "Clip guardado" 3 s.
 const TEXTO_CLIP = {
-  guardando: (d) => ['Guardando clip…', `${d.segundos} s más y listo`],
-  // Clips automáticos: el nombre de la jugada ("Triple kill + Barón").
-  guardado: (d) => [d.titulo && d.titulo !== 'Clip' ? `Clip: ${d.titulo}` : 'Clip guardado', `${d.segundos} s · Videos › SharkTracker`],
+  // Un solo aviso, al pasar la jugada (o al pulsar Ctrl + F8). El archivo se termina de
+  // guardar solo unos segundos después: lo verás en la sección Clips.
+  creado: (d) => ['Clip creado', d.detalle ?? 'Lo verás en la sección Clips'],
   error: () => ['No se pudo guardar', 'Revisa Ajustes › Clips'],
   apagado: () => ['Clips apagados', 'Actívalos en Ajustes › Clips'],
 };
@@ -509,8 +509,8 @@ function pintarClip(d) {
   if (!texto) { mostrar(nodo, false); return; }
   const [titulo, sub] = texto(d);
   pintarAviso(nodo, { icon: 'clip', claseColor: `c-clip${d.estado === 'error' ? ' error' : ''}`, titulo, sub });
-  mostrar(nodo, true, d.estado !== 'guardando');
-  if (d.estado !== 'guardando') clipTimer = setTimeout(() => mostrar(nodo, false), 3000);
+  mostrar(nodo, true, true);
+  clipTimer = setTimeout(() => mostrar(nodo, false), 3000);
 }
 window.overlay.onClip?.(pintarClip);
 

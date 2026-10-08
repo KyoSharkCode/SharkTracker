@@ -109,6 +109,7 @@ async function cargarPerfil() {
       rendimiento: calc.rendimientoPorCola(lista, refValida), // radar por cola (pestañas)
       referencia: refValida ? `${TIER_ES[referencia.tier] ?? referencia.tier}` : null,
       etiquetas: calc.etiquetas(lista),
+      masJugados: calc.masJugados(lista), // top 5 de los últimos 30 días
       maestrias: (maestrias.data ?? []).map((m) => ({ campeon: m.champion, nivel: m.level, puntos: m.points })),
       elo: calc.historialElo(snapshots.data),
       historial: calc.historial(lista),

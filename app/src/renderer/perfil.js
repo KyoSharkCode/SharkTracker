@@ -218,6 +218,30 @@
     return card;
   }
 
+  // ── Más jugados (últimos 30 días, todas las colas) ──
+  // Una fila por campeón: ícono, nombre y partidas.
+  function pintarMasJugados(p) {
+    const card = el('div', 'card card-masjugados');
+    card.append(el('div', 'cardhd', 'Más jugados · 30 días'));
+    const lista = p.masJugados ?? [];
+    if (!lista.length) {
+      card.append(el('div', 'vacio', 'Sin partidas en los últimos 30 días.'));
+      return card;
+    }
+    const filas = el('div', 'mj-lista');
+    for (const c of lista) {
+      const nombre = nombreCampeon(p, c.campeon);
+      const fila = el('div', 'mj-fila');
+      const info = el('div', 'mj-info');
+      info.append(el('div', 'mj-nombre', nombre), el('div', 'mj-sub', `${c.partidas} ${c.partidas === 1 ? 'partida' : 'partidas'}`));
+      fila.append(imagen(urlCampeon(p, c.campeon), 'mj-icono', iniciales(nombre)), info);
+      fila.title = `${nombre}: ${c.partidas} ${c.partidas === 1 ? 'partida' : 'partidas'}, ${Math.round((c.victorias / c.partidas) * 100)} % de victorias`;
+      filas.append(fila);
+    }
+    card.append(filas);
+    return card;
+  }
+
   // ── Historial de elo (SoloQ, últimos 30 días) ──
   function pintarElo(p) {
     const card = el('div', 'card card-elo');
@@ -340,7 +364,7 @@
     }
     sub.textContent = `Tu cuenta vinculada en SharkTracker · Sonar · ${haceCuanto(datos.actualizado)}`;
     const fila = el('div', 'perfil-fila');
-    fila.append(pintarRadar(datos), pintarMaestrias(datos));
+    fila.append(pintarRadar(datos), pintarMaestrias(datos), pintarMasJugados(datos));
     cuerpo.replaceChildren(fila, pintarElo(datos), pintarHistorial(datos));
   }
 

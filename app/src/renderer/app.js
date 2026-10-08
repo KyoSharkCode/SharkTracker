@@ -395,6 +395,41 @@ fuentesAudio.forEach((caja) => {
   vol.addEventListener('change', () => guardarClips({ audio: { [f]: { volumen: Number(vol.value) } } }));
   caja.querySelector('select')?.addEventListener('change', (e) => guardarClips({ audio: { [f]: { dispositivo: e.target.value } } }));
 });
+// Probar audio: qué llega de cada fuente encendida (lo dice el propio ayudante).
+const NOMBRE_FUENTE = { juego: 'Juego', discord: 'Discord', musica: 'Música', mic: 'Micrófono', pc: 'Todo el PC' };
+const TEXTO_PRUEBA = {
+  ok: (r) => `se oye ✓ (${r.db} dB)`,
+  silencio: () => 'llega, pero en silencio: ¿estaba sonando algo?',
+  nada: () => 'no llega sonido. Si usas Wave Link o Voicemeeter, prueba con "Juego", "Discord" y "Música" en lugar de "Todo el PC", o elige otro dispositivo',
+  'sin-capturar': (r) => (r.fuente === 'juego' ? 'abre una partida (o la práctica) para probarlo'
+    : r.fuente === 'discord' ? 'Discord no está abierto' : r.fuente === 'musica' ? 'Spotify no está abierto' : `no se pudo abrir${r.detalle ? `: ${r.detalle.replace(/^[^:]+:\s*/, '')}` : ''}`),
+};
+$('btn-probar-audio').addEventListener('click', async () => {
+  const b = $('btn-probar-audio');
+  const lista = $('audio-prueba');
+  b.disabled = true;
+  b.textContent = 'Probando…';
+  const r = await window.sharkTracker.clips.probarAudio();
+  b.disabled = false;
+  b.textContent = 'Probar audio';
+  lista.hidden = false;
+  if (!r.ok) {
+    const li = document.createElement('li');
+    li.className = 'mal';
+    li.textContent = r.motivo === 'sin-fuentes' ? 'Enciende al menos una fuente de audio.'
+      : r.motivo === 'sin-ayudante' ? 'Falta el ayudante de audio (sharkaudio.exe): reinstala la app.' : 'El ayudante de audio no respondió.';
+    lista.replaceChildren(li);
+    return;
+  }
+  lista.replaceChildren(...r.fuentes.map((f) => {
+    const li = document.createElement('li');
+    li.className = f.estado === 'ok' ? 'bien' : 'mal';
+    const b2 = document.createElement('b');
+    b2.textContent = `${NOMBRE_FUENTE[f.fuente]}: `;
+    li.append(b2, document.createTextNode(TEXTO_PRUEBA[f.estado](f)));
+    return li;
+  }));
+});
 $('sw-audio-separadas').addEventListener('click', () => guardarClips({ audio: { separadas: !$('sw-audio-separadas').classList.contains('on') } }));
 // Micrófonos y salidas: se piden al ayudante de audio una vez (al abrir la pestaña).
 let dispositivosAudio = null;
@@ -448,7 +483,7 @@ async function renderClips(aj) {
     const f = caja.dataset.fuente;
     const a = c.audio[f];
     // "Todo el PC" ya incluye el juego y Discord: esos dos quedan en pausa.
-    const anulada = c.audio.pc.activo && (f === 'juego' || f === 'discord');
+    const anulada = c.audio.pc.activo && ['juego', 'discord', 'musica'].includes(f);
     caja.classList.toggle('on', a.activo && !anulada);
     caja.classList.toggle('anulada', anulada);
     const sw = caja.querySelector('.sw');
