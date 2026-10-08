@@ -114,8 +114,10 @@
       return;
     }
     if (!elegido) {
-      // Tu campeón más jugado si se juega en este rol; si no, el primero de la lista.
-      elegido = (datos.misCampeones ?? []).find((id) => filas.some((f) => f.champion_id === id && f.role_rate >= 0.15))
+      // El que más jugaste en este rol (últimos 30 días); si no, tu maestría más alta que se
+      // juegue en este rol; si no, el primero de la lista.
+      elegido = (datos.jugadosPorRol?.[rol] ?? []).map((x) => x.id).find((id) => filas.some((f) => f.champion_id === id))
+        ?? (datos.misCampeones ?? []).find((id) => filas.some((f) => f.champion_id === id && f.role_rate >= 0.15))
         ?? filas[0].champion_id;
     }
     pintarTier(filas);

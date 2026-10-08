@@ -585,6 +585,12 @@ Decisiones de Alex (oct 2026).
     detrás, ★ y cantidad de clips); al entrar, sus clips con "‹ Partidas". Al pasar el mouse el clip se levanta
     4 px y, tras 350 ms, reproduce sin sonido ~8 s desde el momento de la jugada (`momento` en el índice; el
     video se suelta al salir). "★ Favoritos" muestra todos los favoritos juntos.
+  - **En Vivo / Meta, "tus campeones"**: antes salían solo de las top maestrías (`player_masteries`, 3) con
+    role_rate ≥ 15 % en tu rol, así que a Alex (Poppy/Akali/Lillia, jungla) le salía uno. `meta.cargarTier`
+    devuelve también `jugadosPorRol` (tus partidas de los últimos 30 días por `teamPosition` → rol de Meta,
+    de más a menos); `misCampeonesEn(rol)` en envivo.js = jugados en ese rol + maestrías del rol. Se usa en
+    "Tus campeones", la referencia de "Bans recomendados" (y para no sugerir banearlos) y el campeón por
+    defecto de Meta.
   - **Mi Perfil**: tarjeta "Más jugados · 30 días" a la derecha de las maestrías (`calc.masJugados`, top 5 de
     las partidas guardadas en todas las colas, sin remakes; ícono, nombre y partidas; el winrate en el title).
 

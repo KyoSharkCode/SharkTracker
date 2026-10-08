@@ -13,6 +13,8 @@ const { adaptar } = require('./build-adaptada');
 const DD = 'https://ddragon.leagueoflegends.com/cdn';
 // players.primary_role (web) → posición de OP.GG.
 const POS_WEB = { TOP: 'top', JUNGLE: 'jungle', MID: 'mid', ADC: 'adc', SUPPORT: 'support' };
+// Rol de una partida (teamPosition de Riot) → rol de Meta.
+const POS_PARTIDA = { TOP: 'top', JUNGLE: 'jungle', MIDDLE: 'mid', BOTTOM: 'adc', UTILITY: 'support' };
 
 function getJson(url, timeout = 10000) {
   return new Promise((resolve, reject) => {
@@ -81,18 +83,38 @@ async function cargarTier() {
     ]);
     if (tier.error) throw tier.error;
     let misCampeones = [];
+    let jugadosPorRol = {};
     if (jugador.data) {
-      const { data } = await cliente.from('player_masteries').select('champion').eq('player_id', jugador.data.id).order('rank').limit(5);
-      // player_masteries guarda el id interno ("MonkeyKing") → id numérico.
+      const hace30 = new Date(Date.now() - 30 * 86400000).toISOString();
+      const [maestrias, partidas] = await Promise.all([
+        cliente.from('player_masteries').select('champion').eq('player_id', jugador.data.id).order('rank').limit(5),
+        cliente.from('matches').select('ended_at, match_participants!inner(champion, role, player_id)')
+          .eq('match_participants.player_id', jugador.data.id).gte('ended_at', hace30)
+          .order('ended_at', { ascending: false }).limit(150),
+      ]);
+      // La base guarda el id interno ("MonkeyKing") → id numérico.
       const porId = Object.fromEntries(Object.entries(cat.campeones).map(([key, x]) => [x.id, Number(key)]));
-      misCampeones = (data ?? []).map((m) => porId[m.champion]).filter(Boolean);
+      // Tus más jugados de los últimos 30 días, por rol (de más a menos partidas).
+      const cuenta = {};
+      for (const m of partidas.data ?? []) {
+        const p = m.match_participants?.[0];
+        const rol = POS_PARTIDA[p?.role];
+        const id = porId[p?.champion];
+        if (!rol || !id) continue;
+        cuenta[rol] ??= new Map();
+        cuenta[rol].set(id, (cuenta[rol].get(id) ?? 0) + 1);
+      }
+      jugadosPorRol = Object.fromEntries(Object.entries(cuenta).map(([rol, mapa]) =>
+        [rol, [...mapa.entries()].sort((a, b) => b[1] - a[1]).map(([id, n]) => ({ id, partidas: n }))]));
+      misCampeones = (maestrias.data ?? []).map((m) => porId[m.champion]).filter(Boolean);
     }
     return {
       estado: 'ok',
       parche: estado.data?.parche ?? null,
       actualizado: estado.data?.actualizado ?? null,
       rol: POS_WEB[jugador.data?.primary_role] ?? 'jungle',
-      misCampeones,
+      misCampeones,   // top maestrías
+      jugadosPorRol,  // { jungle: [{ id, partidas }], … } de los últimos 30 días
       filas: tier.data ?? [],
       catalogos: cat,
     };

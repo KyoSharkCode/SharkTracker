@@ -159,17 +159,23 @@
     return col;
   }
 
+  // Tus campeones en ese rol: primero los que más jugaste ahí en los últimos 30 días, después
+  // tus top maestrías que se juegan en ese rol (role_rate ≥ 15 %).
+  function misCampeonesEn(rol) {
+    const jugados = (meta?.jugadosPorRol?.[rol] ?? []).map((x) => x.id);
+    const maestrias = (meta?.misCampeones ?? []).filter((id) => (fila(id, rol)?.role_rate ?? 0) >= 0.15);
+    return [...new Set([...jugados, ...maestrias])];
+  }
+
   function cardPicks(rol) {
     const c = tarjeta('Picks recomendados');
     const fuera = ocupados();
-    const tuyos = (meta?.misCampeones ?? [])
-      .filter((id) => !fuera.has(id) && (fila(id, rol)?.role_rate ?? 0) >= 0.15)
-      .slice(0, 3)
+    const tuyos = misCampeonesEn(rol).filter((id) => !fuera.has(id)).slice(0, 3)
       .map((id, i) => { const f = fila(id, rol); return chipCampeon(id, `${TIERS[f?.tier]?.[0] ?? '–'} · ${pct(wr(f))}`, i === 0); });
     const delMeta = filas().filter((f) => f.posicion === rol && !fuera.has(f.champion_id)).slice(0, 3)
       .map((f) => chipCampeon(f.champion_id, `${TIERS[f.tier]?.[0] ?? '–'} · ${pct(wr(f))}`));
     const grid = el('div', 'ev-cols');
-    grid.append(columna('Tus campeones', tuyos, `Ninguno de tus más jugados se juega de ${ROL_ES[rol]}.`),
+    grid.append(columna('Tus campeones', tuyos, `No jugaste de ${ROL_ES[rol]} en los últimos 30 días.`),
       columna(`Meta · ${ROL_ES[rol]}`, delMeta, 'Sin datos de Meta todavía.'));
     const rival = rivalDeLinea();
     if (rival) {
@@ -186,7 +192,7 @@
     const c = tarjeta('Bans recomendados', 'dot-err');
     const fuera = ocupados();
     const ref = estado.yo?.campeon || estado.yo?.intencion
-      || (meta?.misCampeones ?? []).find((id) => (fila(id, rol)?.role_rate ?? 0) >= 0.15) || null;
+      || misCampeonesEn(rol)[0] || null;
     const grid = el('div', 'ev-cols');
     if (ref) {
       const f = ficha(ref, rol);
@@ -196,7 +202,7 @@
       grid.append(columna(`Le cuestan a tu ${campeon(ref).nombre}`, lista, f ? 'Pocas partidas para saberlo.' : 'Cargando…'));
     }
     // No sugerir banear tu propio campeón (el que tienes en mente o tus más jugados).
-    const vistos = new Set([ref, ...(meta?.misCampeones ?? [])].filter(Boolean));
+    const vistos = new Set([ref, ...misCampeonesEn(rol), ...(meta?.misCampeones ?? [])].filter(Boolean));
     const baneados = [...filas()].sort((a, b) => (b.ban_rate ?? 0) - (a.ban_rate ?? 0))
       .filter((f) => !fuera.has(f.champion_id) && !vistos.has(f.champion_id) && vistos.add(f.champion_id))
       .slice(0, 3).map((f) => chipCampeon(f.champion_id, `${pct(f.ban_rate, 0)} ban`));
