@@ -396,6 +396,41 @@ function pintarSiguiente() {
   nodo.replaceChildren(...partes);
 }
 
+// ── Sube esta: al tener un punto de habilidad sin gastar, una flecha hacia abajo justo
+// encima de las flechitas doradas de subir nivel del juego, sobre la habilidad que toca
+// (orden de OP.GG). La pieza son 4 huecos (Q W E R) con la separación de las habilidades
+// del HUD; solo el que toca lleva la flecha (en el editor se ven los 4 para alinearlos).
+// Entra desde arriba y la flecha rebota suave mientras esté (pedido de Alex). Desaparece en
+// cuanto subes la habilidad.
+let habilidad = null;
+function pintarHabilidad() {
+  const nodo = $('habilidad');
+  mostrar(nodo, !!habilidad);
+  if (!habilidad) return;
+  const firma = JSON.stringify(habilidad);
+  if (nodo._firma === firma) return;
+  nodo._firma = firma;
+  const huecos = ['Q', 'W', 'E', 'R'].map((k) => {
+    const h = el('div', `hab-hueco${k === habilidad.tecla ? ' toca' : ''}`);
+    h.append(el('span', 'hab-letra', k));
+    if (k === habilidad.tecla) {
+      const NS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('viewBox', '0 0 28 22');
+      svg.setAttribute('class', 'hab-flecha');
+      svg.setAttribute('aria-hidden', 'true');
+      const p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', 'M2 2h24L14 20z');
+      svg.append(p);
+      h.append(svg);
+      // Con varios puntos sin gastar (subiste dos niveles de golpe), cuántos faltan.
+      if (habilidad.pendientes > 1) h.append(el('span', 'hab-pend', `×${habilidad.pendientes}`));
+    }
+    return h;
+  });
+  nodo.replaceChildren(...huecos);
+}
+
 window.overlay.onTab((pulsado) => { tab = pulsado; pintarOro(); });
 window.overlay.onCarga?.((datos) => { carga = datos; pintarCarga(); });
 
@@ -437,6 +472,8 @@ function pintarEstado(estado) {
   pintarRendimiento();
   siguiente = ver('siguiente') ? (estado.siguiente ?? null) : null;
   pintarSiguiente();
+  habilidad = ver('habilidad') ? (estado.habilidad ?? null) : null;
+  pintarHabilidad();
   // Objetos comprados: solo se redibuja la build si cambian.
   const objetos = (estado.misObjetos ?? []).map(Number);
   const firma = objetos.slice().sort().join(',');

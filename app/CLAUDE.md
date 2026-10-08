@@ -135,7 +135,9 @@ de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no
 - **Actualizaciones**: electron-updater desde **GitHub Releases** (repo público): busca al
   abrir y cada 4 h, descarga sola, instala al cerrar o con "Reiniciar y actualizar". Cuando la
   versión nueva está descargada, la barra de título muestra "vX.Y.Z lista · Reiniciar" (`#update-chip`).
-  Solo en la app instalada (con `npm start` no).
+  Solo en la app instalada (con `npm start` no). En Ajustes → Cuenta → "Acerca de" hay un botón
+  **"Buscar actualizaciones"** (IPC `update:buscar`; se ve cuando está al día o falló) para no tener
+  que cerrar y abrir la app.
 - **Publicar una versión**: subir `version` en app/package.json (merge) → pestaña Actions
   del repo → **"App: publicar versión"** → Run workflow (`.github/workflows/app-publicar.yml`,
   arma en windows-latest, sube a un Release en borrador y lo publica como `vX.Y.Z`; GitHub
@@ -310,6 +312,20 @@ que pulse un botón.
   los 30 s si falla), solo en la Grieta (mapa 11). Campeón por `rawChampionName`; rol: el de la
   partida (`position`), si no el de la última selección (lcu) con ese campeón, si no el rol
   donde más se juega (`meta_tier.role_rate`). Interruptor "Tu build" en Ajustes → Overlay.
+- **Habilidades**: En Vivo muestra "Subir primero" y el **orden por nivel** (cuadrícula de 18, la
+  misma de Meta) en la tarjeta de runas y hechizos de tu campeón. En partida, la pieza **"Sube esta"**
+  (`#habilidad`, zona centro, x 744 y 902; movible en el editor e interruptor en Ajustes → Overlay)
+  aparece solo con un punto de habilidad sin gastar: una flecha hacia abajo justo encima de las
+  flechitas doradas de subir nivel del juego, sobre la habilidad que toca (como pidió Alex, sin
+  panel ni texto; "×2" al lado si hay más de un punto). Son 4 huecos de 44 px (separación de Q W E R
+  medida en una captura del HUD de Alex); en el editor se ven los 4 huecos punteados para alinearlos.
+  La flecha rebota suave (1,1 s, solo transform, nada con reduced motion): **única excepción**
+  pedida por Alex a la regla de "sin bucles" del overlay. `habilidades.js` (`siguienteHabilidad`, se prueba en Node): con
+  `activePlayer.level` y `abilities.{Q,W,E,R}.abilityLevel`, recorre el orden de OP.GG
+  (`ficha.habilidades.orden`, guardado en main.js `ordenHabilidades` al preparar la build) y elige
+  la primera que va atrasada y se puede subir (R a los 6/11/16; básicas hasta 5 y la mitad del
+  nivel redondeada hacia arriba). Si te desviaste del orden, señala la que quedó pendiente. Solo en
+  la Grieta (como la build en partida).
 
 ## Feedback de la v0.5 (v0.6.0)
 
@@ -478,6 +494,12 @@ Decisiones de Alex (oct 2026).
   - Ajustes → Clips (`ajustes.json` → `clips`: activo, calidad, antes 20, despues 15, overlayEnClip),
     apagado de fábrica. Al activar descarga FFmpeg con barra de progreso y prueba la gráfica.
   - Falta: audio (C1b, ayudante nativo), eventos automáticos (C2), galería y límite de 10 GB (C3).
+  - **Prueba real de v0.9.1 (Alex y Ostia, una partida cada uno)**: sin bajón de rendimiento, clips fluidos,
+    Ctrl + F8 bien. PC de Alex: NVENC directo, 7 clips de 36 s (45–65 MB) guardados en 0,6–0,8 s; el
+    último, pulsado justo al final, se terminó antes de parar el búfer. Laptop de Ostia: NVENC y AMF fallan
+    ("no packets", la pantalla está en la Intel) y gana QuickSync sin copia; 1 clip de 63,5 MB en 1,4 s.
+    La línea de RAM no salía: el regex de `tasklist` buscaba "K" y Windows en español escribe "KB"
+    (corregido en v0.9.2: acepta cualquier unidad).
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)
