@@ -192,4 +192,20 @@ function historial(partidas) {
   }));
 }
 
-module.exports = { aplanar, resumen, radar, rendimientoPorCola, etiquetas, historialElo, historial, textoRango, esRemake, TIERS, TIER_ES };
+// Campeones más jugados en las partidas guardadas (la base guarda 30 días), en todas
+// las colas y sin remakes: [{ campeon, partidas, victorias }], de más a menos.
+function masJugados(partidas, n = 5) {
+  const cuenta = new Map();
+  for (const p of partidas) {
+    if (!p.campeon || esRemake(p)) continue;
+    const c = cuenta.get(p.campeon) ?? { campeon: p.campeon, partidas: 0, victorias: 0, ultima: p.terminada };
+    c.partidas++;
+    if (p.win) c.victorias++;
+    cuenta.set(p.campeon, c);
+  }
+  // Empate: el que jugaste más recientemente (las partidas llegan de la más nueva a la más vieja).
+  return [...cuenta.values()].sort((a, b) => b.partidas - a.partidas || String(b.ultima).localeCompare(String(a.ultima)))
+    .slice(0, n).map(({ campeon, partidas: total, victorias }) => ({ campeon, partidas: total, victorias }));
+}
+
+module.exports = { masJugados, aplanar, resumen, radar, rendimientoPorCola, etiquetas, historialElo, historial, textoRango, esRemake, TIERS, TIER_ES };

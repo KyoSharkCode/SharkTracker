@@ -16,7 +16,7 @@
 //   RAM de FFmpeg cada minuto, clips guardados y errores) para revisar el consumo.
 
 const { app, shell } = require('electron');
-const { execFile } = require('child_process');
+const { execFile, spawn } = require('child_process');
 const fs = require('fs');
 const https = require('https');
 const path = require('path');
@@ -136,22 +136,70 @@ const PROGRAMAS = {
   discord: 'Discord.exe,DiscordPTB.exe,DiscordCanary.exe',
 };
 const NOMBRE_PISTA = { juego: 'Juego', discord: 'Discord', mic: 'Micrófono', pc: 'PC' };
+// Fuentes encendidas, en orden. "Todo el PC" ya incluye el juego y Discord: no se suman dos veces.
+function fuentesAudio(a) {
+  const elegidas = a?.pc?.activo ? ['pc', 'mic'] : ['juego', 'discord', 'mic'];
+  return elegidas.filter((f) => a?.[f]?.activo).map((f) => {
+    const valor = f === 'mic' || f === 'pc' ? (a[f].dispositivo || 'defecto') : PROGRAMAS[f];
+    return { f, arg: `${f === 'juego' || f === 'discord' ? 'programa' : f}:${a[f].volumen}:${valor}` };
+  });
+}
 function planAudio(a) {
   if (!a) return null;
   const exe = rutaAyudante();
   if (!exe) { log('Sin sharkaudio.exe: los clips van sin sonido.'); return null; }
-  // "Todo el PC" ya incluye el juego y Discord: no se suman dos veces.
-  const elegidas = a.pc?.activo ? ['pc', 'mic'] : ['juego', 'discord', 'mic'];
-  const fuentes = elegidas.filter((f) => a[f]?.activo).map((f) => {
-    const valor = f === 'mic' || f === 'pc' ? (a[f].dispositivo || 'defecto') : PROGRAMAS[f];
-    return { f, arg: `${f === 'juego' || f === 'discord' ? 'programa' : f}:${a[f].volumen}:${valor}` };
-  });
+  const fuentes = fuentesAudio(a);
   if (!fuentes.length) return null;
   const separadas = !!a.separadas && fuentes.length > 1;
   return {
     comando: [exe, 'capturar', ...fuentes.flatMap((x) => ['--fuente', x.arg]), ...(separadas ? ['--separadas'] : [])],
     pistas: ['Mezcla', ...(separadas ? fuentes.map((x) => NOMBRE_PISTA[x.f]) : [])],
   };
+}
+
+// "Probar audio" (Ajustes → Clips → Audio): abre el ayudante con las fuentes de ahora
+// unos segundos y devuelve qué llegó de cada una, según su propio informe de niveles:
+// [{ fuente: 'juego', estado: 'ok' | 'silencio' | 'nada' | 'sin-capturar', db, detalle }].
+function probarAudio(a) {
+  const exe = rutaAyudante();
+  const fuentes = fuentesAudio(a);
+  if (!exe || process.platform !== 'win32') return Promise.resolve({ ok: false, motivo: 'sin-ayudante', fuentes: [] });
+  if (!fuentes.length) return Promise.resolve({ ok: false, motivo: 'sin-fuentes', fuentes: [] });
+  return new Promise((resolve) => {
+    const ay = spawn(exe, ['capturar', ...fuentes.flatMap((x) => ['--fuente', x.arg]), '--niveles', '4'], { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+    ay.stdout.resume(); // el sonido en sí no hace falta: solo el informe
+    const avisos = [];
+    let resto = '';
+    let listo = false;
+    const terminar = (resultado) => {
+      if (listo) return;
+      listo = true;
+      clearTimeout(limite);
+      try { ay.kill(); } catch { /* ya cerrado */ }
+      for (const l of avisos) log(`Probar audio · ${l}`);
+      resolve(resultado);
+    };
+    const limite = setTimeout(() => terminar({ ok: false, motivo: 'sin-respuesta', fuentes: [], avisos }), 9000);
+    ay.on('error', (e) => terminar({ ok: false, motivo: 'sin-ayudante', error: e.message, fuentes: [], avisos }));
+    ay.stderr.on('data', (d) => {
+      const lineas = (resto + d).split(/\r?\n/);
+      resto = lineas.pop();
+      for (const l of lineas.map((x) => x.trim()).filter(Boolean)) {
+        avisos.push(l);
+        const m = /^Niveles \(\d+ s\): (.*)$/.exec(l);
+        if (!m) continue;
+        // "League of Legends -18 dB · Micrófono silencio": en el orden de las fuentes.
+        const partes = m[1].split(' · ');
+        terminar({ ok: true, avisos: avisos.filter((x) => !x.startsWith('Niveles')), fuentes: fuentes.map((x, i) => {
+          const p = partes[i] ?? '';
+          const db = /(-?\d+) dB$/.exec(p);
+          const estado = db ? 'ok' : /silencio$/.test(p) ? 'silencio' : /no llega nada$/.test(p) ? 'nada' : 'sin-capturar';
+          const detalle = avisos.find((av) => av.startsWith(`${p.split(' ')[0]}`) && !av.startsWith('Niveles')) ?? null;
+          return { fuente: x.f, estado, db: db ? Number(db[1]) : null, detalle };
+        }) });
+      }
+    });
+  });
 }
 
 // Micrófonos y salidas de sonido para Ajustes → Clips → Audio.
@@ -446,6 +494,6 @@ function abrirCarpeta() {
 
 module.exports = {
   preparar, iniciarPartida, detenerPartida, ponerCampeon, marcar, alGuardado, estado, abrirCarpeta,
-  dispositivos, planAudio, galeria, completarMiniaturas, favorito, renombrar, borrar, mostrarEnCarpeta, servir, aplicarLimite,
+  dispositivos, planAudio, probarAudio, galeria, completarMiniaturas, favorito, renombrar, borrar, mostrarEnCarpeta, servir, aplicarLimite,
   grabando: () => motor.grabando(), log,
 };

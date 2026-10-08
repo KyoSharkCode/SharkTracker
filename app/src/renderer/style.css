@@ -974,3 +974,18 @@ html, body { font-variant-numeric: tabular-nums; }
 .visor-acciones { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
 .visor-sep { flex: 1; }
 #visor-fav.on { color: var(--dorado); }
+
+/* Mi Perfil: más jugados en 30 días (a la derecha de las maestrías) */
+.card-masjugados { display: flex; flex-direction: column; }
+.mj-lista { display: flex; flex-direction: column; gap: 8px; flex: 1; justify-content: center; }
+.mj-fila { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 10px; background: #051823; border: 1px solid rgba(120,220,210,0.06); }
+.mj-icono { width: 40px; height: 40px; flex-shrink: 0; border-radius: 9px; overflow: hidden; background: #10303D;
+  display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--texto-tenue); }
+.mj-icono img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mj-info { min-width: 0; }
+.mj-nombre { font-size: 14px; font-weight: 700; color: var(--texto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mj-sub { font-family:'Red Hat Mono',ui-monospace,monospace; font-size: 12px; color: var(--texto-tenue); margin-top: 1px; }
+.audio-prueba { list-style: none; margin: 4px 0 8px; padding: 10px 12px; border-radius: 10px; background: #051823; display: flex; flex-direction: column; gap: 6px; font-size: 13px; line-height: 1.45; color: var(--texto-tenue); }
+.audio-prueba b { color: var(--texto); font-weight: 600; }
+.audio-prueba li.bien::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--verde); margin-right: 8px; vertical-align: 1px; }
+.audio-prueba li.mal::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--salmon); margin-right: 8px; vertical-align: 1px; }

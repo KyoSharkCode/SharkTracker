@@ -607,27 +607,30 @@ function revisarJugadas(datos) {
   clips.ponerCampeon(campeonActual);
   const ahora = Date.now();
   for (const j of detectorJugadas.procesar(datos, ahora, c.eventos)) {
-    clips.marcar({ desde: j.t, hasta: ahora, etiqueta: j.etiqueta }, c);
+    avisarJugada(clips.marcar({ desde: j.t, hasta: ahora, etiqueta: j.etiqueta }, c), j.etiqueta, c);
   }
 }
 function marcarUlti() {
   const c = ajustesApp.leer().clips;
   if (!c.activo || !detectorJugadas || !clips.grabando()) return;
   for (const j of detectorJugadas.ulti(Date.now(), datosPartida, c.eventos)) {
-    clips.marcar({ desde: j.t, etiqueta: j.etiqueta }, c);
+    avisarJugada(clips.marcar({ desde: j.t, etiqueta: j.etiqueta }, c), j.etiqueta, c);
   }
+}
+// Un solo aviso por clip, en el momento de la jugada: "Clip creado". Si la jugada se
+// suma a un clip que ya estaba en marcha (jugadas seguidas), no se repite.
+function avisarJugada(r, etiqueta, c) {
+  if (r === 'nueva' && c.avisoAuto) avisarClip({ estado: 'creado', detalle: etiqueta });
 }
 async function guardarClip() {
   const c = ajustesApp.leer().clips;
   clips.ponerCampeon(campeonActual);
   const r = c.activo ? clips.marcar({ desde: Date.now(), etiqueta: 'Clip', manual: true }, c) : null;
-  avisarClip(r ? { estado: 'guardando', segundos: c.despues } : { estado: 'apagado' });
+  avisarClip(r ? { estado: 'creado', detalle: 'Ctrl + F8' } : { estado: 'apagado' });
 }
-// Al guardarse un clip (manual o automático): aviso en el overlay y en la ventana.
+// Al guardarse el archivo (unos segundos después): solo se avisa en partida si falló.
 clips.alGuardado((r) => {
-  const c = ajustesApp.leer().clips;
-  if (r.manual) avisarClip(r.ok ? { estado: 'guardado', segundos: r.segundos, titulo: r.titulo } : { estado: 'error' });
-  else if (r.ok && c.avisoAuto) avisarClip({ estado: 'guardado', segundos: r.segundos, titulo: r.titulo });
+  if (!r.ok && r.motivo !== 'sin-grabar') avisarClip({ estado: 'error' });
   mainWindow?.webContents.send('clips:guardado', r);
 });
 // Al cambiar los ajustes: protección del overlay y, si hay partida, empezar o parar el búfer
@@ -648,6 +651,7 @@ ipcMain.handle('clips:estado', () => clips.estado());
 ipcMain.handle('clips:preparar', () => clips.preparar((p) => mainWindow?.webContents.send('clips:progreso', p)));
 ipcMain.handle('clips:abrirCarpeta', () => clips.abrirCarpeta());
 ipcMain.handle('clips:dispositivos', () => clips.dispositivos());
+ipcMain.handle('clips:probarAudio', () => clips.probarAudio(ajustesApp.leer().clips.audio));
 // Galería: la lista y, de fondo, las miniaturas que falten (avisa cuando estén).
 ipcMain.handle('clips:galeria', () => {
   clips.completarMiniaturas(() => mainWindow?.webContents.send('clips:cambio'));
