@@ -396,13 +396,13 @@ fuentesAudio.forEach((caja) => {
   caja.querySelector('select')?.addEventListener('change', (e) => guardarClips({ audio: { [f]: { dispositivo: e.target.value } } }));
 });
 // Probar audio: qué llega de cada fuente encendida (lo dice el propio ayudante).
-const NOMBRE_FUENTE = { juego: 'Juego', discord: 'Discord', mic: 'Micrófono', pc: 'Todo el PC' };
+const NOMBRE_FUENTE = { juego: 'Juego', discord: 'Discord', musica: 'Música', mic: 'Micrófono', pc: 'Todo el PC' };
 const TEXTO_PRUEBA = {
   ok: (r) => `se oye ✓ (${r.db} dB)`,
   silencio: () => 'llega, pero en silencio: ¿estaba sonando algo?',
-  nada: () => 'no llega sonido. Si usas Wave Link o Voicemeeter, prueba con "Juego" y "Discord" en lugar de "Todo el PC", o elige otro dispositivo',
+  nada: () => 'no llega sonido. Si usas Wave Link o Voicemeeter, prueba con "Juego", "Discord" y "Música" en lugar de "Todo el PC", o elige otro dispositivo',
   'sin-capturar': (r) => (r.fuente === 'juego' ? 'abre una partida (o la práctica) para probarlo'
-    : r.fuente === 'discord' ? 'Discord no está abierto' : `no se pudo abrir${r.detalle ? `: ${r.detalle.replace(/^[^:]+:\s*/, '')}` : ''}`),
+    : r.fuente === 'discord' ? 'Discord no está abierto' : r.fuente === 'musica' ? 'Spotify no está abierto' : `no se pudo abrir${r.detalle ? `: ${r.detalle.replace(/^[^:]+:\s*/, '')}` : ''}`),
 };
 $('btn-probar-audio').addEventListener('click', async () => {
   const b = $('btn-probar-audio');
@@ -483,7 +483,7 @@ async function renderClips(aj) {
     const f = caja.dataset.fuente;
     const a = c.audio[f];
     // "Todo el PC" ya incluye el juego y Discord: esos dos quedan en pausa.
-    const anulada = c.audio.pc.activo && (f === 'juego' || f === 'discord');
+    const anulada = c.audio.pc.activo && ['juego', 'discord', 'musica'].includes(f);
     caja.classList.toggle('on', a.activo && !anulada);
     caja.classList.toggle('anulada', anulada);
     const sw = caja.querySelector('.sw');

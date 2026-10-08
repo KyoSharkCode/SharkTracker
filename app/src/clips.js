@@ -134,14 +134,16 @@ function preparar(onProgreso) {
 const PROGRAMAS = {
   juego: 'League of Legends.exe',
   discord: 'Discord.exe,DiscordPTB.exe,DiscordCanary.exe',
+  musica: 'Spotify.exe',
 };
-const NOMBRE_PISTA = { juego: 'Juego', discord: 'Discord', mic: 'Micrófono', pc: 'PC' };
+const NOMBRE_PISTA = { juego: 'Juego', discord: 'Discord', musica: 'Música', mic: 'Micrófono', pc: 'PC' };
+const ES_PROGRAMA = (f) => f in PROGRAMAS;
 // Fuentes encendidas, en orden. "Todo el PC" ya incluye el juego y Discord: no se suman dos veces.
 function fuentesAudio(a) {
-  const elegidas = a?.pc?.activo ? ['pc', 'mic'] : ['juego', 'discord', 'mic'];
+  const elegidas = a?.pc?.activo ? ['pc', 'mic'] : ['juego', 'discord', 'musica', 'mic'];
   return elegidas.filter((f) => a?.[f]?.activo).map((f) => {
     const valor = f === 'mic' || f === 'pc' ? (a[f].dispositivo || 'defecto') : PROGRAMAS[f];
-    return { f, arg: `${f === 'juego' || f === 'discord' ? 'programa' : f}:${a[f].volumen}:${valor}` };
+    return { f, arg: `${ES_PROGRAMA(f) ? 'programa' : f}:${a[f].volumen}:${valor}` };
   });
 }
 function planAudio(a) {

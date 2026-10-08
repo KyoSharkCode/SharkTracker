@@ -569,8 +569,10 @@ Decisiones de Alex (oct 2026).
     con la fuente delante) y cada 30 s "Niveles (30 s): League of Legends -18 dB · Micrófono silencio · PC no
     llega nada" (`--niveles N`). **Probar audio** (Ajustes → Clips → Audio, `clips.probarAudio`): abre el
     ayudante con las fuentes de ahora y `--niveles 4`, y muestra por fuente se oye / silencio / no llega nada /
-    sin capturar. Con Wave Link o Voicemeeter se recomienda "Juego" y "Discord" (por proceso, no dependen
-    del dispositivo de salida).
+    sin capturar. Con Wave Link o Voicemeeter se recomienda "Juego", "Discord" y "Música" (por proceso, no
+    dependen del dispositivo de salida).
+  - **Música** (pedido de Alex, que usaba "Todo el PC" solo por la música): fuente `musica` = proceso
+    `Spotify.exe`, volumen 60 % de fábrica, apagada de fábrica; "Todo el PC" la reemplaza como a Juego y Discord.
   - **Aviso único**: "Clip creado" en el overlay al pasar la jugada (`avisarJugada`, solo si abre un clip
     nuevo, no al alargar uno) o al pulsar Ctrl + F8; al guardarse el archivo solo se avisa si falló.
   - **Carpetas por partida**: cada partida guarda en `Videos\SharkTracker\<Campeón AAAA-MM-DD>` (con

@@ -26,7 +26,7 @@ const EVENTOS_CLIP = ['kill', 'asistencia', 'muerte', 'objetivo', 'estructura', 
 // Límite de espacio de los clips (los favoritos no cuentan).
 const LIMITES_GB = [5, 10, 20, 50];
 // Audio (C1b): fuentes que puede grabar el ayudante.
-const FUENTES_AUDIO = ['juego', 'discord', 'mic', 'pc'];
+const FUENTES_AUDIO = ['juego', 'discord', 'musica', 'mic', 'pc'];
 const TECLA_ULTI = /^[A-Z0-9]$/;
 
 function fabrica() {
@@ -52,6 +52,7 @@ function fabrica() {
       audio: {
         juego: { activo: true, volumen: 100 },                      // solo el sonido de League
         discord: { activo: false, volumen: 100 },                   // voces del grupo (avísales)
+        musica: { activo: false, volumen: 60 },                     // Spotify (más bajo: de fondo)
         mic: { activo: false, volumen: 100, dispositivo: '' },      // '' = el de Windows
         pc: { activo: false, volumen: 100, dispositivo: '' },       // todo lo que suena (en lugar de juego y Discord)
         separadas: false,    // cada fuente en su pista, además de la mezcla

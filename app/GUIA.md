@@ -57,8 +57,8 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
   SharkTracker**). Dentro, al pasar el mouse por un clip ves unos segundos de la jugada; clic para
   verlo, ★ para guardarlo para siempre, renombrar, mostrar en la carpeta o borrar (va a la papelera).
 - **Audio de los clips**: en Ajustes → Clips → Audio, "Probar audio" dice qué fuente se oye. Si usas
-  Wave Link o Voicemeeter, usa "Juego" y "Discord" (graban el programa, sin importar por dónde
-  sale) en lugar de "Todo el PC".
+  Wave Link o Voicemeeter, usa "Juego", "Discord" y "Música" (Spotify; graban el programa, sin
+  importar por dónde sale) en lugar de "Todo el PC".
 
 ## Actualizaciones
 Son **automáticas**: la app busca versiones nuevas al abrirse (y cada 4 h), las descarga sola y las
