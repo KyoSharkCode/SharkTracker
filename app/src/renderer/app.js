@@ -45,6 +45,7 @@ navItems.forEach((item) => item.addEventListener('click', () => {
   if (item.dataset.page === 'perfil') window.miPerfil.cargar(); // se refresca si pasaron 2+ min
   if (item.dataset.page === 'meta') window.metaPagina.cargar();  // se refresca si pasaron 10+ min
   if (item.dataset.page === 'envivo') window.enVivo.cargar();
+  if (item.dataset.page === 'clips') window.galeriaClips.cargar();
 }));
 
 // --- Sesión de Discord ---
@@ -333,21 +334,99 @@ $('btn-buscar-update').addEventListener('click', async () => {
 });
 $('update-chip').addEventListener('click', () => window.sharkTracker.app.instalarActualizacion());
 
-// --- Ajustes → Clips (C1): activar (descarga FFmpeg y prueba el codificador la primera vez),
-// calidad, overlay en el clip y carpeta. Ctrl + F8 lo escucha el proceso main en partida.
+// --- Ajustes → Clips: activar (descarga FFmpeg y prueba el codificador la primera vez),
+// calidad, duración, jugadas automáticas, audio y espacio. Ctrl + F8, la tecla de la R
+// y las jugadas los escucha el proceso main en partida.
 const swClips = $('sw-clips');
 const swClipsOverlay = $('sw-clips-overlay');
 const calidadClipsEl = $('clips-calidad');
-for (const [valor, texto] of [['alta', 'Alta'], ['ligera', 'Ligera']]) {
+const limiteClipsEl = $('clips-limite');
+const guardarClips = async (cambios) => renderClips(await window.sharkTracker.ajustes.set({ clips: cambios }));
+function segmento(caja, valor, texto, alElegir) {
   const b = document.createElement('button');
   b.type = 'button';
   b.className = 'segmento';
-  b.dataset.calidad = valor;
+  b.dataset.valor = String(valor);
   b.setAttribute('role', 'radio');
   b.textContent = texto;
-  b.addEventListener('click', async () => renderClips(await window.sharkTracker.ajustes.set({ clips: { calidad: valor } })));
-  calidadClipsEl.append(b);
+  b.addEventListener('click', alElegir);
+  caja.append(b);
 }
+function marcarSegmentos(caja, valor) {
+  caja.querySelectorAll('.segmento').forEach((b) => {
+    const on = b.dataset.valor === String(valor);
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-checked', String(on));
+  });
+}
+for (const [valor, texto] of [['alta', 'Alta'], ['ligera', 'Ligera']]) segmento(calidadClipsEl, valor, texto, () => guardarClips({ calidad: valor }));
+for (const gb of [5, 10, 20, 50]) segmento(limiteClipsEl, gb, `${gb} GB`, () => guardarClips({ limiteGB: gb }));
+
+// Duración: el número se ve al mover; se guarda al soltar.
+for (const k of ['antes', 'despues']) {
+  const r = $(`clips-${k}`);
+  r.addEventListener('input', () => { $(`clips-${k}-v`).textContent = `${r.value} s`; });
+  r.addEventListener('change', () => guardarClips({ [k]: Number(r.value) }));
+}
+
+// Jugadas automáticas
+document.querySelectorAll('[data-evento]').forEach((b) => b.addEventListener('click', () => {
+  guardarClips({ eventos: { [b.dataset.evento]: !b.classList.contains('on') } });
+}));
+const teclaUlti = $('clips-tecla');
+for (const t of [...'QWERTYUIOPASDFGHJKLZXCVBNM1234567890']) {
+  const o = document.createElement('option');
+  o.value = t;
+  o.textContent = t;
+  teclaUlti.append(o);
+}
+teclaUlti.addEventListener('change', () => guardarClips({ teclaUlti: teclaUlti.value }));
+$('sw-clips-aviso').addEventListener('click', () => guardarClips({ avisoAuto: !$('sw-clips-aviso').classList.contains('on') }));
+
+// Audio: cada fuente con su interruptor, volumen y (micrófono / PC) dispositivo.
+const fuentesAudio = document.querySelectorAll('.fuente');
+fuentesAudio.forEach((caja) => {
+  const f = caja.dataset.fuente;
+  const sw = caja.querySelector('.sw');
+  const vol = caja.querySelector('input[type=range]');
+  const out = caja.querySelector('output');
+  sw.addEventListener('click', () => guardarClips({ audio: { [f]: { activo: !sw.classList.contains('on') } } }));
+  vol.addEventListener('input', () => { out.textContent = `${vol.value} %`; });
+  vol.addEventListener('change', () => guardarClips({ audio: { [f]: { volumen: Number(vol.value) } } }));
+  caja.querySelector('select')?.addEventListener('change', (e) => guardarClips({ audio: { [f]: { dispositivo: e.target.value } } }));
+});
+$('sw-audio-separadas').addEventListener('click', () => guardarClips({ audio: { separadas: !$('sw-audio-separadas').classList.contains('on') } }));
+// Micrófonos y salidas: se piden al ayudante de audio una vez (al abrir la pestaña).
+let dispositivosAudio = null;
+async function cargarDispositivos() {
+  if (dispositivosAudio) return;
+  dispositivosAudio = await window.sharkTracker.clips.dispositivos();
+  renderClips(await window.sharkTracker.ajustes.get());
+}
+function llenarSelector(sel, lista, elegido) {
+  const opciones = [{ id: '', nombre: 'El de Windows' }, ...(lista ?? [])];
+  if (elegido && !opciones.some((o) => o.id === elegido)) opciones.push({ id: elegido, nombre: 'Desconectado' });
+  const firma = JSON.stringify(opciones);
+  if (sel._firma !== firma) {
+    sel._firma = firma;
+    sel.replaceChildren(...opciones.map((o) => {
+      const op = document.createElement('option');
+      op.value = o.id;
+      op.textContent = o.defecto ? `${o.nombre} (el de Windows)` : o.nombre;
+      return op;
+    }));
+  }
+  sel.value = elegido ?? '';
+}
+document.querySelector('.stab[data-stab="clips"]')?.addEventListener('click', () => { cargarDispositivos(); pintarUsoClips(); });
+
+const GB = 1024 ** 3;
+const gbTxt = (b) => `${(b / GB).toLocaleString('es', { maximumFractionDigits: 1, minimumFractionDigits: b && b < 10 * GB ? 1 : 0 })} GB`;
+async function pintarUsoClips() {
+  const g = await window.sharkTracker.clips.galeria();
+  $('clips-uso').textContent = `Usas ${gbTxt(g.usado)} de ${gbTxt(g.limite)}${g.favoritos ? ` · favoritos: ${gbTxt(g.favoritos)}` : ''}`;
+}
+
 let estadoClips = null;
 let preparandoClips = false;
 async function renderClips(aj) {
@@ -356,12 +435,36 @@ async function renderClips(aj) {
   estadoClips = await window.sharkTracker.clips.estado();
   marcar(swClips, c.activo);
   marcar(swClipsOverlay, c.overlayEnClip);
-  calidadClipsEl.querySelectorAll('.segmento').forEach((b) => {
-    const on = b.dataset.calidad === c.calidad;
-    b.classList.toggle('on', on);
-    b.setAttribute('aria-checked', String(on));
+  marcarSegmentos(calidadClipsEl, c.calidad);
+  marcarSegmentos(limiteClipsEl, c.limiteGB);
+  for (const k of ['antes', 'despues']) {
+    $(`clips-${k}`).value = c[k];
+    $(`clips-${k}-v`).textContent = `${c[k]} s`;
+  }
+  document.querySelectorAll('[data-evento]').forEach((b) => marcar(b, c.eventos[b.dataset.evento]));
+  teclaUlti.value = c.teclaUlti;
+  marcar($('sw-clips-aviso'), c.avisoAuto);
+  fuentesAudio.forEach((caja) => {
+    const f = caja.dataset.fuente;
+    const a = c.audio[f];
+    // "Todo el PC" ya incluye el juego y Discord: esos dos quedan en pausa.
+    const anulada = c.audio.pc.activo && (f === 'juego' || f === 'discord');
+    caja.classList.toggle('on', a.activo && !anulada);
+    caja.classList.toggle('anulada', anulada);
+    const sw = caja.querySelector('.sw');
+    marcar(sw, a.activo && !anulada);
+    sw.disabled = anulada || !estadoClips.audio;
+    caja.querySelector('input[type=range]').value = a.volumen;
+    caja.querySelector('output').textContent = `${a.volumen} %`;
+    const sel = caja.querySelector('select');
+    if (sel) llenarSelector(sel, f === 'mic' ? dispositivosAudio?.entradas : dispositivosAudio?.salidas, a.dispositivo);
   });
-  $('clips-duracion').textContent = `${c.antes} s antes de pulsar Ctrl + F8 y ${c.despues} s después`;
+  marcar($('sw-audio-separadas'), c.audio.separadas);
+  $('sw-audio-separadas').disabled = !estadoClips.audio;
+  $('audio-estado').textContent = !estadoClips.windows ? 'El audio solo funciona en Windows.'
+    : !estadoClips.audio ? 'Falta el ayudante de audio (sharkaudio.exe): reinstala la app. Los clips van sin sonido.'
+    : estadoClips.grabando ? `Grabando: ${estadoClips.pistas.length ? estadoClips.pistas.join(' · ') : 'sin sonido'}`
+    : 'El sonido de tus clips. Cada fuente con su volumen.';
   if (preparandoClips) return;
   swClips.disabled = !estadoClips.windows;
   $('clips-estado').textContent = !estadoClips.windows ? 'Solo funciona en Windows.'
@@ -393,14 +496,13 @@ swClips.addEventListener('click', async () => {
       return;
     }
   }
-  renderClips(await window.sharkTracker.ajustes.set({ clips: { activo: activar } }));
+  guardarClips({ activo: activar });
 });
-swClipsOverlay.addEventListener('click', async () => {
-  renderClips(await window.sharkTracker.ajustes.set({ clips: { overlayEnClip: !swClipsOverlay.classList.contains('on') } }));
-});
+swClipsOverlay.addEventListener('click', () => guardarClips({ overlayEnClip: !swClipsOverlay.classList.contains('on') }));
 $('btn-clips-carpeta').addEventListener('click', () => window.sharkTracker.clips.abrirCarpeta());
 window.sharkTracker.clips.onGuardado((r) => {
-  $('clips-ultimo').textContent = r.ok ? `Último clip: ${r.segundos} s, guardado a las ${new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}` : 'El último clip no se pudo guardar.';
+  const hora = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  $('clips-ultimo').textContent = r.ok ? `Último clip: ${r.titulo && r.titulo !== 'Clip' ? `${r.titulo}, ` : ''}${r.segundos} s, a las ${hora}` : 'El último clip no se pudo guardar.';
 });
 window.sharkTracker.ajustes.onChanged(renderClips);
 window.sharkTracker.ajustes.get().then(renderClips);

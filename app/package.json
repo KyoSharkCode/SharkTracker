@@ -32,6 +32,12 @@
       "package.json"
     ],
     "npmRebuild": false,
+    "extraResources": [
+      {
+        "from": "nativo/sharkaudio.exe",
+        "to": "sharkaudio.exe"
+      }
+    ],
     "win": {
       "target": "nsis",
       "icon": "src/assets/icon.png",

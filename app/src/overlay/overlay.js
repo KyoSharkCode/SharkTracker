@@ -488,7 +488,8 @@ function pintarEstado(estado) {
 // "Guardando clip…" mientras se graban los segundos de después; "Clip guardado" 3 s.
 const TEXTO_CLIP = {
   guardando: (d) => ['Guardando clip…', `${d.segundos} s más y listo`],
-  guardado: (d) => ['Clip guardado', `${d.segundos} s · Videos › SharkTracker`],
+  // Clips automáticos: el nombre de la jugada ("Triple kill + Barón").
+  guardado: (d) => [d.titulo && d.titulo !== 'Clip' ? `Clip: ${d.titulo}` : 'Clip guardado', `${d.segundos} s · Videos › SharkTracker`],
   error: () => ['No se pudo guardar', 'Revisa Ajustes › Clips'],
   apagado: () => ['Clips apagados', 'Actívalos en Ajustes › Clips'],
 };

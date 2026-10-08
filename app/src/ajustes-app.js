@@ -21,6 +21,13 @@ const AVISOS = ['dientes', 'misiones', 'semana', 'retos'];
 
 // Clips (Ajustes → Clips). Todo apagado de fábrica: sin activarlo no se graba nada.
 const CALIDADES = ['alta', 'ligera'];
+// Eventos que guardan un clip solos (C2), cada uno con su interruptor.
+const EVENTOS_CLIP = ['kill', 'asistencia', 'muerte', 'objetivo', 'estructura', 'ulti', 'cadaUlti'];
+// Límite de espacio de los clips (los favoritos no cuentan).
+const LIMITES_GB = [5, 10, 20, 50];
+// Audio (C1b): fuentes que puede grabar el ayudante.
+const FUENTES_AUDIO = ['juego', 'discord', 'mic', 'pc'];
+const TECLA_ULTI = /^[A-Z0-9]$/;
 
 function fabrica() {
   return {
@@ -37,6 +44,18 @@ function fabrica() {
       antes: 20,             // segundos antes de pulsar Ctrl + F8
       despues: 15,           // segundos después
       overlayEnClip: false,  // false = el overlay de SharkTracker no sale en los clips
+      // Clips automáticos: solo si participaste (autor, asistencia o víctima).
+      eventos: { kill: true, asistencia: true, muerte: true, objetivo: true, estructura: true, ulti: true, cadaUlti: false },
+      teclaUlti: 'R',        // por si cambiaste la tecla de la R en el juego
+      avisoAuto: true,       // aviso pequeño en el overlay al guardar un clip automático
+      limiteGB: 10,          // espacio para clips normales (se borran los más viejos)
+      audio: {
+        juego: { activo: true, volumen: 100 },                      // solo el sonido de League
+        discord: { activo: false, volumen: 100 },                   // voces del grupo (avísales)
+        mic: { activo: false, volumen: 100, dispositivo: '' },      // '' = el de Windows
+        pc: { activo: false, volumen: 100, dispositivo: '' },       // todo lo que suena (en lugar de juego y Discord)
+        separadas: false,    // cada fuente en su pista, además de la mezcla
+      },
     },
   };
 }
@@ -60,6 +79,19 @@ function normalizar(datos) {
     if (Number.isFinite(c[k])) base.clips[k] = Math.min(30, Math.max(10, Math.round(c[k])));
   }
   if (typeof c.overlayEnClip === 'boolean') base.clips.overlayEnClip = c.overlayEnClip;
+  for (const e of EVENTOS_CLIP) {
+    if (typeof c.eventos?.[e] === 'boolean') base.clips.eventos[e] = c.eventos[e];
+  }
+  if (typeof c.teclaUlti === 'string' && TECLA_ULTI.test(c.teclaUlti.toUpperCase())) base.clips.teclaUlti = c.teclaUlti.toUpperCase();
+  if (typeof c.avisoAuto === 'boolean') base.clips.avisoAuto = c.avisoAuto;
+  if (LIMITES_GB.includes(c.limiteGB)) base.clips.limiteGB = c.limiteGB;
+  for (const f of FUENTES_AUDIO) {
+    const o = c.audio?.[f];
+    if (typeof o?.activo === 'boolean') base.clips.audio[f].activo = o.activo;
+    if (Number.isFinite(o?.volumen)) base.clips.audio[f].volumen = Math.min(200, Math.max(0, Math.round(o.volumen)));
+    if ('dispositivo' in base.clips.audio[f] && typeof o?.dispositivo === 'string' && o.dispositivo.length < 300) base.clips.audio[f].dispositivo = o.dispositivo;
+  }
+  if (typeof c.audio?.separadas === 'boolean') base.clips.audio.separadas = c.audio.separadas;
   return base;
 }
 
@@ -78,10 +110,18 @@ function guardar(cambios) {
     acento: cambios?.acento ?? actual.acento,
     ventana: { ...actual.ventana, ...(cambios?.ventana ?? {}) },
     avisos: { ...actual.avisos, ...(cambios?.avisos ?? {}) },
-    clips: { ...actual.clips, ...(cambios?.clips ?? {}) },
+    clips: {
+      ...actual.clips,
+      ...(cambios?.clips ?? {}),
+      eventos: { ...actual.clips.eventos, ...(cambios?.clips?.eventos ?? {}) },
+      audio: Object.fromEntries(Object.entries(actual.clips.audio).map(([k, v]) => {
+        const nuevo = cambios?.clips?.audio?.[k];
+        return [k, typeof v === 'object' ? { ...v, ...(nuevo ?? {}) } : (nuevo ?? v)];
+      })),
+    },
   });
   try { fs.writeFileSync(archivo(), JSON.stringify(cache, null, 2)); } catch { /* sin disco: queda en memoria */ }
   return structuredClone(cache);
 }
 
-module.exports = { leer, guardar, fabrica, normalizar, ACENTOS, AVISOS, CALIDADES };
+module.exports = { leer, guardar, fabrica, normalizar, ACENTOS, AVISOS, CALIDADES, EVENTOS_CLIP, LIMITES_GB, FUENTES_AUDIO };

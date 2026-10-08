@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, protocol } = require('electron');
 const path = require('path');
 const https = require('https');
 const { execFile } = require('child_process');
@@ -11,6 +11,7 @@ const ajustesOverlay = require('./overlay-config');
 const ajustesApp = require('./ajustes-app');
 const notificaciones = require('./notificaciones');
 const clips = require('./clips');
+const { crearDetector } = require('./clips-eventos');
 
 // La Live Client Data API de League usa un certificado autofirmado local,
 // así que hay que decirle a Node que no lo rechace (127.0.0.1:2999, nunca sale de tu PC).
@@ -18,6 +19,10 @@ const liveClientAgent = new https.Agent({ rejectUnauthorized: false });
 
 let mainWindow;
 let pendingDeepLink = null; // enlace que llegó antes de que la ventana estuviera lista
+
+// sharkclip:// = los clips y sus miniaturas para la galería (ver clips.servir).
+// Tiene que registrarse antes de que la app esté lista.
+protocol.registerSchemesAsPrivileged([{ scheme: 'sharkclip', privileges: { standard: true, secure: true, stream: true, supportFetchAPI: true } }]);
 
 // Nombre e identificador de la app en Windows (barra de tareas, notificaciones).
 app.setName('SharkTracker');
@@ -52,6 +57,7 @@ if (!gotLock) {
   });
 
   app.whenReady().then(() => {
+    protocol.handle('sharkclip', (req) => clips.servir(req));
     createWindow();
     aplicarVentana(ajustesApp.leer());
     notificaciones.iniciar({ auth, ajustes: ajustesApp, abrirApp: focusWindow });
@@ -467,6 +473,7 @@ let hookEncendido = false;
 let tabPulsado = false;
 let xPulsada = false;
 let f8Pulsada = false;
+let ultiPulsada = false;
 function iniciarTeclado() {
   try {
     if (!hook) {
@@ -490,11 +497,17 @@ function iniciarTeclado() {
           f8Pulsada = true;
           if (overlayTimer) guardarClip();
         }
+        // Tecla de la R (clips automáticos de ulti). Sin Ctrl ni Alt: así no cuenta un atajo.
+        if (e.keycode === UiohookKey[ajustesApp.leer().clips.teclaUlti] && !e.ctrlKey && !e.altKey && !ultiPulsada) {
+          ultiPulsada = true;
+          if (overlayTimer) marcarUlti();
+        }
       });
       uIOhook.on('keyup', (e) => {
         if (e.keycode === UiohookKey.Tab) avisarTab(false);
         if (e.keycode === UiohookKey.X) xPulsada = false;
         if (e.keycode === UiohookKey.F8) f8Pulsada = false;
+        if (e.keycode === UiohookKey[ajustesApp.leer().clips.teclaUlti]) ultiPulsada = false;
       });
       hook = uIOhook;
     }
@@ -510,6 +523,7 @@ function detenerTeclado() {
   tabPulsado = false;
   xPulsada = false;
   f8Pulsada = false;
+  ultiPulsada = false;
 }
 // Guarda la decisión (visible u oculto) para las próximas partidas.
 function alternarPanelCarga() {
@@ -522,6 +536,8 @@ function startOverlay() {
   if (!overlayWindow) createOverlayWindow();
   iniciarTeclado();
   estadoPartida = crearEstadoPartida();
+  detectorJugadas = crearDetector();
+  datosPartida = null;
   reiniciarBuild();
   // "Tu rendimiento": promedios de la división de arriba (una vez por partida).
   const partida = estadoPartida;
@@ -537,6 +553,8 @@ function startOverlay() {
     estadoPartida.setPrecios(preciosItems);
     const yo = jugadorPropio(res.data);
     campeonActual = yo?.championName ?? campeonActual;
+    datosPartida = res.data;
+    revisarJugadas(res.data);
     if (yo && !buildPreparando && (!buildPartida || buildPartida.estado === 'error') && Date.now() - buildIntento > 30000) {
       prepararBuild(res.data, yo);
     }
@@ -558,6 +576,7 @@ function limpiarOverlay() {
 
 function stopOverlay() {
   campeonActual = null;
+  datosPartida = null;
   if (!cargaActiva) detenerTeclado();
   reiniciarBuild();
   reiniciarPartidaApp(); // terminó la partida: la app deja de mostrarla
@@ -569,8 +588,10 @@ function stopOverlay() {
 }
 ipcMain.handle('game:getStatus', () => ({ inGame: !!lastInGame }));
 
-// ── Clips (C1): búfer durante la partida + Ctrl + F8 (ver clips.js) ──
+// ── Clips: búfer durante la partida, jugadas automáticas y Ctrl + F8 (ver clips.js) ──
 let campeonActual = null;
+let datosPartida = null;     // último allgamedata (para la tecla de la R)
+let detectorJugadas = null;  // clips-eventos.js, uno por partida
 // El overlay de SharkTracker no sale en los clips (salvo que se pida en Ajustes → Clips).
 function protegerOverlay(c) {
   overlayWindow?.setContentProtection(!!c?.activo && !c.overlayEnClip);
@@ -578,23 +599,44 @@ function protegerOverlay(c) {
 function avisarClip(datos) {
   overlayWindow?.webContents.send('overlay:clip', datos);
 }
+// Cada segundo, con allgamedata: ¿hubo una jugada tuya que merezca clip?
+function revisarJugadas(datos) {
+  const c = ajustesApp.leer().clips;
+  if (!c.activo || !detectorJugadas || !clips.grabando()) return;
+  clips.ponerCampeon(campeonActual);
+  const ahora = Date.now();
+  for (const j of detectorJugadas.procesar(datos, ahora, c.eventos)) {
+    clips.marcar({ desde: j.t, hasta: ahora, etiqueta: j.etiqueta }, c);
+  }
+}
+function marcarUlti() {
+  const c = ajustesApp.leer().clips;
+  if (!c.activo || !detectorJugadas || !clips.grabando()) return;
+  for (const j of detectorJugadas.ulti(Date.now(), datosPartida, c.eventos)) {
+    clips.marcar({ desde: j.t, etiqueta: j.etiqueta }, c);
+  }
+}
 async function guardarClip() {
   const c = ajustesApp.leer().clips;
-  if (!c.activo || !clips.grabando()) {
-    avisarClip({ estado: 'apagado' });
-    return;
-  }
-  avisarClip({ estado: 'guardando', segundos: c.despues });
-  const r = await clips.guardarAhora(c, campeonActual);
-  if (r.motivo === 'ocupado') return; // ya se está guardando uno
-  avisarClip(r.ok ? { estado: 'guardado', segundos: r.segundos } : { estado: 'error' });
-  mainWindow?.webContents.send('clips:guardado', r);
+  clips.ponerCampeon(campeonActual);
+  const r = c.activo ? clips.marcar({ desde: Date.now(), etiqueta: 'Clip', manual: true }, c) : null;
+  avisarClip(r ? { estado: 'guardando', segundos: c.despues } : { estado: 'apagado' });
 }
-// Al cambiar los ajustes: protección del overlay y, si hay partida, empezar o parar el búfer.
+// Al guardarse un clip (manual o automático): aviso en el overlay y en la ventana.
+clips.alGuardado((r) => {
+  const c = ajustesApp.leer().clips;
+  if (r.manual) avisarClip(r.ok ? { estado: 'guardado', segundos: r.segundos, titulo: r.titulo } : { estado: 'error' });
+  else if (r.ok && c.avisoAuto) avisarClip({ estado: 'guardado', segundos: r.segundos, titulo: r.titulo });
+  mainWindow?.webContents.send('clips:guardado', r);
+});
+// Al cambiar los ajustes: protección del overlay y, si hay partida, empezar o parar el búfer
+// (también se reinicia si cambió la calidad o el audio).
 function aplicarClips(antes, ahora) {
   protegerOverlay(ahora);
+  clips.aplicarLimite(ahora.limiteGB);
   if (!lastInGame) return;
-  if (ahora.activo && (!antes.activo || antes.calidad !== ahora.calidad)) {
+  const reiniciar = antes.calidad !== ahora.calidad || JSON.stringify(antes.audio) !== JSON.stringify(ahora.audio);
+  if (ahora.activo && (!antes.activo || reiniciar)) {
     clips.detenerPartida().then(() => clips.iniciarPartida(ahora));
   } else if (!ahora.activo && antes.activo) {
     clips.detenerPartida();
@@ -603,6 +645,16 @@ function aplicarClips(antes, ahora) {
 ipcMain.handle('clips:estado', () => clips.estado());
 ipcMain.handle('clips:preparar', () => clips.preparar((p) => mainWindow?.webContents.send('clips:progreso', p)));
 ipcMain.handle('clips:abrirCarpeta', () => clips.abrirCarpeta());
+ipcMain.handle('clips:dispositivos', () => clips.dispositivos());
+// Galería: la lista y, de fondo, las miniaturas que falten (avisa cuando estén).
+ipcMain.handle('clips:galeria', () => {
+  clips.completarMiniaturas(() => mainWindow?.webContents.send('clips:cambio'));
+  return clips.galeria(ajustesApp.leer().clips);
+});
+ipcMain.handle('clips:favorito', (_e, archivo, valor) => clips.favorito(archivo, valor));
+ipcMain.handle('clips:renombrar', (_e, archivo, nombre) => clips.renombrar(archivo, nombre));
+ipcMain.handle('clips:borrar', (_e, archivo) => clips.borrar(archivo));
+ipcMain.handle('clips:mostrar', (_e, archivo) => clips.mostrarEnCarpeta(archivo));
 
 // ── Mi Perfil (datos de SharkTracker + copia local para "sin conexión") ──
 const perfil = require('./perfil');
