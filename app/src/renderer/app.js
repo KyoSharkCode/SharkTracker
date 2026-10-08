@@ -360,7 +360,7 @@ function marcarSegmentos(caja, valor) {
   });
 }
 for (const [valor, texto] of [['alta', 'Alta'], ['ligera', 'Ligera']]) segmento(calidadClipsEl, valor, texto, () => guardarClips({ calidad: valor }));
-for (const gb of [5, 10, 20, 50]) segmento(limiteClipsEl, gb, `${gb} GB`, () => guardarClips({ limiteGB: gb }));
+for (const gb of [5, 10, 20, 50]) segmento(limiteClipsEl, gb, `${gb} GB`, () => guardarClips({ limiteGB: gb }).then(pintarUsoClips));
 
 // Duración: el número se ve al mover; se guarda al soltar.
 for (const k of ['antes', 'despues']) {

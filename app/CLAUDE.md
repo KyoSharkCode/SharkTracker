@@ -205,8 +205,12 @@ app/
       meta.js            → dibuja Meta (tier list, ficha, tendencias)
   pruebas/
     prueba-clips-C0.bat  → prueba C0 del motor de clips (ver "Motor de clips")
-  src/clips-motor.js     → motor de clips: codificador, búfer en anillo y guardar (sin Electron)
-  src/clips.js           → clips en la app: descarga de FFmpeg, partida, Ctrl + F8, registro
+  src/clips-motor.js     → motor de clips: codificador, búfer en anillo, audio y guardar (sin Electron)
+  src/clips-eventos.js   → qué jugadas hacen clip (Live Client API + tecla de la R; sin Electron)
+  src/clips-agenda.js    → junta jugadas seguidas en un clip y decide cuándo guardar (sin Electron)
+  src/clips.js           → clips en la app: FFmpeg, partida, audio, índice, galería, sharkclip://, registro
+  src/renderer/clips.js  → sección Clips (galería y visor)
+  nativo/sharkaudio.cpp  → ayudante de audio (WASAPI); compilar.cmd lo compila en "App: publicar versión"
 ```
 
 Para correrla: abrir el repo en VS Code, y en la terminal `cd app`,
@@ -426,7 +430,7 @@ grupo del mockup (no los de la app).
   dientes y Top N (`wallet_tx` reason `top`, detalle "Top N de la semana"). Máx. 4 avisos por vuelta.
   Clic → abre la página en sharktracker.lol. Solo llegan con la app abierta o en la bandeja.
 
-## Motor de clips (Fase 2, bloque 5) — en curso (C0 hecha, C1 en v0.9.1)
+## Motor de clips (Fase 2, bloque 5) — C0, C1 (v0.9.1), C2 + C1b + C3 (v0.9.3)
 
 Decisiones de Alex (oct 2026).
 - **Arquitectura**: FFmpeg (build LGPL recortado, ~20–30 MB) como proceso aparte e invisible dentro de la
@@ -496,13 +500,64 @@ Decisiones de Alex (oct 2026).
     activos y no se pida "Incluir el overlay".
   - Ajustes → Clips (`ajustes.json` → `clips`: activo, calidad, antes 20, despues 15, overlayEnClip),
     apagado de fábrica. Al activar descarga FFmpeg con barra de progreso y prueba la gráfica.
-  - Falta: audio (C1b, ayudante nativo), eventos automáticos (C2), galería y límite de 10 GB (C3).
+  - (C2, C1b y C3 llegaron en v0.9.3: ver abajo.)
   - **Prueba real de v0.9.1 (Alex y Ostia, una partida cada uno)**: sin bajón de rendimiento, clips fluidos,
     Ctrl + F8 bien. PC de Alex: NVENC directo, 7 clips de 36 s (45–65 MB) guardados en 0,6–0,8 s; el
     último, pulsado justo al final, se terminó antes de parar el búfer. Laptop de Ostia: NVENC y AMF fallan
     ("no packets", la pantalla está en la Intel) y gana QuickSync sin copia; 1 clip de 63,5 MB en 1,4 s.
     La línea de RAM no salía: el regex de `tasklist` buscaba "K" y Windows en español escribe "KB"
-    (corregido en v0.9.2: acepta cualquier unidad).
+    (corregido en v0.9.2: acepta cualquier unidad). v0.9.2: RAM estable toda la partida (Alex ~180 MB
+    con NVENC, Ostia ~260→294 MB con QuickSync).
+- **C2 + C1b + C3 (v0.9.3)**: jugadas automáticas, audio y galería. Sin probar todavía en Windows.
+  - **Jugadas** (`clips-eventos.js`, `crearDetector`): main.js le pasa `allgamedata` cada 1 s
+    (`revisarJugadas`). Solo eventos nuevos (la primera lectura y una partida nueva, por el EventTime
+    del GameStart, no hacen clip). Tuyo = tu nombre (riotId, summonerName, riotIdGameName, sin #tag)
+    como autor, en `Assisters` o como víctima: kill (y multikill: Doble…Pentakill), asistencia, muerte,
+    objetivo (dragón/Ancestral, Barón, Heraldo, larvas `/horde|grub|larva/`, Atakhan; "Robo de …" con
+    `Stolen`) y estructura (torre, inhibidor). **Ulti**: uiohook escucha la tecla de `clips.teclaUlti`
+    (R de fábrica, sin Ctrl/Alt) y solo cuenta si ya tienes la R (nivel ≥ 1); con una kill/asistencia/
+    objetivo en los 10 s siguientes el clip empieza en la ulti (y con "Ultis que terminan en algo" vale
+    aunque kills/asistencias estén apagadas). "Cada ulti" (apagado) hace clip siempre.
+  - **Agenda** (`clips-agenda.js`): cada jugada pide `antes`/`despues`; si llega otra antes de que se
+    guarde la anterior se alarga el mismo clip (tope 2 min; si se pasa, empieza otro). Se guarda
+    `despues` s tras la última + 2,5 s. Ctrl + F8 es una jugada más ("Clip"). Al terminar la partida,
+    lo pendiente se guarda ya. Nombre: "AAAA-MM-DD HH-MM-SS Campeón - Triple kill + Barón.mp4" (las
+    2 etiquetas más vistosas, `PRIORIDAD`).
+  - **Motor**: anillo de 70 trozos (140 s, para el tope de 2 min). `guardar({segundos, fin})` elige los
+    trozos cerrados hasta `fin` por la hora del archivo (mtime), en cola (de a uno). **Los trozos ya no
+    reinician sus marcas de tiempo y se pegan byte a byte con el protocolo `concat:`**: el concat por
+    lista recolocaba cada trozo por su duración y el audio se corría ~20 ms por trozo (medido).
+    Miniatura con `motor.miniatura` (en el segundo `antes`, 384 px).
+  - **Audio** (`app/nativo/sharkaudio.cpp`, C++ sin dependencias, ~1 MB): `sharkaudio dispositivos` (JSON
+    de salidas y micrófonos) y `sharkaudio capturar --fuente tipo:vol:valor … [--separadas]`. Tipos:
+    `programa` (captura por proceso con el árbol incluido, raíces por nombre de .exe; reintenta cada 3 s si
+    no está abierto: Discord), `mic` y `pc` (loopback del dispositivo; "defecto" o id). Todo pedido en PCM
+    16 bits 48 kHz estéreo (AUTOCONVERTPCM) y sale como float por stdout **al ritmo del reloj del PC**
+    (QPC) con 50 ms de retraso fijo: lo que no llegó va en silencio, lo que sobra (>200 ms) se descarta.
+    Con `--separadas`: mezcla + un par estéreo por fuente. "Todo el PC" reemplaza a Juego y Discord.
+    La app pasa su stdout a la entrada de FFmpeg (la "q" para cerrar ya no sirve: con audio se mata).
+    **Sincronía**: video (`setpts` dentro de lavfi, pegado a ddagrab) y audio (`asetpts`, menos lo que
+    dura el bloque y los 50 ms) llevan la hora real desde un origen común (`RTCTIME-origen`; la hora
+    completa no cabe en MPEG-TS). Video con `-fps_mode passthrough`. Medido en Linux con un destello y
+    un pitido en cada segundo: sin deriva, dentro de 1–2 cuadros. `-use_wallclock_as_timestamps` NO sirve
+    (lavfi lo ignora y rompe el audio en crudo). Pistas con nombre (title y handler_name). Si con audio
+    no arranca, se graba sin audio (registro.txt lo dice).
+  - **Compilación**: `app/nativo/compilar.cmd` (Visual Studio vía vswhere, `/MT`) corre en el workflow
+    de publicar antes de electron-builder; `extraResources` lo copia a `resources/sharkaudio.exe`. El .exe
+    no se sube al repo. Se probó con MinGW + Wine (arranca, argumentos, silencio al ritmo justo, tubería
+    con FFmpeg); la captura real de WASAPI solo se puede probar en Windows.
+  - **Galería** (sección Clips, `renderer/clips.js`): por partida (`indice.json` en userData/clips: partida,
+    campeón, título, manual, favorito, renombrado), clips sueltos por día. Miniaturas en
+    `userData/clips/miniaturas` (las que falten se hacen de fondo, `clips:cambio`). Visor `<dialog>`
+    con video, favorito, renombrar (limpia el nombre; avisa si existe), mostrar en la carpeta y borrar
+    (dos clics, a la papelera). Antes de renombrar/borrar se suelta el video (Windows bloquea el archivo).
+    **Protocolo `sharkclip://video|mini/<archivo>`** (registrado como privilegiado, con rangos para
+    adelantar): solo nombres .mp4 de la carpeta, sin rutas. CSP: `img-src sharkclip:` y `media-src sharkclip:`.
+  - **Espacio**: `limiteGB` (5/10/20/50, 10 de fábrica) sin contar favoritos; al guardar y al cambiar el
+    límite se borran (para siempre) los normales más viejos. Aviso con < 15 GB libres (`fs.statfsSync`).
+  - **Ajustes → Clips**: duración antes/después (10–30 s), tarjeta "Clips automáticos" (interruptor por
+    tipo, tecla de la ulti, aviso en partida `avisoAuto`), "Audio" (juego/Discord/micrófono/PC con volumen
+    0–200 % y dispositivo; pistas separadas) y "Espacio". Cambiar calidad o audio en partida reinicia el búfer.
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)

@@ -474,6 +474,7 @@ let tabPulsado = false;
 let xPulsada = false;
 let f8Pulsada = false;
 let ultiPulsada = false;
+let teclaUlti = ajustesApp.leer().clips.teclaUlti; // se actualiza al cambiar los ajustes
 function iniciarTeclado() {
   try {
     if (!hook) {
@@ -498,7 +499,7 @@ function iniciarTeclado() {
           if (overlayTimer) guardarClip();
         }
         // Tecla de la R (clips automáticos de ulti). Sin Ctrl ni Alt: así no cuenta un atajo.
-        if (e.keycode === UiohookKey[ajustesApp.leer().clips.teclaUlti] && !e.ctrlKey && !e.altKey && !ultiPulsada) {
+        if (e.keycode === UiohookKey[teclaUlti] && !e.ctrlKey && !e.altKey && !ultiPulsada) {
           ultiPulsada = true;
           if (overlayTimer) marcarUlti();
         }
@@ -507,7 +508,7 @@ function iniciarTeclado() {
         if (e.keycode === UiohookKey.Tab) avisarTab(false);
         if (e.keycode === UiohookKey.X) xPulsada = false;
         if (e.keycode === UiohookKey.F8) f8Pulsada = false;
-        if (e.keycode === UiohookKey[ajustesApp.leer().clips.teclaUlti]) ultiPulsada = false;
+        if (e.keycode === UiohookKey[teclaUlti]) ultiPulsada = false;
       });
       hook = uIOhook;
     }
@@ -632,6 +633,7 @@ clips.alGuardado((r) => {
 // Al cambiar los ajustes: protección del overlay y, si hay partida, empezar o parar el búfer
 // (también se reinicia si cambió la calidad o el audio).
 function aplicarClips(antes, ahora) {
+  teclaUlti = ahora.teclaUlti;
   protegerOverlay(ahora);
   clips.aplicarLimite(ahora.limiteGB);
   if (!lastInGame) return;
