@@ -64,13 +64,22 @@ contextBridge.exposeInMainWorld('sharkTracker', {
     probarAviso: () => ipcRenderer.invoke('ajustes:probarAviso'),
   },
 
-  // Clips (Ajustes → Clips): FFmpeg, codificador y carpeta. Ctrl + F8 vive en el proceso main.
+  // Clips (sección Clips y Ajustes → Clips): FFmpeg, codificador, audio, galería y carpeta.
+  // Ctrl + F8 y las jugadas automáticas viven en el proceso main. Los videos y
+  // miniaturas se ven con sharkclip://video/<archivo> y sharkclip://mini/<archivo>.
   clips: {
     estado: () => ipcRenderer.invoke('clips:estado'),
     preparar: () => ipcRenderer.invoke('clips:preparar'),
     abrirCarpeta: () => ipcRenderer.invoke('clips:abrirCarpeta'),
+    dispositivos: () => ipcRenderer.invoke('clips:dispositivos'),
+    galeria: () => ipcRenderer.invoke('clips:galeria'),
+    favorito: (archivo, valor) => ipcRenderer.invoke('clips:favorito', archivo, valor),
+    renombrar: (archivo, nombre) => ipcRenderer.invoke('clips:renombrar', archivo, nombre),
+    borrar: (archivo) => ipcRenderer.invoke('clips:borrar', archivo),
+    mostrar: (archivo) => ipcRenderer.invoke('clips:mostrar', archivo),
     onProgreso: (callback) => ipcRenderer.on('clips:progreso', (_e, p) => callback(p)),
     onGuardado: (callback) => ipcRenderer.on('clips:guardado', (_e, r) => callback(r)),
+    onCambio: (callback) => ipcRenderer.on('clips:cambio', () => callback()),
   },
 
   // Sesión de Discord

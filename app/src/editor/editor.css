@@ -59,8 +59,14 @@ body.editor {
 .tab-fila { position: absolute; left: 30px; right: 30px; height: 1px; background: rgba(167,211,207,0.15); transform: translateY(38px); }
 .tab-medio { position: absolute; left: 50%; top: 70px; bottom: 10px; width: 2px; background: rgba(200,170,110,0.35); }
 
+/* Las 3 zonas ocupan toda la pantalla y se apilan (la derecha queda encima): sin esto
+   la zona de arriba se queda con el clic y las piezas del centro y la izquierda no se
+   pueden arrastrar. Solo las piezas reciben el mouse. */
+.editor .zona { pointer-events: none; }
+.editor .zona > * { pointer-events: auto; }
+
 /* Piezas que se pueden mover */
-#baron, #ancestral, #rendimiento, #avisos, #carga { cursor: grab; outline: 2px dashed rgba(61,255,210,0.45); outline-offset: 4px; }
+#baron, #ancestral, #rendimiento, #avisos, #carga, #habilidad { cursor: grab; outline: 2px dashed rgba(61,255,210,0.45); outline-offset: 4px; }
 #avisos { border-radius: 12px; }
 .editor .arrastrando { cursor: grabbing !important; }
 .editor .elegida { outline: 2px solid var(--acento) !important; }

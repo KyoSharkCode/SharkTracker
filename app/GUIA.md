@@ -36,8 +36,9 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
 - **Tab**: diferencia de oro por fila (la flecha apunta a quien tiene más oro).
 - Arriba a la derecha, **Tu rendimiento** contra la división de arriba de la tuya.
 - **Ajustes → Overlay**: apagar piezas y moverlas ("Reposicionar elementos").
-- **Ctrl + F8**: guarda un clip con los 20 s anteriores y los 15 s siguientes (si activaste los
-  clips en Ajustes → Clips). Arriba a la derecha sale "Guardando clip…" y luego "Clip guardado".
+- **Clips** (si los activaste en Ajustes → Clips): tus kills, asistencias, muertes, objetivos,
+  torres y ultis que terminan en algo se guardan solos. **Ctrl + F8** guarda lo que quieras (20 s
+  antes y 15 s después). Jugadas seguidas van en un solo clip. Arriba a la derecha sale un aviso.
 
 ## Ajustes a tu gusto
 - **Ajustes → Apariencia**: color de acento de la app, tamaño y opacidad del overlay en partida
@@ -48,9 +49,12 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
   abre la página en la web. "Probar un aviso" muestra uno de ejemplo.
 
 - **Ajustes → Clips** (apagado de fábrica): al activarlo, la primera vez descarga FFmpeg (unos
-  80 MB) y prueba tu tarjeta gráfica. Desde ahí graba solo durante la partida, sin llenar el disco,
-  y Ctrl + F8 guarda el clip en **Videos › SharkTracker**. Por ahora sin sonido. Calidad Alta (60 fps)
-  o Ligera (30 fps), y si quieres que el overlay salga en el clip.
+  80 MB) y prueba tu tarjeta gráfica. Desde ahí graba solo durante la partida, sin llenar el disco.
+  Ahí eliges qué jugadas se guardan solas, cuántos segundos antes y después, el audio (juego,
+  Discord, micrófono o todo el PC, cada uno con su volumen; si grabas Discord, avisa al grupo) y el
+  espacio máximo (10 GB de fábrica; los favoritos ★ no cuentan).
+- **Clips** (menú lateral): tus clips por partida. Clic para verlos, ★ para guardarlos para
+  siempre, renombrar, mostrar en la carpeta o borrar (van a la papelera). Están en **Videos › SharkTracker**.
 
 ## Actualizaciones
 Son **automáticas**: la app busca versiones nuevas al abrirse (y cada 4 h), las descarga sola y las

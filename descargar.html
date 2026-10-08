@@ -234,6 +234,16 @@ init();
 // Notas del parche de la app. Al publicar una versión nueva, se agrega arriba del todo.
 // Cada versión: { version, titulo, nuevo: [...], arreglos: [...] } (texto plano).
 const NOTAS = [
+  { version: '0.9.3', titulo: 'Clips automáticos, con sonido y galería', nuevo: [
+      'Clips automáticos: tus kills (y multikills), asistencias, muertes, objetivos, torres e inhibidores se guardan solos. Cada tipo tiene su interruptor en Ajustes → Clips.',
+      'Ultis: si tiras la R y en los 10 s siguientes cae una kill u objetivo, el clip empieza en la ulti. Puedes cambiar la tecla si no usas la R.',
+      'Jugadas seguidas van en un solo clip (hasta 2 minutos) y el nombre dice qué pasó: "Triple kill + Barón".',
+      'Los clips ya tienen sonido: el juego, Discord, tu micrófono o todo el PC, cada uno con su volumen, y pistas separadas para editar.',
+      'Nueva sección Clips: tus clips por partida con miniatura, para verlos, marcarlos como favoritos ★, renombrarlos o borrarlos.',
+      'Límite de espacio (10 GB de fábrica): se borran los más viejos, menos los favoritos. Y ahora eliges cuántos segundos antes y después se guardan.',
+    ], arreglos: [
+      'Reposicionar elementos: la flecha de subir habilidad, los avisos de Barón y Ancestral y la build en partida ya se pueden arrastrar (antes no respondían al mouse).',
+    ] },
   { version: '0.9.2', titulo: 'Habilidades y actualizaciones al momento', nuevo: [
       'En partida: al subir de nivel aparece una flecha hacia abajo encima de las flechitas del juego, sobre la habilidad que toca según el orden de OP.GG. Se va en cuanto la subes. Puedes moverlo o apagarlo en Ajustes → Overlay.',
       'En Vivo: el orden de habilidades nivel por nivel (del 1 al 18) y cuál subir primero, junto a tus runas y hechizos.',

@@ -48,6 +48,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm ci
+      # Ayudante de audio de los clips (app/nativo): se compila aquí con Visual Studio
+      # y electron-builder lo copia a resources/ del instalador.
+      - name: Compilar el ayudante de audio (sharkaudio.exe)
+        shell: cmd
+        run: nativo\compilar.cmd
       - name: Armar el instalador y subirlo a un Release en borrador
         run: npx electron-builder --win --publish always
         env:
