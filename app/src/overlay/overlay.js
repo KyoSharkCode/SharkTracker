@@ -400,7 +400,8 @@ function pintarSiguiente() {
 // encima de las flechitas doradas de subir nivel del juego, sobre la habilidad que toca
 // (orden de OP.GG). La pieza son 4 huecos (Q W E R) con la separación de las habilidades
 // del HUD; solo el que toca lleva la flecha (en el editor se ven los 4 para alinearlos).
-// Solo entra y sale (sin bucles). Desaparece en cuanto subes la habilidad.
+// Entra desde arriba y la flecha rebota suave mientras esté (pedido de Alex). Desaparece en
+// cuanto subes la habilidad.
 let habilidad = null;
 function pintarHabilidad() {
   const nodo = $('habilidad');

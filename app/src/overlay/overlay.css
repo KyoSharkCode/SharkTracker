@@ -215,6 +215,11 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .hab-letra { display: none; }
 .hab-flecha { width: 28px; height: 22px; fill: var(--acento); stroke: #03111A; stroke-width: 2; stroke-linejoin: round;
   filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
+/* Única animación en bucle del overlay (la pidió Alex): la flecha sube y baja suave, como las
+   flechitas del juego, para que se note sin distraer. Solo transform: casi no gasta. */
+@keyframes hab-rebote { 0%, 100% { transform: translateY(-3px); } 50% { transform: translateY(2px); } }
+.hab-flecha { animation: hab-rebote 1.1s cubic-bezier(.45,0,.55,1) infinite; }
+@media (prefers-reduced-motion: reduce) { .hab-flecha { animation: none; } }
 .hab-pend { position: absolute; left: 34px; top: 0; font-family:'Red Hat Mono',ui-monospace,monospace; font-size: 12px; font-weight: 600;
   color: var(--acento); text-shadow: 0 1px 2px #000, 0 0 3px #000; }
 /* Editor: se ven los 4 huecos para alinearlos con las habilidades del juego */
