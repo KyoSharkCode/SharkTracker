@@ -363,8 +363,8 @@ que pulse un botón.
   - Los "packs de vida" de ARAM no salen en la API del juego: no se pueden anunciar.
 - Al terminar una partida y al empezar cada pantalla de carga se limpia el overlay
   (`limpiarOverlay`): antes "Tu rendimiento" de la partida anterior aparecía en la siguiente carga.
-- Pantalla de carga: en ARAM / Arena / URF no hay "Main del campeón" ni "Fuera de su main"
-  (y no se piden maestrías a Riot).
+- Pantalla de carga: en ARAM / Arena / URF no hay etiquetas de main (Jugando su Main, Fuera de su main…)
+  y no se piden maestrías a Riot.
 - ARAM de temporada (cola 2400) cuenta como ARAM en Mi Perfil, En Vivo y la pantalla de carga.
 
 ## Rediseño visual (v0.7.0, oct 2026 — mockup "SharkTracker — mejoras visuales")
@@ -641,9 +641,25 @@ no salen en el "espectador" de Riot).
   carga hasta que el proceso se cierra (`partidaTerminada`).
 - Datos: Edge Function `pantalla-carga` (**"Verify JWT" ENCENDIDO**: exige sesión de
   Discord y cuenta de LoL vinculada; la key de Riot vive allí). 1 petición al espectador
-  (los 10 jugadores) + liga por jugador (rango, LP, V/D, racha) + maestría top 3 (etiqueta
-  "Main del campeón" / "Fuera de su main"). Los de SharkTracker salen de la base (0 peticiones).
-  Ojo: en league-v4 la división viene en el campo **`rank`** (no `division`).
+  (los 10 jugadores) + liga por jugador (rango, LP, V/D, racha) + maestrías de Riot (lista
+  completa, 1 petición por jugador) para la etiqueta de su relación con el campeón. Los de SharkTracker
+  salen de la base (0 peticiones de rango; la maestría de Riot solo si la base no basta para decidir).
+  - **Etiquetas de main** (oct 2026, a pedido de Alex: el top 3 por puntos no dice quién es main hoy,
+  porque los puntos son de toda la vida). Se calculan en la Edge Function y viajan como `relacion`
+  (`main` queda como booleano para versiones viejas de la app). Constantes arriba de `pantalla-carga/index.ts`:
+  `MAESTRIA_TOP` 10, `MAESTRIA_PUNTOS_NUEVO` 2000, `DIAS_RECIENTE` 30, `PARTIDAS_MAIN` 5, `COLAS_MAIN`.
+  - Jugadores de fuera (`relacionRiot`, lista completa de `champion-masteries/by-puuid`, con puntos y
+    `lastPlayTime`; la maestría no dice la cola ni cuántas partidas): sin el campeón en la lista →
+    **Primera vez**; menos de 2.000 puntos → **Nuevo con el campeón**; en su top 10 y jugado en los últimos
+    30 días → **Jugando su Main**; en su top 10 pero hace más de 30 días → **Volviendo a su main**; si no →
+    **Fuera de su main**.
+  - SharkTracker (`relacionST`): 5+ partidas del último mes con ese campeón en normales/ranked/Clash
+    (`match_participants`, sin ARAM) → **Jugando su Main**; si no y está en su top 3 (`player_masteries`)
+    → **Volviendo a su main**; si no, se pide la lista de Riot y vale la regla de arriba (sin lista, sin etiqueta).
+  - La caché `carga_rangos` guarda la lista compacta `maestrias: [[campeón, puntos, última partida]]`
+    (los datos viejos, con `maestria`, se ignoran solos y se vuelven a pedir). Misma cantidad de peticiones
+    que antes, y siempre bajo el cupo del 60 %.
+Ojo: en league-v4 la división viene en el campo **`rank`** (no `division`).
 - Cupo (la key es la personal, compartida con la web): lo esencial hasta el 85 % de la
   ventana de 2 min, la maestría solo por debajo del 60 %; rivales primero. Lo que falte
   queda "Rango pendiente…" y la app reintenta cada 15 s (hasta 5 min). Caché: panel por

@@ -537,6 +537,14 @@
     const sinDivision = ['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(r.tier);
     return `${TIER_ES[r.tier] ?? r.tier}${sinDivision ? '' : ' ' + r.division} · ${r.lp} LP${r.cola === 'Flex' ? ' (Flex)' : ''}`;
   }
+  // Relación del jugador con su campeón (la calcula la Edge Function pantalla-carga).
+  const ETIQUETA_RELACION = {
+    primera: ['nuevo', 'Primera vez'],
+    nuevo: ['nuevo', 'Nuevo con el campeón'],
+    main: ['main', 'Jugando su Main'],
+    volviendo: ['volviendo', 'Volviendo a su main'],
+    fuera: ['fuera', 'Fuera de su main'],
+  };
   function cardEquipo(titulo, dot, lista) {
     const c = tarjeta(titulo, dot);
     const v = partida.carga?.ddVersion;
@@ -546,8 +554,8 @@
       const t = el('div', 'mt-fnom');
       t.append(el('b', null, j.nombre), el('span', null, `${j.campeon} · ${textoRango(j)}`));
       const tags = [];
-      if (j.main === true) tags.push(['main', 'Main']);
-      if (j.main === false) tags.push(['fuera', 'Fuera de su main']);
+      const rel = j.relacion ?? (j.main === true ? 'main' : j.main === false ? 'fuera' : null);
+      if (ETIQUETA_RELACION[rel]) tags.push(ETIQUETA_RELACION[rel]);
       if (j.rango?.racha) tags.push(['main', 'Frenesí']);
       if (j.sharktracker) tags.push(['st', 'SharkTracker']);
       if (tags.length) {

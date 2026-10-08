@@ -52,16 +52,16 @@
   const R = (tier, division, lp, victorias, derrotas, racha = false) => ({ cola: 'Solo/Duo', tier, division, lp, victorias, derrotas, racha });
   const EJEMPLO_CARGA = { estado: 'ok', completo: true, cola: 'Clasificatoria Solo/Duo',
     aliados: [
-      { nombre: 'Galactic Shark#AYK', campeon: 'Briar', rango: R('GOLD', 'II', 41, 30, 25), main: true, sharktracker: true },
-      { nombre: 'Aliado#LAN', campeon: 'Malphite', rango: R('SILVER', 'I', 12, 40, 42), main: false },
-      { nombre: 'Aliado#123', campeon: 'Twisted Fate', rango: R('GOLD', 'III', 55, 61, 39, true), main: true },
+      { nombre: 'Galactic Shark#AYK', campeon: 'Briar', rango: R('GOLD', 'II', 41, 30, 25), relacion: 'main', sharktracker: true },
+      { nombre: 'Aliado#LAN', campeon: 'Malphite', rango: R('SILVER', 'I', 12, 40, 42), relacion: 'primera' },
+      { nombre: 'Aliado#123', campeon: 'Twisted Fate', rango: R('GOLD', 'III', 55, 61, 39, true), relacion: 'volviendo' },
       { nombre: 'Aliado#777', campeon: 'Jinx', rango: R('GOLD', 'IV', 8, 20, 26), main: null },
       { nombre: 'Aliado#SUP', campeon: 'Janna', rango: null, main: null }],
     rivales: [
-      { nombre: 'Rival#1102', campeon: 'Zed', rango: R('GOLD', 'II', 60, 120, 98), main: true },
-      { nombre: 'Rival#7788', campeon: 'Lillia', rango: R('GOLD', 'IV', 5, 24, 26), main: false },
+      { nombre: 'Rival#1102', campeon: 'Zed', rango: R('GOLD', 'II', 60, 120, 98), relacion: 'main' },
+      { nombre: 'Rival#7788', campeon: 'Lillia', rango: R('GOLD', 'IV', 5, 24, 26), relacion: 'nuevo' },
       { nombre: 'Rival#3345', campeon: 'Vi', rango: R('SILVER', 'II', 70, 45, 41), main: null },
-      { nombre: 'Rival#6620', campeon: 'Ezreal', rango: R('GOLD', 'I', 18, 80, 60, true), main: true },
+      { nombre: 'Rival#6620', campeon: 'Ezreal', rango: R('GOLD', 'I', 18, 80, 60, true), relacion: 'fuera' },
       { nombre: 'Rival#9081', campeon: 'Morgana', rango: R('SILVER', 'III', 33, 30, 35), main: null }] };
 
   // ── Posiciones ──
