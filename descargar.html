@@ -234,6 +234,9 @@ init();
 // Notas del parche de la app. Al publicar una versión nueva, se agrega arriba del todo.
 // Cada versión: { version, titulo, nuevo: [...], arreglos: [...] } (texto plano).
 const NOTAS = [
+  { version: '0.9.5', titulo: 'Revisión del audio de los clips', arreglos: [
+      'Audio de los clips: en algunos PC los clips salen sin sonido aunque la app lo capte. Esta versión todavía no lo arregla: revisa sola el sonido de tus primeros clips de cada partida y anota en el registro en qué paso se pierde, para poder arreglarlo en la siguiente.',
+    ] },
   { version: '0.9.4', titulo: 'Clips por partida', nuevo: [
       'Clips: cada partida tiene su carpeta (por ejemplo "Briar 2026-10-08"), en la app y en Videos › SharkTracker. Los clips que ya tenías se ordenan solos.',
       'Al pasar el mouse por un clip se levanta y muestra unos segundos de la jugada, sin sonido.',
