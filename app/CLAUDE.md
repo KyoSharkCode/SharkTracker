@@ -594,6 +594,15 @@ Decisiones de Alex (oct 2026).
   - **Mi Perfil**: tarjeta "Más jugados · 30 días" a la derecha de las maestrías (`calc.masJugados`, top 5 de
     las partidas guardadas en todas las colas, sin remakes; ícono, nombre y partidas; el winrate en el title).
 
+- **Audio sin sonido en los clips (prueba de v0.9.4, Kyo, 10/10/2026)**: el registro mostraba al ayudante
+  capturando con nivel (Spotify −31 dB, Micrófono −14 dB) pero los clips salían sin sonido. En Linux (FFmpeg 6.1
+  y el master de BtbN, con un ayudante falso que manda un seno al ritmo real) el clip sale con sonido: el fallo
+  es de Windows y falta ver dónde. Para saberlo, `clips-motor.js` ahora: graba con `-loglevel warning` y pasa
+  al registro los primeros 20 avisos de FFmpeg ("FFmpeg · …"); mide el sonido de los 3 primeros clips de cada
+  partida (`revisarAudio`, volumedetect de la mezcla: "Audio del clip: 41.8 s de 42 s, nivel medio −30 dB,
+  máx −9 dB" / "en silencio" / "pista vacía" / "el archivo no tiene pista de audio"); y la entrada del audio
+  lleva `-thread_queue_size 1024`.
+
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)
 

@@ -25,6 +25,8 @@ const BITRATE = { alta: ['-b:v', '15M', '-maxrate', '25M', '-bufsize', '30M'], l
 const FPS = { alta: 60, ligera: 30 };
 const AUDIO_HZ = 48000;
 const RETRASO_AYUDANTE_MS = 50; // sharkaudio.exe manda el audio con este retraso fijo (RETRASO_MS)
+const MAX_AVISOS_FFMPEG = 20;   // avisos de FFmpeg al registro por partida
+const CLIPS_REVISADOS = 3;      // clips por partida cuyo sonido se mide (para el registro)
 
 // Codificadores por hardware, en orden de preferencia. Primero los que no sacan
 // la imagen de la GPU (consumen casi nada); la copia a memoria va al final porque
@@ -55,7 +57,9 @@ const relojVideo = (origen) => `,setpts=(RTCTIME-${origen})/(TB*1000000)`;
 // pistas: nombres de las pistas; la primera es la mezcla. Con una sola, solo la mezcla.
 function argsAudio(pistas, origen) {
   const canales = pistas.length * 2;
-  const entrada = ['-f', 'f32le', '-ar', String(AUDIO_HZ), '-ac', String(canales), '-i', 'pipe:0'];
+  // Cola de entrada amplia: si FFmpeg se atrasa un momento leyendo, el audio espera ahí en
+  // vez de frenar la tubería (con la de fábrica, 8 paquetes, avisa "Thread message queue blocking").
+  const entrada = ['-thread_queue_size', '1024', '-f', 'f32le', '-ar', String(AUDIO_HZ), '-ac', String(canales), '-i', 'pipe:0'];
   const comp = ['-c:a', 'aac', '-b:a', '160k', '-ar', String(AUDIO_HZ)];
   // Cada bloque llega entero: su inicio es la hora de llegada menos lo que dura (y menos
   // el retraso fijo del ayudante). aresample=async: rellena huecos y recorta lo que se
@@ -78,6 +82,7 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
   let actual = null; // { codificador, calidad, desde, pid, pistas }
   let cola = Promise.resolve(); // guardados, de a uno
   let enCola = 0;
+  let revisados = 0; // clips de esta partida a los que ya se les midió el sonido
 
   const correr = (args, ms) => new Promise((resolve) => {
     execFile(ffmpeg(), ['-hide_banner', '-loglevel', 'error', '-y', ...args], { windowsHide: true, timeout: ms },
@@ -121,7 +126,8 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
     const fps = FPS[calidad] ?? 60;
     const origen = Date.now() * 1000;
     const a = audio ? argsAudio(audio.pistas, origen) : null;
-    const args = ['-hide_banner', '-loglevel', 'error', '-y',
+    // Con avisos (warning): los primeros van al registro (ver más abajo).
+    const args = ['-hide_banner', '-loglevel', 'warning', '-y',
       ...entrada(fps, a ? relojVideo(origen) : ''), ...(a ? a.entrada : []),
       ...codificador.vf, ...codificador.c, ...(BITRATE[calidad] ?? BITRATE.alta), '-g', String(fps * SEGUNDOS_TROZO),
       ...(a ? a.salida : []),
@@ -146,7 +152,16 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
     }
     const p = spawn(ffmpeg(), args, { windowsHide: true, stdio: ['pipe', 'ignore', 'pipe'] });
     let errores = '';
-    p.stderr.on('data', (d) => { errores = (errores + d).slice(-2000); });
+    let restoFf = '';
+    let avisosFf = 0;
+    p.stderr.on('data', (d) => {
+      errores = (errores + d).slice(-2000);
+      // Lo que avisa FFmpeg mientras graba (marcas de tiempo, audio…), hasta 20 líneas
+      // por partida: si algo se tuerce en Windows, el registro lo dice.
+      const lineas = (restoFf + d).split(/\r?\n/);
+      restoFf = lineas.pop();
+      for (const l of lineas) if (l.trim() && !/Guessed Channel Layout/.test(l) && avisosFf < MAX_AVISOS_FFMPEG) { avisosFf++; log(`FFmpeg · ${l.trim()}`); }
+    });
     p.on('error', (e) => { errores += e.message; });
     p.stdin.on('error', () => { /* FFmpeg se cerró: lo avisa 'exit' */ });
     if (ay) {
@@ -182,6 +197,7 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
     proceso = p;
     ayudante = ay;
     actual = { codificador, calidad, desde: Date.now(), pid: p.pid, pidAudio: ay?.pid ?? null, pistas: conAudio ? audio.pistas : [] };
+    revisados = 0;
     p.on('exit', (code) => {
       if (proceso === p) {
         log(`FFmpeg se cerró solo (código ${code}): ${r.getErrores().trim().split('\n').pop() ?? ''}`);
@@ -259,10 +275,38 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
       const ok = r.ok && fs.existsSync(destino) && fs.statSync(destino).size > 0;
       if (ok) log(`Clip guardado: ${path.basename(destino)} (${total.toFixed(0)} s, ${(fs.statSync(destino).size / 1048576).toFixed(1)} MB) en ${((Date.now() - t0) / 1000).toFixed(2)} s`);
       else log(`No se pudo guardar el clip: ${r.error}`);
+      // Los primeros clips con audio de cada partida: ¿qué sonido quedó dentro del archivo?
+      if (ok && pistas.length && revisados < CLIPS_REVISADOS) {
+        revisados++;
+        log(`Audio del clip: ${await revisarAudio(destino, total)}`);
+      }
       return ok ? { ok: true, archivo: destino, segundos: Math.round(total) } : { ok: false, motivo: 'ffmpeg', error: r.error };
     }).finally(() => { enCola--; });
     cola = tarea.catch(() => {});
     return tarea;
+  }
+
+  // Mide la pista de la mezcla de un clip: cuánto sonido trae y a qué nivel.
+  // Devuelve un texto para el registro ("41.8 s de sonido, nivel máx -8 dB", "en silencio"…).
+  function revisarAudio(archivo, segundos) {
+    return new Promise((resolve) => {
+      execFile(ffmpeg(), ['-hide_banner', '-nostats', '-i', archivo, '-map', '0:a:0', '-af', 'volumedetect', '-f', 'null', '-'],
+        { windowsHide: true, timeout: 20000 }, (err, _out, txt = '') => {
+          if (/matches no streams/i.test(txt)) return resolve('el archivo no tiene pista de audio');
+          // El filtro puede informar más de una vez (la primera, vacía): vale la última.
+          const ultimo = (re) => [...txt.matchAll(re)].pop()?.[1];
+          const muestras = Number(ultimo(/n_samples:\s*(\d+)/g) ?? 0);
+          const max = ultimo(/max_volume:\s*(-?[\d.]+|-inf) dB/g);
+          const media = ultimo(/mean_volume:\s*(-?[\d.]+|-inf) dB/g);
+          if (err && !muestras) return resolve(`no se pudo medir (${txt.trim().split('\n').pop() ?? err.message})`);
+          // volumedetect cuenta las muestras de todos los canales (2 en la mezcla).
+          const dur = muestras / 2 / AUDIO_HZ;
+          const cuanto = `${dur.toFixed(1)} s de ${segundos.toFixed(0)} s`;
+          if (!muestras) return resolve(`pista vacía (0 s de ${segundos.toFixed(0)} s)`);
+          if (max === undefined || max === '-inf' || Number(max) < -80) return resolve(`${cuanto}, en silencio`);
+          resolve(`${cuanto}, nivel medio ${Math.round(Number(media))} dB, máx ${Math.round(Number(max))} dB`);
+        });
+    });
   }
 
   // Foto de un clip para la galería (`en`: segundos desde el inicio).
