@@ -57,9 +57,9 @@ const relojVideo = (origen) => `,setpts=(RTCTIME-${origen})/(TB*1000000)`;
 // pistas: nombres de las pistas; la primera es la mezcla. Con una sola, solo la mezcla.
 function argsAudio(pistas, origen) {
   const canales = pistas.length * 2;
-  // Cola de entrada amplia: si FFmpeg se atrasa un momento leyendo, el audio espera ahí en
-  // vez de frenar la tubería (con la de fábrica, 8 paquetes, avisa "Thread message queue blocking").
-  const entrada = ['-thread_queue_size', '1024', '-f', 'f32le', '-ar', String(AUDIO_HZ), '-ac', String(canales), '-i', 'pipe:0'];
+  // Ojo: sin -thread_queue_size; en el FFmpeg que baja la app (master de BtbN) ya solo vale
+  // para salidas y con él la grabación con audio no arranca.
+  const entrada = ['-f', 'f32le', '-ar', String(AUDIO_HZ), '-ac', String(canales), '-i', 'pipe:0'];
   const comp = ['-c:a', 'aac', '-b:a', '160k', '-ar', String(AUDIO_HZ)];
   // Cada bloque llega entero: su inicio es la hora de llegada menos lo que dura (y menos
   // el retraso fijo del ayudante). aresample=async: rellena huecos y recorta lo que se
@@ -83,6 +83,7 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
   let cola = Promise.resolve(); // guardados, de a uno
   let enCola = 0;
   let revisados = 0; // clips de esta partida a los que ya se les midió el sonido
+  let flujo = null;  // { recibido, canales }: cuánto audio le llegó a FFmpeg
 
   const correr = (args, ms) => new Promise((resolve) => {
     execFile(ffmpeg(), ['-hide_banner', '-loglevel', 'error', '-y', ...args], { windowsHide: true, timeout: ms },
@@ -164,7 +165,9 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
     });
     p.on('error', (e) => { errores += e.message; });
     p.stdin.on('error', () => { /* FFmpeg se cerró: lo avisa 'exit' */ });
+    const recibido = { bytes: 0, desde: Date.now() }; // audio que el ayudante pasó a FFmpeg
     if (ay) {
+      ay.stdout.on('data', (d) => { recibido.bytes += d.length; });
       ay.stdout.pipe(p.stdin);
       ay.on('exit', (code) => { if (ayudante === ay) log(`El ayudante de audio se cerró (código ${code}): ${erroresAy.trim().split('\n').pop() ?? ''}`); });
     }
@@ -178,7 +181,7 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
       for (const x of [ay, p]) { try { x?.kill(); } catch { /* nada */ } }
       return null;
     }
-    return { p, ay, fps, getErrores: () => errores };
+    return { p, ay, fps, recibido, canales: audio ? audio.pistas.length * 2 : 0, getErrores: () => errores };
   }
 
   // Empieza a grabar el búfer en anillo. Devuelve false si FFmpeg no arrancó.
@@ -198,6 +201,7 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
     ayudante = ay;
     actual = { codificador, calidad, desde: Date.now(), pid: p.pid, pidAudio: ay?.pid ?? null, pistas: conAudio ? audio.pistas : [] };
     revisados = 0;
+    flujo = conAudio ? { recibido: r.recibido, canales: r.canales } : null;
     p.on('exit', (code) => {
       if (proceso === p) {
         log(`FFmpeg se cerró solo (código ${code}): ${r.getErrores().trim().split('\n').pop() ?? ''}`);
@@ -278,7 +282,15 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
       // Los primeros clips con audio de cada partida: ¿qué sonido quedó dentro del archivo?
       if (ok && pistas.length && revisados < CLIPS_REVISADOS) {
         revisados++;
-        log(`Audio del clip: ${await revisarAudio(destino, total)}`);
+        // Tres puntos del camino: cuánto audio llegó a FFmpeg, qué quedó en el último trozo
+        // del búfer y qué quedó en el clip ya pegado.
+        let llegada = '';
+        if (flujo) {
+          const seg = flujo.recibido.bytes / (4 * flujo.canales * AUDIO_HZ);
+          llegada = ` · a FFmpeg le llegaron ${seg.toFixed(0)} s de audio en ${((Date.now() - flujo.recibido.desde) / 1000).toFixed(0)} s`;
+        }
+        const ultimo = elegidos[elegidos.length - 1];
+        log(`Audio del clip: ${await revisarAudio(destino, total)} · último trozo: ${await revisarAudio(ultimo.archivo, ultimo.dur)}${llegada}`);
       }
       return ok ? { ok: true, archivo: destino, segundos: Math.round(total) } : { ok: false, motivo: 'ffmpeg', error: r.error };
     }).finally(() => { enCola--; });

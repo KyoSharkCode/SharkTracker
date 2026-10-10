@@ -525,7 +525,8 @@ static bool escribir(HANDLE salida, const std::vector<float>& buf) {
 }
 
 // Informe para el registro de la app: qué llegó de cada fuente desde el último.
-static void informarNiveles(std::deque<Fuente>& fuentes, int segundos) {
+// `enviada`: lo que se mandó por la tubería (la mezcla, ya con los volúmenes).
+static void informarNiveles(std::deque<Fuente>& fuentes, Medida& enviada, int segundos) {
   std::wstring t = L"Niveles (" + std::to_wstring(segundos) + L" s):";
   for (size_t i = 0; i < fuentes.size(); i++) {
     auto& f = fuentes[i];
@@ -540,6 +541,16 @@ static void informarNiveles(std::deque<Fuente>& fuentes, int segundos) {
     }
     f.medida = Medida();
   }
+  // Al final, para no cambiar el orden que lee "Probar audio".
+  t += L" · Mezcla enviada ";
+  if (!enviada.frames) t += L"nada";
+  else if (enviada.pico < 0.0001f) t += L"silencio";
+  else {
+    wchar_t b[32];
+    swprintf(b, 32, L"%.0f dB", 20.0 * std::log10((double)enviada.pico));
+    t += b;
+  }
+  enviada = Medida();
   aviso(t);
 }
 
@@ -558,12 +569,13 @@ static int modoCapturar(std::deque<Fuente>& fuentes, bool separadas, int cadaNiv
   long long enviados = 0;
   std::vector<float> buf;
   ULONGLONG ultimoInforme = GetTickCount64();
+  Medida enviada; // lo que salió por la tubería desde el último informe
   timeBeginPeriod(1);
   for (;;) {
     Sleep(10);
     if (cadaNiveles > 0 && GetTickCount64() - ultimoInforme >= (ULONGLONG)cadaNiveles * 1000) {
       ultimoInforme = GetTickCount64();
-      informarNiveles(fuentes, cadaNiveles);
+      informarNiveles(fuentes, enviada, cadaNiveles);
     }
     for (auto& f : fuentes) {
       for (auto& c : f.capturas) c->leer(f.cola, f.medida);
@@ -596,7 +608,9 @@ static int modoCapturar(std::deque<Fuente>& fuentes, bool separadas, int cadaNiv
       float* fila = &buf[(size_t)i * canales];
       fila[0] = std::clamp(fila[0], -1.f, 1.f);
       fila[1] = std::clamp(fila[1], -1.f, 1.f);
+      enviada.pico = std::max(enviada.pico, std::max(std::fabs(fila[0]), std::fabs(fila[1])));
     }
+    enviada.frames += n;
     enviados = deberia;
     if (!escribir(salida, buf)) break; // la app cerró la tubería: fin
   }

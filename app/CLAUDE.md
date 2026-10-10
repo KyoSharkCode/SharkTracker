@@ -600,8 +600,13 @@ Decisiones de Alex (oct 2026).
   es de Windows y falta ver dónde. Para saberlo, `clips-motor.js` ahora: graba con `-loglevel warning` y pasa
   al registro los primeros 20 avisos de FFmpeg ("FFmpeg · …"); mide el sonido de los 3 primeros clips de cada
   partida (`revisarAudio`, volumedetect de la mezcla: "Audio del clip: 41.8 s de 42 s, nivel medio −30 dB,
-  máx −9 dB" / "en silencio" / "pista vacía" / "el archivo no tiene pista de audio"); y la entrada del audio
-  lleva `-thread_queue_size 1024`.
+  máx −9 dB" / "en silencio" / "pista vacía" / "el archivo no tiene pista de audio"), además del último trozo del
+  búfer y cuántos segundos de audio le llegaron a FFmpeg por la tubería; y el ayudante agrega a su línea de
+  niveles "Mezcla enviada −X dB" (lo que sale por la tubería, ya con volúmenes). Con eso se ve en qué tramo se
+  pierde: ayudante → tubería → trozos → clip. Kyo vio en VLC que el clip trae la pista "Mezcla" pero a 2 kb/s
+  (AAC casi vacío). Ráfagas de audio (entregar 1 s de golpe) no lo reproducen en Linux.
+  **`-thread_queue_size` no se puede usar en la entrada**: en el FFmpeg master ya es opción de salida y la
+  grabación con audio no arranca.
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)
