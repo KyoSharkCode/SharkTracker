@@ -13,14 +13,17 @@
 -- · Fase suiza y Eliminatorias: "Próximamente", con las fechas de apertura de
 --   las elecciones del Pick'Em oficial. Sus series se cargan desde el Admin
 --   cuando se conozcan.
+-- Fondos de los bloques (assets/pickems/): Sett Heartsteel (Play-In),
+-- Akali True Damage (Fase suiza) y Faker «Know My Name» (Eliminatorias).
 -- Cada fase solo se crea si todavía no existe.
 -- ============================================================
 do $$
 declare v_ev bigint; r1a bigint; r1b bigint; wf bigint; ls bigint; lf bigint;
 begin
   if not exists (select 1 from pickem_events where name = 'Worlds 2026 · Play-In') then
-    insert into pickem_events (name, locks_at)
-    values ('Worlds 2026 · Play-In', timestamp '2026-10-15 06:00' at time zone 'Europe/Madrid') returning id into v_ev;
+    insert into pickem_events (name, locks_at, bg_image, bg_focus)
+    values ('Worlds 2026 · Play-In', timestamp '2026-10-15 06:00' at time zone 'Europe/Madrid',
+            'assets/pickems/fondo-play-in.webp', '45% 62%') returning id into v_ev;
 
     insert into pickem_matches (event_id, label, bracket, col, sort, team1, team2, points)
     values (v_ev, 'Ronda 1', 'superior', 1, 1, 'FURIA', 'MVK Esports', 10) returning id into r1a;
@@ -37,14 +40,16 @@ begin
   end if;
 
   if not exists (select 1 from pickem_events where name = 'Worlds 2026 · Fase suiza') then
-    insert into pickem_events (name, opens_at, locks_at)
+    insert into pickem_events (name, opens_at, locks_at, bg_image, bg_focus)
     values ('Worlds 2026 · Fase suiza', timestamp '2026-10-19 00:00' at time zone 'Europe/Madrid',
-                                        timestamp '2026-10-23 06:00' at time zone 'Europe/Madrid');
+                                        timestamp '2026-10-23 06:00' at time zone 'Europe/Madrid',
+            'assets/pickems/fondo-fase-suiza.webp', '50% 22%');
   end if;
 
   if not exists (select 1 from pickem_events where name = 'Worlds 2026 · Eliminatorias') then
-    insert into pickem_events (name, opens_at, locks_at)
+    insert into pickem_events (name, opens_at, locks_at, bg_image, bg_focus)
     values ('Worlds 2026 · Eliminatorias', timestamp '2026-11-01 00:00' at time zone 'Europe/Madrid',
-                                           timestamp '2026-11-24 06:00' at time zone 'Europe/Madrid');
+                                           timestamp '2026-11-24 06:00' at time zone 'Europe/Madrid',
+            'assets/pickems/fondo-eliminatorias.webp', '8% 38%');
   end if;
 end $$;

@@ -29,6 +29,8 @@ create table if not exists pickem_events (
   opens_at      timestamptz,                 -- desde aquí se puede votar (null = ya abierto)
   locks_at      timestamptz not null,        -- hasta aquí se puede armar el bracket
   perfect_prize text not null default 'Skin Definitiva',   -- premio por acertar todo
+  bg_image      text,                        -- fondo del bloque en la portada (assets/… o https://…)
+  bg_focus      text not null default '50% 35%',            -- punto de la imagen que no se recorta (x% y%)
   finished_at timestamptz,                -- la admin lo cerró y se repartió la skin
   created_at  timestamptz not null default now()
 );
@@ -297,20 +299,30 @@ $$;
 -- ============================================================
 -- Admin
 -- ============================================================
-create or replace function admin_save_pickem_event(p_id bigint, p_name text, p_opens_at timestamptz, p_locks_at timestamptz, p_perfect_prize text)
+create or replace function admin_save_pickem_event(p_id bigint, p_name text, p_opens_at timestamptz, p_locks_at timestamptz, p_perfect_prize text,
+                                                   p_bg_image text default null, p_bg_focus text default null)
 returns bigint language plpgsql security definer set search_path = public as $$
 declare v_id bigint;
 begin
   if not is_admin() then raise exception 'Solo una administradora puede editar los Pickems.'; end if;
+  -- El fondo va dentro de un style="background-image:url(…)": solo rutas del repo o https sin caracteres raros
+  if nullif(trim(p_bg_image), '') is not null and trim(p_bg_image) !~ '^(assets/[A-Za-z0-9._/-]+|https://[^\s''"()<>]+)$' then
+    raise exception 'El fondo tiene que ser una ruta assets/… o un enlace https://';
+  end if;
+  if nullif(trim(p_bg_focus), '') is not null and trim(p_bg_focus) !~ '^[0-9]{1,3}% [0-9]{1,3}%$' then
+    raise exception 'El enfoque del fondo tiene que ser como "50%% 35%%".';
+  end if;
   if coalesce(trim(p_name), '') = '' then raise exception 'Ponle un nombre.'; end if;
   if p_locks_at is null then raise exception 'Falta la hora de cierre.'; end if;
   if p_opens_at is not null and p_opens_at >= p_locks_at then raise exception 'La apertura tiene que ser antes del cierre.'; end if;
   if p_id is null then
-    insert into pickem_events (name, opens_at, locks_at, perfect_prize)
-    values (trim(p_name), p_opens_at, p_locks_at, coalesce(nullif(trim(p_perfect_prize), ''), 'Skin Definitiva')) returning id into v_id;
+    insert into pickem_events (name, opens_at, locks_at, perfect_prize, bg_image, bg_focus)
+    values (trim(p_name), p_opens_at, p_locks_at, coalesce(nullif(trim(p_perfect_prize), ''), 'Skin Definitiva'),
+            nullif(trim(p_bg_image), ''), coalesce(nullif(trim(p_bg_focus), ''), '50% 35%')) returning id into v_id;
   else
     update pickem_events set name = trim(p_name), opens_at = p_opens_at, locks_at = p_locks_at,
-           perfect_prize = coalesce(nullif(trim(p_perfect_prize), ''), perfect_prize)
+           perfect_prize = coalesce(nullif(trim(p_perfect_prize), ''), perfect_prize),
+           bg_image = nullif(trim(p_bg_image), ''), bg_focus = coalesce(nullif(trim(p_bg_focus), ''), bg_focus)
      where id = p_id and finished_at is null returning id into v_id;
     if v_id is null then raise exception 'Ese evento no existe o ya está finalizado.'; end if;
   end if;
@@ -475,12 +487,12 @@ end $$;
 
 revoke execute on function pickem_settle_event(bigint), pickem_prune_picks(uuid, bigint) from public, anon, authenticated;
 revoke execute on function save_pickem_pick(bigint, text), place_pickem_bet(bigint, text, integer),
-                           admin_save_pickem_event(bigint, text, timestamptz, timestamptz, text), admin_delete_pickem_event(bigint),
+                           admin_save_pickem_event(bigint, text, timestamptz, timestamptz, text, text, text), admin_delete_pickem_event(bigint),
                            admin_save_pickem_match(bigint, bigint, text, text, text, integer, integer, timestamptz, integer, boolean),
                            admin_delete_pickem_match(bigint), admin_set_pickem_result(bigint, integer, integer),
                            admin_close_pickem_bets(bigint, boolean), admin_finish_pickem_event(bigint) from public, anon;
 grant execute on function save_pickem_pick(bigint, text), place_pickem_bet(bigint, text, integer),
-                          admin_save_pickem_event(bigint, text, timestamptz, timestamptz, text), admin_delete_pickem_event(bigint),
+                          admin_save_pickem_event(bigint, text, timestamptz, timestamptz, text, text, text), admin_delete_pickem_event(bigint),
                           admin_save_pickem_match(bigint, bigint, text, text, text, integer, integer, timestamptz, integer, boolean),
                           admin_delete_pickem_match(bigint), admin_set_pickem_result(bigint, integer, integer),
                           admin_close_pickem_bets(bigint, boolean), admin_finish_pickem_event(bigint) to authenticated;

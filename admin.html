@@ -952,6 +952,10 @@ function pkEventCard(ev) {
         <small class="es">${ev ? madrid(ev.locks_at) : '&nbsp;'}</small></div>
       <div><label>Premio del pleno</label><input class="in" data-f="prize" maxlength="60" value="${esc(ev?.perfect_prize ?? 'Skin Definitiva')}" ${finished ? 'disabled' : ''}>
         <small class="es">Lo recibe quien acierta todo</small></div>
+      <div style="flex:1;min-width:220px"><label>Fondo del bloque</label><input class="in" data-f="bg" maxlength="300" value="${esc(ev?.bg_image ?? '')}" placeholder="assets/pickems/fondo-….webp" ${finished ? 'disabled' : ''}>
+        <small class="es">Ruta del repo o enlace https://</small></div>
+      <div><label>Enfoque</label><input class="in" data-f="focus" maxlength="9" style="width:96px" value="${esc(ev?.bg_focus ?? '50% 35%')}" title="Qué punto de la imagen no se recorta: horizontal% vertical%" ${finished ? 'disabled' : ''}>
+        <small class="es">x% y%</small></div>
       <div class="actions" style="flex-direction:row">
         ${ev ? `<a class="btn ghost" href="pickems.html?id=${ev.id}">Ver página</a>` : ''}
         ${finished ? '' : `<button class="btn ok" data-pk="save-ev" type="button">${ev ? 'Guardar' : 'Crear'}</button>
@@ -992,7 +996,7 @@ $('pk-list').addEventListener('click', async (e) => {
     const id = head.dataset.pkEv;
     call = ['admin_save_pickem_event', { p_id: id === 'new' ? null : Number(id), p_name: v(head, 'name'),
       p_opens_at: v(head, 'opens') ? new Date(v(head, 'opens')).toISOString() : null, p_locks_at: new Date(v(head, 'locks')).toISOString(),
-      p_perfect_prize: v(head, 'prize') }, '✅ Fase guardada'];
+      p_perfect_prize: v(head, 'prize'), p_bg_image: v(head, 'bg'), p_bg_focus: v(head, 'focus') }, '✅ Fase guardada'];
   } else if (act === 'del-ev-yes') {
     call = ['admin_delete_pickem_event', { p_id: Number(b.dataset.id) }, 'Evento borrado'];
   } else if (act === 'finish-yes') {

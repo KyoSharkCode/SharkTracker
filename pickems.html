@@ -402,6 +402,35 @@
     .intro-hub .stage-prog .track i{animation:none;}
   }
 
+  /* Fondo de cada fase (imagen + velo para que el texto se lea siempre) */
+  .stage-bg{position:absolute; inset:0; z-index:-2; background-size:cover; background-repeat:no-repeat;
+    transform:scale(1.02); transition:transform 700ms var(--ease-out), filter 400ms ease;}
+  .stage-bg::after{content:''; position:absolute; inset:0;
+    background:radial-gradient(ellipse 60% 70% at 50% 55%, rgba(3,17,26,.78), rgba(3,17,26,.35) 75%),
+               linear-gradient(180deg, rgba(3,17,26,.45) 0%, rgba(3,17,26,.2) 40%, rgba(3,17,26,.85) 100%);}
+  .stage.soon .stage-bg{filter:grayscale(.55) brightness(.65);}
+  .stage.closed .stage-bg{filter:saturate(.85);}
+  .stage.done .stage-bg{filter:grayscale(.3) brightness(.8);}
+  .stage.has-bg{border-color:rgba(120,220,210,.2);}
+  .stage.has-bg.open{border-color:rgba(61,255,210,.6);}
+  .stage.has-bg h3, .stage.has-bg .sub{text-shadow:0 2px 14px rgba(3,17,26,.85);}
+  .stage.has-bg .sub{color:var(--text-soft);}
+  .stage.has-bg .sonar circle{stroke:rgba(230,251,248,.07);}
+  .stage.has-bg .pill{background:rgba(3,17,26,.55); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);}
+  .stage.has-bg .stage-pts{padding:3px 8px; border-radius:99px; background:rgba(3,17,26,.55);}
+  .stage.has-bg .stage-prog .track{background:rgba(3,17,26,.6);}
+  @media (hover:hover) and (pointer:fine){ a.stage:hover .stage-bg{transform:scale(1.06);} }
+  /* Al abrir la portada, el fondo se asienta (un leve acercamiento que termina quieto) */
+  .intro-hub .stage-bg{animation:settle 1400ms var(--ease-out) backwards; animation-delay:calc(var(--i,0) * 70ms);}
+  @keyframes settle{ from{transform:scale(1.12); opacity:.4;} }
+  /* Cabecera de una fase: su fondo a la derecha, fundido hacia el texto */
+  .hero{position:relative; overflow:hidden; isolation:isolate;}
+  .hero-bg{position:absolute; inset:0 0 0 30%; z-index:-1; background-size:cover; background-repeat:no-repeat; opacity:.55;
+    -webkit-mask-image:linear-gradient(90deg, transparent 0%, #000 55%); mask-image:linear-gradient(90deg, transparent 0%, #000 55%);}
+  .hero-bg::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(8,32,44,.15) 0%, rgba(8,32,44,.45) 55%, rgba(8,32,44,.88) 100%);}
+  @media (max-width:700px){ .hero-bg{inset:0; opacity:.25; -webkit-mask-image:none; mask-image:none;} }
+  @media (prefers-reduced-motion: reduce){ a.stage:hover .stage-bg{transform:scale(1.02);} .intro-hub .stage-bg{animation-name:fade-only;} }
+
   @media (max-width:860px){
     .prizes{grid-template-columns:1fr;}
     .links{display:none;}
@@ -599,6 +628,7 @@ function drawHero() {
     : ph === 'soon' ? `<span class="kicker closed">${icono('reloj_arena', { size: 14 })} Próximamente</span>`
     : `<span class="kicker closed">${icono('candado', { size: 14 })} Bracket cerrado · se juega</span>`;
   morph($('hero'), `<div class="hero">
+    ${ev.bg_image ? `<span class="hero-bg" aria-hidden="true" style="background-image:url('${esc(ev.bg_image)}'); background-position:${esc(ev.bg_focus ?? '50% 35%')}"></span>` : ''}
     ${kicker}
     <h2 class="ev-name">${esc(ev.name)}</h2>
     <p class="ev-sub">${ph === 'soon' ? `Se abre el <b>${fechaEs(ev.opens_at)}</b> y cierra el` : open ? 'Cierra el' : 'Cerró el'} <b>${fechaEs(ev.locks_at)}</b> (hora de España)</p>
@@ -1115,11 +1145,12 @@ function stageCard(e, mine, i) {
   const teams = ph !== 'soon' && ms.length ? [...new Set(ms.flatMap(m => [m.team1, m.team2]).filter(Boolean))] : [];
   const prog = st.me && ms.length && ph !== 'soon'
     ? `<div class="stage-prog"><small>${myPicks}/${ms.length} elecciones realizadas</small><div class="track"><i class="${myPicks === ms.length ? 'full' : ''}" style="--p:${myPicks / ms.length}"></i></div></div>` : '';
-  const inner = `${SONAR}<div class="stage-top">${pill}<span class="stage-pts">${max ? `<b>${my?.teeth ?? 0}</b> / ${max} 🦷` : '— 🦷'}</span></div>
+  const bg = e.bg_image ? `<span class="stage-bg" aria-hidden="true" style="background-image:url('${esc(e.bg_image)}'); background-position:${esc(e.bg_focus ?? '50% 35%')}"></span>` : '';
+  const inner = `${bg}${SONAR}<div class="stage-top">${pill}<span class="stage-pts">${max ? `<b>${my?.teeth ?? 0}</b> / ${max} 🦷` : '— 🦷'}</span></div>
     <h3>${esc(splitName(e.name).stage)}</h3><p class="sub">${sub}</p>
     ${teams.length ? `<div class="teams">${teams.map(t => logo(t)).join('')}</div>` : ''}
     ${cta ? `<span class="btn cta"><span class="lbl">${cta}</span></span>` : '<p class="sub">Pronto se abren estos Pickems.</p>'}${prog}`;
-  const attrs = `class="stage ${ph}" data-key="st${e.id}" style="--i:${i}"`;
+  const attrs = `class="stage ${ph} ${e.bg_image ? 'has-bg' : ''}" data-key="st${e.id}" style="--i:${i}"`;
   return cta ? `<a ${attrs} href="pickems.html?id=${e.id}">${inner}</a>` : `<div ${attrs}>${inner}</div>`;
 }
 
