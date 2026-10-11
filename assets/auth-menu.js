@@ -83,6 +83,7 @@ export function createAuthMenu({ supabase, profileIconUrl, onEdit, slotId = 'aut
   function toast(msg, isError) {
     const el = document.createElement('div');
     el.className = `am-toast ${isError ? 'err' : ''}`;
+    el.setAttribute('role', isError ? 'alert' : 'status');   // el lector de pantalla lo anuncia
     el.textContent = msg;
     document.body.appendChild(el);
     setTimeout(() => { el.style.opacity = '0'; }, 3500);

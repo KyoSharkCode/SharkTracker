@@ -17,6 +17,8 @@ const ITEMS = [
     icon: 'M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V17h3v4H8v-4h3v-2.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zM6 7v1a2 2 0 0 0 1.2 1.8A5 5 0 0 1 7 8.5V7zM18 7h-1v1.5c0 .5 0 .9-.2 1.3A2 2 0 0 0 18 8z' },
   { key: 'fama', label: 'Salón de la fama', href: 'reto.html#fame-sec', desc: 'Ganadores de retos anteriores',
     icon: 'M12 2l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 16.9 6.1 20l1.2-6.5L2.5 8.9 9.1 8z' },
+  { key: 'pickems', label: 'Pickems', href: 'pickems.html', desc: 'Predice el Mundial y gana dientes',
+    icon: 'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2m0 2v14h14V5zm5.6 10.4L7 11.8l1.4-1.4 2.2 2.2 5-5L17 9z' },
   { key: 'versus', label: 'Versus', href: 'versus.html', desc: 'Compara a dos jugadores',
     icon: 'M3 4h4.5L12 13l4.5-9H21l-7 14h-4zM2 20h20v2H2z' },
   { key: 'tienda', label: 'Tienda', href: 'tienda.html', desc: 'Gasta tus dientes en marcos, efectos y premios',
