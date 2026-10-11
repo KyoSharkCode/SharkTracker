@@ -448,6 +448,7 @@
     .count b{font-size:30px;}
     .ev-name{font-size:23px;}
     .notice{flex-wrap:wrap;} .notice .btn{margin-left:0;}
+    .m-foot summary{display:flex; align-items:center; min-height:44px; padding:0 4px;}
     .bet{padding:16px;}
     .bet-teams{grid-template-columns:1fr;}
     .hide-sm{display:none;}
@@ -491,7 +492,7 @@
     <div id="notice"></div>
     <section>
       <h2 class="section-title"><span class="bar"></span><span id="bracket-title">Bracket</span><span class="aside" id="bracket-aside"></span></h2>
-      <div id="bracket" aria-live="polite"></div>
+      <div id="bracket"></div>
     </section>
     <section id="bets-sec" hidden></section>
     <section id="board-sec">
@@ -526,6 +527,7 @@ const iconOr1 = (id) => profileIconUrl(id) ?? profileIconUrl(1);
 const ICON_ONERROR = `this.onerror=null;this.src='${profileIconUrl(1)}';`;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $ = (id) => document.getElementById(id);
+const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
 const fmtN = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 const fechaEs = (iso) => new Date(iso).toLocaleString('es-ES', { timeZone: 'Europe/Madrid', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
 const fechaDia = (iso) => new Date(iso).toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid', day: '2-digit', month: '2-digit', year: '2-digit' });
@@ -634,7 +636,7 @@ function drawHero() {
     ${kicker}
     <h2 class="ev-name">${esc(ev.name)}</h2>
     <p class="ev-sub">${ph === 'soon' ? `Se abre el <b>${fechaEs(ev.opens_at)}</b> y cierra el` : open ? 'Cierra el' : 'Cerró el'} <b>${fechaEs(ev.locks_at)}</b> (hora de España)</p>
-    <p class="ev-sub">${st.matches.length} series · ${new Set(st.picks.map(p => p.player_id)).size} participantes</p>
+    ${st.matches.length ? `<p class="ev-sub">${plural(st.matches.length, 'serie', 'series')} · ${plural(new Set(st.picks.map(p => p.player_id)).size, 'participante', 'participantes')}</p>` : ''}
     ${countdownTarget ? `<div class="count" id="count" aria-label="${open ? 'Tiempo para el cierre' : 'Tiempo para la apertura'}">
       <div><b data-u="d">${c.d}</b><small>días</small></div><div><b data-u="h">${c.h}</b><small>horas</small></div>
       <div><b data-u="m">${c.m}</b><small>min</small></div><div><b data-u="s">${c.s}</b><small>seg</small></div></div>` : ''}
@@ -1158,7 +1160,7 @@ function stageCard(e, mine, i) {
 
 function hubCount(target) {
   const c = countParts(Math.max(0, target - Date.now()));
-  return `${c.d}:${c.h}:${c.m}:${c.s}`;
+  return `${c.d > 0 ? `${c.d} d ` : ''}${c.h}:${c.m}:${c.s}`;
 }
 function tickHub() {
   for (const el of document.querySelectorAll('[data-countdown]')) {
