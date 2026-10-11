@@ -9,6 +9,7 @@
 //       createPickemsBanner({ supabase });
 // ============================================================
 import { equipo } from './equipos.js';
+import { icono } from './iconos.js';
 import { createBracket } from './pickems.js';
 
 const CSS = `
@@ -30,6 +31,7 @@ const CSS = `
 .pkb-txt{flex:1; min-width:0;}
 .pkb-txt b{display:block; font-family:'Unbounded',sans-serif; font-size:15px; font-weight:700; line-height:1.3;}
 .pkb-txt small{display:block; margin-top:3px; font-size:13px; color:var(--text-soft,#C9ECE8);}
+.pkb-dt{display:inline-block; vertical-align:-0.18em; color:var(--gold,#FFB547);}
 .pkb-txt small i{font-style:normal; font-family:'Red Hat Mono',ui-monospace,monospace; font-weight:600; color:var(--text,#E6FBF8); white-space:nowrap;}
 .pkb-prog{flex-shrink:0; font:600 12px 'Red Hat Mono',ui-monospace,monospace; padding:4px 9px; border-radius:99px; background:rgba(3,17,26,.6); color:var(--accent,#3DFFD2);}
 .pkb-prog.full{color:var(--gold,#FFB547);}
@@ -92,7 +94,7 @@ export async function createPickemsBanner({ supabase, anchor = '.wrap > header' 
     view = {
       key: `pkb-hide-${open.id}-abierto`, ev: open, teams,
       title: `Pickems · ${stageOf(open.name)}`,
-      sub: () => `Cierra en <i data-pkb-count="${new Date(open.locks_at).getTime()}">${countdown(new Date(open.locks_at).getTime())}</i> · Hasta 🦷 ${max} y ${esc(open.perfect_prize)}`,
+      sub: () => `Cierra en <i data-pkb-count="${new Date(open.locks_at).getTime()}">${countdown(new Date(open.locks_at).getTime())}</i> · Hasta ${icono('diente', { size: 14, clase: 'pkb-dt' })} ${max} y ${esc(open.perfect_prize)}`,
       prog: mine == null ? null : { n: mine, total: em.length },
       cta: mine == null ? 'Ver Pickems' : mine === em.length ? 'Revisar mi bracket' : 'Armar mi bracket',
       href: `pickems.html?id=${open.id}`,
