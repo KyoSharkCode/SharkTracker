@@ -4,7 +4,8 @@
 // clase anima en vez de "saltar"), el foco del teclado se conserva y los
 // <details> abiertos siguen abiertos.
 //
-// · data-key="…"        empareja elementos aunque cambien de orden (filas que se reordenan).
+// · data-key="…"        empareja elementos aunque cambien de orden (filas que se reordenan);
+//                        si cambia la etiqueta (<div> → <button>), el elemento se reemplaza.
 // · data-morph-skip     no toca los hijos de ese elemento (SVG dibujado a mano,
 //                        números que se animan desde JS).
 // · Los <input> conservan lo que se escribió, salvo que su valor cambie desde fuera.
@@ -31,9 +32,14 @@ function patchChildren(a, b) {
     const k = keyOf(nb);
     if (k) {
       const match = keyed.get(k);
-      if (match) {
+      if (match && match.nodeName === nb.nodeName) {
         if (match !== cur) a.insertBefore(match, cur);
         patch(match, nb);
+        keyed.delete(k);
+      } else if (match) {
+        // Cambió de etiqueta (p. ej. un <div> que pasa a ser <button>): se reemplaza, no se parchea
+        a.insertBefore(nb.cloneNode(true), cur);
+        match.remove();
         keyed.delete(k);
       } else {
         a.insertBefore(nb.cloneNode(true), cur);
