@@ -59,4 +59,5 @@ export function scoreOptions(bo) {
   return out;
 }
 
-export const MIN_BET = 10;   // igual que pickem_min_bet() en la base
+export const MIN_BET = 10;    // igual que pickem_min_bet() en la base
+export const MAX_BET = 500;   // igual que pickem_max_bet()

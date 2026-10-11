@@ -17,7 +17,7 @@ Proyecto personal, sin fines comerciales. No está respaldado por Riot Games.
 | `estadisticas.html` | Estadísticas del grupo. |
 | `versus.html` | Comparativa entre dos jugadores. |
 | `reto.html` | Retos del grupo y sus resultados. |
-| `pickems.html` | Pickems estilo Riot: cada jugador arma su bracket (gana 🦷 por acierto y la Skin Definitiva con pleno) y apuesta 🦷 en la final; cualquiera ve los votos. |
+| `pickems.html` | Pickems estilo Riot. Portada con un bloque por fase (abierta, próximamente, en juego o finalizada), recompensas y clasificación general; cada fase (`?id=`) es un bracket animado donde se gana 🦷 por acierto, el premio del pleno y se apuesta en la final (máx. 500 🦷). Cualquiera ve los votos. |
 | `tienda.html` | Tienda de cosméticos y premios con los 🦷 ganados jugando. |
 | `rewind.html` | Resumen de la temporada de SoloQ de cada jugador. |
 | `overlay.html` | Overlay para OBS (rango y misiones en directo). |

@@ -1,8 +1,9 @@
 -- ============================================================
 -- Pickems (estilo Pick'Em de LoL Esports)
 --
--- · La admin crea un "evento" (ej. Worlds 2026 · Play-In) con su hora de
---   cierre y sus series. Cada serie tiene sus equipos fijos (ronda 1) o los
+-- · La admin crea un "evento" por fase (ej. Worlds 2026 · Play-In) con su
+--   apertura, su cierre, su premio por pleno y sus series. La portada de
+--   Pickems agrupa las fases por torneo (lo que va antes de " · "). Cada serie tiene sus equipos fijos (ronda 1) o los
 --   recibe de otra serie: "ganador de la serie X" / "perdedor de la serie X".
 -- · Cada jugador con la cuenta vinculada arma su bracket eligiendo el GANADOR
 --   de cada serie: el equipo que elige pasa a la serie siguiente de SU bracket.
@@ -10,21 +11,24 @@
 -- · Cuando la admin carga el resultado de una serie, cada acierto da los 🦷
 --   de esa serie (columna points, editable por serie). Si se corrige un
 --   resultado, se recalcula todo el evento.
--- · Al finalizar el evento, quien acertó TODOS los ganadores recibe la Skin
---   Definitiva (premio real pendiente de entrega en el Admin) y la insignia.
+-- · Al finalizar el evento, quien acertó TODOS los ganadores recibe el premio
+--   del pleno (perfect_prize, por defecto la Skin Definitiva: premio real
+--   pendiente de entrega en el Admin) y la insignia.
 -- · Apuestas (series con bets_enabled, p. ej. la gran final): se abren cuando
 --   se conocen los dos equipos y cierran al empezar la serie (starts_at) o
 --   cuando la admin las cierra. Los 🦷 apostados se descuentan al apostar.
 --   Bote compartido: quienes aciertan recuperan lo suyo y se reparten lo de
 --   quienes fallan, en proporción a lo que apostó cada uno. Si nadie acierta
---   o nadie falla, se devuelve todo.
+--   o nadie falla, se devuelve todo. Apuesta mínima 10 🦷 y máxima 500 🦷.
 -- ============================================================
 
 -- ── Tablas ──
 create table if not exists pickem_events (
   id          bigint generated always as identity primary key,
-  name        text not null,
-  locks_at    timestamptz not null,       -- hasta aquí se puede armar el bracket
+  name          text not null,               -- "Torneo · Fase", ej. "Worlds 2026 · Play-In"
+  opens_at      timestamptz,                 -- desde aquí se puede votar (null = ya abierto)
+  locks_at      timestamptz not null,        -- hasta aquí se puede armar el bracket
+  perfect_prize text not null default 'Skin Definitiva',   -- premio por acertar todo
   finished_at timestamptz,                -- la admin lo cerró y se repartió la skin
   created_at  timestamptz not null default now()
 );
@@ -82,8 +86,9 @@ returns boolean language sql immutable as $$
      and least(p_s1, p_s2) < (p_best_of + 1) / 2
 $$;
 
--- Apuesta mínima (🦷)
+-- Apuesta mínima y máxima por persona (🦷)
 create or replace function pickem_min_bet() returns integer language sql immutable as $$ select 10 $$;
+create or replace function pickem_max_bet() returns integer language sql immutable as $$ select 500 $$;
 
 -- Insignia y premio del pleno
 insert into badges (code, name, description, icon, sort) values
@@ -91,7 +96,7 @@ insert into badges (code, name, description, icon, sort) values
 on conflict (code) do nothing;
 -- No está a la venta (inactivo): existe para que el pleno aparezca en "Premios por entregar".
 insert into shop_items (id, kind, name, description, collection, price, active, icon, sort)
-values ('pickem-perfecto', 'premio', 'Skin Definitiva', 'Premio por acertar todos los Pickems de un evento.', 'Pickems', 0, false, 'skin', 900)
+values ('pickem-perfecto', 'premio', 'Skin Definitiva', 'Premio por acertar todos los Pickems de una fase.', 'Pickems', 0, false, 'skin', 900)
 on conflict (id) do nothing;
 
 -- ============================================================
@@ -231,6 +236,7 @@ begin
   select * into m from pickem_matches where id = p_match;
   if not found then raise exception 'Esa serie no existe.'; end if;
   select * into e from pickem_events where id = m.event_id;
+  if e.opens_at is not null and now() < e.opens_at then raise exception 'Estos Pickems todavía no se abren.'; end if;
   if now() >= e.locks_at or e.finished_at is not null then raise exception 'Los Pickems ya cerraron.'; end if;
   if p_team is null then
     delete from pickem_picks where player_id = v_player and match_id = p_match;
@@ -277,6 +283,7 @@ begin
   if coalesce(p_amount, 0) > 0 then
     if p_team is distinct from v_t1 and p_team is distinct from v_t2 then raise exception 'Ese equipo no juega esta serie.'; end if;
     if p_amount < pickem_min_bet() then raise exception 'La apuesta mínima es de % dientes.', pickem_min_bet(); end if;
+    if p_amount > pickem_max_bet() then raise exception 'La apuesta máxima es de % dientes.', pickem_max_bet(); end if;
     if wallet_balance(v_player) < p_amount then
       raise exception 'No te alcanzan los dientes (tienes %).', wallet_balance(v_player);
     end if;
@@ -290,17 +297,21 @@ $$;
 -- ============================================================
 -- Admin
 -- ============================================================
-create or replace function admin_save_pickem_event(p_id bigint, p_name text, p_locks_at timestamptz)
+create or replace function admin_save_pickem_event(p_id bigint, p_name text, p_opens_at timestamptz, p_locks_at timestamptz, p_perfect_prize text)
 returns bigint language plpgsql security definer set search_path = public as $$
 declare v_id bigint;
 begin
   if not is_admin() then raise exception 'Solo una administradora puede editar los Pickems.'; end if;
   if coalesce(trim(p_name), '') = '' then raise exception 'Ponle un nombre.'; end if;
   if p_locks_at is null then raise exception 'Falta la hora de cierre.'; end if;
+  if p_opens_at is not null and p_opens_at >= p_locks_at then raise exception 'La apertura tiene que ser antes del cierre.'; end if;
   if p_id is null then
-    insert into pickem_events (name, locks_at) values (trim(p_name), p_locks_at) returning id into v_id;
+    insert into pickem_events (name, opens_at, locks_at, perfect_prize)
+    values (trim(p_name), p_opens_at, p_locks_at, coalesce(nullif(trim(p_perfect_prize), ''), 'Skin Definitiva')) returning id into v_id;
   else
-    update pickem_events set name = trim(p_name), locks_at = p_locks_at where id = p_id and finished_at is null returning id into v_id;
+    update pickem_events set name = trim(p_name), opens_at = p_opens_at, locks_at = p_locks_at,
+           perfect_prize = coalesce(nullif(trim(p_perfect_prize), ''), perfect_prize)
+     where id = p_id and finished_at is null returning id into v_id;
     if v_id is null then raise exception 'Ese evento no existe o ya está finalizado.'; end if;
   end if;
   return v_id;
@@ -438,7 +449,7 @@ begin
     having count(*) = v_total
   loop
     insert into prize_claims (player_id, item_id, item_name, price)
-    values (r.player_id, 'pickem-perfecto', 'Skin Definitiva · ' || e.name, 0);
+    values (r.player_id, 'pickem-perfecto', e.perfect_prize || ' · ' || e.name, 0);
     perform award_badge(r.player_id, 'pickem_perfecto', e.name);
     v_n := v_n + 1;
   end loop;
@@ -464,12 +475,12 @@ end $$;
 
 revoke execute on function pickem_settle_event(bigint), pickem_prune_picks(uuid, bigint) from public, anon, authenticated;
 revoke execute on function save_pickem_pick(bigint, text), place_pickem_bet(bigint, text, integer),
-                           admin_save_pickem_event(bigint, text, timestamptz), admin_delete_pickem_event(bigint),
+                           admin_save_pickem_event(bigint, text, timestamptz, timestamptz, text), admin_delete_pickem_event(bigint),
                            admin_save_pickem_match(bigint, bigint, text, text, text, integer, integer, timestamptz, integer, boolean),
                            admin_delete_pickem_match(bigint), admin_set_pickem_result(bigint, integer, integer),
                            admin_close_pickem_bets(bigint, boolean), admin_finish_pickem_event(bigint) from public, anon;
 grant execute on function save_pickem_pick(bigint, text), place_pickem_bet(bigint, text, integer),
-                          admin_save_pickem_event(bigint, text, timestamptz), admin_delete_pickem_event(bigint),
+                          admin_save_pickem_event(bigint, text, timestamptz, timestamptz, text), admin_delete_pickem_event(bigint),
                           admin_save_pickem_match(bigint, bigint, text, text, text, integer, integer, timestamptz, integer, boolean),
                           admin_delete_pickem_match(bigint), admin_set_pickem_result(bigint, integer, integer),
                           admin_close_pickem_bets(bigint, boolean), admin_finish_pickem_event(bigint) to authenticated;

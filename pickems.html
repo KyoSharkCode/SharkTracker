@@ -294,6 +294,114 @@
     .slot.swap .who{animation:fade-only 200ms ease;}
   }
 
+  /* ============================================================
+     Portada de Pickems (sin ?id): tu tarjeta, una tarjeta por fase,
+     recompensas y clasificación general.
+     ============================================================ */
+  .back-link{display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0 4px; font-size:13.5px; font-weight:700; color:var(--text-dim); text-decoration:none; transition:color 150ms ease;}
+  .back-link:hover{color:var(--text);}
+  .back-link .arr{display:inline-block; transition:transform 200ms var(--ease-out);}
+  @media (hover:hover) and (pointer:fine){ .back-link:hover .arr{transform:translateX(-3px);} }
+
+  .me-card{display:flex; align-items:center; gap:18px; flex-wrap:wrap; padding:20px 22px; border-radius:18px; background:var(--panel); border:1px solid var(--border); margin-bottom:22px;}
+  .me-card .av{width:60px; height:60px; border-radius:50%; object-fit:cover; background:var(--placeholder); border:2px solid var(--accent); flex-shrink:0;}
+  .me-card .who b{display:block; font-family:'Unbounded',sans-serif; font-size:22px; font-weight:700; line-height:1.2;}
+  .me-card .who small{display:block; font-size:13px; color:var(--text-dim); margin-top:3px;}
+  .me-stats{display:flex; margin-left:auto; border:1px solid var(--border); border-radius:14px; overflow:hidden;}
+  .me-stats > *{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-width:128px; min-height:76px; padding:10px 16px; border:none; border-left:1px solid var(--border); background:none; color:var(--text);}
+  .me-stats > *:first-child{border-left:none;}
+  .me-stats b{font:700 22px var(--f-cifra); line-height:1;}
+  .me-stats .gold{color:var(--gold);}
+  .me-stats small{font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.03em;}
+  .me-stats button{cursor:pointer; font:inherit; transition:background-color 200ms ease, transform 140ms var(--ease-out);}
+  .me-stats button:hover{background:rgba(61,255,210,.06);}
+  .me-stats button:active{transform:scale(0.97);}
+  .me-stats button svg{width:22px; height:22px; color:var(--accent);}
+
+  .tour-title{display:flex; align-items:baseline; gap:12px; margin:0 0 14px; font-family:'Unbounded',sans-serif; font-size:15px; font-weight:700; text-transform:uppercase;}
+  .tour-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent); align-self:center;}
+  .stages{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px; margin-bottom:38px;}
+  .stages > .stage:last-child:nth-child(odd){grid-column:1 / -1;}
+
+  .stage{position:relative; overflow:hidden; isolation:isolate; display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px;
+    min-height:212px; padding:20px 22px 18px; border-radius:16px; background:var(--panel); border:1px solid var(--border); color:var(--text); text-decoration:none;
+    transition:border-color 250ms ease, transform 200ms var(--ease-out), box-shadow 250ms ease;}
+  a.stage:active{transform:scale(0.985);}
+  @media (hover:hover) and (pointer:fine){
+    a.stage:hover{transform:translateY(-2px); border-color:rgba(61,255,210,.45); box-shadow:0 14px 34px rgba(0,0,0,.35);}
+    a.stage:hover .sonar circle{stroke:rgba(61,255,210,.22);}
+  }
+  .stage.open{border-color:rgba(61,255,210,.55);}
+  .stage.soon{background:linear-gradient(180deg, rgba(8,32,44,.6), var(--panel));}
+  /* Ondas de sonar del logo, a la derecha de la tarjeta */
+  .sonar{position:absolute; right:-70px; top:50%; width:300px; height:300px; transform:translateY(-50%); z-index:-1; pointer-events:none;}
+  .sonar circle{fill:none; stroke:rgba(120,220,210,.08); stroke-width:1.5; transition:stroke 300ms ease;}
+  .stage.open .sonar circle{stroke:rgba(61,255,210,.14);}
+  .stage.done .sonar circle{stroke:rgba(169,139,255,.14);}
+  /* Al abrir la portada, un pulso de sonar sale de la fase abierta (una sola vez) */
+  .stage.open .sonar .ping{stroke:rgba(61,255,210,.5); transform-origin:150px 150px; animation:ping 1400ms var(--ease-out) 300ms both;}
+  @keyframes ping{ from{transform:scale(0.3); opacity:1;} to{transform:scale(1.1); opacity:0;} }
+
+  .stage-top{align-self:stretch; display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .pill{display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:99px; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; border:1px solid var(--border); color:var(--text-dim);}
+  .pill .dot{width:7px; height:7px; border-radius:50%; background:currentColor;}
+  .pill.open{color:var(--accent); border-color:rgba(61,255,210,.5);}
+  .pill.closed{color:var(--gold-soft); border-color:rgba(255,181,71,.45);}
+  .pill.done{color:var(--medusa); border-color:rgba(169,139,255,.45);}
+  .stage-pts{font:600 13px var(--f-cifra); color:var(--text-dim);}
+  .stage-pts b{color:var(--gold);}
+  .stage h3{margin:auto 0 0; font-family:'Unbounded',sans-serif; font-size:26px; font-weight:700; line-height:1.15;}
+  .stage .sub{margin:0; font-size:14px; color:var(--text-dim);}
+  .stage .sub b{font-family:var(--f-cifra); color:var(--text); font-weight:600; white-space:nowrap;}
+  .prizes:empty, #notice:empty{display:none;}
+  .stage .cta{margin-top:6px; pointer-events:none;}
+  .stage .teams{display:flex; gap:6px; justify-content:center; margin-top:2px;}
+  .stage-prog{align-self:stretch; margin-top:auto; text-align:left;}
+  .stage-prog small{display:block; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; color:var(--text-soft); margin-bottom:6px;}
+  .stage-prog .track{height:6px; border-radius:99px; background:var(--panel-2); overflow:hidden;}
+  .stage-prog .track i{display:block; height:100%; background:var(--accent); transform-origin:left; transform:scaleX(var(--p,0)); transition:transform 700ms var(--ease-out);}
+  .stage-prog .track i.full{background:var(--green);}
+  .intro-hub .stage{animation:rise 420ms var(--ease-out) backwards; animation-delay:calc(var(--i,0) * 70ms);}
+  .intro-hub .stage-prog .track i{animation:fill 900ms var(--ease-out) 250ms backwards;}
+  @keyframes fill{ from{transform:scaleX(0);} }
+
+  /* Recompensas: una tabla por fase */
+  .rewards{border-radius:16px; background:var(--panel); border:1px solid var(--border); overflow:hidden;}
+  .rw{display:grid; grid-template-columns:minmax(150px,1.1fr) 1fr 1.3fr 1fr; gap:14px; align-items:center; padding:16px 20px; border-top:1px solid rgba(120,220,210,.07);}
+  .rw:first-child{border-top:none;}
+  .rw.head{padding-top:12px; padding-bottom:12px; font-size:12px; font-weight:600; color:var(--text-faint);}
+  .rw .ph b{display:block; font-size:15px;}
+  .rw .ph small{display:block; font-size:12.5px; color:var(--text-dim); margin-top:2px;}
+  .rw .val{display:flex; align-items:center; gap:8px; font-size:14px; color:var(--text-soft);}
+  .rw .val .ic{color:var(--gold); display:flex;}
+  .rw .val b{font-family:var(--f-cifra); color:var(--gold); font-weight:600;}
+  .rw .val.pz b{font-family:'Albert Sans',system-ui,sans-serif; color:var(--gold-soft);}
+  .rw .tbd{color:var(--text-faint); font-style:italic;}
+  .rewards-foot{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:14px 20px; background:var(--panel-2); font-size:13.5px; color:var(--text-dim);}
+  .rewards-foot a{margin-left:auto;}
+
+  /* Próximas fases (al final de una fase) */
+  .next-stages{display:flex; gap:12px; flex-wrap:wrap;}
+  .next-stage{display:flex; align-items:center; gap:12px; flex:1 1 260px; padding:14px 16px; border-radius:14px; background:var(--panel); border:1px dashed var(--border); color:var(--text-dim); font-size:13.5px; text-decoration:none;}
+  .next-stage b{display:block; color:var(--text); font-size:14.5px;}
+  .next-stage .ic{color:var(--text-faint); display:flex;}
+
+  @media (max-width:760px){
+    .stages{grid-template-columns:1fr;}
+    .me-stats{margin-left:0; width:100%;}
+    .me-stats > *{flex:1; min-width:0; padding:10px 8px;}
+    .rw{grid-template-columns:1fr 1fr; gap:10px 14px;}
+    .rw.head{display:none;}
+    .rw .ph{grid-column:1 / -1;}
+    .rw .val.none{display:none;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    a.stage:hover, a.stage:active, .me-stats button:active{transform:none;}
+    .stage.open .sonar .ping{animation:none; opacity:0;}
+    .intro-hub .stage{animation-name:fade-only;}
+    .intro-hub .stage-prog .track i{animation:none;}
+  }
+
   @media (max-width:860px){
     .prizes{grid-template-columns:1fr;}
     .links{display:none;}
@@ -330,8 +438,23 @@
   </header>
   <div id="loading" class="msg" role="status">Cargando…</div>
   <div id="empty" class="msg" hidden><b>Todavía no hay Pickems</b>Cuando la admin abra unos, aparecerán aquí.<br><a href="index.html">Volver al ranking</a></div>
+  <main id="hub" hidden>
+    <div id="me-card"></div>
+    <div id="tours"></div>
+    <section>
+      <h2 class="section-title"><span class="bar"></span>Recompensas</h2>
+      <div class="rewards" id="rewards"></div>
+    </section>
+    <section>
+      <h2 class="section-title"><span class="bar"></span>Clasificación general</h2>
+      <div class="card" style="overflow:hidden"><table>
+        <thead><tr><th>#</th><th>Participante</th><th class="num">Dientes</th><th class="num">Aciertos</th><th class="num hide-sm">Fases</th></tr></thead>
+        <tbody id="hub-board"></tbody>
+      </table></div>
+    </section>
+  </main>
   <main id="main" hidden>
-    <nav class="events" id="events" aria-label="Eventos" hidden></nav>
+    <nav id="events" aria-label="Pickems"></nav>
     <div id="hero"></div>
     <div class="prizes" id="prizes"></div>
     <div id="notice"></div>
@@ -348,6 +471,10 @@
       </table></div>
       <p class="note">Los dientes se suman a tu cartera cuando la admin carga el resultado de cada serie. “Pleno posible”: completó el bracket y no ha fallado ninguna serie de las que ya se jugaron.</p>
     </section>
+    <section id="next-sec" hidden>
+      <h2 class="section-title"><span class="bar"></span>Próximamente</h2>
+      <div class="next-stages" id="next-stages"></div>
+    </section>
   </main>
 </div>
 <script type="module">
@@ -357,7 +484,7 @@ import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { icono } from './assets/iconos.js';
 import { equipo } from './assets/equipos.js';
-import { createBracket, MIN_BET } from './assets/pickems.js';
+import { createBracket, MIN_BET, MAX_BET } from './assets/pickems.js';
 import { morph } from './assets/morph.js';
 
 createNavMenu({ current: 'pickems' });
@@ -370,6 +497,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&
 const $ = (id) => document.getElementById(id);
 const fmtN = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 const fechaEs = (iso) => new Date(iso).toLocaleString('es-ES', { timeZone: 'Europe/Madrid', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+const fechaDia = (iso) => new Date(iso).toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid', day: '2-digit', month: '2-digit', year: '2-digit' });
 const fechaCorta = (iso) => new Date(iso).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
 // Movimiento reducido: sin vuelos, sin desplazamientos ni conteos (los cambios de color y estado se mantienen)
@@ -390,7 +518,12 @@ let countdownTarget = null;
 
 const nameOf = (p) => st.profiles.get(p.id)?.display_name || p.riot_game_name || '?';
 const myPicks = () => new Map(st.picks.filter(p => p.player_id === st.me?.id).map(p => [p.match_id, p.team]));
-const isOpen = () => st.ev && !st.ev.finished_at && Date.now() < new Date(st.ev.locks_at).getTime();
+// Fase de un evento: 'soon' (aún no abre) · 'open' · 'closed' (se juega) · 'done' (finalizado)
+const phaseOf = (ev) => ev.finished_at ? 'done' : ev.opens_at && Date.now() < new Date(ev.opens_at).getTime() ? 'soon'
+  : Date.now() < new Date(ev.locks_at).getTime() ? 'open' : 'closed';
+const isOpen = () => st.ev && phaseOf(st.ev) === 'open';
+// "Worlds 2026 · Play-In" → torneo "Worlds 2026", fase "Play-In"
+const splitName = (n) => { const i = n.indexOf(' · '); return i < 0 ? { tour: '', stage: n } : { tour: n.slice(0, i), stage: n.slice(i + 3) }; };
 
 function logo(team) {
   const e = team ? equipo(team) : null;
@@ -412,10 +545,9 @@ async function load() {
   st.events = events ?? [];
   authMenu.render(session, st.players, profiles ?? []);
   $('loading').hidden = true;
-  if (!st.events.length) { $('empty').hidden = false; $('main').hidden = true; return; }
-  // Sin ?id: el evento sin finalizar que cierra antes; si no hay, el último.
-  const open = st.events.filter(e => !e.finished_at).sort((a, b) => new Date(a.locks_at) - new Date(b.locks_at))[0];
-  st.ev = (idParam && st.events.find(e => e.id === idParam)) || open || st.events[0];
+  if (!st.events.length) { $('empty').hidden = false; $('main').hidden = true; $('hub').hidden = true; return; }
+  st.ev = idParam ? st.events.find(e => e.id === idParam) ?? null : null;
+  if (!st.ev) return loadHub();   // sin ?id (o uno que no existe): la portada
   const { data: matches } = await supabase.from('pickem_matches').select('*').eq('event_id', st.ev.id).order('sort').order('id');
   st.matches = matches ?? [];
   br = createBracket(st.matches);
@@ -429,19 +561,28 @@ async function load() {
   st.picks = pending ? [...(picks ?? []).filter(p => p.player_id !== st.me?.id), ...st.picks.filter(p => p.player_id === st.me?.id)] : (picks ?? []);
   st.bets = bets ?? [];
   st.balance = bal?.balance ?? 0;
-  document.title = `${st.ev.name} · Pickems · SharkTracker`;
+  document.title = `${splitName(st.ev.name).stage} · Pickems · SharkTracker`;
   $('main').hidden = false;
   draw();
 }
 
 function draw() {
-  drawEvents(); drawHero(); drawPrizes(); drawNotice(); drawBracket(); drawBets(); drawBoard();
+  drawEvents(); drawHero(); drawPrizes(); drawNotice(); drawBracket(); drawBets(); drawBoard(); drawNext();
   st.drawn = true;
 }
 
 function drawEvents() {
-  $('events').hidden = st.events.length < 2;
-  morph($('events'), st.events.map(e => `<a data-key="e${e.id}" href="pickems.html?id=${e.id}" class="${e.id === st.ev.id ? 'on' : ''}">${esc(e.name)}</a>`).join(''));
+  morph($('events'), `<a class="back-link" href="pickems.html"><span class="arr" aria-hidden="true">←</span> Todos los Pickems</a>`);
+}
+
+// Al final de una fase: las que vienen después (y se abren pronto)
+function drawNext() {
+  const tour = splitName(st.ev.name).tour;
+  const next = st.events.filter(e => e.id !== st.ev.id && phaseOf(e) === 'soon' && splitName(e.name).tour === tour)
+    .sort((a, b) => new Date(a.opens_at) - new Date(b.opens_at));
+  $('next-sec').hidden = !next.length;
+  morph($('next-stages'), next.map(e => `<a class="next-stage" data-key="n${e.id}" href="pickems.html?id=${e.id}"><span class="ic">${icono('reloj_arena', { size: 22 })}</span>
+    <span><b>${esc(splitName(e.name).stage)}</b>Se abren las elecciones el ${fechaEs(e.opens_at)}</span></a>`).join(''));
 }
 
 function countParts(diff) {
@@ -450,18 +591,19 @@ function countParts(diff) {
 }
 
 function drawHero() {
-  const open = isOpen(), ev = st.ev;
-  countdownTarget = open ? new Date(ev.locks_at).getTime() : null;
+  const ev = st.ev, ph = phaseOf(ev), open = ph === 'open';
+  countdownTarget = open ? new Date(ev.locks_at).getTime() : ph === 'soon' ? new Date(ev.opens_at).getTime() : null;
   const c = countParts(Math.max(0, (countdownTarget ?? 0) - Date.now()));
-  const kicker = ev.finished_at ? `<span class="kicker done">${icono('trofeo', { size: 14 })} Finalizado</span>`
+  const kicker = ph === 'done' ? `<span class="kicker done">${icono('trofeo', { size: 14 })} Finalizado</span>`
     : open ? '<span class="kicker open">● Bracket abierto</span>'
+    : ph === 'soon' ? `<span class="kicker closed">${icono('reloj_arena', { size: 14 })} Próximamente</span>`
     : `<span class="kicker closed">${icono('candado', { size: 14 })} Bracket cerrado · se juega</span>`;
   morph($('hero'), `<div class="hero">
     ${kicker}
     <h2 class="ev-name">${esc(ev.name)}</h2>
-    <p class="ev-sub">${open ? 'Cierra el' : 'Cerró el'} <b>${fechaEs(ev.locks_at)}</b> (hora de España)</p>
+    <p class="ev-sub">${ph === 'soon' ? `Se abre el <b>${fechaEs(ev.opens_at)}</b> y cierra el` : open ? 'Cierra el' : 'Cerró el'} <b>${fechaEs(ev.locks_at)}</b> (hora de España)</p>
     <p class="ev-sub">${st.matches.length} series · ${new Set(st.picks.map(p => p.player_id)).size} participantes</p>
-    ${open ? `<div class="count" id="count" aria-label="Tiempo para el cierre">
+    ${countdownTarget ? `<div class="count" id="count" aria-label="${open ? 'Tiempo para el cierre' : 'Tiempo para la apertura'}">
       <div><b data-u="d">${c.d}</b><small>días</small></div><div><b data-u="h">${c.h}</b><small>horas</small></div>
       <div><b data-u="m">${c.m}</b><small>min</small></div><div><b data-u="s">${c.s}</b><small>seg</small></div></div>` : ''}
   </div>`);
@@ -469,19 +611,22 @@ function drawHero() {
 
 function drawPrizes() {
   const pts = st.matches.map(m => m.points);
+  if (!pts.length) { morph($('prizes'), ''); return; }
   const total = pts.reduce((a, b) => a + b, 0);
   const rango = pts.length ? (Math.min(...pts) === Math.max(...pts) ? `+${pts[0]}` : `+${Math.min(...pts)} a +${Math.max(...pts)}`) : '';
   const p = (cls, ic, t, d) => `<div class="prize ${cls}"><span class="ico">${icono(ic, { size: 22 })}</span><div><b>${t}</b><small>${d}</small></div></div>`;
   morph($('prizes'),
     p('', 'check', `Cada acierto: ${rango} 🦷`, `Según la ronda (lo ves en cada serie). Bracket perfecto: ${total} 🦷.`) +
-    p('skin', 'corona', 'Skin Definitiva', 'Si aciertas el ganador de todas las series.') +
-    (st.matches.some(m => m.bets_enabled) ? p('', 'dado', 'Apuesta en la final', 'Apuesta tus dientes cuando se sepan los finalistas. Los que aciertan se reparten el bote.') : ''));
+    p('skin', 'corona', esc(st.ev.perfect_prize), 'Si aciertas el ganador de todas las series.') +
+    (st.matches.some(m => m.bets_enabled) ? p('', 'dado', 'Apuesta en la final', `Hasta ${MAX_BET} 🦷 cuando se sepan los finalistas. Los que aciertan se reparten el bote.`) : ''));
 }
 
 function drawNotice() {
   const open = isOpen();
   let html = '';
-  if (open && !st.session) {
+  if (phaseOf(st.ev) === 'soon') {
+    html = `<div class="notice">${icono('reloj_arena', { size: 20 })}<span><b>Pronto se abren estos Pickems.</b> Las elecciones se abren el ${fechaEs(st.ev.opens_at)}${st.matches.length ? '' : '; las series se publican al abrir'}.</span></div>`;
+  } else if (open && !st.session) {
     html = `<div class="notice">${icono('candado', { size: 20 })}<span><b>Inicia sesión para armar tu bracket.</b> Sin cuenta puedes ver lo que eligió cada uno.</span><a class="btn" href="login.html"><span class="lbl">Iniciar sesión</span></a></div>`;
   } else if (open && !st.me) {
     html = `<div class="notice">${icono('enlace', { size: 20 })}<span><b>Vincula tu cuenta de LoL</b> para jugar: los dientes van a tu perfil.</span><a class="btn" href="login.html"><span class="lbl">Vincular cuenta</span></a></div>`;
@@ -556,7 +701,7 @@ function drawBracket() {
   // Antes de redibujar: qué equipo había en cada lado y qué series ya daban dientes
   const before = new Map([...$('bracket').querySelectorAll('.slot[data-key]')].map(s => [s.dataset.key, s.dataset.team]));
   const gotBefore = new Set([...$('bracket').querySelectorAll('[data-got="true"]')].map(g => g.dataset.gain));
-  if (!st.matches.length) { morph($('bracket'), '<div class="card dim" style="padding:18px">La admin todavía no ha cargado las series.</div>'); return; }
+  if (!st.matches.length) { morph($('bracket'), `<div class="card dim" style="padding:18px">${phaseOf(st.ev) === 'soon' ? 'Las series se publican cuando se abran las elecciones.' : 'La admin todavía no ha cargado las series.'}</div>`); return; }
   const upper = st.matches.filter(m => m.bracket !== 'inferior'), lower = st.matches.filter(m => m.bracket === 'inferior');
   morph($('bracket'), `<div class="bracket" data-key="up"><svg class="links" data-morph-skip aria-hidden="true"></svg>${columns(upper, 0)}</div>
     ${lower.length ? `<h3 class="lower-title" data-key="lt">Cuadro inferior</h3><div class="bracket lower" data-key="low"><svg class="links" data-morph-skip aria-hidden="true"></svg>${columns(lower, upper.length)}</div>` : ''}`);
@@ -779,14 +924,14 @@ function betCard(m) {
       <span class="bet-pot" data-pot="${pot}">Bote: 🦷 <span data-morph-skip data-n="${pot}">${fmtN(pot)}</span></span></div>
     <div class="bet-teams">${teamBox(t[0], 1)}${teamBox(t[1], 2)}</div>
     ${pot ? `<div class="bet-bar" aria-hidden="true"><span class="a" style="--w:${s1 || 0.0001}"></span><span class="b" style="--w:${s2 || 0.0001}"></span></div>` : ''}
-    ${canBet ? `<div class="bet-form"><input type="number" inputmode="numeric" min="${MIN_BET}" max="${st.balance + (mine?.amount ?? 0)}" step="1" id="bet-amt-${m.id}" value="${mine?.amount ?? ''}" placeholder="🦷 mín. ${MIN_BET}" aria-label="Dientes a apostar">
+    ${canBet ? `<div class="bet-form"><input type="number" inputmode="numeric" min="${MIN_BET}" max="${Math.min(MAX_BET, st.balance + (mine?.amount ?? 0))}" step="1" id="bet-amt-${m.id}" value="${mine?.amount ?? ''}" placeholder="🦷 ${MIN_BET}–${MAX_BET}" aria-label="Dientes a apostar">
         <button class="btn ${busy ? 'busy' : ''}" type="button" data-bet-go="${m.id}" ${sel && !busy ? '' : 'disabled'}><span class="lbl">${mine ? 'Cambiar apuesta' : 'Apostar'}</span></button>
         ${mine ? `<button class="btn ghost" type="button" data-bet-off="${m.id}" ${busy ? 'disabled' : ''}><span class="lbl">Retirar</span></button>` : ''}
         <span class="bal">Tienes <b>🦷 <span data-morph-skip data-n="${st.balance + (mine?.amount ?? 0)}">${fmtN(st.balance + (mine?.amount ?? 0))}</span></b>${mine ? ' (contando lo apostado)' : ''}</span></div>`
       : state === 'open' && !st.me ? `<p class="note">${st.session ? 'Vincula tu cuenta de LoL para apostar.' : '<a href="login.html">Inicia sesión</a> para apostar.'}</p>` : ''}
     ${mine && state !== 'done' ? `<div class="bet-mine">Tu apuesta: <b>🦷 ${fmtN(mine.amount)} a ${esc(mine.team)}</b>${mult(mine.team) ? ` · si gana, te llevas unos <b>🦷 ${fmtN(Math.floor(mine.amount * mult(mine.team)))}</b> con el bote de ahora` : ''}.</div>` : ''}
     ${rows ? `<div class="bet-list">${rows}</div>` : ''}
-    <p class="note">Los dientes se descuentan al apostar. Si tu equipo gana, recuperas lo tuyo y te repartes lo apostado al otro equipo en proporción a tu apuesta. Si nadie apuesta al otro lado, se devuelve todo. Cierra al empezar la serie.</p>
+    <p class="note">Los dientes se descuentan al apostar. Si tu equipo gana, recuperas lo tuyo y te repartes lo apostado al otro equipo en proporción a tu apuesta. Si nadie apuesta al otro lado, se devuelve todo. Mínimo ${MIN_BET} y máximo ${MAX_BET} 🦷 por persona. Cierra al empezar la serie.</p>
   </div>`;
 }
 
@@ -812,6 +957,7 @@ $('bets-sec').addEventListener('click', async (e) => {
   const team = st.betTeam.get(mid) ?? mine?.team;
   const amount = off ? 0 : parseInt($('bet-amt-' + mid)?.value, 10);
   if (!off && !(amount >= MIN_BET)) { authMenu.toast(`La apuesta mínima es de ${MIN_BET} dientes.`, true); $('bet-amt-' + mid)?.focus(); return; }
+  if (!off && amount > MAX_BET) { authMenu.toast(`La apuesta máxima es de ${MAX_BET} dientes.`, true); $('bet-amt-' + mid)?.focus(); return; }
   st.betBusy.add(mid); drawBets();
   const { error } = await supabase.rpc('place_pickem_bet', { p_match: mid, p_team: team, p_amount: amount });
   st.betBusy.delete(mid);
@@ -823,6 +969,7 @@ $('bets-sec').addEventListener('click', async (e) => {
 
 // ── Clasificación (las filas se deslizan a su puesto nuevo) ──
 function drawBoard() {
+  $('board-sec').hidden = !st.matches.length;
   const byId = new Map(st.players.map(p => [p.id, p]));
   const total = st.matches.length;
   const rows = new Map();
@@ -859,11 +1006,174 @@ function drawBoard() {
   }
 }
 
+// ============================================================
+// Portada de Pickems (sin ?id)
+// ============================================================
+const hub = { matches: [], picks: [], bets: [], brs: new Map(), drawn: false };
+const SONAR = `<svg class="sonar" viewBox="0 0 300 300" aria-hidden="true"><circle cx="150" cy="150" r="38"/><circle cx="150" cy="150" r="72"/>
+  <circle cx="150" cy="150" r="108"/><circle cx="150" cy="150" r="144"/><circle class="ping" cx="150" cy="150" r="144" style="opacity:0"/></svg>`;
+const SHARE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>';
+
+async function loadHub() {
+  const ids = st.events.map(e => e.id);
+  const [{ data: matches }, { data: bets }] = await Promise.all([
+    supabase.from('pickem_matches').select('*').in('event_id', ids).order('sort').order('id'),
+    supabase.from('pickem_bets').select('match_id, player_id, amount'),
+  ]);
+  hub.matches = matches ?? [];
+  const mids = hub.matches.map(m => m.id);
+  const { data: picks } = mids.length ? await supabase.from('pickem_picks').select('*').in('match_id', mids) : { data: [] };
+  hub.picks = picks ?? [];
+  hub.bets = bets ?? [];
+  hub.brs = new Map(st.events.map(e => [e.id, createBracket(hub.matches.filter(m => m.event_id === e.id))]));
+  document.title = 'Pickems · SharkTracker';
+  $('main').hidden = true;
+  $('hub').hidden = false;
+  drawHub();
+}
+
+// Dientes y aciertos de cada jugador en cada fase (solo aciertos del bracket; las apuestas van aparte)
+function hubScores() {
+  const byPlayer = new Map();
+  for (const p of hub.picks) {
+    const m = hub.matches.find(x => x.id === p.match_id); if (!m) continue;
+    const win = hub.brs.get(m.event_id).winner(m);
+    const r = byPlayer.get(p.player_id) ?? { teeth: 0, ok: 0, events: new Set(), byEvent: new Map() };
+    const e = r.byEvent.get(m.event_id) ?? { teeth: 0, picks: 0 };
+    e.picks++; r.events.add(m.event_id);
+    if (win && p.team === win) { r.ok++; r.teeth += m.points; e.teeth += m.points; }
+    r.byEvent.set(m.event_id, e);
+    byPlayer.set(p.player_id, r);
+  }
+  return byPlayer;
+}
+
+function drawHub() {
+  const scores = hubScores();
+  const ranking = [...scores.entries()].filter(([id]) => st.players.some(p => p.id === id))
+    .sort((a, b) => b[1].teeth - a[1].teeth || b[1].ok - a[1].ok);
+  const mine = st.me ? scores.get(st.me.id) : null;
+  // Puesto solo cuando ya hay dientes en juego (con todos a 0 no hay ranking que valga)
+  const pos = st.me && ranking[0]?.[1].teeth > 0 ? ranking.findIndex(([id]) => id === st.me.id) : -1;
+
+  // Tu tarjeta
+  morph($('me-card'), st.me ? `<div class="me-card">
+      <img class="av" src="${iconOr1(st.me.icon_id)}" alt="" onerror="${ICON_ONERROR}">
+      <div class="who"><b>${esc(nameOf(st.me))}</b><small>Tus Pickems</small></div>
+      <div class="me-stats">
+        <div><b class="gold">🦷 <span data-morph-skip data-n="${mine?.teeth ?? 0}">${mine?.teeth ?? 0}</span></b><small>Dientes ganados</small></div>
+        <div><b>${pos >= 0 ? `#${pos + 1}` : '–'}</b><small>Puesto en el grupo</small></div>
+        <button type="button" id="hub-share">${SHARE_SVG}<small>Compartir</small></button>
+      </div></div>`
+    : `<div class="me-card"><div class="who"><b>Pickems</b><small>${st.session ? 'Vincula tu cuenta de LoL para jugar: los dientes van a tu perfil.' : 'Inicia sesión para armar tus brackets. Sin cuenta puedes ver lo que eligió cada uno.'}</small></div>
+      <div class="me-stats"><a href="login.html" style="text-decoration:none">${icono('enlace', { size: 22 })}<small>${st.session ? 'Vincular cuenta' : 'Iniciar sesión'}</small></a>
+      <button type="button" id="hub-share">${SHARE_SVG}<small>Compartir</small></button></div></div>`);
+
+  // Fases agrupadas por torneo, en orden de cierre
+  const tours = new Map();
+  for (const e of [...st.events].sort((a, b) => new Date(a.locks_at) - new Date(b.locks_at))) {
+    const t = splitName(e.name).tour || 'Pickems';
+    if (!tours.has(t)) tours.set(t, []);
+    tours.get(t).push(e);
+  }
+  let i = 0;
+  morph($('tours'), [...tours.entries()].map(([tour, evs]) => `<section data-key="t${esc(tour)}">
+      <h2 class="tour-title"><span class="bar"></span>${esc(tour)}</h2>
+      <div class="stages">${evs.map(e => stageCard(e, mine, i++)).join('')}</div></section>`).join(''));
+  tweenNumbers($('me-card'));
+  if (!hub.drawn && !reduced) { $('tours').classList.add('intro-hub'); setTimeout(() => $('tours').classList.remove('intro-hub'), 1400); }
+
+  drawRewards();
+
+  // Clasificación general
+  const total = st.events.length;
+  morph($('hub-board'), ranking.map(([id, r], k) => { const pl = st.players.find(p => p.id === id);
+    return `<tr data-key="h${id}" class="${k === 0 && r.teeth > 0 ? 'first' : ''}"><td class="pos">${k + 1}</td>
+      <td><div class="pl"><img loading="lazy" decoding="async" src="${iconOr1(pl.icon_id)}" alt="" onerror="${ICON_ONERROR}"><a href="perfil.html?jugador=${encodeURIComponent(pl.id)}">${esc(nameOf(pl))}</a></div></td>
+      <td class="num"><span class="teeth">🦷 <span data-morph-skip data-n="${r.teeth}">${r.teeth}</span></span></td>
+      <td class="num">${r.ok}</td><td class="num hide-sm">${r.events.size}/${total}</td></tr>`; }).join('')
+    || '<tr><td colspan="5" class="dim" style="text-align:center;padding:22px;">Nadie ha jugado todavía.</td></tr>');
+  tweenNumbers($('hub-board'));
+  hub.drawn = true;
+}
+
+function stageCard(e, mine, i) {
+  const ph = phaseOf(e), br = hub.brs.get(e.id);
+  const ms = hub.matches.filter(m => m.event_id === e.id);
+  const max = ms.reduce((a, m) => a + m.points, 0);
+  const my = mine?.byEvent.get(e.id);
+  const myPicks = st.me ? hub.picks.filter(p => p.player_id === st.me.id && ms.some(m => m.id === p.match_id)).length : 0;
+  const played = ms.filter(br.hasResult).length;
+  const pill = { soon: `<span class="pill">${icono('reloj_arena', { size: 13 })} Próximamente</span>`, open: '<span class="pill open"><span class="dot"></span>Abierto</span>',
+                 closed: `<span class="pill closed">${icono('candado', { size: 13 })} En juego</span>`, done: `<span class="pill done">${icono('trofeo', { size: 13 })} Finalizado</span>` }[ph];
+  const sub = ph === 'soon' ? `Apertura de las elecciones: <b>${fechaDia(e.opens_at)} – ${fechaDia(e.locks_at)}</b>`
+    : ph === 'open' ? `Cierre de elecciones: <b data-countdown="${new Date(e.locks_at).getTime()}">${hubCount(new Date(e.locks_at).getTime())}</b>`
+    : ph === 'closed' ? `${played} de ${ms.length} series jugadas`
+    : `Finalizado · ${my ? `ganaste <b>${my.teeth} 🦷</b>` : 'no participaste'}`;
+  const cta = ph === 'open' ? (st.me ? (myPicks === ms.length && ms.length ? 'Revisar selección' : 'Realizar selección') : 'Ver elecciones')
+    : ph === 'soon' ? (ms.length ? 'Ver series' : '') : 'Ver resultados';
+  const teams = ph !== 'soon' && ms.length ? [...new Set(ms.flatMap(m => [m.team1, m.team2]).filter(Boolean))] : [];
+  const prog = st.me && ms.length && ph !== 'soon'
+    ? `<div class="stage-prog"><small>${myPicks}/${ms.length} elecciones realizadas</small><div class="track"><i class="${myPicks === ms.length ? 'full' : ''}" style="--p:${myPicks / ms.length}"></i></div></div>` : '';
+  const inner = `${SONAR}<div class="stage-top">${pill}<span class="stage-pts">${max ? `<b>${my?.teeth ?? 0}</b> / ${max} 🦷` : '— 🦷'}</span></div>
+    <h3>${esc(splitName(e.name).stage)}</h3><p class="sub">${sub}</p>
+    ${teams.length ? `<div class="teams">${teams.map(t => logo(t)).join('')}</div>` : ''}
+    ${cta ? `<span class="btn cta"><span class="lbl">${cta}</span></span>` : '<p class="sub">Pronto se abren estos Pickems.</p>'}${prog}`;
+  const attrs = `class="stage ${ph}" data-key="st${e.id}" style="--i:${i}"`;
+  return cta ? `<a ${attrs} href="pickems.html?id=${e.id}">${inner}</a>` : `<div ${attrs}>${inner}</div>`;
+}
+
+function hubCount(target) {
+  const c = countParts(Math.max(0, target - Date.now()));
+  return `${c.d}:${c.h}:${c.m}:${c.s}`;
+}
+function tickHub() {
+  for (const el of document.querySelectorAll('[data-countdown]')) {
+    const target = Number(el.dataset.countdown);
+    if (target <= Date.now()) { drawHub(); return; }   // cerró: la tarjeta pasa a "En juego"
+    el.textContent = hubCount(target);
+  }
+  // Una fase que llega a su apertura (o a su cierre) cambia sola de tarjeta
+  const sig = st.events.map(phaseOf).join();
+  if (hub.sig && hub.sig !== sig) drawHub();
+  hub.sig = sig;
+}
+
+function drawRewards() {
+  const evs = [...st.events].sort((a, b) => new Date(a.locks_at) - new Date(b.locks_at));
+  morph($('rewards'), `<div class="rw head"><span>Fase</span><span>Por aciertos</span><span>Pleno (aciertas todo)</span><span>Extra</span></div>`
+    + evs.map(e => {
+      const ms = hub.matches.filter(m => m.event_id === e.id);
+      const max = ms.reduce((a, m) => a + m.points, 0);
+      const pts = [...new Set(ms.map(m => m.points))].sort((a, b) => a - b);
+      const ph = phaseOf(e);
+      const bets = ms.some(m => m.bets_enabled);
+      return `<div class="rw" data-key="rw${e.id}">
+        <div class="ph"><b>${esc(splitName(e.name).stage)}</b><small>${ph === 'soon' ? `Se abre el ${fechaDia(e.opens_at)}` : ph === 'open' ? `Cierra el ${fechaDia(e.locks_at)}` : ph === 'closed' ? 'En juego' : 'Finalizado'}</small></div>
+        <div class="val">${max ? `<span class="ic">${icono('diente', { size: 18 })}</span><span>Hasta <b>${max}</b> (${pts.length > 1 ? `${pts[0]}–${pts[pts.length - 1]}` : pts[0]} por acierto)</span>` : '<span class="tbd">Se anuncia al abrir</span>'}</div>
+        <div class="val pz"><span class="ic">${icono('corona', { size: 18 })}</span><b>${esc(e.perfect_prize)}</b></div>
+        <div class="val ${bets ? '' : 'none'}">${bets ? `<span class="ic">${icono('dado', { size: 18 })}</span><span>Apuesta en la final, hasta <b>${MAX_BET}</b></span>` : '<span class="tbd">—</span>'}</div>
+      </div>`; }).join('')
+    + `<div class="rewards-foot" data-key="rwf"><span>Los dientes se suman a tu cartera al cargarse cada resultado y se gastan en la tienda. Los premios reales los entrega la admin.</span>
+        <a class="btn ghost" href="tienda.html"><span class="lbl">Ir a la tienda</span></a></div>`);
+}
+
+$('hub').addEventListener('click', async (e) => {
+  if (!e.target.closest('#hub-share')) return;
+  const url = new URL('pickems.html', location.href).href;
+  const text = st.me ? `Mis Pickems en SharkTracker: 🦷 ${hubScores().get(st.me.id)?.teeth ?? 0}. ¿Me ganas?` : 'Pickems de SharkTracker';
+  try {
+    if (navigator.share) await navigator.share({ title: 'Pickems · SharkTracker', text, url });
+    else { await navigator.clipboard.writeText(`${text} ${url}`); authMenu.toast('🔗 Enlace copiado'); }
+  } catch { /* compartir cancelado */ }
+});
+
 function tick() {
+  if (!$('hub').hidden) return tickHub();
   if (!countdownTarget) return;
   const el = $('count'); if (!el) return;
   const diff = countdownTarget - Date.now();
-  if (diff <= 0) { countdownTarget = null; draw(); return; }   // llegó el cierre: se bloquea el bracket
+  if (diff <= 0) { countdownTarget = null; draw(); return; }   // llegó la apertura o el cierre
   const c = countParts(diff);
   for (const u of ['d', 'h', 'm', 's']) { const b = el.querySelector(`[data-u="${u}"]`); if (b.textContent !== String(c[u])) b.textContent = c[u]; }
 }
