@@ -16,6 +16,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Albert+Sans:wght@400;500;600;700;800&family=Red+Hat+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;}
+  .dt{display:inline-block; vertical-align:-0.18em; color:var(--gold); flex-shrink:0;}
   [hidden]{display:none !important;}
   body{
     margin:0; min-height:100vh; color:var(--text); font-family:'Albert Sans',system-ui,sans-serif;
@@ -527,6 +528,8 @@ const iconOr1 = (id) => profileIconUrl(id) ?? profileIconUrl(1);
 const ICON_ONERROR = `this.onerror=null;this.src='${profileIconUrl(1)}';`;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $ = (id) => document.getElementById(id);
+// Ícono oficial de los dientes (moneda con diente), el mismo de la tienda
+const DT = (size = 14) => icono('diente', { size, clase: 'dt' });
 const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
 const fmtN = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 const fechaEs = (iso) => new Date(iso).toLocaleString('es-ES', { timeZone: 'Europe/Madrid', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
@@ -650,9 +653,9 @@ function drawPrizes() {
   const rango = pts.length ? (Math.min(...pts) === Math.max(...pts) ? `+${pts[0]}` : `+${Math.min(...pts)} a +${Math.max(...pts)}`) : '';
   const p = (cls, ic, t, d) => `<div class="prize ${cls}"><span class="ico">${icono(ic, { size: 22 })}</span><div><b>${t}</b><small>${d}</small></div></div>`;
   morph($('prizes'),
-    p('', 'check', `Cada acierto: ${rango} 🦷`, `Según la ronda (lo ves en cada serie). Bracket perfecto: ${total} 🦷.`) +
+    p('', 'check', `Cada acierto: ${rango} ${DT()}`, `Según la ronda (lo ves en cada serie). Bracket perfecto: ${total} ${DT()}.`) +
     p('skin', 'corona', esc(st.ev.perfect_prize), 'Si aciertas el ganador de todas las series.') +
-    (st.matches.some(m => m.bets_enabled) ? p('', 'dado', 'Apuesta en la final', `Hasta ${MAX_BET} 🦷 cuando se sepan los finalistas. Los que aciertan se reparten el bote.`) : ''));
+    (st.matches.some(m => m.bets_enabled) ? p('', 'dado', 'Apuesta en la final', `Hasta ${MAX_BET} ${DT()} cuando se sepan los finalistas. Los que aciertan se reparten el bote.`) : ''));
 }
 
 function drawNotice() {
@@ -710,7 +713,7 @@ function matchCard(m, i) {
     .map(({ v, pl }) => `<a class="vote ${win ? (v.team === win ? 'ok' : 'bad') : ''}" data-key="v${pl.id}" href="perfil.html?jugador=${encodeURIComponent(pl.id)}">
       <img loading="lazy" decoding="async" src="${iconOr1(pl.icon_id)}" alt="" onerror="${ICON_ONERROR}">${esc(nameOf(pl))}<span>${esc(equipo(v.team)?.code ?? v.team)}</span></a>`).join('');
   return `<article class="match ${pick ? 'picked' : ''}" data-key="m${m.id}" data-match="${m.id}" style="--i:${i}">${slot(0)}${slot(1)}
-    <div class="m-foot"><span class="gain ${gainCls}" data-gain="${m.id}" data-got="${got}" title="Dientes por acertar esta serie">+${m.points} 🦷</span>
+    <div class="m-foot"><span class="gain ${gainCls}" data-gain="${m.id}" data-got="${got}" title="Dientes por acertar esta serie">+${m.points} ${DT()}</span>
       <span>BO${m.best_of}${m.starts_at ? ' · ' + fechaCorta(m.starts_at) : ''}</span>${lostPick}
       ${votes.length ? `<details><summary>${votes.length} ${votes.length === 1 ? 'voto' : 'votos'} <span class="chev" aria-hidden="true">▾</span></summary><div class="votes">${list}</div></details>` : ''}</div>
   </article>`;
@@ -723,7 +726,7 @@ function columns(list, offset) {
     const ms = list.filter(m => m.col === c);
     const labels = [...new Set(ms.map(m => m.label).filter(Boolean))];
     const pts = [...new Set(ms.map(m => m.points))];
-    return `<div class="bcol" data-key="c${c}"><div class="bcol-head"><b>${esc(labels.join(' / ') || 'Ronda ' + c)}</b><small>+${pts.join('/')} 🦷 por acierto</small></div>
+    return `<div class="bcol" data-key="c${c}"><div class="bcol-head"><b>${esc(labels.join(' / ') || 'Ronda ' + c)}</b><small>+${pts.join('/')} ${DT()} por acierto</small></div>
       <div class="bcol-body">${ms.map(m => matchCard(m, i++)).join('')}</div></div>`;
   }).join('');
 }
@@ -934,11 +937,11 @@ function betCard(m) {
   const sel = st.betTeam.get(m.id) ?? mine?.team ?? null;
   const canBet = state === 'open' && !!st.me;
   const busy = st.betBusy.has(m.id);
-  // Cuánto devuelve cada 🦷 apostado a ese equipo si gana (con el bote de ahora)
+  // Cuánto devuelve cada diente apostado a ese equipo si gana (con el bote de ahora)
   const mult = (team) => { const w = sum(team); return w ? (pot / w) : null; };
   const stateTxt = { waiting: 'Se abre cuando se conozcan los finalistas', open: '● Abierta', closed: 'Cerrada · se juega', done: 'Terminada' }[state];
   const teamBox = (team, k) => {
-    const inner = `${logo(team)}<span class="nm">${team ? esc(team) : 'Por definir'}<small>🦷 <span data-morph-skip data-n="${sum(team)}">${fmtN(sum(team))}</span> apostados</small></span>
+    const inner = `${logo(team)}<span class="nm">${team ? esc(team) : 'Por definir'}<small>${DT()} <span data-morph-skip data-n="${sum(team)}">${fmtN(sum(team))}</span> apostados</small></span>
       ${team && mult(team) ? `<span class="mult" title="Cada diente apostado a este equipo devuelve esto si gana" data-morph-skip data-n="${mult(team).toFixed(4)}" data-fmt="x">×${mult(team).toFixed(2)}</span>` : ''}`;
     const cls = `${team && sel === team ? 'sel' : ''} ${win && team === win ? 'won' : ''}`;
     return canBet && team ? `<button type="button" class="bet-team ${cls}" data-key="bt${k}" data-bet-team="${esc(team)}" data-m="${m.id}" aria-pressed="${sel === team}">${inner}</button>`
@@ -951,21 +954,21 @@ function betCard(m) {
     const p = payout(b);
     return `<div class="bet-row" data-key="br${pl.id}"><img loading="lazy" decoding="async" src="${iconOr1(pl.icon_id)}" alt="" onerror="${ICON_ONERROR}">
       <a href="perfil.html?jugador=${encodeURIComponent(pl.id)}">${esc(nameOf(pl))}</a><span class="tm">→ ${esc(b.team)}</span>
-      <span class="amt">🦷 ${fmtN(b.amount)}</span>${p == null ? '' : `<span class="res ${p > b.amount ? 'win' : p < b.amount ? 'lose' : ''}">${p > b.amount ? '+' + fmtN(p - b.amount) : p < b.amount ? '−' + fmtN(b.amount) : 'devuelta'}</span>`}</div>`; }).join('');
+      <span class="amt">${DT()} ${fmtN(b.amount)}</span>${p == null ? '' : `<span class="res ${p > b.amount ? 'win' : p < b.amount ? 'lose' : ''}">${p > b.amount ? '+' + fmtN(p - b.amount) : p < b.amount ? '−' + fmtN(b.amount) : 'devuelta'}</span>`}</div>`; }).join('');
   const s1 = sum(t[0]), s2 = sum(t[1]);
   return `<div class="card bet" data-key="bet${m.id}" data-bet="${m.id}">
     <div class="bet-head"><b>${esc(m.label ?? 'Apuesta')}</b><span class="bet-state ${state === 'open' ? 'open' : state === 'done' ? 'done' : ''}">${stateTxt}</span>
-      <span class="bet-pot" data-pot="${pot}">Bote: 🦷 <span data-morph-skip data-n="${pot}">${fmtN(pot)}</span></span></div>
+      <span class="bet-pot" data-pot="${pot}">Bote: ${DT()} <span data-morph-skip data-n="${pot}">${fmtN(pot)}</span></span></div>
     <div class="bet-teams">${teamBox(t[0], 1)}${teamBox(t[1], 2)}</div>
     ${pot ? `<div class="bet-bar" aria-hidden="true"><span class="a" style="--w:${s1 || 0.0001}"></span><span class="b" style="--w:${s2 || 0.0001}"></span></div>` : ''}
-    ${canBet ? `<div class="bet-form"><input type="number" inputmode="numeric" min="${MIN_BET}" max="${Math.min(MAX_BET, st.balance + (mine?.amount ?? 0))}" step="1" id="bet-amt-${m.id}" value="${mine?.amount ?? ''}" placeholder="🦷 ${MIN_BET}–${MAX_BET}" aria-label="Dientes a apostar">
+    ${canBet ? `<div class="bet-form"><input type="number" inputmode="numeric" min="${MIN_BET}" max="${Math.min(MAX_BET, st.balance + (mine?.amount ?? 0))}" step="1" id="bet-amt-${m.id}" value="${mine?.amount ?? ''}" placeholder="${MIN_BET}–${MAX_BET} dientes" aria-label="Dientes a apostar">
         <button class="btn ${busy ? 'busy' : ''}" type="button" data-bet-go="${m.id}" ${sel && !busy ? '' : 'disabled'}><span class="lbl">${mine ? 'Cambiar apuesta' : 'Apostar'}</span></button>
         ${mine ? `<button class="btn ghost" type="button" data-bet-off="${m.id}" ${busy ? 'disabled' : ''}><span class="lbl">Retirar</span></button>` : ''}
-        <span class="bal">Tienes <b>🦷 <span data-morph-skip data-n="${st.balance + (mine?.amount ?? 0)}">${fmtN(st.balance + (mine?.amount ?? 0))}</span></b>${mine ? ' (contando lo apostado)' : ''}</span></div>`
+        <span class="bal">Tienes <b>${DT()} <span data-morph-skip data-n="${st.balance + (mine?.amount ?? 0)}">${fmtN(st.balance + (mine?.amount ?? 0))}</span></b>${mine ? ' (contando lo apostado)' : ''}</span></div>`
       : state === 'open' && !st.me ? `<p class="note">${st.session ? 'Vincula tu cuenta de LoL para apostar.' : '<a href="login.html">Inicia sesión</a> para apostar.'}</p>` : ''}
-    ${mine && state !== 'done' ? `<div class="bet-mine">Tu apuesta: <b>🦷 ${fmtN(mine.amount)} a ${esc(mine.team)}</b>${mult(mine.team) ? ` · si gana, te llevas unos <b>🦷 ${fmtN(Math.floor(mine.amount * mult(mine.team)))}</b> con el bote de ahora` : ''}.</div>` : ''}
+    ${mine && state !== 'done' ? `<div class="bet-mine">Tu apuesta: <b>${DT()} ${fmtN(mine.amount)} a ${esc(mine.team)}</b>${mult(mine.team) ? ` · si gana, te llevas unos <b>${DT()} ${fmtN(Math.floor(mine.amount * mult(mine.team)))}</b> con el bote de ahora` : ''}.</div>` : ''}
     ${rows ? `<div class="bet-list">${rows}</div>` : ''}
-    <p class="note">Los dientes se descuentan al apostar. Si tu equipo gana, recuperas lo tuyo y te repartes lo apostado al otro equipo en proporción a tu apuesta. Si nadie apuesta al otro lado, se devuelve todo. Mínimo ${MIN_BET} y máximo ${MAX_BET} 🦷 por persona. Cierra al empezar la serie.</p>
+    <p class="note">Los dientes se descuentan al apostar. Si tu equipo gana, recuperas lo tuyo y te repartes lo apostado al otro equipo en proporción a tu apuesta. Si nadie apuesta al otro lado, se devuelve todo. Mínimo ${MIN_BET} y máximo ${MAX_BET} ${DT()} por persona. Cierra al empezar la serie.</p>
   </div>`;
 }
 
@@ -997,7 +1000,7 @@ $('bets-sec').addEventListener('click', async (e) => {
   st.betBusy.delete(mid);
   if (error) { authMenu.toast(error.message, true); drawBets(); return; }
   st.betTeam.delete(mid);
-  authMenu.toast(off ? 'Apuesta retirada: dientes devueltos' : `🎲 Apostaste 🦷 ${fmtN(amount)} a ${team}`);
+  authMenu.toast(off ? 'Apuesta retirada: dientes devueltos' : `🎲 Apostaste ${fmtN(amount)} dientes a ${team}`);
   await load();
 });
 
@@ -1024,7 +1027,7 @@ function drawBoard() {
       <td class="pos">${i + 1}</td>
       <td><div class="pl"><img loading="lazy" decoding="async" src="${iconOr1(r.pl.icon_id)}" alt="" onerror="${ICON_ONERROR}">
         <a href="perfil.html?jugador=${encodeURIComponent(r.pl.id)}">${esc(nameOf(r.pl))}</a>${alive(r) ? `<span class="tag">${st.ev.finished_at ? 'Skin Definitiva' : 'Pleno posible'}</span>` : ''}</div></td>
-      <td class="num"><span class="teeth">🦷 <span data-morph-skip data-n="${r.teeth}">${r.teeth}</span></span></td>
+      <td class="num"><span class="teeth">${DT()} <span data-morph-skip data-n="${r.teeth}">${r.teeth}</span></span></td>
       <td class="num">${r.ok}/${resolved}</td>
       <td class="num hide-sm">${r.picks}/${total}</td>
     </tr>`).join('') || '<tr><td colspan="5" class="dim" style="text-align:center;padding:22px;">Nadie ha armado su bracket todavía.</td></tr>');
@@ -1095,7 +1098,7 @@ function drawHub() {
       <img class="av" src="${iconOr1(st.me.icon_id)}" alt="" onerror="${ICON_ONERROR}">
       <div class="who"><b>${esc(nameOf(st.me))}</b><small>Tus Pickems</small></div>
       <div class="me-stats">
-        <div><b class="gold">🦷 <span data-morph-skip data-n="${mine?.teeth ?? 0}">${mine?.teeth ?? 0}</span></b><small>Dientes ganados</small></div>
+        <div><b class="gold">${DT(20)} <span data-morph-skip data-n="${mine?.teeth ?? 0}">${mine?.teeth ?? 0}</span></b><small>Dientes ganados</small></div>
         <div><b>${pos >= 0 ? `#${pos + 1}` : '–'}</b><small>Puesto en el grupo</small></div>
         <button type="button" id="hub-share">${SHARE_SVG}<small>Compartir</small></button>
       </div></div>`
@@ -1124,7 +1127,7 @@ function drawHub() {
   morph($('hub-board'), ranking.map(([id, r], k) => { const pl = st.players.find(p => p.id === id);
     return `<tr data-key="h${id}" class="${k === 0 && r.teeth > 0 ? 'first' : ''}"><td class="pos">${k + 1}</td>
       <td><div class="pl"><img loading="lazy" decoding="async" src="${iconOr1(pl.icon_id)}" alt="" onerror="${ICON_ONERROR}"><a href="perfil.html?jugador=${encodeURIComponent(pl.id)}">${esc(nameOf(pl))}</a></div></td>
-      <td class="num"><span class="teeth">🦷 <span data-morph-skip data-n="${r.teeth}">${r.teeth}</span></span></td>
+      <td class="num"><span class="teeth">${DT()} <span data-morph-skip data-n="${r.teeth}">${r.teeth}</span></span></td>
       <td class="num">${r.ok}</td><td class="num hide-sm">${r.events.size}/${total}</td></tr>`; }).join('')
     || '<tr><td colspan="5" class="dim" style="text-align:center;padding:22px;">Nadie ha jugado todavía.</td></tr>');
   tweenNumbers($('hub-board'));
@@ -1143,14 +1146,14 @@ function stageCard(e, mine, i) {
   const sub = ph === 'soon' ? `Apertura de las elecciones: <b>${fechaDia(e.opens_at)} – ${fechaDia(e.locks_at)}</b>`
     : ph === 'open' ? `Cierre de elecciones: <b data-countdown="${new Date(e.locks_at).getTime()}">${hubCount(new Date(e.locks_at).getTime())}</b>`
     : ph === 'closed' ? `${played} de ${ms.length} series jugadas`
-    : `Finalizado · ${my ? `ganaste <b>${my.teeth} 🦷</b>` : 'no participaste'}`;
+    : `Finalizado · ${my ? `ganaste <b>${my.teeth} ${DT()}</b>` : 'no participaste'}`;
   const cta = ph === 'open' ? (st.me ? (myPicks === ms.length && ms.length ? 'Revisar selección' : 'Realizar selección') : 'Ver elecciones')
     : ph === 'soon' ? (ms.length ? 'Ver series' : '') : 'Ver resultados';
   const teams = ph !== 'soon' && ms.length ? [...new Set(ms.flatMap(m => [m.team1, m.team2]).filter(Boolean))] : [];
   const prog = st.me && ms.length && ph !== 'soon'
     ? `<div class="stage-prog"><small>${myPicks}/${ms.length} elecciones realizadas</small><div class="track"><i class="${myPicks === ms.length ? 'full' : ''}" style="--p:${myPicks / ms.length}"></i></div></div>` : '';
   const bg = e.bg_image ? `<span class="stage-bg" aria-hidden="true" style="background-image:url('${esc(e.bg_image)}'); background-position:${esc(e.bg_focus ?? '50% 35%')}"></span>` : '';
-  const inner = `${bg}${SONAR}<div class="stage-top">${pill}<span class="stage-pts">${max ? `<b>${my?.teeth ?? 0}</b> / ${max} 🦷` : '— 🦷'}</span></div>
+  const inner = `${bg}${SONAR}<div class="stage-top">${pill}<span class="stage-pts">${max ? `<b>${my?.teeth ?? 0}</b> / ${max} ${DT()}` : `— ${DT()}`}</span></div>
     <h3>${esc(splitName(e.name).stage)}</h3><p class="sub">${sub}</p>
     ${teams.length ? `<div class="teams">${teams.map(t => logo(t)).join('')}</div>` : ''}
     ${cta ? `<span class="btn cta"><span class="lbl">${cta}</span></span>` : '<p class="sub">Pronto se abren estos Pickems.</p>'}${prog}`;
@@ -1196,7 +1199,7 @@ function drawRewards() {
 $('hub').addEventListener('click', async (e) => {
   if (!e.target.closest('#hub-share')) return;
   const url = new URL('pickems.html', location.href).href;
-  const text = st.me ? `Mis Pickems en SharkTracker: 🦷 ${hubScores().get(st.me.id)?.teeth ?? 0}. ¿Me ganas?` : 'Pickems de SharkTracker';
+  const text = st.me ? `Mis Pickems en SharkTracker: ${hubScores().get(st.me.id)?.teeth ?? 0} dientes. ¿Me ganas?` : 'Pickems de SharkTracker';
   try {
     if (navigator.share) await navigator.share({ title: 'Pickems · SharkTracker', text, url });
     else { await navigator.clipboard.writeText(`${text} ${url}`); authMenu.toast('🔗 Enlace copiado'); }
