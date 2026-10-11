@@ -111,9 +111,9 @@
   .slot.won .sc{color:var(--gold-soft);}
   .slot.lost{color:var(--text-faint);}
   .slot.lost .tlogo img{filter:grayscale(1); opacity:.55;}
-  .slot.pick{background:rgba(61,255,210,.1); box-shadow:inset 3px 0 0 var(--accent);}
-  .slot.pick.ok{background:rgba(255,181,71,.1); box-shadow:inset 3px 0 0 var(--gold);}
-  .slot.pick.bad{background:rgba(255,111,142,.08); box-shadow:inset 3px 0 0 var(--danger);}
+  .slot.pick{background:rgba(61,255,210,.1); box-shadow:inset 0 0 0 1px rgba(61,255,210,.55);}
+  .slot.pick.ok{background:rgba(255,181,71,.1); box-shadow:inset 0 0 0 1px rgba(255,181,71,.6);}
+  .slot.pick.bad{background:rgba(255,111,142,.08); box-shadow:inset 0 0 0 1px rgba(255,111,142,.5);}
   .slot .star{color:var(--accent); width:16px; display:flex;}
   .slot.pick.ok .star{color:var(--gold);} .slot.pick.bad .star{color:var(--danger);}
   .tlogo{position:relative; width:30px; height:30px; flex-shrink:0; border-radius:8px; background:var(--panel-2); display:flex; align-items:center; justify-content:center; font:600 11px var(--f-cifra); color:var(--text-soft);}
@@ -183,8 +183,120 @@
   .teeth{font-family:var(--f-cifra); font-weight:600; color:var(--gold);}
   .tag{display:inline-block; margin-left:8px; font-size:11px; font-weight:800; padding:2px 8px; border-radius:99px; background:rgba(255,181,71,.14); color:var(--gold-soft); text-transform:uppercase; letter-spacing:.02em;}
 
+  /* ============================================================
+     Movimiento
+     · El momento principal: al elegir un ganador, su logo vuela a la
+       siguiente ronda y la línea del bracket se dibuja hasta allí.
+     · El resto es respuesta (pulsar, ★, progreso) y continuidad (porcentajes,
+       bote, clasificación que se reordena). Nada en bucle.
+     ============================================================ */
+  :root{ --ease-out:cubic-bezier(0.23,1,0.32,1); --ease-io:cubic-bezier(0.77,0,0.175,1); }
+
+  /* Líneas del bracket (SVG detrás de las series; solo con columnas) */
+  .bracket{position:relative;}
+  .bracket > .bcol{position:relative; z-index:1;}
+  .links{position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; overflow:visible;}
+  .links path{fill:none; stroke:rgba(120,220,210,.16); stroke-width:2; stroke-linejoin:round;
+    transition:stroke 300ms ease, opacity 300ms ease;}
+  .links path.on{stroke:var(--accent);}
+  .links path.ok{stroke:var(--gold);}
+  .links path.bad{stroke:rgba(255,111,142,.55);}
+
+  /* Serie y lados */
+  .match{position:relative; transition:border-color 300ms ease, box-shadow 300ms ease;}
+  .match.picked{border-color:rgba(61,255,210,.28);}
+  .slot{position:relative; isolation:isolate; transition:background-color 200ms ease, box-shadow 200ms ease, color 200ms ease;}
+  .slot .who{display:flex; align-items:center; gap:10px; flex:1; min-width:0; transition:transform 140ms var(--ease-out), opacity 200ms ease;}
+  button.slot:active:not(:disabled) .who{transform:scale(0.97);}
+  @media (hover:hover) and (pointer:fine){
+    button.slot:hover:not(:disabled) .tlogo{transform:translateX(2px);}
+  }
+  .tlogo{transition:transform 200ms var(--ease-out), filter 300ms ease, opacity 300ms ease;}
+  /* Barra de votos debajo de cada equipo */
+  .slot .vbar{position:absolute; left:0; right:0; bottom:0; height:2px; z-index:-1; background:rgba(61,255,210,.45);
+    transform-origin:left; transform:scaleX(var(--p,0)); transition:transform 500ms var(--ease-out);}
+  .slot.pick.ok .vbar{background:rgba(255,181,71,.6);}
+  /* ★ / ✓ / ✕ aparece con un pequeño salto */
+  .slot .star{transition:transform 220ms var(--ease-out), opacity 220ms ease;}
+  @starting-style{ .slot .star{transform:scale(0.4) rotate(-30deg); opacity:0;} }
+  /* El lado que recibe un equipo nuevo (vuelo o cambio): se enfoca desde un desenfoque */
+  .slot.swap .who{animation:swap-in 260ms var(--ease-out);}
+  @keyframes swap-in{ from{filter:blur(4px); opacity:.35;} to{filter:none; opacity:1;} }
+  .slot.landed{animation:landed 520ms var(--ease-out);}
+  @keyframes landed{ 0%{background-color:rgba(61,255,210,.26);} 100%{background-color:rgba(61,255,210,0);} }
+  .slot.pick.landed{animation:none;}
+  /* Logo que vuela de una ronda a la siguiente */
+  .flyer{position:fixed; z-index:60; pointer-events:none; display:flex; align-items:center; gap:10px; margin:0;
+    font:700 14px 'Albert Sans',system-ui,sans-serif; color:var(--text); white-space:nowrap; will-change:transform, opacity;}
+  .flyer.loser{color:var(--text-dim);}
+  .flyer .tlogo{box-shadow:0 8px 22px rgba(0,0,0,.45);}
+
+  /* Dientes de la serie: se iluminan al acertar y suben un "+X" */
+  .m-foot .gain{transition:background-color 300ms ease, border-color 300ms ease, color 300ms ease, opacity 300ms ease;}
+  .gain.pop{animation:gain-pop 420ms var(--ease-out);}
+  @keyframes gain-pop{ 0%{transform:scale(0.85);} 60%{transform:scale(1.08);} 100%{transform:scale(1);} }
+  .float-gain{position:fixed; z-index:61; pointer-events:none; font:700 14px var(--f-cifra); color:var(--gold);
+    text-shadow:0 2px 10px rgba(0,0,0,.6);}
+
+  /* Bracket completo: un destello recorre la gran final (una vez) */
+  .match.complete::after{content:''; position:absolute; inset:0; pointer-events:none; z-index:2;
+    background:linear-gradient(105deg, transparent 35%, rgba(255,200,107,.28) 50%, transparent 65%);
+    transform:translateX(-100%); animation:sweep 900ms var(--ease-io) forwards;}
+  @keyframes sweep{ to{transform:translateX(100%);} }
+
+  /* Primera carga: las series aparecen en cascada corta (no bloquea nada) */
+  .intro .match{animation:rise 360ms var(--ease-out) backwards; animation-delay:calc(var(--i, 0) * 45ms);}
+  @keyframes rise{ from{opacity:0; transform:translateY(8px);} }
+
+  /* Lista de votos al abrir */
+  .m-foot summary{transition:color 150ms ease;}
+  .m-foot details[open] summary .chev{transform:rotate(180deg);}
+  .m-foot .chev{display:inline-block; transition:transform 200ms var(--ease-out);}
+  .votes{transition:opacity 200ms ease, transform 200ms var(--ease-out);}
+  @starting-style{ .votes{opacity:0; transform:translateY(-4px);} }
+  .vote{transition:color 150ms ease;}
+
+  /* Progreso del bracket */
+  .pbar{display:inline-block; vertical-align:middle; width:72px; height:6px; margin-left:8px; border-radius:99px; background:var(--panel); overflow:hidden;}
+  .pbar i{display:block; height:100%; background:var(--accent); transform-origin:left; transform:scaleX(var(--p,0)); transition:transform 400ms var(--ease-out);}
+  .pbar.full i{background:var(--gold);}
+
+  /* Botones */
+  .btn{transition:transform 140ms var(--ease-out), background-color 200ms ease, border-color 200ms ease, color 200ms ease, opacity 200ms ease;}
+  .btn:active:not(:disabled){transform:scale(0.97);}
+  .btn .lbl{transition:filter 200ms ease, opacity 200ms ease;}
+  .btn.busy .lbl{filter:blur(2px); opacity:.6;}
+
+  /* Apuesta */
+  .bet-team{transition:transform 140ms var(--ease-out), border-color 200ms ease, background-color 200ms ease;}
+  button.bet-team:active:not(:disabled){transform:scale(0.98);}
+  .bet-team .mult{transition:color 200ms ease;}
+  .bet-pot{transition:color 200ms ease;}
+  .bet-pot.bump{animation:bump 360ms var(--ease-out);}
+  @keyframes bump{ 40%{transform:scale(1.08);} }
+  .bet-row{transition:opacity 260ms ease, transform 260ms var(--ease-out);}
+  @starting-style{ .bet-row{opacity:0; transform:translateX(-8px);} }
+  .bet-bar{display:flex; height:6px; border-radius:99px; overflow:hidden; margin-top:12px; background:var(--panel-2);}
+  .bet-bar span{display:block; height:100%; flex:var(--w,1) 1 0; transition:flex-grow 500ms var(--ease-out);}
+  .bet-bar .a{background:var(--blue);} .bet-bar .b{background:var(--red);}
+
+  /* Clasificación: las filas se deslizan al cambiar de puesto (FLIP desde JS) */
+  #board tr{transition:background-color 300ms ease;}
+  #board tr.moved{background:rgba(61,255,210,.05);}
+
+  @media (prefers-reduced-motion: reduce){
+    .slot .who, .tlogo, .btn, .bet-team, .gain.pop, .bet-pot.bump{transform:none !important; animation:none;}
+    .slot .vbar, .pbar i{transition:none;}
+    @starting-style{ .slot .star{transform:none;} .votes{transform:none;} .bet-row{transform:none;} }
+    .intro .match{animation-name:fade-only;}
+    @keyframes fade-only{ from{opacity:0;} }
+    .match.complete::after{animation:none; display:none;}
+    .slot.swap .who{animation:fade-only 200ms ease;}
+  }
+
   @media (max-width:860px){
     .prizes{grid-template-columns:1fr;}
+    .links{display:none;}
     .bracket{grid-auto-flow:row; grid-auto-columns:auto;}
     .bracket.lower{padding:14px;}
   }
@@ -204,6 +316,7 @@
     th:first-child, td:first-child{padding-left:14px;} th:last-child, td:last-child{padding-right:14px;}
   }
 </style>
+
 <link rel="stylesheet" href="assets/tema.css">
 </head>
 <body>
@@ -224,7 +337,7 @@
     <div id="notice"></div>
     <section>
       <h2 class="section-title"><span class="bar"></span><span id="bracket-title">Bracket</span><span class="aside" id="bracket-aside"></span></h2>
-      <div id="bracket"></div>
+      <div id="bracket" aria-live="polite"></div>
     </section>
     <section id="bets-sec" hidden></section>
     <section id="board-sec">
@@ -245,6 +358,7 @@ import { createNavMenu } from './assets/nav-menu.js';
 import { icono } from './assets/iconos.js';
 import { equipo } from './assets/equipos.js';
 import { createBracket, MIN_BET } from './assets/pickems.js';
+import { morph } from './assets/morph.js';
 
 createNavMenu({ current: 'pickems' });
 const supabase = createSupabase();
@@ -258,12 +372,19 @@ const fmtN = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 const fechaEs = (iso) => new Date(iso).toLocaleString('es-ES', { timeZone: 'Europe/Madrid', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
 const fechaCorta = (iso) => new Date(iso).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
+// Movimiento reducido: sin vuelos, sin desplazamientos ni conteos (los cambios de color y estado se mantienen)
+const rm = matchMedia('(prefers-reduced-motion: reduce)');
+let reduced = rm.matches;
+rm.addEventListener?.('change', (e) => { reduced = e.matches; });
+const EASE_OUT = 'cubic-bezier(0.23, 1, 0.32, 1)';
+const EASE_IO = 'cubic-bezier(0.77, 0, 0.175, 1)';
+
 const authMenu = createAuthMenu({ supabase, profileIconUrl });
 const idParam = Number(new URL(location.href).searchParams.get('id')) || null;
 
 // Estado de la página (se conserva entre recargas por Realtime)
 const st = { session: null, me: null, players: [], profiles: new Map(), events: [], ev: null, matches: [], picks: [], bets: [],
-             balance: 0, saving: false, betTeam: new Map() };
+             balance: 0, betTeam: new Map(), betBusy: new Set(), drawn: false };
 let br = createBracket([]);
 let countdownTarget = null;
 
@@ -304,7 +425,8 @@ async function load() {
     ids.length ? supabase.from('pickem_bets').select('*').in('match_id', ids) : { data: [] },
     st.me ? supabase.from('wallet_balances').select('balance').eq('player_id', st.me.id).maybeSingle() : { data: null },
   ]);
-  st.picks = picks ?? [];
+  // Mientras se guarda una elección, lo que llega del servidor puede ir un paso atrás: se conservan las mías.
+  st.picks = pending ? [...(picks ?? []).filter(p => p.player_id !== st.me?.id), ...st.picks.filter(p => p.player_id === st.me?.id)] : (picks ?? []);
   st.bets = bets ?? [];
   st.balance = bal?.balance ?? 0;
   document.title = `${st.ev.name} · Pickems · SharkTracker`;
@@ -312,29 +434,37 @@ async function load() {
   draw();
 }
 
-function draw() { drawEvents(); drawHero(); drawPrizes(); drawNotice(); drawBracket(); drawBets(); drawBoard(); }
+function draw() {
+  drawEvents(); drawHero(); drawPrizes(); drawNotice(); drawBracket(); drawBets(); drawBoard();
+  st.drawn = true;
+}
 
 function drawEvents() {
   $('events').hidden = st.events.length < 2;
-  $('events').innerHTML = st.events.map(e => `<a href="pickems.html?id=${e.id}" class="${e.id === st.ev.id ? 'on' : ''}">${esc(e.name)}</a>`).join('');
+  morph($('events'), st.events.map(e => `<a data-key="e${e.id}" href="pickems.html?id=${e.id}" class="${e.id === st.ev.id ? 'on' : ''}">${esc(e.name)}</a>`).join(''));
+}
+
+function countParts(diff) {
+  return { d: Math.floor(diff / 86400000), h: String(Math.floor(diff / 3600000) % 24).padStart(2, '0'),
+           m: String(Math.floor(diff / 60000) % 60).padStart(2, '0'), s: String(Math.floor(diff / 1000) % 60).padStart(2, '0') };
 }
 
 function drawHero() {
   const open = isOpen(), ev = st.ev;
   countdownTarget = open ? new Date(ev.locks_at).getTime() : null;
+  const c = countParts(Math.max(0, (countdownTarget ?? 0) - Date.now()));
   const kicker = ev.finished_at ? `<span class="kicker done">${icono('trofeo', { size: 14 })} Finalizado</span>`
     : open ? '<span class="kicker open">● Bracket abierto</span>'
     : `<span class="kicker closed">${icono('candado', { size: 14 })} Bracket cerrado · se juega</span>`;
-  $('hero').innerHTML = `<div class="hero">
+  morph($('hero'), `<div class="hero">
     ${kicker}
     <h2 class="ev-name">${esc(ev.name)}</h2>
     <p class="ev-sub">${open ? 'Cierra el' : 'Cerró el'} <b>${fechaEs(ev.locks_at)}</b> (hora de España)</p>
     <p class="ev-sub">${st.matches.length} series · ${new Set(st.picks.map(p => p.player_id)).size} participantes</p>
     ${open ? `<div class="count" id="count" aria-label="Tiempo para el cierre">
-      <div><b data-u="d">--</b><small>días</small></div><div><b data-u="h">--</b><small>horas</small></div>
-      <div><b data-u="m">--</b><small>min</small></div><div><b data-u="s">--</b><small>seg</small></div></div>` : ''}
-  </div>`;
-  tick();
+      <div><b data-u="d">${c.d}</b><small>días</small></div><div><b data-u="h">${c.h}</b><small>horas</small></div>
+      <div><b data-u="m">${c.m}</b><small>min</small></div><div><b data-u="s">${c.s}</b><small>seg</small></div></div>` : ''}
+  </div>`);
 }
 
 function drawPrizes() {
@@ -342,74 +472,80 @@ function drawPrizes() {
   const total = pts.reduce((a, b) => a + b, 0);
   const rango = pts.length ? (Math.min(...pts) === Math.max(...pts) ? `+${pts[0]}` : `+${Math.min(...pts)} a +${Math.max(...pts)}`) : '';
   const p = (cls, ic, t, d) => `<div class="prize ${cls}"><span class="ico">${icono(ic, { size: 22 })}</span><div><b>${t}</b><small>${d}</small></div></div>`;
-  $('prizes').innerHTML =
+  morph($('prizes'),
     p('', 'check', `Cada acierto: ${rango} 🦷`, `Según la ronda (lo ves en cada serie). Bracket perfecto: ${total} 🦷.`) +
     p('skin', 'corona', 'Skin Definitiva', 'Si aciertas el ganador de todas las series.') +
-    (st.matches.some(m => m.bets_enabled) ? p('', 'dado', 'Apuesta en la final', 'Apuesta tus dientes cuando se sepan los finalistas. Los que aciertan se reparten el bote.') : '');
+    (st.matches.some(m => m.bets_enabled) ? p('', 'dado', 'Apuesta en la final', 'Apuesta tus dientes cuando se sepan los finalistas. Los que aciertan se reparten el bote.') : ''));
 }
 
 function drawNotice() {
   const open = isOpen();
   let html = '';
   if (open && !st.session) {
-    html = `<div class="notice">${icono('candado', { size: 20 })}<span><b>Inicia sesión para armar tu bracket.</b> Sin cuenta puedes ver lo que eligió cada uno.</span><a class="btn" href="login.html">Iniciar sesión</a></div>`;
+    html = `<div class="notice">${icono('candado', { size: 20 })}<span><b>Inicia sesión para armar tu bracket.</b> Sin cuenta puedes ver lo que eligió cada uno.</span><a class="btn" href="login.html"><span class="lbl">Iniciar sesión</span></a></div>`;
   } else if (open && !st.me) {
-    html = `<div class="notice">${icono('enlace', { size: 20 })}<span><b>Vincula tu cuenta de LoL</b> para jugar: los dientes van a tu perfil.</span><a class="btn" href="login.html">Vincular cuenta</a></div>`;
+    html = `<div class="notice">${icono('enlace', { size: 20 })}<span><b>Vincula tu cuenta de LoL</b> para jugar: los dientes van a tu perfil.</span><a class="btn" href="login.html"><span class="lbl">Vincular cuenta</span></a></div>`;
   } else if (open && st.me) {
-    const done = myPicks().size;
-    html = `<div class="notice">${icono('lapiz', { size: 20 })}<span>Toca el equipo que crees que gana: pasa a la siguiente ronda de tu bracket. Se guarda solo y puedes cambiarlo hasta el cierre. <span class="progress">${done}/${st.matches.length}</span> elegidas.</span></div>`;
+    const done = myPicks().size, total = st.matches.length;
+    html = `<div class="notice">${icono('lapiz', { size: 20 })}<span>Toca el equipo que crees que gana: pasa a la siguiente ronda de tu bracket. Se guarda solo y puedes cambiarlo hasta el cierre.
+      <span class="progress">${done}/${total}</span><span class="pbar ${done === total && total ? 'full' : ''}" aria-hidden="true"><i style="--p:${total ? done / total : 0}"></i></span></span></div>`;
   }
-  $('notice').innerHTML = html;
+  morph($('notice'), html);
 }
 
 // ── Bracket ──
-function matchCard(m) {
+function matchCard(m, i) {
   const mp = myPicks();
-  const canVote = isOpen() && !!st.me && !st.saving;
+  const canVote = isOpen() && !!st.me;
   const pick = mp.get(m.id) ?? null;
   const win = br.winner(m);
   const votes = st.picks.filter(p => p.match_id === m.id);
   const teams = [1, 2].map(slot => br.actual(m, slot) ?? (st.me ? br.mine(mp, m, slot) : null));
-  const slot = (i) => {
-    const t = teams[i], real = br.actual(m, i + 1);
+  const slot = (k) => {
+    const t = teams[k], real = br.actual(m, k + 1);
     const n = t ? votes.filter(v => v.team === t).length : 0;
     const isPick = t && pick === t;
     const cls = [!t ? 'tbd' : '', isPick ? 'pick' : '', isPick && win ? (win === pick ? 'ok' : 'bad') : '',
                  win && t ? (t === win ? 'won' : 'lost') : ''].join(' ');
-    const score = br.hasResult(m) ? (i === 0 ? m.score1 : m.score2) : '';
-    const inner = `${logo(t)}<span class="nm">${t ? esc(t) : esc(br.placeholder(m, i + 1))}</span>
-      ${t && votes.length ? `<span class="pct">${Math.round(100 * n / votes.length)}%</span>` : ''}
+    const score = br.hasResult(m) ? (k === 0 ? m.score1 : m.score2) : '';
+    const share = t && votes.length ? n / votes.length : 0;
+    const inner = `<span class="who">${logo(t)}<span class="nm">${t ? esc(t) : esc(br.placeholder(m, k + 1))}</span></span>
+      ${t && votes.length ? `<span class="pct">${Math.round(100 * share)}%</span>` : ''}
       ${isPick ? `<span class="star" aria-label="Tu elección">${icono(win ? (win === pick ? 'check' : 'alto') : 'estrella', { size: 15 })}</span>` : ''}
-      ${score !== '' ? `<span class="sc">${score}</span>` : ''}`;
-    // Se puede elegir si el bracket está abierto y el equipo existe en TU bracket (y no es un hueco)
-    const pickable = canVote && t && (real || br.mine(mp, m, i + 1) === t);
+      ${score !== '' ? `<span class="sc">${score}</span>` : ''}
+      <span class="vbar" style="--p:${share.toFixed(3)}" aria-hidden="true"></span>`;
+    // Se puede elegir si el bracket está abierto y el equipo existe en TU bracket
+    const pickable = canVote && t && (real || br.mine(mp, m, k + 1) === t);
+    const key = `s${m.id}-${k + 1}`;
     return pickable
-      ? `<button type="button" class="slot ${cls}" data-m="${m.id}" data-team="${esc(t)}" aria-pressed="${!!isPick}">${inner}</button>`
-      : `<div class="slot ${cls}">${inner}</div>`;
+      ? `<button type="button" class="slot ${cls}" data-key="${key}" data-m="${m.id}" data-team="${esc(t)}" aria-pressed="${!!isPick}">${inner}</button>`
+      : `<div class="slot ${cls}" data-key="${key}" data-team="${esc(t ?? '')}">${inner}</div>`;
   };
   // Tu elección se quedó fuera (el equipo que pusiste aquí no llegó a esta serie)
   const lostPick = pick && !teams.includes(pick) ? `<span class="lost-pick">Tu elección: ${esc(pick)}</span>` : '';
-  const gainCls = pick && win ? (win === pick ? 'got' : 'miss') : (pick && lostPick ? 'miss' : '');
+  const got = !!(pick && win && win === pick);
+  const gainCls = got ? 'got' : (pick && win) || (pick && lostPick) ? 'miss' : '';
   const byId = new Map(st.players.map(p => [p.id, p]));
   const list = votes.map(v => ({ v, pl: byId.get(v.player_id) })).filter(x => x.pl)
     .sort((a, b) => a.v.team.localeCompare(b.v.team) || nameOf(a.pl).localeCompare(nameOf(b.pl)))
-    .map(({ v, pl }) => `<a class="vote ${win ? (v.team === win ? 'ok' : 'bad') : ''}" href="perfil.html?jugador=${encodeURIComponent(pl.id)}">
+    .map(({ v, pl }) => `<a class="vote ${win ? (v.team === win ? 'ok' : 'bad') : ''}" data-key="v${pl.id}" href="perfil.html?jugador=${encodeURIComponent(pl.id)}">
       <img loading="lazy" decoding="async" src="${iconOr1(pl.icon_id)}" alt="" onerror="${ICON_ONERROR}">${esc(nameOf(pl))}<span>${esc(equipo(v.team)?.code ?? v.team)}</span></a>`).join('');
-  return `<article class="match">${slot(0)}${slot(1)}
-    <div class="m-foot"><span class="gain ${gainCls}" title="Dientes por acertar esta serie">+${m.points} 🦷</span>
+  return `<article class="match ${pick ? 'picked' : ''}" data-key="m${m.id}" data-match="${m.id}" style="--i:${i}">${slot(0)}${slot(1)}
+    <div class="m-foot"><span class="gain ${gainCls}" data-gain="${m.id}" data-got="${got}" title="Dientes por acertar esta serie">+${m.points} 🦷</span>
       <span>BO${m.best_of}${m.starts_at ? ' · ' + fechaCorta(m.starts_at) : ''}</span>${lostPick}
-      ${votes.length ? `<details><summary>${votes.length} ${votes.length === 1 ? 'voto' : 'votos'} ▾</summary><div class="votes">${list}</div></details>` : ''}</div>
+      ${votes.length ? `<details><summary>${votes.length} ${votes.length === 1 ? 'voto' : 'votos'} <span class="chev" aria-hidden="true">▾</span></summary><div class="votes">${list}</div></details>` : ''}</div>
   </article>`;
 }
 
-function columns(list) {
+function columns(list, offset) {
   const cols = [...new Set(list.map(m => m.col))].sort((a, b) => a - b);
+  let i = offset;
   return cols.map(c => {
     const ms = list.filter(m => m.col === c);
     const labels = [...new Set(ms.map(m => m.label).filter(Boolean))];
     const pts = [...new Set(ms.map(m => m.points))];
-    return `<div class="bcol"><div class="bcol-head"><b>${esc(labels.join(' / ') || 'Ronda ' + c)}</b><small>+${pts.join('/')} 🦷 por acierto</small></div>
-      <div class="bcol-body">${ms.map(matchCard).join('')}</div></div>`;
+    return `<div class="bcol" data-key="c${c}"><div class="bcol-head"><b>${esc(labels.join(' / ') || 'Ronda ' + c)}</b><small>+${pts.join('/')} 🦷 por acierto</small></div>
+      <div class="bcol-body">${ms.map(m => matchCard(m, i++)).join('')}</div></div>`;
   }).join('');
 }
 
@@ -417,24 +553,189 @@ function drawBracket() {
   const resolved = st.matches.filter(br.hasResult).length;
   $('bracket-title').textContent = st.me && isOpen() ? 'Tu bracket' : 'Bracket';
   $('bracket-aside').textContent = st.matches.length ? `${resolved} de ${st.matches.length} jugadas` : '';
-  if (!st.matches.length) { $('bracket').innerHTML = '<div class="card dim" style="padding:18px">La admin todavía no ha cargado las series.</div>'; return; }
+  // Antes de redibujar: qué equipo había en cada lado y qué series ya daban dientes
+  const before = new Map([...$('bracket').querySelectorAll('.slot[data-key]')].map(s => [s.dataset.key, s.dataset.team]));
+  const gotBefore = new Set([...$('bracket').querySelectorAll('[data-got="true"]')].map(g => g.dataset.gain));
+  if (!st.matches.length) { morph($('bracket'), '<div class="card dim" style="padding:18px">La admin todavía no ha cargado las series.</div>'); return; }
   const upper = st.matches.filter(m => m.bracket !== 'inferior'), lower = st.matches.filter(m => m.bracket === 'inferior');
-  $('bracket').innerHTML = `<div class="bracket">${columns(upper)}</div>
-    ${lower.length ? `<h3 class="lower-title">Cuadro inferior</h3><div class="bracket lower">${columns(lower)}</div>` : ''}`;
+  morph($('bracket'), `<div class="bracket" data-key="up"><svg class="links" data-morph-skip aria-hidden="true"></svg>${columns(upper, 0)}</div>
+    ${lower.length ? `<h3 class="lower-title" data-key="lt">Cuadro inferior</h3><div class="bracket lower" data-key="low"><svg class="links" data-morph-skip aria-hidden="true"></svg>${columns(lower, upper.length)}</div>` : ''}`);
+  if (!st.drawn) {
+    // Primera carga: cascada corta de las series
+    if (!reduced) { $('bracket').classList.add('intro'); setTimeout(() => $('bracket').classList.remove('intro'), 900); }
+  } else {
+    // Lados que cambiaron de equipo sin vuelo (otra serie, Realtime): se enfocan desde un desenfoque
+    for (const s of $('bracket').querySelectorAll('.slot[data-key]')) {
+      if (before.has(s.dataset.key) && before.get(s.dataset.key) !== s.dataset.team && !flying.has(s.dataset.key)) replay(s, 'swap');
+    }
+    // Dientes recién ganados (llegó un resultado mientras mirabas)
+    for (const g of $('bracket').querySelectorAll('[data-got="true"]')) if (!gotBefore.has(g.dataset.gain)) celebrateGain(g);
+  }
+  requestAnimationFrame(() => drawLinks(!st.drawn));
 }
 
-$('bracket').addEventListener('click', async (e) => {
-  const b = e.target.closest('button.slot'); if (!b || st.saving) return;
+// Reproduce una animación CSS de clase aunque ya se haya usado antes
+function replay(el, cls) {
+  el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
+  el.addEventListener('animationend', () => el.classList.remove(cls), { once: true });
+}
+
+function celebrateGain(chip) {
+  replay(chip, 'pop');
+  if (reduced) return;
+  const r = chip.getBoundingClientRect();
+  if (r.bottom < 0 || r.top > innerHeight) return;
+  const f = document.createElement('span');
+  f.className = 'float-gain'; f.textContent = chip.textContent.trim();
+  f.style.left = `${r.left + r.width / 2 - 20}px`; f.style.top = `${r.top - 4}px`;
+  document.body.append(f);
+  f.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(-26px)', opacity: 0 }], { duration: 900, easing: EASE_OUT })
+    .onfinish = () => f.remove();
+}
+
+// ── Líneas del bracket (SVG) ──
+// Una línea por cada "ganador de X pasa a Y" dentro del mismo cuadro. Se enciende cuando
+// elegiste el ganador de X; dorada si acertaste, coral si fallaste. Al encenderse se dibuja.
+function drawLinks(initial) {
+  for (const wrap of $('bracket').querySelectorAll('.bracket')) {
+    const svg = wrap.querySelector(':scope > .links');
+    if (!svg || getComputedStyle(svg).display === 'none') continue;
+    const box = wrap.getBoundingClientRect();
+    svg.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+    const mp = myPicks();
+    const seen = new Set();
+    for (const dst of st.matches) {
+      for (const slot of [1, 2]) {
+        const srcId = slot === 1 ? dst.src1_match : dst.src2_match;
+        if (!srcId || !(slot === 1 ? dst.src1_win : dst.src2_win)) continue;
+        const srcEl = wrap.querySelector(`.match[data-match="${srcId}"]`);
+        const dstSlot = wrap.querySelector(`.slot[data-key="s${dst.id}-${slot}"]`);
+        if (!srcEl || !dstSlot) continue;
+        const a = srcEl.getBoundingClientRect(), b = dstSlot.getBoundingClientRect();
+        const x1 = a.right - box.left, y1 = a.top + a.height / 2 - box.top;
+        const x2 = b.left - box.left, y2 = b.top + b.height / 2 - box.top, xm = (x1 + x2) / 2;
+        const key = `l${srcId}-${dst.id}`; seen.add(key);
+        let path = svg.querySelector(`path[data-k="${key}"]`);
+        if (!path) { path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.dataset.k = key; svg.append(path); }
+        path.setAttribute('d', `M${x1} ${y1} H${xm} V${y2} H${x2}`);
+        const src = br.byId.get(srcId), pick = mp.get(srcId), win = br.winner(src);
+        const state = !pick ? '' : win ? (win === pick ? 'ok' : 'bad') : 'on';
+        const was = path.getAttribute('class') ?? '';
+        path.setAttribute('class', state);
+        if (state === 'on' && was !== 'on' && !initial && !reduced) {
+          const len = path.getTotalLength();
+          path.animate([{ strokeDasharray: len, strokeDashoffset: len }, { strokeDasharray: len, strokeDashoffset: 0 }],
+                       { duration: 460, easing: EASE_IO, delay: 120 });
+        }
+      }
+    }
+    for (const p of svg.querySelectorAll('path')) if (!seen.has(p.dataset.k)) p.remove();
+  }
+}
+new ResizeObserver(() => drawLinks(true)).observe($('bracket'));
+
+// ── Elegir: respuesta al instante, el servidor confirma detrás ──
+let pending = 0;
+let queue = Promise.resolve();
+const flying = new Set();
+
+// Aplica la elección en local y borra las que ya no encajan (igual que pickem_prune_picks)
+function applyPickLocal(mid, team) {
+  const me = st.me.id;
+  st.picks = st.picks.filter(p => !(p.player_id === me && p.match_id === mid));
+  if (team) st.picks.push({ player_id: me, match_id: mid, team });
+  for (const m of st.matches) {
+    const mp = myPicks(), t = mp.get(m.id);
+    if (t && t !== br.mine(mp, m, 1) && t !== br.mine(mp, m, 2)) st.picks = st.picks.filter(p => !(p.player_id === me && p.match_id === m.id));
+  }
+}
+
+// El logo (con su nombre) vuela del lado elegido a su lado en la serie siguiente
+function fly(fromRect, html, toSlot, loser) {
+  const to = toSlot?.querySelector('.who');
+  if (!to) return;
+  const b = to.getBoundingClientRect();
+  const visible = b.bottom > 0 && b.top < innerHeight && fromRect.bottom > 0 && fromRect.top < innerHeight;
+  if (reduced || !visible) { replay(toSlot, 'landed'); return; }
+  const ghost = document.createElement('div');
+  ghost.className = `flyer ${loser ? 'loser' : ''}`;
+  ghost.innerHTML = html;
+  Object.assign(ghost.style, { left: `${fromRect.left}px`, top: `${fromRect.top}px`, width: `${fromRect.width}px`, height: `${fromRect.height}px` });
+  document.body.append(ghost);
+  flying.add(toSlot.dataset.key);
+  to.style.opacity = '0';
+  const dx = b.left - fromRect.left, dy = b.top - fromRect.top;
+  const anim = ghost.animate([
+    { transform: 'translate(0, 0)', opacity: 1 },
+    { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 14}px)`, opacity: loser ? 0.75 : 1, offset: 0.5 },
+    { transform: `translate(${dx}px, ${dy}px)`, opacity: loser ? 0.6 : 1 },
+  ], { duration: loser ? 520 : 460, easing: EASE_IO, delay: loser ? 60 : 0 });
+  const done = () => { ghost.remove(); to.style.opacity = ''; flying.delete(toSlot.dataset.key); replay(toSlot, 'landed'); };
+  anim.onfinish = done; anim.oncancel = done;
+}
+
+$('bracket').addEventListener('click', (e) => {
+  const b = e.target.closest('button.slot'); if (!b) return;
   const mid = Number(b.dataset.m), team = b.dataset.team;
   const quitar = myPicks().get(mid) === team;   // tocar tu elección la quita
-  st.saving = true; drawBracket();
-  const { error } = await supabase.rpc('save_pickem_pick', { p_match: mid, p_team: quitar ? null : team });
-  st.saving = false;
-  if (error) { authMenu.toast(error.message, true); drawBracket(); return; }
-  authMenu.toast(quitar ? 'Elección quitada' : `${team} gana ✓`);
-  await load();
-  $('bracket').querySelector(`button.slot[data-m="${mid}"][data-team="${CSS.escape(team)}"]`)?.focus();
+  // Origen de los vuelos: el lado elegido (ganador) y el otro lado (perdedor)
+  const card = b.closest('.match');
+  const sides = [...card.querySelectorAll('.slot')].map(s => ({ team: s.dataset.team, rect: s.querySelector('.who').getBoundingClientRect(), html: s.querySelector('.who').innerHTML }));
+  const before = new Map([...$('bracket').querySelectorAll('.slot[data-key]')].map(s => [s.dataset.key, s.dataset.team]));
+  const wasComplete = myPicks().size === st.matches.length;
+
+  applyPickLocal(mid, quitar ? null : team);
+  drawNotice(); drawBracket(); drawBoard(); drawHero();
+
+  if (!quitar) {
+    const loserTeam = sides.find(s => s.team !== team)?.team;
+    for (const dst of st.matches) {
+      for (const slot of [1, 2]) {
+        if ((slot === 1 ? dst.src1_match : dst.src2_match) !== mid) continue;
+        const winSide = slot === 1 ? dst.src1_win : dst.src2_win;
+        const flyTeam = winSide ? team : loserTeam;
+        const key = `s${dst.id}-${slot}`;
+        const el = $('bracket').querySelector(`.slot[data-key="${key}"]`);
+        if (!el || el.dataset.team !== flyTeam || before.get(key) === flyTeam) continue;
+        const from = sides.find(s => s.team === flyTeam);
+        fly(from.rect, from.html, el, !winSide);
+      }
+    }
+    if (!wasComplete && myPicks().size === st.matches.length) {
+      const final = st.matches[st.matches.length - 1];
+      const fc = $('bracket').querySelector(`.match[data-match="${final.id}"]`);
+      if (fc && !reduced) setTimeout(() => replay(fc, 'complete'), 380);
+      authMenu.toast('🏆 ¡Bracket completo! Puedes cambiarlo hasta el cierre');
+    }
+  }
+
+  // Se guardan en orden; si algo falla, se recarga lo que hay en el servidor
+  pending++;
+  queue = queue.then(async () => {
+    const { error } = await supabase.rpc('save_pickem_pick', { p_match: mid, p_team: quitar ? null : team });
+    pending--;
+    if (error) { authMenu.toast(error.message, true); await load(); }
+  });
 });
+
+// ── Números que cuentan hasta su valor nuevo ──
+function tweenNumbers(root) {
+  for (const el of root.querySelectorAll('[data-n]')) {
+    const to = Number(el.dataset.n), fmt = el.dataset.fmt;
+    const show = (v) => { el.textContent = fmt === 'x' ? `×${v.toFixed(2)}` : fmtN(Math.round(v)); };
+    const from = el._n;
+    el._n = to;
+    if (from === undefined || from === to || reduced) { show(to); continue; }
+    const t0 = performance.now(), dur = 520;
+    cancelAnimationFrame(el._raf);
+    const step = (t) => {
+      const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      show(from + (to - from) * e);
+      if (k < 1) el._raf = requestAnimationFrame(step);
+    };
+    el._raf = requestAnimationFrame(step);
+  }
+}
 
 // ── Apuestas ──
 function betState(m) {
@@ -453,32 +754,35 @@ function betCard(m) {
   const mine = st.me ? bets.find(b => b.player_id === st.me.id) : null;
   const sel = st.betTeam.get(m.id) ?? mine?.team ?? null;
   const canBet = state === 'open' && !!st.me;
-  // Cuánto se lleva cada 🦷 apostado a ese equipo si gana (con el bote de ahora)
+  const busy = st.betBusy.has(m.id);
+  // Cuánto devuelve cada 🦷 apostado a ese equipo si gana (con el bote de ahora)
   const mult = (team) => { const w = sum(team); return w ? (pot / w) : null; };
   const stateTxt = { waiting: 'Se abre cuando se conozcan los finalistas', open: '● Abierta', closed: 'Cerrada · se juega', done: 'Terminada' }[state];
-  const teamBox = (team) => {
-    const inner = `${logo(team)}<span class="nm">${team ? esc(team) : 'Por definir'}<small>🦷 ${fmtN(sum(team))} apostados</small></span>
-      ${team && mult(team) ? `<span class="mult" title="Cada diente apostado a este equipo devuelve esto si gana">×${mult(team).toFixed(2)}</span>` : ''}`;
+  const teamBox = (team, k) => {
+    const inner = `${logo(team)}<span class="nm">${team ? esc(team) : 'Por definir'}<small>🦷 <span data-morph-skip data-n="${sum(team)}">${fmtN(sum(team))}</span> apostados</small></span>
+      ${team && mult(team) ? `<span class="mult" title="Cada diente apostado a este equipo devuelve esto si gana" data-morph-skip data-n="${mult(team).toFixed(4)}" data-fmt="x">×${mult(team).toFixed(2)}</span>` : ''}`;
     const cls = `${team && sel === team ? 'sel' : ''} ${win && team === win ? 'won' : ''}`;
-    return canBet && team ? `<button type="button" class="bet-team ${cls}" data-bet-team="${esc(team)}" data-m="${m.id}" aria-pressed="${sel === team}">${inner}</button>`
-      : `<div class="bet-team ${cls}">${inner}</div>`;
+    return canBet && team ? `<button type="button" class="bet-team ${cls}" data-key="bt${k}" data-bet-team="${esc(team)}" data-m="${m.id}" aria-pressed="${sel === team}">${inner}</button>`
+      : `<div class="bet-team ${cls}" data-key="bt${k}">${inner}</div>`;
   };
   const byId = new Map(st.players.map(p => [p.id, p]));
   const W = win ? sum(win) : 0, L = pot - W;
   const payout = (b) => !win ? null : (W === 0 || L === 0) ? b.amount : b.team === win ? b.amount + Math.floor(b.amount * L / W) : 0;
   const rows = bets.slice().sort((a, b) => b.amount - a.amount).map(b => { const pl = byId.get(b.player_id); if (!pl) return '';
     const p = payout(b);
-    return `<div class="bet-row"><img loading="lazy" decoding="async" src="${iconOr1(pl.icon_id)}" alt="" onerror="${ICON_ONERROR}">
+    return `<div class="bet-row" data-key="br${pl.id}"><img loading="lazy" decoding="async" src="${iconOr1(pl.icon_id)}" alt="" onerror="${ICON_ONERROR}">
       <a href="perfil.html?jugador=${encodeURIComponent(pl.id)}">${esc(nameOf(pl))}</a><span class="tm">→ ${esc(b.team)}</span>
       <span class="amt">🦷 ${fmtN(b.amount)}</span>${p == null ? '' : `<span class="res ${p > b.amount ? 'win' : p < b.amount ? 'lose' : ''}">${p > b.amount ? '+' + fmtN(p - b.amount) : p < b.amount ? '−' + fmtN(b.amount) : 'devuelta'}</span>`}</div>`; }).join('');
-  return `<div class="card bet" data-bet="${m.id}">
+  const s1 = sum(t[0]), s2 = sum(t[1]);
+  return `<div class="card bet" data-key="bet${m.id}" data-bet="${m.id}">
     <div class="bet-head"><b>${esc(m.label ?? 'Apuesta')}</b><span class="bet-state ${state === 'open' ? 'open' : state === 'done' ? 'done' : ''}">${stateTxt}</span>
-      <span class="bet-pot">Bote: 🦷 ${fmtN(pot)}</span></div>
-    <div class="bet-teams">${teamBox(t[0])}${teamBox(t[1])}</div>
-    ${canBet ? `<div class="bet-form"><input type="number" inputmode="numeric" min="${MIN_BET}" max="${st.balance}" step="1" id="bet-amt-${m.id}" value="${mine?.amount ?? ''}" placeholder="🦷 mín. ${MIN_BET}" aria-label="Dientes a apostar">
-        <button class="btn" type="button" data-bet-go="${m.id}" ${sel ? '' : 'disabled'}>${mine ? 'Cambiar apuesta' : 'Apostar'}</button>
-        ${mine ? `<button class="btn ghost" type="button" data-bet-off="${m.id}">Retirar</button>` : ''}
-        <span class="bal">Tienes <b>🦷 ${fmtN(st.balance + (mine?.amount ?? 0))}</b>${mine ? ' (contando lo apostado)' : ''}</span></div>`
+      <span class="bet-pot" data-pot="${pot}">Bote: 🦷 <span data-morph-skip data-n="${pot}">${fmtN(pot)}</span></span></div>
+    <div class="bet-teams">${teamBox(t[0], 1)}${teamBox(t[1], 2)}</div>
+    ${pot ? `<div class="bet-bar" aria-hidden="true"><span class="a" style="--w:${s1 || 0.0001}"></span><span class="b" style="--w:${s2 || 0.0001}"></span></div>` : ''}
+    ${canBet ? `<div class="bet-form"><input type="number" inputmode="numeric" min="${MIN_BET}" max="${st.balance + (mine?.amount ?? 0)}" step="1" id="bet-amt-${m.id}" value="${mine?.amount ?? ''}" placeholder="🦷 mín. ${MIN_BET}" aria-label="Dientes a apostar">
+        <button class="btn ${busy ? 'busy' : ''}" type="button" data-bet-go="${m.id}" ${sel && !busy ? '' : 'disabled'}><span class="lbl">${mine ? 'Cambiar apuesta' : 'Apostar'}</span></button>
+        ${mine ? `<button class="btn ghost" type="button" data-bet-off="${m.id}" ${busy ? 'disabled' : ''}><span class="lbl">Retirar</span></button>` : ''}
+        <span class="bal">Tienes <b>🦷 <span data-morph-skip data-n="${st.balance + (mine?.amount ?? 0)}">${fmtN(st.balance + (mine?.amount ?? 0))}</span></b>${mine ? ' (contando lo apostado)' : ''}</span></div>`
       : state === 'open' && !st.me ? `<p class="note">${st.session ? 'Vincula tu cuenta de LoL para apostar.' : '<a href="login.html">Inicia sesión</a> para apostar.'}</p>` : ''}
     ${mine && state !== 'done' ? `<div class="bet-mine">Tu apuesta: <b>🦷 ${fmtN(mine.amount)} a ${esc(mine.team)}</b>${mult(mine.team) ? ` · si gana, te llevas unos <b>🦷 ${fmtN(Math.floor(mine.amount * mult(mine.team)))}</b> con el bote de ahora` : ''}.</div>` : ''}
     ${rows ? `<div class="bet-list">${rows}</div>` : ''}
@@ -489,28 +793,35 @@ function betCard(m) {
 function drawBets() {
   const ms = st.matches.filter(m => m.bets_enabled);
   $('bets-sec').hidden = !ms.length;
-  $('bets-sec').innerHTML = `<h2 class="section-title"><span class="bar"></span>Apuesta</h2>${ms.map(betCard).join('')}`;
+  const pots = new Map([...$('bets-sec').querySelectorAll('[data-pot]')].map(p => [p.closest('[data-bet]').dataset.bet, p.dataset.pot]));
+  morph($('bets-sec'), `<h2 class="section-title" data-key="bt"><span class="bar"></span>Apuesta</h2>${ms.map(betCard).join('')}`);
+  tweenNumbers($('bets-sec'));
+  // El bote late cuando cambia (alguien apostó)
+  for (const p of $('bets-sec').querySelectorAll('[data-pot]')) {
+    const was = pots.get(p.closest('[data-bet]').dataset.bet);
+    if (was !== undefined && was !== p.dataset.pot && !reduced) replay(p, 'bump');
+  }
 }
 
 $('bets-sec').addEventListener('click', async (e) => {
   const tb = e.target.closest('[data-bet-team]');
-  if (tb) { const amt = $('bet-amt-' + tb.dataset.m)?.value; st.betTeam.set(Number(tb.dataset.m), tb.dataset.betTeam); drawBets();
-    const inp = $('bet-amt-' + tb.dataset.m); if (inp) { inp.value = amt; inp.focus(); } return; }
+  if (tb) { st.betTeam.set(Number(tb.dataset.m), tb.dataset.betTeam); drawBets(); $('bet-amt-' + tb.dataset.m)?.focus(); return; }
   const go = e.target.closest('[data-bet-go], [data-bet-off]'); if (!go) return;
   const mid = Number(go.dataset.betGo ?? go.dataset.betOff), off = go.hasAttribute('data-bet-off');
   const mine = st.bets.find(b => b.match_id === mid && b.player_id === st.me?.id);
   const team = st.betTeam.get(mid) ?? mine?.team;
   const amount = off ? 0 : parseInt($('bet-amt-' + mid)?.value, 10);
-  if (!off && !(amount >= MIN_BET)) { authMenu.toast(`La apuesta mínima es de ${MIN_BET} dientes.`, true); return; }
-  go.disabled = true;
+  if (!off && !(amount >= MIN_BET)) { authMenu.toast(`La apuesta mínima es de ${MIN_BET} dientes.`, true); $('bet-amt-' + mid)?.focus(); return; }
+  st.betBusy.add(mid); drawBets();
   const { error } = await supabase.rpc('place_pickem_bet', { p_match: mid, p_team: team, p_amount: amount });
-  if (error) { authMenu.toast(error.message, true); go.disabled = false; return; }
+  st.betBusy.delete(mid);
+  if (error) { authMenu.toast(error.message, true); drawBets(); return; }
   st.betTeam.delete(mid);
   authMenu.toast(off ? 'Apuesta retirada: dientes devueltos' : `🎲 Apostaste 🦷 ${fmtN(amount)} a ${team}`);
   await load();
 });
 
-// ── Clasificación ──
+// ── Clasificación (las filas se deslizan a su puesto nuevo) ──
 function drawBoard() {
   const byId = new Map(st.players.map(p => [p.id, p]));
   const total = st.matches.length;
@@ -526,14 +837,26 @@ function drawBoard() {
   const resolved = st.matches.filter(br.hasResult).length;
   const list = [...rows.values()].sort((a, b) => b.teeth - a.teeth || b.ok - a.ok || b.picks - a.picks || nameOf(a.pl).localeCompare(nameOf(b.pl)));
   const alive = (r) => total > 0 && r.picks === total && r.bad === 0;
-  $('board').innerHTML = list.map((r, i) => `<tr class="${i === 0 && r.teeth > 0 ? 'first' : ''}">
+  const tbody = $('board');
+  const first = new Map([...tbody.querySelectorAll('tr[data-key]')].map(tr => [tr.dataset.key, tr.getBoundingClientRect().top]));
+  morph(tbody, list.map((r, i) => `<tr data-key="p${r.pl.id}" class="${i === 0 && r.teeth > 0 ? 'first' : ''}">
       <td class="pos">${i + 1}</td>
       <td><div class="pl"><img loading="lazy" decoding="async" src="${iconOr1(r.pl.icon_id)}" alt="" onerror="${ICON_ONERROR}">
         <a href="perfil.html?jugador=${encodeURIComponent(r.pl.id)}">${esc(nameOf(r.pl))}</a>${alive(r) ? `<span class="tag">${st.ev.finished_at ? 'Skin Definitiva' : 'Pleno posible'}</span>` : ''}</div></td>
-      <td class="num"><span class="teeth">🦷 ${r.teeth}</span></td>
+      <td class="num"><span class="teeth">🦷 <span data-morph-skip data-n="${r.teeth}">${r.teeth}</span></span></td>
       <td class="num">${r.ok}/${resolved}</td>
       <td class="num hide-sm">${r.picks}/${total}</td>
-    </tr>`).join('') || '<tr><td colspan="5" class="dim" style="text-align:center;padding:22px;">Nadie ha armado su bracket todavía.</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="5" class="dim" style="text-align:center;padding:22px;">Nadie ha armado su bracket todavía.</td></tr>');
+  tweenNumbers(tbody);
+  if (reduced) return;
+  for (const tr of tbody.querySelectorAll('tr[data-key]')) {
+    const was = first.get(tr.dataset.key);
+    if (was === undefined) continue;
+    const dy = was - tr.getBoundingClientRect().top;
+    if (Math.abs(dy) < 1) continue;
+    tr.animate([{ transform: `translateY(${dy}px)` }, { transform: 'translateY(0)' }], { duration: 420, easing: EASE_IO });
+    replay(tr, 'moved');
+  }
 }
 
 function tick() {
@@ -541,10 +864,8 @@ function tick() {
   const el = $('count'); if (!el) return;
   const diff = countdownTarget - Date.now();
   if (diff <= 0) { countdownTarget = null; draw(); return; }   // llegó el cierre: se bloquea el bracket
-  el.querySelector('[data-u="d"]').textContent = Math.floor(diff / 86400000);
-  el.querySelector('[data-u="h"]').textContent = String(Math.floor(diff / 3600000) % 24).padStart(2, '0');
-  el.querySelector('[data-u="m"]').textContent = String(Math.floor(diff / 60000) % 60).padStart(2, '0');
-  el.querySelector('[data-u="s"]').textContent = String(Math.floor(diff / 1000) % 60).padStart(2, '0');
+  const c = countParts(diff);
+  for (const u of ['d', 'h', 'm', 's']) { const b = el.querySelector(`[data-u="${u}"]`); if (b.textContent !== String(c[u])) b.textContent = c[u]; }
 }
 setInterval(tick, 1000);
 
