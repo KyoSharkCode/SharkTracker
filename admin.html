@@ -310,7 +310,7 @@
     <section data-tab="pickems">
       <h2 class="section-title"><span class="bar"></span>Pickems <button class="btn ghost title-btn" id="btn-new-pk" type="button">+ Nuevo evento</button></h2>
       <div id="pk-list"></div>
-      <p class="sp-note">Las horas se escriben en la hora de tu computadora; debajo se ve a qué hora de España equivalen. Los resultados se cargan después del cierre y reparten los 🦷 al momento (si corriges uno, se recalcula). Al finalizar, quien acertó todos los marcadores recibe la Skin Definitiva en “Premios por entregar” de la Tienda.</p>
+      <p class="sp-note">Las horas se escriben en la hora de tu computadora; debajo se ve a qué hora de España equivalen. Los resultados se cargan en orden, después del cierre, y reparten los 🦷 al momento (si corriges uno, se recalcula todo). Las series de rondas siguientes reciben sus equipos solas. Las apuestas se abren cuando se conocen los dos equipos y cierran a la hora de inicio de la serie o con “Cerrar apuestas”. Al finalizar, quien acertó todos los ganadores recibe la Skin Definitiva en “Premios por entregar” de la Tienda.</p>
       <p class="err" id="pk-err"></p>
     </section>
 
@@ -370,6 +370,7 @@ import { getDDragonVersion } from './assets/lol-data.js';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { prizeIconSvg, PRIZE_ICONS, injectCosmeticsCss } from './assets/cosmetics.js';
+import { createBracket, scoreOptions } from './assets/pickems.js';
 injectCosmeticsCss();
 createNavMenu({ current: null });
 
@@ -442,6 +443,7 @@ async function init() {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'player_profiles' }, () => { clearTimeout(t2); t2 = setTimeout(loadPlayers, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'challenges' }, () => { clearTimeout(t3); t3 = setTimeout(loadChallenges, 400); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'pickem_picks' }, () => { clearTimeout(t6); t6 = setTimeout(loadPickems, 800); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'pickem_bets' }, () => { clearTimeout(t6); t6 = setTimeout(loadPickems, 800); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'prize_claims' }, () => { clearTimeout(t5); t5 = setTimeout(loadRewards, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'reward_settings' }, () => { clearTimeout(t5); t5 = setTimeout(loadRewards, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'mission_settings' }, () => { clearTimeout(t4); t4 = setTimeout(loadMissions, 400); })
@@ -883,73 +885,82 @@ $('sp-list').addEventListener('click', async (e) => {
 });
 
 // ── Pickems ──
-let pk = { events: [], matches: [], votes: new Map(), newEvent: false, newMatch: null, confirm: null };
+let pk = { events: [], matches: [], votes: new Map(), bets: new Map(), newEvent: false, newMatch: null, confirm: null };
 const madrid = (iso) => new Date(iso).toLocaleString('es-ES', { timeZone: 'Europe/Madrid', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' (España)';
-function pkScores(bo) {
-  const w = (bo + 1) / 2, out = [];
-  for (let l = 0; l < w; l++) out.push([w, l]);
-  for (let l = w - 1; l >= 0; l--) out.push([l, w]);
-  return out;
-}
 async function loadPickems() {
-  const [{ data: events, error }, { data: matches }, { data: picks }] = await Promise.all([
+  const [{ data: events, error }, { data: matches }, { data: picks }, { data: bets }] = await Promise.all([
     supabase.from('pickem_events').select('*').order('locks_at', { ascending: false }),
     supabase.from('pickem_matches').select('*').order('sort').order('id'),
     supabase.from('pickem_picks').select('match_id'),
+    supabase.from('pickem_bets').select('match_id, amount'),
   ]);
   if (error) { $('pk-err').textContent = `No se pudieron cargar los Pickems: ${error.message} (¿corriste la migración?)`; return; }
-  const votes = new Map();
+  const votes = new Map(), betSum = new Map();
   for (const p of picks ?? []) votes.set(p.match_id, (votes.get(p.match_id) ?? 0) + 1);
-  pk = { ...pk, events: events ?? [], matches: matches ?? [], votes };
+  for (const b of bets ?? []) { const x = betSum.get(b.match_id) ?? { n: 0, sum: 0 }; x.n++; x.sum += b.amount; betSum.set(b.match_id, x); }
+  pk = { ...pk, events: events ?? [], matches: matches ?? [], votes, bets: betSum };
   drawPickems();
 }
-function pkMatchRow(m, evId, locked, finished) {
+function pkMatchRow(m, evId, locked, finished, br) {
   const id = m?.id ?? 'new';
-  const bo = m?.best_of ?? 3;
+  const bo = m?.best_of ?? 5;
   const res = m && m.score1 != null ? `${m.score1}-${m.score2}` : '';
+  const off = finished ? 'disabled' : '';
+  // Lado que sale de otra serie: se muestra de dónde viene (y quién es, si ya se sabe)
+  const teamIn = (slot) => {
+    const fixed = slot === 1 ? m?.team1 : m?.team2;
+    const fromSrc = m && (slot === 1 ? m.src1_match : m.src2_match);
+    if (fromSrc) { const real = br.actual(m, slot);
+      return `<span class="in team" style="display:inline-flex;align-items:center;color:var(--text-dim)" title="Sale de otra serie">${esc(real ?? br.placeholder(m, slot))}</span>`; }
+    return `<input class="in team" data-f="t${slot}" maxlength="30" placeholder="Equipo ${slot}" value="${esc(fixed ?? '')}" ${off}>`;
+  };
+  const t1 = m ? br.actual(m, 1) : null, t2 = m ? br.actual(m, 2) : null;
+  const bet = m ? pk.bets.get(m.id) : null;
   return `<div class="pk-m" data-pk-m="${id}" data-pk-ev="${evId}">
-    <input class="in lbl" data-f="label" maxlength="40" placeholder="Ronda (opcional)" value="${esc(m?.label ?? '')}" ${finished ? 'disabled' : ''}>
-    <input class="in team" data-f="t1" maxlength="30" placeholder="Equipo 1" value="${esc(m?.team1 ?? '')}" ${finished ? 'disabled' : ''}>
-    <span class="dim">vs</span>
-    <input class="in team" data-f="t2" maxlength="30" placeholder="Equipo 2" value="${esc(m?.team2 ?? '')}" ${finished ? 'disabled' : ''}>
-    <select class="in" data-f="bo" ${finished ? 'disabled' : ''}>${[1, 3, 5].map(n => `<option value="${n}" ${n === bo ? 'selected' : ''}>BO${n}</option>`).join('')}</select>
-    <input class="in dt" data-f="start" type="datetime-local" title="Fecha de la serie (opcional)" value="${isoToInput(m?.starts_at)}" ${finished ? 'disabled' : ''}>
-    <input class="in sort" data-f="sort" type="number" title="Orden" value="${m?.sort ?? (pk.matches.filter(x => x.event_id === evId).length + 1)}" ${finished ? 'disabled' : ''}>
+    <input class="in lbl" data-f="label" maxlength="40" placeholder="Ronda (opcional)" value="${esc(m?.label ?? '')}" ${off}>
+    ${teamIn(1)}<span class="dim">vs</span>${teamIn(2)}
+    <select class="in" data-f="bo" ${off}>${[1, 3, 5].map(n => `<option value="${n}" ${n === bo ? 'selected' : ''}>BO${n}</option>`).join('')}</select>
+    <label class="rw-check" title="Dientes por acertar esta serie">🦷 <input class="in sort" data-f="points" type="number" min="0" value="${m?.points ?? 10}" ${off}></label>
+    <input class="in dt" data-f="start" type="datetime-local" title="Hora de inicio (opcional; las apuestas cierran a esta hora)" value="${isoToInput(m?.starts_at)}" ${off}>
+    <input class="in sort" data-f="sort" type="number" title="Orden" value="${m?.sort ?? (pk.matches.filter(x => x.event_id === evId).length + 1)}" ${off}>
+    <label class="rw-check" title="Se puede apostar en esta serie"><input type="checkbox" data-f="bets" ${m?.bets_enabled ? 'checked' : ''} ${off}> Apuestas</label>
     ${finished ? '' : `<button class="btn ${m ? 'ghost' : 'ok'}" data-pk="save-m" type="button">${m ? 'Guardar' : 'Crear'}</button>
       <button class="btn no" data-pk="${m ? 'del-m' : 'cancel-m'}" type="button">${m ? 'Borrar' : 'Cancelar'}</button>`}
-    ${m ? `<span class="votes">${pk.votes.get(m.id) ?? 0} votos</span>
-      <div class="res"><select class="in" data-f="res" ${locked && !finished ? '' : 'disabled'} title="${locked ? 'Resultado' : 'Se carga después del cierre'}">
-        <option value="">Sin resultado</option>${pkScores(m.best_of).map(([a, b]) => `<option value="${a}-${b}" ${res === `${a}-${b}` ? 'selected' : ''}>${esc(a > b ? m.team1 : m.team2)} ${a}-${b}</option>`).join('')}</select>
-        ${locked && !finished ? '<button class="btn ok" data-pk="res" type="button">Cargar</button>' : ''}</div>` : ''}
-    ${pk.confirm === 'm' + id ? `<div class="confirm" style="flex-basis:100%">¿Borrar la serie <b>${esc(m.team1)} vs ${esc(m.team2)}</b>? Se pierden sus votos y los 🦷 que haya repartido.
+    ${m ? `<span class="votes">${pk.votes.get(m.id) ?? 0} votos${bet ? ` · ${bet.n} apuestas (🦷 ${fmtN(bet.sum)})` : ''}</span>
+      ${m.bets_enabled && !finished && m.score1 == null ? `<button class="btn ghost" data-pk="bets-toggle" type="button">${m.bets_closed_at ? 'Reabrir apuestas' : 'Cerrar apuestas'}</button>` : ''}
+      <div class="res"><select class="in" data-f="res" ${locked && !finished && t1 && t2 ? '' : 'disabled'} title="${!locked ? 'Se carga después del cierre' : !(t1 && t2) ? 'Faltan resultados de series anteriores' : 'Resultado'}">
+        <option value="">Sin resultado</option>${t1 && t2 ? scoreOptions(m.best_of).map(([a, b]) => `<option value="${a}-${b}" ${res === `${a}-${b}` ? 'selected' : ''}>${esc(a > b ? t1 : t2)} ${a}-${b}</option>`).join('') : ''}</select>
+        ${locked && !finished && t1 && t2 ? '<button class="btn ok" data-pk="res" type="button">Cargar</button>' : ''}</div>` : ''}
+    ${pk.confirm === 'm' + id ? `<div class="confirm" style="flex-basis:100%">¿Borrar la serie <b>${esc(m.label ?? '')}</b>? Se pierden sus votos, se devuelven sus apuestas y se quitan los 🦷 que haya repartido.
       <div class="actions"><button class="btn danger" data-pk="del-m-yes" type="button">Sí, borrar</button><button class="btn ghost" data-pk="no" type="button">Cancelar</button></div></div>` : ''}
   </div>`;
 }
 function pkEventCard(ev) {
   const id = ev?.id ?? 'new';
-  const now = Date.now();
-  const locked = ev && now >= new Date(ev.locks_at).getTime();
+  const locked = ev && Date.now() >= new Date(ev.locks_at).getTime();
   const finished = !!ev?.finished_at;
   const ms = ev ? pk.matches.filter(m => m.event_id === ev.id) : [];
+  const br = createBracket(ms);
   const allRes = ms.length && ms.every(m => m.score1 != null);
   const chip = !ev ? '' : finished ? '<span class="chip off">Finalizado</span>' : locked ? '<span class="chip soon">Cerrado</span>' : '<span class="chip live">Abierto</span>';
   return `<div class="pk-ev" data-pk-ev-card="${id}">
     <div class="pk-head" data-pk-ev="${id}">
       <div style="flex:1;min-width:200px"><label>Nombre ${chip}</label><input class="in" data-f="name" maxlength="60" value="${esc(ev?.name ?? '')}" placeholder="Worlds 2026 · Suizo" ${finished ? 'disabled' : ''}></div>
-      <div><label>Cierra</label><input class="in" data-f="locks" type="datetime-local" value="${isoToInput(ev?.locks_at)}" ${finished ? 'disabled' : ''}>
+      <div><label>Cierra el bracket</label><input class="in" data-f="locks" type="datetime-local" value="${isoToInput(ev?.locks_at)}" ${finished ? 'disabled' : ''}>
         <small class="es">${ev ? madrid(ev.locks_at) : '&nbsp;'}</small></div>
       <div class="actions" style="flex-direction:row">
-        ${finished ? `<a class="btn ghost" href="pickems.html?id=${ev.id}">Ver página</a>` : `<button class="btn ok" data-pk="save-ev" type="button">${ev ? 'Guardar' : 'Crear'}</button>
+        ${ev ? `<a class="btn ghost" href="pickems.html?id=${ev.id}">Ver página</a>` : ''}
+        ${finished ? '' : `<button class="btn ok" data-pk="save-ev" type="button">${ev ? 'Guardar' : 'Crear'}</button>
         <button class="btn no" data-pk="${ev ? 'del-ev' : 'cancel-ev'}" type="button">${ev ? 'Borrar' : 'Cancelar'}</button>`}
         ${ev && !finished ? `<button class="btn ${allRes ? 'ok' : 'ghost'}" data-pk="finish" type="button" ${allRes ? '' : 'disabled title="Faltan resultados"'}>Finalizar y dar skin</button>` : ''}
       </div>
     </div>
-    ${pk.confirm === 'ev' + id ? `<div class="confirm" style="margin:10px 16px">¿Borrar <b>${esc(ev.name)}</b>? Se borran sus series, todos los votos y los 🦷 que haya repartido.
+    ${pk.confirm === 'ev' + id ? `<div class="confirm" style="margin:10px 16px">¿Borrar <b>${esc(ev.name)}</b>? Se borran sus series y votos, se devuelven las apuestas y se quitan los 🦷 que haya repartido.
       <div class="actions"><button class="btn danger" data-pk="del-ev-yes" data-id="${id}" type="button">Sí, borrar</button><button class="btn ghost" data-pk="no" type="button">Cancelar</button></div></div>` : ''}
-    ${pk.confirm === 'fin' + id ? `<div class="confirm" style="margin:10px 16px">¿Finalizar <b>${esc(ev.name)}</b>? Quien haya acertado todos los marcadores recibe la Skin Definitiva (pendiente de entrega). Después ya no se pueden cambiar resultados.
+    ${pk.confirm === 'fin' + id ? `<div class="confirm" style="margin:10px 16px">¿Finalizar <b>${esc(ev.name)}</b>? Quien haya acertado todos los ganadores recibe la Skin Definitiva (pendiente de entrega). Después ya no se pueden cambiar resultados.
       <div class="actions"><button class="btn danger" data-pk="finish-yes" data-id="${id}" type="button">Sí, finalizar</button><button class="btn ghost" data-pk="no" type="button">Cancelar</button></div></div>` : ''}
-    ${ev ? `${ms.map(m => pkMatchRow(m, ev.id, locked, finished)).join('')}
-      ${pk.newMatch === ev.id ? pkMatchRow(null, ev.id, locked, finished) : ''}
+    ${ev ? `${ms.map(m => pkMatchRow(m, ev.id, locked, finished, br)).join('')}
+      ${pk.newMatch === ev.id ? pkMatchRow(null, ev.id, locked, finished, br) : ''}
       ${finished ? '' : `<div class="pk-m"><button class="btn ghost" data-pk="new-m" data-id="${ev.id}" type="button">+ Serie</button>${ms.length ? '' : '<span class="dim">Todavía no hay series.</span>'}</div>`}` : ''}
   </div>`;
 }
@@ -983,10 +994,14 @@ $('pk-list').addEventListener('click', async (e) => {
   } else if (act === 'save-m') {
     const id = row.dataset.pkM;
     call = ['admin_save_pickem_match', { p_id: id === 'new' ? null : Number(id), p_event: Number(row.dataset.pkEv), p_label: v(row, 'label'),
-      p_team1: v(row, 't1'), p_team2: v(row, 't2'), p_best_of: Number(v(row, 'bo')),
-      p_starts_at: v(row, 'start') ? new Date(v(row, 'start')).toISOString() : null, p_sort: parseInt(v(row, 'sort'), 10) || null }, '✅ Serie guardada'];
+      p_team1: v(row, 't1'), p_team2: v(row, 't2'), p_best_of: Number(v(row, 'bo')), p_points: parseInt(v(row, 'points'), 10) || 0,
+      p_starts_at: v(row, 'start') ? new Date(v(row, 'start')).toISOString() : null, p_sort: parseInt(v(row, 'sort'), 10) || null,
+      p_bets_enabled: row.querySelector('[data-f="bets"]').checked }, '✅ Serie guardada'];
   } else if (act === 'del-m-yes') {
     call = ['admin_delete_pickem_match', { p_id: Number(row.dataset.pkM) }, 'Serie borrada'];
+  } else if (act === 'bets-toggle') {
+    const m = pk.matches.find(x => x.id === Number(row.dataset.pkM));
+    call = ['admin_close_pickem_bets', { p_match: m.id, p_closed: !m.bets_closed_at }, m.bets_closed_at ? 'Apuestas reabiertas' : '🔒 Apuestas cerradas'];
   } else if (act === 'res') {
     const r = v(row, 'res'); const [a, c] = r ? r.split('-').map(Number) : [null, null];
     call = ['admin_set_pickem_result', { p_match: Number(row.dataset.pkM), p_score1: a, p_score2: c }, r ? '🦷 Resultado cargado y dientes repartidos' : 'Resultado borrado'];
@@ -1006,8 +1021,7 @@ $('pk-list').addEventListener('click', async (e) => {
 // ── Recompensas y tienda ──
 const AMOUNT_LABELS = { mision_facil: 'Misión fácil', mision_media: 'Misión media', mision_dificil: 'Misión difícil', grupal_top: 'Grupal: el que más aportó',
   grupal_resto: 'Grupal: a repartir entre el resto', top1: 'Top 1 semanal', top2: 'Top 2 semanal', top3: 'Top 3 semanal', victoria: 'Cada victoria',
-  primera_victoria: 'Primera victoria del día', perfecta: 'Partida perfecta', pentakill: 'Pentakill', partida_mes: 'Partida del mes', reto1: 'Reto 1º', reto2: 'Reto 2º', reto3: 'Reto 3º',
-  pickem_ganador: 'Pickems: acierta el ganador', pickem_exacto: 'Pickems: marcador exacto' };
+  primera_victoria: 'Primera victoria del día', perfecta: 'Partida perfecta', pentakill: 'Pentakill', partida_mes: 'Partida del mes', reto1: 'Reto 1º', reto2: 'Reto 2º', reto3: 'Reto 3º' };
 const KIND_ES = { marco: 'Marco', fila: 'Fila', banner: 'Banner', nombre: 'Nombre', emoji: 'Emoji', premio: 'Premio' };
 // ── Discord ──
 let dc = null;

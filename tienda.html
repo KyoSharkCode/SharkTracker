@@ -476,7 +476,7 @@ const EARN = [
   ['mano', 'Pentakill', 'Por cada partida con pentakill.', (a) => `${a.pentakill}`],
   ['estrella', 'Partida del mes', 'La mejor partida de SoloQ del grupo, al cerrar el mes.', (a) => `${a.partida_mes}`],
   ['medalla', 'Reto: 1º / 2º / 3º', 'Al terminar cada reto.', (a) => `${a.reto1} / ${a.reto2} / ${a.reto3}`],
-  ['diana', 'Pickems: ganador / marcador exacto', 'Por cada serie que aciertas en los Pickems. Si los clavas todos, Skin Definitiva.', (a) => `${a.pickem_ganador ?? 10} / ${a.pickem_exacto ?? 50}`],
+  ['diana', 'Pickems', 'Cada ganador que aciertas en tu bracket (más en las rondas finales). Si los aciertas todos, Skin Definitiva.', () => 'según la ronda'],
 ];
 function drawEarn() {
   const a = st.settings?.amounts ?? {};
@@ -502,8 +502,8 @@ function drawBadges() {
         ${m ? `<small class="when">✓ ${new Date(m.earned_at).toLocaleDateString('es-ES')}</small>` : ''}</div>`; }).join('')}</div></section>`;
 }
 
-const TX_ICON = { mision: 'diana', grupal: 'grupo', top: 'trofeo', victoria: 'check', primera_victoria: 'amanecer', perfecta: 'destello', pentakill: 'mano', partida_mes: 'estrella', reto: 'medalla', pickem: 'diana', compra: 'bolsa', canje: 'regalo', reembolso: 'intercambio', admin: 'lapiz' };
-const TX_NAME = { mision: 'Misión completada', grupal: 'Misión grupal', top: 'Tabla semanal', victoria: 'Victoria', primera_victoria: 'Primera victoria del día', perfecta: 'Partida perfecta', pentakill: 'Pentakill', partida_mes: 'Partida del mes', reto: 'Reto', pickem: 'Pickems', compra: 'Compra', canje: 'Premio canjeado', reembolso: 'Devolución', admin: 'Ajuste de la admin' };
+const TX_ICON = { mision: 'diana', grupal: 'grupo', top: 'trofeo', victoria: 'check', primera_victoria: 'amanecer', perfecta: 'destello', pentakill: 'mano', partida_mes: 'estrella', reto: 'medalla', pickem: 'diana', apuesta: 'dado', apuesta_premio: 'dado', apuesta_devuelta: 'intercambio', compra: 'bolsa', canje: 'regalo', reembolso: 'intercambio', admin: 'lapiz' };
+const TX_NAME = { mision: 'Misión completada', grupal: 'Misión grupal', top: 'Tabla semanal', victoria: 'Victoria', primera_victoria: 'Primera victoria del día', perfecta: 'Partida perfecta', pentakill: 'Pentakill', partida_mes: 'Partida del mes', reto: 'Reto', pickem: 'Pickems: acierto', apuesta: 'Apuesta', apuesta_premio: 'Apuesta ganada', apuesta_devuelta: 'Apuesta devuelta', compra: 'Compra', canje: 'Premio canjeado', reembolso: 'Devolución', admin: 'Ajuste de la admin' };
 function drawTx() {
   const el = $('tx');
   if (!st.me) { el.innerHTML = `<div class="card msg">${st.loggedIn ? 'Vincula tu cuenta de LoL para ver tus movimientos.' : '<a href="login.html">Inicia sesión</a> para ver tus movimientos.'}</div>`; return; }
