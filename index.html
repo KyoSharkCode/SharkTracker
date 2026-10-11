@@ -518,6 +518,7 @@ import { getDDragonVersion, esc } from './assets/lol-data.js';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { createMissionsWidget } from './assets/missions-widget.js';
+import { createPickemsBanner } from './assets/pickems-banner.js';
 import { renderMatchOfMonth } from './assets/rank-history.js';
 import { icono } from './assets/iconos.js';
 import { injectCosmeticsCss, decorateAvatar, applyRowEffect, nameHtml, loadEquipped } from './assets/cosmetics.js';
@@ -585,6 +586,7 @@ const formatDuration = (seconds) => seconds ? `${Math.floor(seconds / 60)}:${Str
 // Ir a perfil · Editar perfil · Mi Twitch · Admin Dashboard (admins) · Cerrar sesión
 const authMenu = createAuthMenu({ supabase, profileIconUrl });
 createMissionsWidget({ supabase, profileIconUrl });
+createPickemsBanner({ supabase });   // franja de Pickems cuando hay una fase o una apuesta abierta
 const AVATAR_ONERROR = `this.onerror=null;this.src='${profileIconUrl(1)}';`;
 const HIDE_ONERROR = `this.style.visibility='hidden';`;
 // El orden real ya lo calcula el backend (rank_snapshots.elo_score), que sí

@@ -53,6 +53,7 @@ create table if not exists pickem_matches (
   starts_at      timestamptz,
   score1         integer,                 -- resultado (null = todavía no se jugó)
   score2         integer,
+  result_at      timestamptz,             -- cuándo se cargó el resultado (para los avisos de Discord)
   bets_enabled   boolean not null default false,
   bets_closed_at timestamptz,             -- la admin cerró las apuestas a mano
   created_at     timestamptz not null default now(),
@@ -423,7 +424,8 @@ begin
   elsif exists (select 1 from pickem_matches where (src1_match = p_match or src2_match = p_match) and score1 is not null) then
     raise exception 'Primero borra los resultados de las series que salen de esta.';
   end if;
-  update pickem_matches set score1 = p_score1, score2 = p_score2 where id = p_match;
+  update pickem_matches set score1 = p_score1, score2 = p_score2,
+         result_at = case when p_score1 is null then null else now() end where id = p_match;
   perform pickem_settle_event(m.event_id);
 end;
 $$;
