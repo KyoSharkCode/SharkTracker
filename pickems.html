@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- Seguridad (CSP): la página solo puede cargar código y datos de los servicios que usa SharkTracker
+     (Supabase, jsDelivr, Riot/DDragon, CommunityDragon, Meraki, Google Fonts y Twitch). Si se agrega un
+     servicio nuevo, hay que sumarlo aquí (y en las demás páginas). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://mvupiohecvoiwuxwjdrt.supabase.co wss://mvupiohecvoiwuxwjdrt.supabase.co https://ddragon.leagueoflegends.com https://raw.communitydragon.org https://cdn.merakianalytics.com https://cdn.jsdelivr.net; frame-src 'self' https://player.twitch.tv; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="logo/favicon.svg">
+<link rel="apple-touch-icon" href="logo/apple-touch-icon.png">
+<title>Pickems · SharkTracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Albert+Sans:wght@400;500;600;700;800&family=Red+Hat+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  body{
+    margin:0; min-height:100vh; color:var(--text); font-family:'Albert Sans',system-ui,sans-serif;
+    background:
+      radial-gradient(1000px 460px at 15% -6%, rgba(61,255,210,.14), transparent 60%),
+      radial-gradient(1000px 460px at 85% 6%, rgba(169,139,255,.08), transparent 60%),
+      var(--bg);
+  }
+  a{color:inherit;}
+  .wrap{max-width:1080px; margin:0 auto; padding:44px 20px 80px;}
+
+  header{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:30px; padding-bottom:24px; border-bottom:1px solid var(--border);}
+  .logo-slot{display:flex; align-items:center; gap:14px;}
+  .logo-slot img{height:40px; width:auto; display:block;}
+  h1{grid-column:2; margin:0; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700; font-size:clamp(19px,3vw,28px); letter-spacing:.01em; text-transform:uppercase;}
+  .auth-slot{grid-column:3; justify-self:end;}
+  .avatar{width:40px; height:40px; border-radius:50%; background:var(--placeholder); border:2px solid var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; color:var(--accent); text-decoration:none; overflow:hidden; transition:transform .15s;}
+  .avatar:hover{transform:scale(1.06);}
+  .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .avatar.pending{border-color:var(--gold); color:var(--gold);}
+  .login-btn{background:var(--accent); color:var(--on-accent); font-weight:700; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:14px;}
+
+  .msg{padding:70px 20px; text-align:center; color:var(--text-dim); font-size:15px; line-height:1.6;}
+  .msg b{display:block; color:var(--text); font-family:'Unbounded',sans-serif; font-size:19px; letter-spacing:.01em; text-transform:uppercase; margin-bottom:6px;}
+
+  .section-title{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:'Unbounded',sans-serif; font-size:15px; font-weight:700; letter-spacing:.01em; text-transform:uppercase;}
+  .section-title .bar{width:4px; height:16px; border-radius:2px; background:var(--accent);}
+  .section-title .aside{margin-left:auto; font-family:'Albert Sans',system-ui,sans-serif; font-size:13px; font-weight:600; letter-spacing:0; text-transform:none; color:var(--text-dim);}
+  section{margin-bottom:38px;}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);}
+
+  /* ── Eventos (si hay más de uno) ── */
+  .events{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;}
+  .events a{padding:8px 14px; border-radius:99px; border:1px solid var(--border); text-decoration:none; font-size:13px; font-weight:700; color:var(--text-dim);}
+  .events a:hover{border-color:var(--accent); color:var(--text);}
+  .events a.on{border-color:var(--accent); background:rgba(61,255,210,.1); color:var(--text);}
+
+  /* ── Cabecera del evento ── */
+  .hero{border-radius:18px; border:1px solid rgba(169,139,255,.35); background:var(--panel); display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px 24px; align-items:center; padding:26px 30px; margin-bottom:22px;}
+  .hero > *{grid-column:1;}
+  .hero .count{grid-column:2; grid-row:1 / span 6; display:flex; gap:18px;}
+  .count div{display:flex; flex-direction:column; align-items:center;}
+  .count b{font-family:var(--f-cifra); font-size:40px; font-weight:700; line-height:1; color:var(--accent);}
+  .count small{font-size:12px; font-weight:500; color:var(--text-dim);}
+  .kicker{font-size:13px; font-weight:700; justify-self:start;}
+  .kicker.open{color:var(--green);} .kicker.closed{color:var(--gold-soft);} .kicker.done{color:var(--medusa);}
+  .ev-name{margin:2px 0 0; font-family:'Unbounded',sans-serif; font-size:30px; font-weight:700; line-height:1.15;}
+  .ev-sub{margin:0; font-size:14px; color:var(--text-dim);}
+  .ev-sub b{color:var(--text);}
+
+  /* ── Premios ── */
+  .prizes{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:22px;}
+  .prize{display:flex; gap:12px; align-items:center; padding:14px 16px; border-radius:14px; background:var(--panel); border:1px solid var(--border);}
+  .prize .ico{width:42px; height:42px; border-radius:12px; background:var(--panel-2); display:flex; align-items:center; justify-content:center; color:var(--gold); flex-shrink:0;}
+  .prize.skin{border-color:rgba(255,181,71,.4);}
+  .prize.skin .ico{color:var(--gold-soft);}
+  .prize b{display:block; font-size:14px;}
+  .prize small{display:block; font-size:12.5px; color:var(--text-dim); line-height:1.4;}
+  .prize .amt{margin-left:auto; font-family:var(--f-cifra); font-weight:600; font-size:17px; color:var(--gold); white-space:nowrap;}
+
+  /* ── Aviso para votar ── */
+  .notice{display:flex; align-items:center; gap:14px; padding:14px 18px; border-radius:14px; border:1px solid var(--border); background:var(--panel-2); margin-bottom:22px; font-size:14px; color:var(--text-dim);}
+  .notice b{color:var(--text);}
+  .notice .btn{margin-left:auto;}
+  .btn{display:inline-flex; align-items:center; justify-content:center; min-height:40px; padding:8px 16px; border-radius:10px; border:none; background:var(--accent); color:var(--on-accent); font:800 13.5px 'Albert Sans',system-ui,sans-serif; text-decoration:none; cursor:pointer; white-space:nowrap;}
+  .progress{font-family:var(--f-cifra); font-weight:600; color:var(--accent);}
+
+  /* ── Series ── */
+  .matches{display:flex; flex-direction:column; gap:12px;}
+  .match{padding:16px 18px;}
+  .m-top{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:12.5px; color:var(--text-dim); margin-bottom:12px;}
+  .bo{font-family:var(--f-cifra); font-size:12px; font-weight:600; padding:2px 8px; border-radius:6px; background:var(--panel-2); color:var(--text-soft);}
+  .m-res{margin-left:auto; font-weight:700;}
+  .m-res.done{color:var(--text);}
+  .m-res .sc{font-family:var(--f-cifra); color:var(--accent);}
+  .m-main{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:14px;}
+  .team{font-family:'Unbounded',sans-serif; font-size:17px; font-weight:700; min-width:0; overflow-wrap:anywhere;}
+  .team.t2{text-align:right;}
+  .team.win{color:var(--gold-soft);}
+  .team.lose{color:var(--text-faint);}
+  .opts{display:flex; gap:6px; flex-wrap:wrap; justify-content:center;}
+  .opts .vs{align-self:center; font-size:12px; font-weight:700; color:var(--text-faint); padding:0 4px;}
+  .opt{min-width:52px; min-height:44px; padding:6px 10px; border-radius:10px; border:1px solid var(--border); background:var(--field); color:var(--text-dim); font:600 15px var(--f-cifra); cursor:pointer; transition:border-color .15s, background .15s, color .15s;}
+  .opt:hover:not(:disabled){border-color:var(--accent); color:var(--text);}
+  .opt.sel{border-color:var(--accent); background:rgba(61,255,210,.14); color:var(--text);}
+  .opt.real{box-shadow:inset 0 0 0 2px var(--gold);}
+  .opt:disabled{cursor:default;}
+  .opt:disabled:not(.sel):not(.real){opacity:.5;}
+  .opt:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .mine{margin-top:10px; font-size:13px; font-weight:700; text-align:center; color:var(--text-dim);}
+  .mine.ok{color:var(--gold-soft);} .mine.half{color:var(--green);} .mine.bad{color:var(--red-soft);}
+
+  .split{display:flex; height:8px; border-radius:99px; overflow:hidden; margin-top:14px; background:var(--panel-2);}
+  .split span{display:block; height:100%;}
+  .split .a{background:var(--blue);} .split .b{background:var(--red);}
+  .split-lbl{display:flex; justify-content:space-between; font-size:12px; font-weight:700; margin-top:5px; color:var(--text-dim);}
+  .split-lbl .a{color:var(--blue-soft);} .split-lbl .b{color:var(--red-soft);}
+
+  .votes{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px;}
+  .vote{display:inline-flex; align-items:center; gap:7px; padding:3px 10px 3px 3px; border-radius:99px; border:1px solid var(--border); background:var(--panel-2); font-size:12.5px; font-weight:700; text-decoration:none;}
+  .vote img{width:24px; height:24px; border-radius:50%; object-fit:cover; background:var(--placeholder);}
+  .vote .sc{font-family:var(--f-cifra); font-weight:600; color:var(--text-soft);}
+  .vote.t1 .sc{color:var(--blue-soft);} .vote.t2 .sc{color:var(--red-soft);}
+  .vote.exact{border-color:var(--gold);} .vote.exact .sc{color:var(--gold-soft);}
+  .vote.half{border-color:rgba(61,255,210,.5);}
+  .vote.miss{opacity:.55;}
+  .novotes{font-size:12.5px; color:var(--text-faint); margin-top:12px;}
+
+  /* ── Clasificación ── */
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  th{text-align:left; font-size:12px; font-weight:600; color:var(--text-faint); padding:12px 14px; border-bottom:1px solid var(--border); white-space:nowrap;}
+  td{padding:11px 14px; border-bottom:1px solid rgba(120,220,210,.06); vertical-align:middle;}
+  th:first-child, td:first-child{padding-left:20px;} th:last-child, td:last-child{padding-right:20px;}
+  tr:last-child td{border-bottom:none;}
+  .num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .pos{font-family:var(--f-cifra); font-size:18px; font-weight:700; color:var(--text-faint); width:40px;}
+  tr.first .pos{color:var(--gold);}
+  .pl{display:flex; align-items:center; gap:10px; min-width:0;}
+  .pl img{width:32px; height:32px; border-radius:50%; object-fit:cover; background:var(--placeholder); flex-shrink:0;}
+  .pl a{font-weight:700; text-decoration:none;}
+  .pl a:hover{color:var(--accent);}
+  .teeth{font-family:var(--f-cifra); font-weight:600; color:var(--gold);}
+  .tag{display:inline-block; margin-left:8px; font-size:11px; font-weight:800; padding:2px 8px; border-radius:99px; background:rgba(255,181,71,.14); color:var(--gold-soft); text-transform:uppercase; letter-spacing:.02em;}
+  .dim{color:var(--text-faint);}
+  .note{margin:10px 2px 0; font-size:12.5px; color:var(--text-faint); line-height:1.5;}
+
+  @media (max-width:860px){ .prizes{grid-template-columns:1fr;} }
+  @media (max-width:700px){
+    header{grid-template-columns:auto 1fr auto;}
+    h1{font-size:18px;}
+    .wrap{padding:28px 16px 60px;}
+    .hero{grid-template-columns:minmax(0,1fr); padding:22px 20px;}
+    .hero .count{grid-column:1; grid-row:auto; margin-top:8px; gap:14px;}
+    .count b{font-size:30px;}
+    .ev-name{font-size:23px;}
+    .m-main{grid-template-columns:1fr 1fr; gap:10px;}
+    .m-main .opts{grid-column:1 / -1; grid-row:2;}
+    .team{font-size:15px;}
+    .opts{gap:4px;} .opt{min-width:40px; padding:6px 4px; font-size:14px;} .opts .vs{padding:0 2px;}
+    .notice{flex-wrap:wrap;} .notice .btn{margin-left:0;}
+    .hide-sm{display:none;}
+    td, th{padding:10px 8px;}
+    th:first-child, td:first-child{padding-left:14px;} th:last-child, td:last-child{padding-right:14px;}
+  }
+</style>
+<link rel="stylesheet" href="assets/tema.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo-slot">
+      <a href="index.html"><img src="logo/simbolo.svg" alt="SharkTracker"></a>
+    </div>
+    <h1>Pickems</h1>
+    <div class="auth-slot" id="auth-slot"></div>
+  </header>
+  <div id="loading" class="msg" role="status">Cargando…</div>
+  <div id="empty" class="msg" hidden><b>Todavía no hay Pickems</b>Cuando la admin abra unos, aparecerán aquí.<br><a href="index.html">Volver al ranking</a></div>
+  <main id="main" hidden>
+    <nav class="events" id="events" aria-label="Eventos" hidden></nav>
+    <div id="hero"></div>
+    <div class="prizes" id="prizes"></div>
+    <div id="notice"></div>
+    <section>
+      <h2 class="section-title"><span class="bar"></span>Series<span class="aside" id="matches-aside"></span></h2>
+      <div class="matches" id="matches"></div>
+    </section>
+    <section id="board-sec">
+      <h2 class="section-title"><span class="bar"></span>Clasificación</h2>
+      <div class="card" style="overflow:hidden"><table>
+        <thead><tr><th>#</th><th>Participante</th><th class="num">Dientes</th><th class="num">Exactos</th><th class="num hide-sm">Solo ganador</th><th class="num hide-sm">Votos</th></tr></thead>
+        <tbody id="board"></tbody>
+      </table></div>
+      <p class="note" id="board-note"></p>
+    </section>
+  </main>
+</div>
+<script type="module">
+import { createSupabase } from './assets/supabase.js';
+import { getDDragonVersion } from './assets/lol-data.js';
+import { createAuthMenu } from './assets/auth-menu.js';
+import { createNavMenu } from './assets/nav-menu.js';
+import { icono } from './assets/iconos.js';
+
+createNavMenu({ current: 'pickems' });
+const supabase = createSupabase();
+const ddragonVersion = await getDDragonVersion('15.19.1');
+const profileIconUrl = (id) => id ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${id}.png` : null;
+const iconOr1 = (id) => profileIconUrl(id) ?? profileIconUrl(1);
+const ICON_ONERROR = `this.onerror=null;this.src='${profileIconUrl(1)}';`;
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = (id) => document.getElementById(id);
+const fechaEs = (iso) => new Date(iso).toLocaleString('es-ES', { timeZone: 'Europe/Madrid', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+const fechaCorta = (iso) => new Date(iso).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+const authMenu = createAuthMenu({ supabase, profileIconUrl });
+const idParam = Number(new URL(location.href).searchParams.get('id')) || null;
+
+// Estado de la página (se conserva entre recargas por Realtime)
+const st = { session: null, me: null, players: [], profiles: new Map(), events: [], ev: null, matches: [], picks: [], amounts: {}, saving: new Set() };
+let countdownTarget = null;
+
+const nameOf = (p) => { const pr = st.profiles.get(p.id); return (pr?.display_name || p.riot_game_name || '?'); };
+const winsNeeded = (bo) => (bo + 1) / 2;
+// Marcadores posibles de una serie, del lado del equipo 1 al del equipo 2 (BO3 → 2-0, 2-1 | 1-2, 0-2)
+function scoreOptions(bo) {
+  const w = winsNeeded(bo), t1 = [], t2 = [];
+  for (let l = 0; l < w; l++) t1.push([w, l]);
+  for (let l = w - 1; l >= 0; l--) t2.push([l, w]);
+  return { t1, t2 };
+}
+const hasResult = (m) => m.score1 != null && m.score2 != null;
+// 'exact' | 'half' | 'miss' | null (sin resultado)
+function grade(pick, m) {
+  if (!hasResult(m)) return null;
+  if (pick.score1 === m.score1 && pick.score2 === m.score2) return 'exact';
+  return (pick.score1 > pick.score2) === (m.score1 > m.score2) ? 'half' : 'miss';
+}
+const pts = (g) => g === 'exact' ? (st.amounts.pickem_exacto ?? 50) : g === 'half' ? (st.amounts.pickem_ganador ?? 10) : 0;
+
+async function load() {
+  const [{ data: { session } }, { data: players }, { data: profiles }, { data: events }, { data: settings }] = await Promise.all([
+    supabase.auth.getSession(),
+    supabase.from('players').select('*'),
+    supabase.from('player_profiles').select('*'),
+    supabase.from('pickem_events').select('*').order('locks_at', { ascending: false }),
+    supabase.from('reward_settings').select('amounts').maybeSingle(),
+  ]);
+  st.session = session;
+  st.players = players ?? [];
+  st.profiles = new Map((profiles ?? []).map(p => [p.player_id, p]));
+  st.me = session ? st.players.find(p => p.user_id === session.user.id) ?? null : null;
+  st.events = events ?? [];
+  st.amounts = settings?.amounts ?? {};
+  authMenu.render(session, st.players, profiles ?? []);
+  $('loading').hidden = true;
+  if (!st.events.length) { $('empty').hidden = false; $('main').hidden = true; return; }
+  // Sin ?id: el evento abierto que cierra antes; si no hay, el último.
+  const open = st.events.filter(e => !e.finished_at).sort((a, b) => new Date(a.locks_at) - new Date(b.locks_at))[0];
+  st.ev = (idParam && st.events.find(e => e.id === idParam)) || open || st.events[0];
+  const { data: matches } = await supabase.from('pickem_matches').select('*').eq('event_id', st.ev.id).order('sort').order('id');
+  st.matches = matches ?? [];
+  const ids = st.matches.map(m => m.id);
+  const { data: picks } = ids.length ? await supabase.from('pickem_picks').select('*').in('match_id', ids) : { data: [] };
+  st.picks = picks ?? [];
+  document.title = `${st.ev.name} · Pickems · SharkTracker`;
+  $('main').hidden = false;
+  draw();
+}
+
+const isOpen = () => st.ev && !st.ev.finished_at && Date.now() < new Date(st.ev.locks_at).getTime();
+
+function draw() {
+  drawEvents(); drawHero(); drawPrizes(); drawNotice(); drawMatches(); drawBoard();
+}
+
+function drawEvents() {
+  $('events').hidden = st.events.length < 2;
+  $('events').innerHTML = st.events.map(e => `<a href="pickems.html?id=${e.id}" class="${e.id === st.ev.id ? 'on' : ''}">${esc(e.name)}</a>`).join('');
+}
+
+function drawHero() {
+  const open = isOpen(), ev = st.ev;
+  countdownTarget = open ? new Date(ev.locks_at).getTime() : null;
+  const kicker = ev.finished_at ? `<span class="kicker done">${icono('trofeo', { size: 14 })} Finalizado</span>`
+    : open ? '<span class="kicker open">● Votaciones abiertas</span>'
+    : `<span class="kicker closed">${icono('candado', { size: 14 })} Votaciones cerradas · esperando resultados</span>`;
+  $('hero').innerHTML = `<div class="hero">
+    ${kicker}
+    <h2 class="ev-name">${esc(ev.name)}</h2>
+    <p class="ev-sub">${open ? 'Cierra el' : 'Cerró el'} <b>${fechaEs(ev.locks_at)}</b> (hora de España)</p>
+    <p class="ev-sub">${st.matches.length} series · ${new Set(st.picks.map(p => p.player_id)).size} participantes</p>
+    ${open ? `<div class="count" id="count" aria-label="Tiempo para el cierre">
+      <div><b data-u="d">--</b><small>días</small></div><div><b data-u="h">--</b><small>horas</small></div>
+      <div><b data-u="m">--</b><small>min</small></div><div><b data-u="s">--</b><small>seg</small></div></div>` : ''}
+  </div>`;
+  tick();
+}
+
+function drawPrizes() {
+  const a = st.amounts;
+  const p = (cls, ic, t, d, amt) => `<div class="prize ${cls}"><span class="ico">${icono(ic, { size: 22 })}</span><div><b>${t}</b><small>${d}</small></div>${amt ? `<span class="amt">${amt}</span>` : ''}</div>`;
+  $('prizes').innerHTML =
+    p('', 'check', 'Aciertas el ganador', 'Pero no el marcador exacto.', `🦷 ${a.pickem_ganador ?? 10}`) +
+    p('', 'diana', 'Aciertas ganador y marcador', 'En un BO1, acertar el ganador ya cuenta como marcador.', `🦷 ${a.pickem_exacto ?? 50}`) +
+    p('skin', 'corona', 'Skin Definitiva', 'Si aciertas el marcador exacto de todas las series.', '');
+}
+
+function drawNotice() {
+  const open = isOpen();
+  let html = '';
+  if (open && !st.session) {
+    html = `<div class="notice">${icono('candado', { size: 20 })}<span><b>Inicia sesión para votar.</b> Sin cuenta puedes ver los votos de todos.</span><a class="btn" href="login.html">Iniciar sesión</a></div>`;
+  } else if (open && !st.me) {
+    html = `<div class="notice">${icono('enlace', { size: 20 })}<span><b>Vincula tu cuenta de LoL</b> para votar: los dientes van a tu perfil.</span><a class="btn" href="login.html">Vincular cuenta</a></div>`;
+  } else if (open && st.me) {
+    const done = st.matches.filter(m => st.picks.some(p => p.match_id === m.id && p.player_id === st.me.id)).length;
+    html = `<div class="notice">${icono('lapiz', { size: 20 })}<span>Elige el marcador de cada serie. Se guarda solo y puedes cambiarlo hasta el cierre. <span class="progress">${done}/${st.matches.length}</span> votadas.</span></div>`;
+  }
+  $('notice').innerHTML = html;
+}
+
+function drawMatches() {
+  const open = isOpen(), canVote = open && !!st.me;
+  const byId = new Map(st.players.map(p => [p.id, p]));
+  const resolved = st.matches.filter(hasResult).length;
+  $('matches-aside').textContent = st.matches.length ? `${resolved} de ${st.matches.length} con resultado` : '';
+  if (!st.matches.length) { $('matches').innerHTML = '<div class="card match dim">La admin todavía no ha cargado las series.</div>'; return; }
+
+  $('matches').innerHTML = st.matches.map(m => {
+    const picks = st.picks.filter(p => p.match_id === m.id);
+    const mine = st.me ? picks.find(p => p.player_id === st.me.id) : null;
+    const res = hasResult(m);
+    const { t1, t2 } = scoreOptions(m.best_of);
+    const btn = ([a, b]) => {
+      const sel = mine && mine.score1 === a && mine.score2 === b;
+      const real = res && m.score1 === a && m.score2 === b;
+      const busy = st.saving.has(m.id);
+      return `<button type="button" class="opt ${sel ? 'sel' : ''} ${real ? 'real' : ''}" data-m="${m.id}" data-s1="${a}" data-s2="${b}"
+        ${canVote && !busy ? '' : 'disabled'} aria-pressed="${sel}" aria-label="${esc(a > b ? m.team1 : m.team2)} gana ${a}-${b}${real ? ' (resultado)' : ''}">${a}-${b}</button>`;
+    };
+    const n1 = picks.filter(p => p.score1 > p.score2).length, n2 = picks.length - n1;
+    const pc1 = picks.length ? Math.round(100 * n1 / picks.length) : 50;
+    const g = mine ? grade(mine, m) : null;
+    const mineTxt = !mine ? (canVote ? '' : (st.me && !open ? '<div class="mine bad">No votaste esta serie.</div>' : ''))
+      : g === 'exact' ? `<div class="mine ok">¡Marcador exacto! +${pts(g)} 🦷</div>`
+      : g === 'half' ? `<div class="mine half">Acertaste el ganador. +${pts(g)} 🦷</div>`
+      : g === 'miss' ? '<div class="mine bad">Esta no salió.</div>' : '';
+    const w1 = res && m.score1 > m.score2, w2 = res && m.score2 > m.score1;
+    const votes = picks
+      .map(p => ({ p, pl: byId.get(p.player_id) })).filter(x => x.pl)
+      .sort((x, y) => (y.p.score1 - y.p.score2) - (x.p.score1 - x.p.score2) || nameOf(x.pl).localeCompare(nameOf(y.pl)))
+      .map(({ p, pl }) => { const gg = grade(p, m);
+        return `<a class="vote ${p.score1 > p.score2 ? 't1' : 't2'} ${gg ?? ''}" href="perfil.html?jugador=${encodeURIComponent(pl.id)}" title="${esc(nameOf(pl))}: ${esc(p.score1 > p.score2 ? m.team1 : m.team2)} ${p.score1}-${p.score2}">
+          <img loading="lazy" decoding="async" src="${iconOr1(pl.icon_id)}" alt="" onerror="${ICON_ONERROR}">${esc(nameOf(pl))} <span class="sc">${p.score1}-${p.score2}</span></a>`; }).join('');
+    return `<article class="card match">
+      <div class="m-top">${m.label ? `<b>${esc(m.label)}</b>` : ''}<span class="bo">BO${m.best_of}</span>${m.starts_at ? `<span>${fechaCorta(m.starts_at)}</span>` : ''}
+        <span class="m-res ${res ? 'done' : ''}">${res ? `Resultado: <span class="sc">${m.score1}-${m.score2}</span>` : 'Sin jugar'}</span></div>
+      <div class="m-main">
+        <div class="team t1 ${w1 ? 'win' : w2 ? 'lose' : ''}">${esc(m.team1)}</div>
+        <div class="opts">${t1.map(btn).join('')}<span class="vs">vs</span>${t2.map(btn).join('')}</div>
+        <div class="team t2 ${w2 ? 'win' : w1 ? 'lose' : ''}">${esc(m.team2)}</div>
+      </div>
+      ${mineTxt}
+      ${picks.length ? `<div class="split" role="img" aria-label="${pc1}% vota ${esc(m.team1)}, ${100 - pc1}% vota ${esc(m.team2)}"><span class="a" style="width:${pc1}%"></span><span class="b" style="width:${100 - pc1}%"></span></div>
+        <div class="split-lbl"><span class="a">${pc1}% · ${n1} ${n1 === 1 ? 'voto' : 'votos'}</span><span class="b">${n2} ${n2 === 1 ? 'voto' : 'votos'} · ${100 - pc1}%</span></div>
+        <div class="votes">${votes}</div>` : '<div class="novotes">Nadie ha votado esta serie todavía.</div>'}
+    </article>`;
+  }).join('');
+}
+
+function drawBoard() {
+  const byId = new Map(st.players.map(p => [p.id, p]));
+  const mById = new Map(st.matches.map(m => [m.id, m]));
+  const total = st.matches.length;
+  const rows = new Map();
+  for (const p of st.picks) {
+    const m = mById.get(p.match_id); if (!m || !byId.has(p.player_id)) continue;
+    const r = rows.get(p.player_id) ?? { pl: byId.get(p.player_id), teeth: 0, exact: 0, half: 0, votes: 0, miss: 0 };
+    const g = grade(p, m);
+    r.votes++; r.teeth += pts(g);
+    if (g === 'exact') r.exact++; else if (g === 'half') r.half++; else if (g === 'miss') r.miss++;
+    rows.set(p.player_id, r);
+  }
+  const list = [...rows.values()].sort((a, b) => b.teeth - a.teeth || b.exact - a.exact || b.votes - a.votes || nameOf(a.pl).localeCompare(nameOf(b.pl)));
+  // Sigue en carrera por la skin: votó todas las series y todo lo resuelto lo clavó.
+  const alive = (r) => total > 0 && r.votes === total && r.half === 0 && r.miss === 0;
+  $('board').innerHTML = list.map((r, i) => `<tr class="${i === 0 && r.teeth > 0 ? 'first' : ''}">
+      <td class="pos">${i + 1}</td>
+      <td><div class="pl"><img loading="lazy" decoding="async" src="${iconOr1(r.pl.icon_id)}" alt="" onerror="${ICON_ONERROR}">
+        <a href="perfil.html?jugador=${encodeURIComponent(r.pl.id)}">${esc(nameOf(r.pl))}</a>${alive(r) ? `<span class="tag">${st.ev.finished_at ? 'Skin Definitiva' : 'Pleno posible'}</span>` : ''}</div></td>
+      <td class="num"><span class="teeth">🦷 ${r.teeth}</span></td>
+      <td class="num">${r.exact}</td>
+      <td class="num hide-sm">${r.half}</td>
+      <td class="num hide-sm">${r.votes}/${total}</td>
+    </tr>`).join('') || '<tr><td colspan="6" class="dim" style="text-align:center;padding:22px;">Nadie ha votado todavía.</td></tr>';
+  $('board-note').textContent = 'Los dientes se suman a tu cartera cuando la admin carga el resultado de cada serie. "Pleno posible": votó todas las series y ha clavado el marcador de todas las que ya se jugaron.';
+}
+
+// Votar: se guarda al instante
+$('matches').addEventListener('click', async (e) => {
+  const b = e.target.closest('button.opt'); if (!b || b.disabled) return;
+  const mid = Number(b.dataset.m), s1 = Number(b.dataset.s1), s2 = Number(b.dataset.s2);
+  const mine = st.picks.find(p => p.match_id === mid && p.player_id === st.me?.id);
+  const quitar = mine && mine.score1 === s1 && mine.score2 === s2;   // pulsar el mismo marcador lo quita
+  st.saving.add(mid); drawMatches();
+  const { error } = await supabase.rpc('save_pickem_pick', { p_match: mid, p_score1: quitar ? null : s1, p_score2: quitar ? null : s2 });
+  st.saving.delete(mid);
+  if (error) { authMenu.toast(error.message, true); drawMatches(); return; }
+  st.picks = st.picks.filter(p => !(p.match_id === mid && p.player_id === st.me.id));
+  if (!quitar) st.picks.push({ match_id: mid, player_id: st.me.id, score1: s1, score2: s2 });
+  authMenu.toast(quitar ? 'Voto quitado' : 'Voto guardado');
+  draw();
+  // El foco vuelve al botón (el HTML se redibujó)
+  $('matches').querySelector(`button.opt[data-m="${mid}"][data-s1="${s1}"][data-s2="${s2}"]`)?.focus();
+});
+
+function tick() {
+  if (!countdownTarget) return;
+  const el = $('count'); if (!el) return;
+  const diff = countdownTarget - Date.now();
+  if (diff <= 0) { countdownTarget = null; draw(); return; }   // llegó el cierre: se bloquean los votos
+  el.querySelector('[data-u="d"]').textContent = Math.floor(diff / 86400000);
+  el.querySelector('[data-u="h"]').textContent = String(Math.floor(diff / 3600000) % 24).padStart(2, '0');
+  el.querySelector('[data-u="m"]').textContent = String(Math.floor(diff / 60000) % 60).padStart(2, '0');
+  el.querySelector('[data-u="s"]').textContent = String(Math.floor(diff / 1000) % 60).padStart(2, '0');
+}
+setInterval(tick, 1000);
+
+let t = null;
+const reload = () => { clearTimeout(t); t = setTimeout(load, 600); };
+supabase.channel('pickems')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'pickem_events' }, reload)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'pickem_matches' }, reload)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'pickem_picks' }, reload)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'reward_settings' }, reload)
+  .subscribe();
+
+load();
+</script>
+</body>
+</html>

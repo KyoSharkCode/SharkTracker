@@ -189,6 +189,17 @@
   .rw-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px; padding:14px 16px;}
   .rw-grid label{display:block; font-size:12px; font-weight:800; color:var(--text-faint); margin-bottom:4px;}
   .rw-sub{font-size:12px; font-weight:800; color:var(--text-faint); margin:18px 0 8px;}
+  .pk-ev{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:14px; overflow:hidden;}
+  .pk-ev .pk-head{display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap; padding:14px 16px; border-bottom:1px solid var(--border);}
+  .pk-ev .pk-head > div{display:flex; flex-direction:column; gap:4px;}
+  .pk-ev label{font-size:12px; font-weight:800; color:var(--text-faint);}
+  .pk-ev small.es{font-size:12px; color:var(--text-faint);}
+  .pk-m{display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:10px 16px; border-bottom:1px solid var(--border); font-size:13px;}
+  .pk-m:last-child{border-bottom:none;}
+  .pk-m .in{width:auto;}
+  .pk-m .in.team{width:130px;} .pk-m .in.lbl{width:130px;} .pk-m .in.sort{width:64px;} .pk-m .in.dt{width:190px;}
+  .pk-m .votes{font-size:12px; color:var(--text-faint); white-space:nowrap;}
+  .pk-m .res{display:flex; align-items:center; gap:6px; margin-left:auto;}
   .rw-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 16px; border-bottom:1px solid var(--border); font-size:13px;}
   .rw-row:last-child{border-bottom:none;}
   .rw-row .nm{flex:1; min-width:160px;} .rw-row .nm b{display:block;} .rw-row .nm small{color:var(--text-faint);}
@@ -250,6 +261,7 @@
       <button class="tab" data-go="retos" type="button">🏆 Retos</button>
       <button class="tab" data-go="misiones" type="button">🎯 Misiones</button>
       <button class="tab" data-go="splits" type="button">📅 Splits</button>
+      <button class="tab" data-go="pickems" type="button">🔮 Pickems</button>
       <button class="tab" data-go="tienda" type="button">🦷 Tienda <span class="tc" id="tc-tienda" hidden></span></button>
       <button class="tab" data-go="discord" type="button">🔔 Discord <span class="tc bad" id="tc-discord" hidden></span></button>
     </nav>
@@ -293,6 +305,13 @@
       <div class="card" id="sp-list"></div>
       <p class="sp-note">Las fechas vienen con el calendario de Riot de 2026; si Riot las cambia, ajústalas aquí. Al guardar se recalcula el pico y el rango final de todos. Deja "Termina" vacío si todavía no se sabe.</p>
       <p class="err" id="sp-err"></p>
+    </section>
+
+    <section data-tab="pickems">
+      <h2 class="section-title"><span class="bar"></span>Pickems <button class="btn ghost title-btn" id="btn-new-pk" type="button">+ Nuevo evento</button></h2>
+      <div id="pk-list"></div>
+      <p class="sp-note">Las horas se escriben en la hora de tu computadora; debajo se ve a qué hora de España equivalen. Los resultados se cargan después del cierre y reparten los 🦷 al momento (si corriges uno, se recalcula). Al finalizar, quien acertó todos los marcadores recibe la Skin Definitiva en “Premios por entregar” de la Tienda.</p>
+      <p class="err" id="pk-err"></p>
     </section>
 
     <section data-tab="tienda">
@@ -371,7 +390,7 @@ const ui = { editTw: null, confirmUnlink: null, confirmRemove: null, chConfirm: 
 let playersCache = [];
 
 // ── Pestañas ──
-const TABS = ['jugadores', 'retos', 'misiones', 'splits', 'tienda', 'discord'];
+const TABS = ['jugadores', 'retos', 'misiones', 'splits', 'pickems', 'tienda', 'discord'];
 function showTab(t, push = true) {
   if (!TABS.includes(t)) t = 'jugadores';
   document.querySelectorAll('section[data-tab]').forEach(sec => sec.classList.toggle('on', sec.dataset.tab === t));
@@ -412,16 +431,17 @@ async function init() {
   if (!soyAdmin) { $('no-access').hidden = false; return; }
   $('dash').hidden = false;
 
-  await Promise.all([loadRequests(), loadPlayers(), loadChallenges(), loadMissions(), loadSplits(), loadRewards(), loadDiscord()]);
+  await Promise.all([loadRequests(), loadPlayers(), loadChallenges(), loadMissions(), loadSplits(), loadPickems(), loadRewards(), loadDiscord()]);
   setInterval(tickCountdowns, 30000);
   setInterval(() => { if (!document.hidden) loadDiscord(); }, 30000);
 
-  let t1 = null, t2 = null, t3 = null, t4 = null, t5 = null;
+  let t1 = null, t2 = null, t3 = null, t4 = null, t5 = null, t6 = null;
   supabase.channel('admin-dash')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'claim_requests' }, () => { clearTimeout(t1); t1 = setTimeout(() => { loadRequests(); loadPlayers(); }, 300); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => { clearTimeout(t2); t2 = setTimeout(loadPlayers, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'player_profiles' }, () => { clearTimeout(t2); t2 = setTimeout(loadPlayers, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'challenges' }, () => { clearTimeout(t3); t3 = setTimeout(loadChallenges, 400); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'pickem_picks' }, () => { clearTimeout(t6); t6 = setTimeout(loadPickems, 800); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'prize_claims' }, () => { clearTimeout(t5); t5 = setTimeout(loadRewards, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'reward_settings' }, () => { clearTimeout(t5); t5 = setTimeout(loadRewards, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'mission_settings' }, () => { clearTimeout(t4); t4 = setTimeout(loadMissions, 400); })
@@ -862,10 +882,132 @@ $('sp-list').addEventListener('click', async (e) => {
   await loadSplits();
 });
 
+// ── Pickems ──
+let pk = { events: [], matches: [], votes: new Map(), newEvent: false, newMatch: null, confirm: null };
+const madrid = (iso) => new Date(iso).toLocaleString('es-ES', { timeZone: 'Europe/Madrid', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' (España)';
+function pkScores(bo) {
+  const w = (bo + 1) / 2, out = [];
+  for (let l = 0; l < w; l++) out.push([w, l]);
+  for (let l = w - 1; l >= 0; l--) out.push([l, w]);
+  return out;
+}
+async function loadPickems() {
+  const [{ data: events, error }, { data: matches }, { data: picks }] = await Promise.all([
+    supabase.from('pickem_events').select('*').order('locks_at', { ascending: false }),
+    supabase.from('pickem_matches').select('*').order('sort').order('id'),
+    supabase.from('pickem_picks').select('match_id'),
+  ]);
+  if (error) { $('pk-err').textContent = `No se pudieron cargar los Pickems: ${error.message} (¿corriste la migración?)`; return; }
+  const votes = new Map();
+  for (const p of picks ?? []) votes.set(p.match_id, (votes.get(p.match_id) ?? 0) + 1);
+  pk = { ...pk, events: events ?? [], matches: matches ?? [], votes };
+  drawPickems();
+}
+function pkMatchRow(m, evId, locked, finished) {
+  const id = m?.id ?? 'new';
+  const bo = m?.best_of ?? 3;
+  const res = m && m.score1 != null ? `${m.score1}-${m.score2}` : '';
+  return `<div class="pk-m" data-pk-m="${id}" data-pk-ev="${evId}">
+    <input class="in lbl" data-f="label" maxlength="40" placeholder="Ronda (opcional)" value="${esc(m?.label ?? '')}" ${finished ? 'disabled' : ''}>
+    <input class="in team" data-f="t1" maxlength="30" placeholder="Equipo 1" value="${esc(m?.team1 ?? '')}" ${finished ? 'disabled' : ''}>
+    <span class="dim">vs</span>
+    <input class="in team" data-f="t2" maxlength="30" placeholder="Equipo 2" value="${esc(m?.team2 ?? '')}" ${finished ? 'disabled' : ''}>
+    <select class="in" data-f="bo" ${finished ? 'disabled' : ''}>${[1, 3, 5].map(n => `<option value="${n}" ${n === bo ? 'selected' : ''}>BO${n}</option>`).join('')}</select>
+    <input class="in dt" data-f="start" type="datetime-local" title="Fecha de la serie (opcional)" value="${isoToInput(m?.starts_at)}" ${finished ? 'disabled' : ''}>
+    <input class="in sort" data-f="sort" type="number" title="Orden" value="${m?.sort ?? (pk.matches.filter(x => x.event_id === evId).length + 1)}" ${finished ? 'disabled' : ''}>
+    ${finished ? '' : `<button class="btn ${m ? 'ghost' : 'ok'}" data-pk="save-m" type="button">${m ? 'Guardar' : 'Crear'}</button>
+      <button class="btn no" data-pk="${m ? 'del-m' : 'cancel-m'}" type="button">${m ? 'Borrar' : 'Cancelar'}</button>`}
+    ${m ? `<span class="votes">${pk.votes.get(m.id) ?? 0} votos</span>
+      <div class="res"><select class="in" data-f="res" ${locked && !finished ? '' : 'disabled'} title="${locked ? 'Resultado' : 'Se carga después del cierre'}">
+        <option value="">Sin resultado</option>${pkScores(m.best_of).map(([a, b]) => `<option value="${a}-${b}" ${res === `${a}-${b}` ? 'selected' : ''}>${esc(a > b ? m.team1 : m.team2)} ${a}-${b}</option>`).join('')}</select>
+        ${locked && !finished ? '<button class="btn ok" data-pk="res" type="button">Cargar</button>' : ''}</div>` : ''}
+    ${pk.confirm === 'm' + id ? `<div class="confirm" style="flex-basis:100%">¿Borrar la serie <b>${esc(m.team1)} vs ${esc(m.team2)}</b>? Se pierden sus votos y los 🦷 que haya repartido.
+      <div class="actions"><button class="btn danger" data-pk="del-m-yes" type="button">Sí, borrar</button><button class="btn ghost" data-pk="no" type="button">Cancelar</button></div></div>` : ''}
+  </div>`;
+}
+function pkEventCard(ev) {
+  const id = ev?.id ?? 'new';
+  const now = Date.now();
+  const locked = ev && now >= new Date(ev.locks_at).getTime();
+  const finished = !!ev?.finished_at;
+  const ms = ev ? pk.matches.filter(m => m.event_id === ev.id) : [];
+  const allRes = ms.length && ms.every(m => m.score1 != null);
+  const chip = !ev ? '' : finished ? '<span class="chip off">Finalizado</span>' : locked ? '<span class="chip soon">Cerrado</span>' : '<span class="chip live">Abierto</span>';
+  return `<div class="pk-ev" data-pk-ev-card="${id}">
+    <div class="pk-head" data-pk-ev="${id}">
+      <div style="flex:1;min-width:200px"><label>Nombre ${chip}</label><input class="in" data-f="name" maxlength="60" value="${esc(ev?.name ?? '')}" placeholder="Worlds 2026 · Suizo" ${finished ? 'disabled' : ''}></div>
+      <div><label>Cierra</label><input class="in" data-f="locks" type="datetime-local" value="${isoToInput(ev?.locks_at)}" ${finished ? 'disabled' : ''}>
+        <small class="es">${ev ? madrid(ev.locks_at) : '&nbsp;'}</small></div>
+      <div class="actions" style="flex-direction:row">
+        ${finished ? `<a class="btn ghost" href="pickems.html?id=${ev.id}">Ver página</a>` : `<button class="btn ok" data-pk="save-ev" type="button">${ev ? 'Guardar' : 'Crear'}</button>
+        <button class="btn no" data-pk="${ev ? 'del-ev' : 'cancel-ev'}" type="button">${ev ? 'Borrar' : 'Cancelar'}</button>`}
+        ${ev && !finished ? `<button class="btn ${allRes ? 'ok' : 'ghost'}" data-pk="finish" type="button" ${allRes ? '' : 'disabled title="Faltan resultados"'}>Finalizar y dar skin</button>` : ''}
+      </div>
+    </div>
+    ${pk.confirm === 'ev' + id ? `<div class="confirm" style="margin:10px 16px">¿Borrar <b>${esc(ev.name)}</b>? Se borran sus series, todos los votos y los 🦷 que haya repartido.
+      <div class="actions"><button class="btn danger" data-pk="del-ev-yes" data-id="${id}" type="button">Sí, borrar</button><button class="btn ghost" data-pk="no" type="button">Cancelar</button></div></div>` : ''}
+    ${pk.confirm === 'fin' + id ? `<div class="confirm" style="margin:10px 16px">¿Finalizar <b>${esc(ev.name)}</b>? Quien haya acertado todos los marcadores recibe la Skin Definitiva (pendiente de entrega). Después ya no se pueden cambiar resultados.
+      <div class="actions"><button class="btn danger" data-pk="finish-yes" data-id="${id}" type="button">Sí, finalizar</button><button class="btn ghost" data-pk="no" type="button">Cancelar</button></div></div>` : ''}
+    ${ev ? `${ms.map(m => pkMatchRow(m, ev.id, locked, finished)).join('')}
+      ${pk.newMatch === ev.id ? pkMatchRow(null, ev.id, locked, finished) : ''}
+      ${finished ? '' : `<div class="pk-m"><button class="btn ghost" data-pk="new-m" data-id="${ev.id}" type="button">+ Serie</button>${ms.length ? '' : '<span class="dim">Todavía no hay series.</span>'}</div>`}` : ''}
+  </div>`;
+}
+function drawPickems() {
+  $('pk-list').innerHTML = (pk.newEvent ? pkEventCard(null) : '') + (pk.events.map(pkEventCard).join('')
+    || (pk.newEvent ? '' : '<div class="card"><div class="empty">No hay Pickems. Crea uno con “+ Nuevo evento”.</div></div>'));
+}
+$('btn-new-pk').addEventListener('click', () => { pk.newEvent = true; drawPickems(); $('pk-list').querySelector('[data-pk-ev="new"] input')?.focus(); });
+$('pk-list').addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-pk]'); if (!b) return;
+  const act = b.dataset.pk;
+  const head = b.closest('[data-pk-ev]'), row = b.closest('[data-pk-m]');
+  const v = (el, f) => el.querySelector(`[data-f="${f}"]`)?.value ?? '';
+  $('pk-err').textContent = '';
+  if (act === 'no') { pk.confirm = null; return drawPickems(); }
+  if (act === 'cancel-ev') { pk.newEvent = false; return drawPickems(); }
+  if (act === 'cancel-m') { pk.newMatch = null; return drawPickems(); }
+  if (act === 'new-m') { pk.newMatch = Number(b.dataset.id); drawPickems(); return $('pk-list').querySelector('[data-pk-m="new"] input')?.focus(); }
+  if (act === 'del-ev') { pk.confirm = 'ev' + head.dataset.pkEv; return drawPickems(); }
+  if (act === 'del-m') { pk.confirm = 'm' + row.dataset.pkM; return drawPickems(); }
+  if (act === 'finish') { pk.confirm = 'fin' + head.dataset.pkEv; return drawPickems(); }
+  let call;
+  if (act === 'save-ev') {
+    if (!v(head, 'locks')) { $('pk-err').textContent = 'Falta la hora de cierre.'; return; }
+    const id = head.dataset.pkEv;
+    call = ['admin_save_pickem_event', { p_id: id === 'new' ? null : Number(id), p_name: v(head, 'name'), p_locks_at: new Date(v(head, 'locks')).toISOString() }, '✅ Evento guardado'];
+  } else if (act === 'del-ev-yes') {
+    call = ['admin_delete_pickem_event', { p_id: Number(b.dataset.id) }, 'Evento borrado'];
+  } else if (act === 'finish-yes') {
+    call = ['admin_finish_pickem_event', { p_id: Number(b.dataset.id) }, null];
+  } else if (act === 'save-m') {
+    const id = row.dataset.pkM;
+    call = ['admin_save_pickem_match', { p_id: id === 'new' ? null : Number(id), p_event: Number(row.dataset.pkEv), p_label: v(row, 'label'),
+      p_team1: v(row, 't1'), p_team2: v(row, 't2'), p_best_of: Number(v(row, 'bo')),
+      p_starts_at: v(row, 'start') ? new Date(v(row, 'start')).toISOString() : null, p_sort: parseInt(v(row, 'sort'), 10) || null }, '✅ Serie guardada'];
+  } else if (act === 'del-m-yes') {
+    call = ['admin_delete_pickem_match', { p_id: Number(row.dataset.pkM) }, 'Serie borrada'];
+  } else if (act === 'res') {
+    const r = v(row, 'res'); const [a, c] = r ? r.split('-').map(Number) : [null, null];
+    call = ['admin_set_pickem_result', { p_match: Number(row.dataset.pkM), p_score1: a, p_score2: c }, r ? '🦷 Resultado cargado y dientes repartidos' : 'Resultado borrado'];
+  }
+  if (!call) return;
+  b.disabled = true;
+  const { data, error } = await supabase.rpc(call[0], call[1]);
+  if (error) { $('pk-err').textContent = error.message; b.disabled = false; return; }
+  if (act === 'save-ev' && head.dataset.pkEv === 'new') pk.newEvent = false;
+  if (act === 'save-m' && row.dataset.pkM === 'new') pk.newMatch = null;
+  pk.confirm = null;
+  authMenu.toast(call[2] ?? (data ? `🏆 Finalizado: ${data} ${data === 1 ? 'pleno' : 'plenos'} · Skin Definitiva en Premios por entregar` : 'Finalizado: nadie hizo pleno esta vez'));
+  await loadPickems();
+  if (act === 'finish-yes') loadRewards();
+});
+
 // ── Recompensas y tienda ──
 const AMOUNT_LABELS = { mision_facil: 'Misión fácil', mision_media: 'Misión media', mision_dificil: 'Misión difícil', grupal_top: 'Grupal: el que más aportó',
   grupal_resto: 'Grupal: a repartir entre el resto', top1: 'Top 1 semanal', top2: 'Top 2 semanal', top3: 'Top 3 semanal', victoria: 'Cada victoria',
-  primera_victoria: 'Primera victoria del día', perfecta: 'Partida perfecta', pentakill: 'Pentakill', partida_mes: 'Partida del mes', reto1: 'Reto 1º', reto2: 'Reto 2º', reto3: 'Reto 3º' };
+  primera_victoria: 'Primera victoria del día', perfecta: 'Partida perfecta', pentakill: 'Pentakill', partida_mes: 'Partida del mes', reto1: 'Reto 1º', reto2: 'Reto 2º', reto3: 'Reto 3º',
+  pickem_ganador: 'Pickems: acierta el ganador', pickem_exacto: 'Pickems: marcador exacto' };
 const KIND_ES = { marco: 'Marco', fila: 'Fila', banner: 'Banner', nombre: 'Nombre', emoji: 'Emoji', premio: 'Premio' };
 // ── Discord ──
 let dc = null;
@@ -973,7 +1115,7 @@ function drawRewards() {
     <input class="in num" type="number" step="1" data-adj-amt="${p.player_id}" placeholder="+50 / -20"><input class="in txt" data-adj-why="${p.player_id}" placeholder="Motivo (lo ve el jugador)" maxlength="80">
     <button class="btn ghost" data-adj="${p.player_id}" type="button">Aplicar</button></div>`).join('') || '<div class="empty">No hay jugadores.</div>';
 
-  const prizes = rw.items.filter(i => i.kind === 'premio');
+  const prizes = rw.items.filter(i => i.kind === 'premio' && i.id !== 'pickem-perfecto');   // la Skin Definitiva se da solo por Pickems
   const iconSel = (v, attr) => `<select class="in" ${attr}>${Object.entries(PRIZE_ICONS).map(([k, x]) => `<option value="${k}" ${k === v ? 'selected' : ''}>${x.name}</option>`).join('')}</select>`;
   const prizeRow = (it) => `<div class="rw-row" data-prize="${it?.id ?? 'new'}"><span class="rw-ic">${prizeIconSvg(it?.icon ?? 'moneda')}</span>
     <input class="in txt" data-f="name" value="${esc(it?.name ?? '')}" placeholder="Nombre (ej. 650 RP)" maxlength="60">
