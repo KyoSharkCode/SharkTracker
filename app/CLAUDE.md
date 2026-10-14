@@ -536,7 +536,7 @@ Decisiones de Alex (oct 2026).
     (QPC) con 50 ms de retraso fijo: lo que no llegó va en silencio, lo que sobra (>200 ms) se descarta.
     Con `--separadas`: mezcla + un par estéreo por fuente. "Todo el PC" reemplaza a Juego y Discord.
     La app pasa su stdout a la entrada de FFmpeg (la "q" para cerrar ya no sirve: con audio se mata).
-    **Sincronía**: video (`setpts` dentro de lavfi, pegado a ddagrab) y audio (`asetpts`, menos lo que
+    **Sincronía** (el audio cambió en v0.9.6, ver más abajo): video (`setpts` dentro de lavfi, pegado a ddagrab) y audio (`asetpts`, menos lo que
     dura el bloque y los 50 ms) llevan la hora real desde un origen común (`RTCTIME-origen`; la hora
     completa no cabe en MPEG-TS). Video con `-fps_mode passthrough`. Medido en Linux con un destello y
     un pitido en cada segundo: sin deriva, dentro de 1–2 cuadros. `-use_wallclock_as_timestamps` NO sirve
@@ -607,6 +607,22 @@ Decisiones de Alex (oct 2026).
   (AAC casi vacío). Ráfagas de audio (entregar 1 s de golpe) no lo reproducen en Linux.
   **`-thread_queue_size` no se puede usar en la entrada**: en el FFmpeg master ya es opción de salida y la
   grabación con audio no arranca.
+- **Causa y arreglo (v0.9.6, registro de Kyo del 14/10/2026)**: "a FFmpeg le llegaron 17 s de audio en 96 s" y
+  los informes de niveles del ayudante salían cada varios minutos en vez de cada 30 s: el ayudante pasaba casi
+  todo el tiempo **bloqueado escribiendo en la tubería**. FFmpeg 7+ (planificador por hilos) deja de leer una
+  entrada cuando su flujo va más de 100 ms por delante del otro en la salida. El audio llevaba la hora a la que
+  FFmpeg lo procesaba (`asetpts` con RTCTIME), o sea "ahora", y el video de NVENC llega al muxer unos cientos de
+  ms tarde: el audio siempre iba "por delante", FFmpeg casi no lo leía, el ayudante se bloqueaba, su cola se
+  vaciaba (máx. 200 ms) y al desbloquearse mandaba de golpe segundos de silencio. En Linux no salía porque el
+  codificador de prueba casi no tiene retraso; con un codificador lento (SVT-AV1) se reproduce igual.
+  Arreglo (solo `clips-motor.js`, el ayudante no cambia): el audio lleva **marcas por cuenta de muestras**
+  (`-itsoffset` = en qué segundo del video cae la primera muestra, estimado con la llegada de los primeros
+  bloques antes de abrir FFmpeg) y **`-copyts`** (sin él, FFmpeg lleva cada entrada a 0 y el audio se corre
+  ~370 ms). La app lee la salida del ayudante siempre, sin frenarlo (lo que FFmpeg aún no tomó espera en
+  memoria; el registro dice cuánto y avisa si pasa de 30 s). Sin `asetpts` ni `aresample`. Medido en Linux con
+  el master de BtbN, destello y pitido en cada segundo del reloj, codificador con B-frames: 33 s de audio en
+  33 s, 0 s esperando, pitido 20–30 ms antes del destello (≈ 1–2 cuadros) y sin deriva; con pistas separadas
+  igual.
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)
