@@ -47,30 +47,30 @@ const entradaPantalla = (fps, extra = '') => ['-f', 'lavfi', '-i', `ddagrab=outp
 
 const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// Marca de tiempo = hora real desde `origen` (µs), la misma para video y audio: así
-// quedan alineados aunque el ayudante y la captura de pantalla no arranquen en el
-// mismo milisegundo (el audio que llegó antes de tiempo se descarta). Con la hora
-// completa no se puede: el formato de los trozos (MPEG-TS) da la vuelta a las 26 h.
+// Video: marca de tiempo = hora real desde `origen` (µs), pegada a la captura. Con la
+// hora completa no se puede: el formato de los trozos (MPEG-TS) da la vuelta a las 26 h.
 const relojVideo = (origen) => `,setpts=(RTCTIME-${origen})/(TB*1000000)`;
 
 // Argumentos de FFmpeg para el audio que llega por la entrada estándar.
 // pistas: nombres de las pistas; la primera es la mezcla. Con una sola, solo la mezcla.
-function argsAudio(pistas, origen) {
+// desfase: en qué segundo del video (desde `origen`) cae la primera muestra del ayudante.
+// El ayudante manda el audio seguido, al ritmo del reloj y rellenando con silencio lo que
+// no llega, así que cada muestra se ubica contando muestras: no importa cuándo la lea
+// FFmpeg. (Antes se le ponía la hora a la que FFmpeg la leía: con NVENC el video va unos
+// cientos de ms por detrás, FFmpeg frenaba la lectura del audio para esperarlo, el
+// ayudante se quedaba bloqueado y los clips salían en silencio.)
+function argsAudio(pistas, desfase) {
   const canales = pistas.length * 2;
   // Ojo: sin -thread_queue_size; en el FFmpeg que baja la app (master de BtbN) ya solo vale
   // para salidas y con él la grabación con audio no arranca.
-  const entrada = ['-f', 'f32le', '-ar', String(AUDIO_HZ), '-ac', String(canales), '-i', 'pipe:0'];
+  const entrada = ['-itsoffset', desfase.toFixed(6), '-f', 'f32le', '-ar', String(AUDIO_HZ), '-ac', String(canales), '-i', 'pipe:0'];
   const comp = ['-c:a', 'aac', '-b:a', '160k', '-ar', String(AUDIO_HZ)];
-  // Cada bloque llega entero: su inicio es la hora de llegada menos lo que dura (y menos
-  // el retraso fijo del ayudante). aresample=async: rellena huecos y recorta lo que se
-  // solapa (el audio sigue al reloj).
-  const retraso = Math.round((RETRASO_AYUDANTE_MS / 1000) * AUDIO_HZ);
-  const reloj = `asetpts=(RTCTIME-${origen})/(TB*1000000)-NB_SAMPLES-${retraso},aresample=async=1000`;
+  // -copyts: cada entrada conserva sus marcas (FFmpeg no lleva cada una a 0 por su cuenta).
   // El video conserva su hora de captura (sin forzar un ritmo fijo, que lo iría estirando).
-  const video = ['-fps_mode', 'passthrough'];
-  if (pistas.length === 1) return { entrada, salida: [...video, '-map', '0:v', '-map', '1:a', '-af', reloj, ...comp] };
+  const video = ['-copyts', '-fps_mode', 'passthrough'];
+  if (pistas.length === 1) return { entrada, salida: [...video, '-map', '0:v', '-map', '1:a', ...comp] };
   const partes = pistas.map((_, i) => `[s${i}]pan=stereo|c0=c${i * 2}|c1=c${i * 2 + 1}[p${i}]`);
-  const grafo = `[1:a]${reloj},asplit=${pistas.length}${pistas.map((_, i) => `[s${i}]`).join('')};${partes.join(';')}`;
+  const grafo = `[1:a]asplit=${pistas.length}${pistas.map((_, i) => `[s${i}]`).join('')};${partes.join(';')}`;
   return { entrada, salida: [...video, '-filter_complex', grafo, '-map', '0:v', ...pistas.flatMap((_, i) => ['-map', `[p${i}]`]), ...comp] };
 }
 
@@ -83,7 +83,7 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
   let cola = Promise.resolve(); // guardados, de a uno
   let enCola = 0;
   let revisados = 0; // clips de esta partida a los que ya se les midió el sonido
-  let flujo = null;  // { recibido, canales }: cuánto audio le llegó a FFmpeg
+  let flujo = null;  // { recibido, espera, canales }: cuánto audio le llegó a FFmpeg y cuánto espera
 
   const correr = (args, ms) => new Promise((resolve) => {
     execFile(ffmpeg(), ['-hide_banner', '-loglevel', 'error', '-y', ...args], { windowsHide: true, timeout: ms },
@@ -126,19 +126,12 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
     fs.mkdirSync(dirBufer, { recursive: true });
     const fps = FPS[calidad] ?? 60;
     const origen = Date.now() * 1000;
-    const a = audio ? argsAudio(audio.pistas, origen) : null;
-    // Con avisos (warning): los primeros van al registro (ver más abajo).
-    const args = ['-hide_banner', '-loglevel', 'warning', '-y',
-      ...entrada(fps, a ? relojVideo(origen) : ''), ...(a ? a.entrada : []),
-      ...codificador.vf, ...codificador.c, ...(BITRATE[calidad] ?? BITRATE.alta), '-g', String(fps * SEGUNDOS_TROZO),
-      ...(a ? a.salida : []),
-      // Sin reiniciar las marcas de tiempo en cada trozo: así se pegan tal cual (ver guardar).
-      '-f', 'segment', '-segment_time', String(SEGUNDOS_TROZO), '-segment_wrap', String(anillo),
-      '-segment_format', 'mpegts',
-      '-segment_list', lista, '-segment_list_type', 'csv', '-segment_list_size', String(anillo),
-      path.join(dirBufer, 'trozo%03d.ts')];
     let ay = null;
     let erroresAy = '';
+    // Audio que el ayudante pasó a FFmpeg. Se lee siempre, sin frenar al ayudante: si
+    // FFmpeg tarda en tomarlo, espera en memoria (`espera`) y no se pierde.
+    const recibido = { bytes: 0, desde: Date.now() };
+    let p = null;
     if (audio) {
       ay = spawn(audio.comando[0], audio.comando.slice(1), { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
       // Lo que avisa el ayudante (qué captura, qué falla, niveles cada 30 s) va al registro.
@@ -150,8 +143,58 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
         for (const l of lineas) if (l.trim()) log(`Audio · ${l.trim()}`);
       });
       ay.on('error', (e) => { erroresAy += e.message; });
+      // Hora (ms, reloj del PC) de la primera muestra: cada bloque que llega dice "a esta
+      // hora ya habían salido N muestras". La llegada solo puede atrasarse, así que vale
+      // la estimación más temprana de los primeros bloques.
+      const bytesMuestra = 4 * audio.pistas.length * 2;
+      let primera = Infinity;
+      const pendiente = [];
+      let avisoEspera = false;
+      ay.stdout.on('data', (d) => {
+        recibido.bytes += d.length;
+        if (p) {
+          p.stdin.write(d);
+          if (!avisoEspera && p.stdin.writableLength > 30 * bytesMuestra * AUDIO_HZ) {
+            avisoEspera = true;
+            log('FFmpeg no está tomando el audio: hay más de 30 s esperando.');
+          }
+          return;
+        }
+        pendiente.push(d);
+        primera = Math.min(primera, Date.now() - (recibido.bytes / bytesMuestra / AUDIO_HZ) * 1000);
+      });
+      const hasta = Date.now() + 8000;
+      while (!recibido.bytes && ay.exitCode === null && Date.now() < hasta) await dormir(20);
+      if (recibido.bytes) await dormir(300);
+      if (!recibido.bytes) {
+        log(`La grabación no arrancó (${codificador.nombre}, con audio): el ayudante de audio no manda nada. ${erroresAy.trim().split('\n').pop() ?? ''}`);
+        try { ay.kill(); } catch { /* nada */ }
+        return null;
+      }
+      // La muestra que sale a la hora T es el sonido de T menos el retraso fijo del ayudante.
+      const desfase = (primera - RETRASO_AYUDANTE_MS - origen / 1000) / 1000;
+      log(`Audio: empieza en el segundo ${desfase.toFixed(3)} del video`);
+      p = lanzar(argsAudio(audio.pistas, desfase));
+      for (const d of pendiente) p.stdin.write(d);
+      pendiente.length = 0;
+    } else {
+      p = lanzar(null);
     }
-    const p = spawn(ffmpeg(), args, { windowsHide: true, stdio: ['pipe', 'ignore', 'pipe'] });
+
+    function lanzar(a) {
+      // Con avisos (warning): los primeros van al registro (ver más abajo).
+      const args = ['-hide_banner', '-loglevel', 'warning', '-y',
+        ...entrada(fps, a ? relojVideo(origen) : ''), ...(a ? a.entrada : []),
+        ...codificador.vf, ...codificador.c, ...(BITRATE[calidad] ?? BITRATE.alta), '-g', String(fps * SEGUNDOS_TROZO),
+        ...(a ? a.salida : []),
+        // Sin reiniciar las marcas de tiempo en cada trozo: así se pegan tal cual (ver guardar).
+        '-f', 'segment', '-segment_time', String(SEGUNDOS_TROZO), '-segment_wrap', String(anillo),
+        '-segment_format', 'mpegts',
+        '-segment_list', lista, '-segment_list_type', 'csv', '-segment_list_size', String(anillo),
+        path.join(dirBufer, 'trozo%03d.ts')];
+      return spawn(ffmpeg(), args, { windowsHide: true, stdio: ['pipe', 'ignore', 'pipe'] });
+    }
+
     let errores = '';
     let restoFf = '';
     let avisosFf = 0;
@@ -165,12 +208,7 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
     });
     p.on('error', (e) => { errores += e.message; });
     p.stdin.on('error', () => { /* FFmpeg se cerró: lo avisa 'exit' */ });
-    const recibido = { bytes: 0, desde: Date.now() }; // audio que el ayudante pasó a FFmpeg
-    if (ay) {
-      ay.stdout.on('data', (d) => { recibido.bytes += d.length; });
-      ay.stdout.pipe(p.stdin);
-      ay.on('exit', (code) => { if (ayudante === ay) log(`El ayudante de audio se cerró (código ${code}): ${erroresAy.trim().split('\n').pop() ?? ''}`); });
-    }
+    if (ay) ay.on('exit', (code) => { if (ayudante === ay) log(`El ayudante de audio se cerró (código ${code}): ${erroresAy.trim().split('\n').pop() ?? ''}`); });
     // Prioridad baja: el juego siempre va primero.
     for (const x of [p, ay]) { try { if (x?.pid) os.setPriority(x.pid, os.constants.priority.PRIORITY_BELOW_NORMAL); } catch { /* sin permiso: sigue igual */ } }
     await dormir(2500);
@@ -181,7 +219,8 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
       for (const x of [ay, p]) { try { x?.kill(); } catch { /* nada */ } }
       return null;
     }
-    return { p, ay, fps, recibido, canales: audio ? audio.pistas.length * 2 : 0, getErrores: () => errores };
+    const espera = () => p.stdin.writableLength;
+    return { p, ay, fps, recibido, espera, canales: audio ? audio.pistas.length * 2 : 0, getErrores: () => errores };
   }
 
   // Empieza a grabar el búfer en anillo. Devuelve false si FFmpeg no arrancó.
@@ -201,7 +240,7 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
     ayudante = ay;
     actual = { codificador, calidad, desde: Date.now(), pid: p.pid, pidAudio: ay?.pid ?? null, pistas: conAudio ? audio.pistas : [] };
     revisados = 0;
-    flujo = conAudio ? { recibido: r.recibido, canales: r.canales } : null;
+    flujo = conAudio ? { recibido: r.recibido, espera: r.espera, canales: r.canales } : null;
     p.on('exit', (code) => {
       if (proceso === p) {
         log(`FFmpeg se cerró solo (código ${code}): ${r.getErrores().trim().split('\n').pop() ?? ''}`);
@@ -286,8 +325,9 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
         // del búfer y qué quedó en el clip ya pegado.
         let llegada = '';
         if (flujo) {
-          const seg = flujo.recibido.bytes / (4 * flujo.canales * AUDIO_HZ);
-          llegada = ` · a FFmpeg le llegaron ${seg.toFixed(0)} s de audio en ${((Date.now() - flujo.recibido.desde) / 1000).toFixed(0)} s`;
+          const seg = (bytes) => bytes / (4 * flujo.canales * AUDIO_HZ);
+          llegada = ` · a FFmpeg le llegaron ${seg(flujo.recibido.bytes).toFixed(0)} s de audio en ${((Date.now() - flujo.recibido.desde) / 1000).toFixed(0)} s`
+            + ` (${seg(flujo.espera()).toFixed(1)} s esperando a que FFmpeg los tome)`;
         }
         const ultimo = elegidos[elegidos.length - 1];
         log(`Audio del clip: ${await revisarAudio(destino, total)} · último trozo: ${await revisarAudio(ultimo.archivo, ultimo.dur)}${llegada}`);
