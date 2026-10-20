@@ -200,6 +200,9 @@
   .pk-m .in.team{width:130px;} .pk-m .in.lbl{width:130px;} .pk-m .in.sort{width:64px;} .pk-m .in.dt{width:190px;}
   .pk-m .votes{font-size:12px; color:var(--text-faint); white-space:nowrap;}
   .pk-m .res{display:flex; align-items:center; gap:6px; margin-left:auto;}
+  .sw-step{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:800; color:var(--text-faint);}
+  .sw-step b{min-width:16px; text-align:center; font:700 15px 'Red Hat Mono',ui-monospace,monospace; color:var(--text);}
+  .sw-step .btn{padding:4px 10px; min-width:34px;}
   .rw-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 16px; border-bottom:1px solid var(--border); font-size:13px;}
   .rw-row:last-child{border-bottom:none;}
   .rw-row .nm{flex:1; min-width:160px;} .rw-row .nm b{display:block;} .rw-row .nm small{color:var(--text-faint);}
@@ -370,7 +373,7 @@ import { getDDragonVersion } from './assets/lol-data.js';
 import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { prizeIconSvg, PRIZE_ICONS, injectCosmeticsCss } from './assets/cosmetics.js';
-import { createBracket, scoreOptions } from './assets/pickems.js';
+import { createBracket, scoreOptions, swissStatus } from './assets/pickems.js';
 injectCosmeticsCss();
 createNavMenu({ current: null });
 
@@ -444,6 +447,7 @@ async function init() {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'challenges' }, () => { clearTimeout(t3); t3 = setTimeout(loadChallenges, 400); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'pickem_picks' }, () => { clearTimeout(t6); t6 = setTimeout(loadPickems, 800); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'pickem_bets' }, () => { clearTimeout(t6); t6 = setTimeout(loadPickems, 800); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'pickem_swiss_picks' }, () => { clearTimeout(t6); t6 = setTimeout(loadPickems, 800); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'prize_claims' }, () => { clearTimeout(t5); t5 = setTimeout(loadRewards, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'reward_settings' }, () => { clearTimeout(t5); t5 = setTimeout(loadRewards, 500); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'mission_settings' }, () => { clearTimeout(t4); t4 = setTimeout(loadMissions, 400); })
@@ -885,20 +889,24 @@ $('sp-list').addEventListener('click', async (e) => {
 });
 
 // ── Pickems ──
-let pk = { events: [], matches: [], votes: new Map(), bets: new Map(), newEvent: false, newMatch: null, confirm: null };
+let pk = { events: [], matches: [], votes: new Map(), bets: new Map(), newEvent: false, newMatch: null, confirm: null, teams: [], swVotes: new Map() };
 const madrid = (iso) => new Date(iso).toLocaleString('es-ES', { timeZone: 'Europe/Madrid', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' (España)';
 async function loadPickems() {
-  const [{ data: events, error }, { data: matches }, { data: picks }, { data: bets }] = await Promise.all([
+  const [{ data: events, error }, { data: matches }, { data: picks }, { data: bets }, { data: teams }, { data: spicks }] = await Promise.all([
     supabase.from('pickem_events').select('*').order('locks_at', { ascending: false }),
     supabase.from('pickem_matches').select('*').order('sort').order('id'),
     supabase.from('pickem_picks').select('match_id'),
     supabase.from('pickem_bets').select('match_id, amount'),
+    supabase.from('pickem_teams').select('*').order('sort'),
+    supabase.from('pickem_swiss_picks').select('event_id, player_id'),
   ]);
   if (error) { $('pk-err').textContent = `No se pudieron cargar los Pickems: ${error.message} (¿corriste la migración?)`; return; }
   const votes = new Map(), betSum = new Map();
   for (const p of picks ?? []) votes.set(p.match_id, (votes.get(p.match_id) ?? 0) + 1);
   for (const b of bets ?? []) { const x = betSum.get(b.match_id) ?? { n: 0, sum: 0 }; x.n++; x.sum += b.amount; betSum.set(b.match_id, x); }
-  pk = { ...pk, events: events ?? [], matches: matches ?? [], votes, bets: betSum };
+  const swVotes = new Map();   // fase suiza: cuántos jugadores hicieron elecciones
+  for (const p of spicks ?? []) { const set = swVotes.get(p.event_id) ?? new Set(); set.add(p.player_id); swVotes.set(p.event_id, set); }
+  pk = { ...pk, events: events ?? [], matches: matches ?? [], votes, bets: betSum, teams: teams ?? [], swVotes };
   drawPickems();
 }
 function pkMatchRow(m, evId, locked, finished, br) {
@@ -935,20 +943,37 @@ function pkMatchRow(m, evId, locked, finished, br) {
       <div class="actions"><button class="btn danger" data-pk="del-m-yes" type="button">Sí, borrar</button><button class="btn ghost" data-pk="no" type="button">Cancelar</button></div></div>` : ''}
   </div>`;
 }
+// Fase suiza: récord de cada equipo con +/− (reparte los 🦷 al momento) y lista de equipos
+function swissAdmin(ev, ts, locked, finished) {
+  const n = pk.swVotes.get(ev.id)?.size ?? 0;
+  const stepper = (t, f, v) => `<span class="sw-step">${f === 'w' ? 'V' : 'D'}
+      <button class="btn ghost" data-pk="sw-rec" data-team="${esc(t.team)}" data-f="${f}" data-d="-1" type="button" ${!locked || finished || v === 0 ? 'disabled' : ''} aria-label="Quitar ${f === 'w' ? 'victoria' : 'derrota'} a ${esc(t.team)}">−</button>
+      <b>${v}</b>
+      <button class="btn ghost" data-pk="sw-rec" data-team="${esc(t.team)}" data-f="${f}" data-d="1" type="button" ${!locked || finished || v === 3 || (f === 'w' ? t.losses === 3 : t.wins === 3) ? 'disabled' : ''} aria-label="Sumar ${f === 'w' ? 'victoria' : 'derrota'} a ${esc(t.team)}">+</button></span>`;
+  return `<div class="pk-m"><span class="dim">${n} ${n === 1 ? 'jugador hizo' : 'jugadores hicieron'} sus elecciones · ${locked ? 'carga el récord de cada equipo después de cada ronda' : 'el récord se carga después del cierre'}</span></div>
+    ${ts.map(t => { const s = swissStatus(t);
+      return `<div class="pk-m" data-pk-ev="${ev.id}"><b style="min-width:180px">${esc(t.team)}</b>${stepper(t, 'w', t.wins)}${stepper(t, 'l', t.losses)}
+        <span class="votes">${s.done ? (s.adv ? `✅ Clasifica ${s.rec}` : `💀 Eliminado ${s.rec}`) : 'En juego'}</span></div>`; }).join('')}
+    ${finished ? '' : `<div class="pk-m" data-pk-ev="${ev.id}"><details style="flex:1"><summary class="dim" style="cursor:pointer">Editar equipos (uno por línea, en el orden de la ronda 1: 1 vs 2, 3 vs 4…)</summary>
+      <textarea class="in" data-f="teams" rows="8" style="width:100%;margin-top:8px;font:600 13px 'Albert Sans',system-ui,sans-serif">${esc(ts.map(t => t.team).join('\n'))}</textarea>
+      <button class="btn ok" data-pk="sw-teams" type="button" style="margin-top:8px">Guardar equipos</button></details></div>`}`;
+}
 function pkEventCard(ev) {
   const id = ev?.id ?? 'new';
   const locked = ev && Date.now() >= new Date(ev.locks_at).getTime();
   const finished = !!ev?.finished_at;
   const ms = ev ? pk.matches.filter(m => m.event_id === ev.id) : [];
   const br = createBracket(ms);
-  const allRes = ms.length && ms.every(m => m.score1 != null);
+  const sw = ev?.kind === 'swiss';
+  const ts = ev ? pk.teams.filter(t => t.event_id === ev.id) : [];
+  const allRes = sw ? ts.length && ts.every(t => swissStatus(t).done) : ms.length && ms.every(m => m.score1 != null);
   const chip = !ev ? '' : finished ? '<span class="chip off">Finalizado</span>' : locked ? '<span class="chip soon">Cerrado</span>' : '<span class="chip live">Abierto</span>';
   return `<div class="pk-ev" data-pk-ev-card="${id}">
     <div class="pk-head" data-pk-ev="${id}">
       <div style="flex:1;min-width:200px"><label>Nombre ${chip}</label><input class="in" data-f="name" maxlength="60" value="${esc(ev?.name ?? '')}" placeholder="Torneo · Fase (ej. Worlds 2026 · Fase suiza)" ${finished ? 'disabled' : ''}></div>
       <div><label>Se abren las elecciones</label><input class="in" data-f="opens" type="datetime-local" value="${isoToInput(ev?.opens_at)}" title="Vacío = abiertas ya" ${finished ? 'disabled' : ''}>
         <small class="es">${ev?.opens_at ? madrid(ev.opens_at) : 'Vacío = abiertas ya'}</small></div>
-      <div><label>Cierra el bracket</label><input class="in" data-f="locks" type="datetime-local" value="${isoToInput(ev?.locks_at)}" ${finished ? 'disabled' : ''}>
+      <div><label>Cierran las elecciones</label><input class="in" data-f="locks" type="datetime-local" value="${isoToInput(ev?.locks_at)}" ${finished ? 'disabled' : ''}>
         <small class="es">${ev ? madrid(ev.locks_at) : '&nbsp;'}</small></div>
       <div><label>Premio del pleno</label><input class="in" data-f="prize" maxlength="60" value="${esc(ev?.perfect_prize ?? 'Skin Definitiva')}" ${finished ? 'disabled' : ''}>
         <small class="es">Lo recibe quien acierta todo</small></div>
@@ -965,9 +990,10 @@ function pkEventCard(ev) {
     </div>
     ${pk.confirm === 'ev' + id ? `<div class="confirm" style="margin:10px 16px">¿Borrar <b>${esc(ev.name)}</b>? Se borran sus series y votos, se devuelven las apuestas y se quitan los 🦷 que haya repartido.
       <div class="actions"><button class="btn danger" data-pk="del-ev-yes" data-id="${id}" type="button">Sí, borrar</button><button class="btn ghost" data-pk="no" type="button">Cancelar</button></div></div>` : ''}
-    ${pk.confirm === 'fin' + id ? `<div class="confirm" style="margin:10px 16px">¿Finalizar <b>${esc(ev.name)}</b>? Quien haya acertado todos los ganadores recibe <b>${esc(ev.perfect_prize)}</b> (pendiente de entrega). Después ya no se pueden cambiar resultados.
+    ${pk.confirm === 'fin' + id ? `<div class="confirm" style="margin:10px 16px">¿Finalizar <b>${esc(ev.name)}</b>? Quien haya acertado ${ev.kind === 'swiss' ? 'los 8 clasificados y los 3 récords' : 'todos los ganadores'} recibe <b>${esc(ev.perfect_prize)}</b> (pendiente de entrega). Después ya no se pueden cambiar resultados.
       <div class="actions"><button class="btn danger" data-pk="finish-yes" data-id="${id}" type="button">Sí, finalizar</button><button class="btn ghost" data-pk="no" type="button">Cancelar</button></div></div>` : ''}
-    ${ev ? `${ms.map(m => pkMatchRow(m, ev.id, locked, finished, br)).join('')}
+    ${ev && sw ? swissAdmin(ev, ts, locked, finished) : ''}
+    ${ev && !sw ? `${ms.map(m => pkMatchRow(m, ev.id, locked, finished, br)).join('')}
       ${pk.newMatch === ev.id ? pkMatchRow(null, ev.id, locked, finished, br) : ''}
       ${finished ? '' : `<div class="pk-m"><button class="btn ghost" data-pk="new-m" data-id="${ev.id}" type="button">+ Serie</button>${ms.length ? '' : '<span class="dim">Todavía no hay series.</span>'}</div>`}` : ''}
   </div>`;
@@ -1007,6 +1033,17 @@ $('pk-list').addEventListener('click', async (e) => {
       p_team1: v(row, 't1'), p_team2: v(row, 't2'), p_best_of: Number(v(row, 'bo')), p_points: parseInt(v(row, 'points'), 10) || 0,
       p_starts_at: v(row, 'start') ? new Date(v(row, 'start')).toISOString() : null, p_sort: parseInt(v(row, 'sort'), 10) || null,
       p_bets_enabled: row.querySelector('[data-f="bets"]').checked }, '✅ Serie guardada'];
+  } else if (act === 'sw-rec') {
+    const evId = Number(head?.dataset.pkEv ?? b.closest('[data-pk-ev]').dataset.pkEv);
+    const t = pk.teams.find(x => x.event_id === evId && x.team === b.dataset.team);
+    const d = Number(b.dataset.d), w = t.wins + (b.dataset.f === 'w' ? d : 0), l = t.losses + (b.dataset.f === 'l' ? d : 0);
+    const s = swissStatus({ wins: w, losses: l });
+    call = ['admin_set_swiss_record', { p_event: evId, p_team: t.team, p_wins: w, p_losses: l },
+            s.done ? (s.adv ? `✅ ${t.team} clasifica ${s.rec} · dientes repartidos` : `💀 ${t.team} eliminado ${s.rec}`) : `${t.team}: ${w}-${l}`];
+  } else if (act === 'sw-teams') {
+    const row = b.closest('[data-pk-ev]');
+    const list = row.querySelector('[data-f="teams"]').value.split('\n').map(x => x.trim()).filter(Boolean);
+    call = ['admin_save_swiss_teams', { p_event: Number(row.dataset.pkEv), p_teams: list }, '✅ Equipos guardados'];
   } else if (act === 'del-m-yes') {
     call = ['admin_delete_pickem_match', { p_id: Number(row.dataset.pkM) }, 'Serie borrada'];
   } else if (act === 'bets-toggle') {

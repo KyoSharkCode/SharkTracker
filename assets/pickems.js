@@ -61,3 +61,33 @@ export function scoreOptions(bo) {
 
 export const MIN_BET = 10;    // igual que pickem_min_bet() en la base
 export const MAX_BET = 500;   // igual que pickem_max_bet()
+
+// ============================================================
+// Fase suiza (igual que pickem_settle_swiss en la base)
+//   Huecos '3-0', '3-1', '3-2' → récord exacto · 'a1'…'a5' → clasifica.
+//   +10 si el equipo clasifica · +15 extra si estaba en su récord exacto.
+// ============================================================
+export const SWISS = {
+  adv: 10, bonus: 15,
+  slots: ['3-0', '3-1', '3-2', 'a1', 'a2', 'a3', 'a4', 'a5'],
+  record: { '3-0': 'Invicto', '3-1': 'Comodidad absoluta', '3-2': 'Por los pelos' },
+};
+export const swissMax = () => 3 * (SWISS.adv + SWISS.bonus) + 5 * SWISS.adv;   // 125
+export const isRecordSlot = (slot) => slot in SWISS.record;
+
+// Destino de un equipo: { done, adv, rec } (rec = "3-1", "1-3"…; null si sigue jugando)
+export function swissStatus(t) {
+  if (!t) return { done: false, adv: false, rec: null };
+  if (t.wins === 3) return { done: true, adv: true, rec: `3-${t.losses}` };
+  if (t.losses === 3) return { done: true, adv: false, rec: `${t.wins}-3` };
+  return { done: false, adv: false, rec: null };
+}
+
+// Resultado de una elección: state 'pending' | 'ok' | 'half' | 'bad' y los dientes que da
+export function swissGrade(slot, t) {
+  const s = swissStatus(t);
+  if (!s.done) return { state: 'pending', pts: 0 };
+  if (!s.adv) return { state: 'bad', pts: 0 };
+  if (!isRecordSlot(slot)) return { state: 'ok', pts: SWISS.adv };
+  return slot === s.rec ? { state: 'ok', pts: SWISS.adv + SWISS.bonus } : { state: 'half', pts: SWISS.adv };
+}
