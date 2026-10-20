@@ -10,7 +10,7 @@
 // ============================================================
 import { equipo } from './equipos.js';
 import { icono } from './iconos.js';
-import { createBracket } from './pickems.js';
+import { createBracket, SWISS, swissMax } from './pickems.js';
 
 const CSS = `
 .pkb{position:relative; overflow:hidden; isolation:isolate; display:flex; align-items:center; gap:16px; margin:0 0 26px; padding:16px 18px 16px 20px;
@@ -71,32 +71,39 @@ export async function createPickemsBanner({ supabase, anchor = '.wrap > header' 
   if (!evs.length) return;
   const { data: matches } = await supabase.from('pickem_matches').select('*').in('event_id', evs.map(e => e.id)).order('sort').order('id');
   const ms = matches ?? [];
+  const { data: teamRows } = await supabase.from('pickem_teams').select('event_id, team, sort').in('event_id', evs.map(e => e.id)).order('sort');
+  const ts = teamRows ?? [];
+  const ready = (e) => e.kind === 'swiss' ? ts.some(t => t.event_id === e.id) : ms.some(m => m.event_id === e.id);
 
-  // 1) Fase abierta (la que cierra antes) con series
-  const open = evs.filter(e => new Date(e.locks_at).getTime() > now && ms.some(m => m.event_id === e.id))
+  // 1) Fase abierta (la que cierra antes) con series o equipos
+  const open = evs.filter(e => new Date(e.locks_at).getTime() > now && ready(e))
     .sort((a, b) => new Date(a.locks_at) - new Date(b.locks_at))[0];
   let view = null;
   if (open) {
+    const sw = open.kind === 'swiss';
     const em = ms.filter(m => m.event_id === open.id);
-    const max = em.reduce((a, m) => a + m.points, 0);
+    const total = sw ? SWISS.slots.length : em.length;
+    const max = sw ? swissMax() : em.reduce((a, m) => a + m.points, 0);
     // Tu progreso (si tienes la cuenta vinculada)
     let mine = null;
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       const { data: me } = await supabase.from('players').select('id').eq('user_id', session.user.id).maybeSingle();
       if (me) {
-        const { count } = await supabase.from('pickem_picks').select('match_id', { count: 'exact', head: true })
-          .eq('player_id', me.id).in('match_id', em.map(m => m.id));
+        const { count } = sw
+          ? await supabase.from('pickem_swiss_picks').select('slot', { count: 'exact', head: true }).eq('player_id', me.id).eq('event_id', open.id)
+          : await supabase.from('pickem_picks').select('match_id', { count: 'exact', head: true }).eq('player_id', me.id).in('match_id', em.map(m => m.id));
         mine = count ?? 0;
       }
     }
-    const teams = [...new Set(em.flatMap(m => [m.team1, m.team2]).filter(Boolean))].slice(0, 4);
+    const teams = sw ? ts.filter(t => t.event_id === open.id).slice(0, 4).map(t => t.team)
+      : [...new Set(em.flatMap(m => [m.team1, m.team2]).filter(Boolean))].slice(0, 4);
     view = {
       key: `pkb-hide-${open.id}-abierto`, ev: open, teams,
       title: `Pickems · ${stageOf(open.name)}`,
       sub: () => `Cierra en <i data-pkb-count="${new Date(open.locks_at).getTime()}">${countdown(new Date(open.locks_at).getTime())}</i> · Hasta ${icono('diente', { size: 14, clase: 'pkb-dt' })} ${max} y ${esc(open.perfect_prize)}`,
-      prog: mine == null ? null : { n: mine, total: em.length },
-      cta: mine == null ? 'Ver Pickems' : mine === em.length ? 'Revisar mi bracket' : 'Armar mi bracket',
+      prog: mine == null ? null : { n: mine, total },
+      cta: mine == null ? 'Ver Pickems' : mine === total ? (sw ? 'Revisar mis elecciones' : 'Revisar mi bracket') : (sw ? 'Hacer mis elecciones' : 'Armar mi bracket'),
       href: `pickems.html?id=${open.id}`,
     };
   } else {

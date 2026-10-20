@@ -434,6 +434,88 @@
   @media (max-width:700px){ .hero-bg{inset:0; opacity:.25; -webkit-mask-image:none; mask-image:none;} }
   @media (prefers-reduced-motion: reduce){ a.stage:hover .stage-bg{transform:scale(1.02);} .intro-hub .stage-bg{animation-name:fade-only;} }
 
+  /* ============================================================
+     Fase suiza: 3 récords exactos arriba y 5 clasificados abajo
+     ============================================================ */
+  .sw-rec{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px;}
+  .sw-card{padding:14px; border-radius:16px; background:var(--panel); border:1px solid var(--border);}
+  .sw-head{display:flex; align-items:center; gap:8px; padding:0 2px 12px; margin-bottom:12px; border-bottom:1px solid var(--border);}
+  .sw-head .ic{color:var(--gold); display:flex;}
+  .sw-head b{font:700 16px var(--f-cifra); color:var(--gold-soft);}
+  .sw-head small{margin-left:auto; font-size:13px; font-weight:700; color:var(--text-dim);}
+  .sw-pts{font:600 12px var(--f-cifra); padding:2px 8px; border-radius:99px; border:1px solid var(--border); color:var(--text-dim); display:inline-flex; align-items:center; gap:4px;}
+  .sw-sub{display:flex; align-items:center; gap:10px; margin:22px 2px 12px; font-size:13px; font-weight:700; color:var(--text-dim);}
+  .sw-sub b{color:var(--text); font-family:'Unbounded',sans-serif; font-size:13px; text-transform:uppercase;}
+  .sw-adv{display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:12px;}
+  .sw-adv .sw-slot .nm{white-space:normal; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; line-height:1.25;}
+
+  .sw-wrap{position:relative;}
+  .sw-slot{position:relative; display:flex; align-items:center; gap:10px; width:100%; min-height:60px; padding:10px 12px; border-radius:12px;
+    border:1px solid var(--border); background:var(--field); color:var(--text); font:700 14px 'Albert Sans',system-ui,sans-serif; text-align:left;
+    transition:border-color 200ms ease, background-color 200ms ease, transform 140ms var(--ease-out), box-shadow 200ms ease;}
+  button.sw-slot{cursor:pointer;}
+  button.sw-slot:hover{border-color:rgba(61,255,210,.45);}
+  button.sw-slot:active{transform:scale(0.98);}
+  button.sw-slot[aria-expanded="true"]{border-color:var(--accent); box-shadow:0 0 0 3px rgba(61,255,210,.12);}
+  .sw-slot.empty{color:var(--text-faint); font-weight:600; border-style:dashed;}
+  .sw-slot .nm{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .sw-slot .chev{display:flex; color:var(--text-dim); transition:transform 200ms var(--ease-out);}
+  button.sw-slot[aria-expanded="true"] .chev{transform:rotate(180deg);}
+  .sw-slot .rec{font:600 13px var(--f-cifra); color:var(--text-dim);}
+  .sw-slot .res{font:700 12px var(--f-cifra); padding:2px 8px; border-radius:99px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;}
+  .sw-slot.ok{border-color:rgba(61,255,210,.6); background:rgba(61,255,210,.08);}
+  .sw-slot.ok .res{background:rgba(61,255,210,.14); color:var(--green);}
+  .sw-slot.half{border-color:rgba(255,181,71,.55); background:rgba(255,181,71,.07);}
+  .sw-slot.half .res{background:rgba(255,181,71,.14); color:var(--gold-soft);}
+  .sw-slot.bad{border-color:rgba(255,111,142,.45); background:rgba(255,111,142,.06); color:var(--text-dim);}
+  .sw-slot.bad .res{background:rgba(255,111,142,.12); color:var(--red-soft);}
+  .sw-slot.bad .tlogo img{filter:grayscale(1) brightness(.55);}
+  .sw-slot .tlogo{width:36px; height:36px;}
+  .sw-slot.pop .tlogo{animation:sw-pop 360ms var(--ease-out);}
+  @keyframes sw-pop{ 0%{transform:scale(.6); opacity:.3;} 60%{transform:scale(1.08);} 100%{transform:scale(1);} }
+
+  /* Desplegable con los equipos (sale desde su hueco) */
+  .sw-pop{position:absolute; z-index:40; top:calc(100% + 6px); left:0; min-width:100%; width:max-content; max-width:min(320px, 90vw); max-height:340px; overflow-y:auto;
+    padding:6px; border-radius:14px; background:rgba(8,32,44,.98); border:1px solid var(--border); box-shadow:0 18px 44px rgba(0,0,0,.55);
+    transform-origin:top left; transition:opacity 160ms ease, transform 160ms var(--ease-out);}
+  @starting-style{ .sw-pop{opacity:0; transform:translateY(-4px) scale(.97);} }
+  .sw-wrap.right .sw-pop{left:auto; right:0; transform-origin:top right;}
+  .sw-opt{display:flex; align-items:center; gap:10px; width:100%; min-height:44px; padding:6px 10px; border:none; border-radius:10px; background:none; color:var(--text);
+    font:700 14px 'Albert Sans',system-ui,sans-serif; text-align:left; cursor:pointer; transition:background-color 120ms ease;}
+  .sw-opt:hover, .sw-opt:focus-visible{background:rgba(61,255,210,.08); outline:none;}
+  .sw-opt.sel{background:rgba(61,255,210,.12);}
+  .sw-opt small{margin-left:auto; padding-left:10px; font-size:12px; font-weight:600; color:var(--text-faint); white-space:nowrap;}
+  .sw-opt em{font-style:normal; font-size:12px; font-weight:700; color:var(--gold-soft); white-space:nowrap;}
+  .sw-opt.clear{color:var(--red-soft); font-weight:600; border-top:1px solid var(--border); border-radius:0 0 10px 10px; margin-top:4px;}
+
+  /* Equipos con su récord en vivo */
+  .sw-teams{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px;}
+  .sw-team{position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; background:var(--panel); border:1px solid var(--border);
+    transition:border-color 300ms ease, opacity 300ms ease;}
+  .sw-team .tlogo{width:34px; height:34px;}
+  .sw-team .nm{flex:1; min-width:0;}
+  .sw-team .nm b{display:block; font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .sw-team .nm small{display:block; font-size:12px; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .sw-team .wl{font:700 16px var(--f-cifra); color:var(--text-soft);}
+  .sw-team.adv{border-color:rgba(61,255,210,.45);} .sw-team.adv .wl{color:var(--green);}
+  .sw-team.out{opacity:.6;} .sw-team.out .wl{color:var(--red-soft);} .sw-team.out .tlogo img{filter:grayscale(1) brightness(.6);}
+  .sw-team .share{position:absolute; left:0; right:0; bottom:0; height:2px; background:rgba(61,255,210,.45); transform-origin:left; transform:scaleX(var(--p,0)); transition:transform 500ms var(--ease-out);}
+
+  /* Elecciones del grupo */
+  .sw-matrix td{padding:9px 10px;}
+  .sw-matrix .picks{display:flex; gap:4px; flex-wrap:wrap;}
+  .sw-matrix .tlogo{width:28px; height:28px;}
+  .sw-matrix .tlogo.ok{box-shadow:0 0 0 2px var(--green);}
+  .sw-matrix .tlogo.half{box-shadow:0 0 0 2px var(--gold);}
+  .sw-matrix .tlogo.bad{opacity:.45;}
+  .sw-matrix .none{color:var(--text-faint);}
+
+  @media (max-width:860px){ .sw-adv{grid-template-columns:repeat(2, minmax(0,1fr));} .sw-teams{grid-template-columns:repeat(2, minmax(0,1fr));} }
+  @media (max-width:700px){ .sw-rec{grid-template-columns:1fr;} .sw-matrix .hide-sm{display:none;}
+    .sw-sub{flex-wrap:wrap; gap:6px 10px;} .sw-sub .sw-pts:last-child{margin-left:0;} }
+  @media (prefers-reduced-motion: reduce){ .sw-slot.pop .tlogo{animation:none;} button.sw-slot:active{transform:none;}
+    @starting-style{ .sw-pop{transform:none;} } }
+
   @media (max-width:860px){
     .prizes{grid-template-columns:1fr;}
     .links{display:none;}
@@ -491,18 +573,19 @@
     <div id="hero"></div>
     <div class="prizes" id="prizes"></div>
     <div id="notice"></div>
-    <section>
+    <section id="bracket-sec">
       <h2 class="section-title"><span class="bar"></span><span id="bracket-title">Bracket</span><span class="aside" id="bracket-aside"></span></h2>
       <div id="bracket"></div>
     </section>
     <section id="bets-sec" hidden></section>
+    <div id="swiss" hidden></div>
     <section id="board-sec">
       <h2 class="section-title"><span class="bar"></span>Clasificación</h2>
       <div class="card" style="overflow:hidden"><table>
         <thead><tr><th>#</th><th>Participante</th><th class="num">Dientes</th><th class="num">Aciertos</th><th class="num hide-sm">Elecciones</th></tr></thead>
         <tbody id="board"></tbody>
       </table></div>
-      <p class="note">Los dientes se suman a tu cartera cuando la admin carga el resultado de cada serie. “Pleno posible”: completó el bracket y no ha fallado ninguna serie de las que ya se jugaron.</p>
+      <p class="note" id="board-note"></p>
     </section>
     <section id="next-sec" hidden>
       <h2 class="section-title"><span class="bar"></span>Próximamente</h2>
@@ -517,7 +600,7 @@ import { createAuthMenu } from './assets/auth-menu.js';
 import { createNavMenu } from './assets/nav-menu.js';
 import { icono } from './assets/iconos.js';
 import { equipo } from './assets/equipos.js';
-import { createBracket, MIN_BET, MAX_BET } from './assets/pickems.js';
+import { createBracket, MIN_BET, MAX_BET, SWISS, swissMax, isRecordSlot, swissStatus, swissGrade } from './assets/pickems.js';
 import { morph } from './assets/morph.js';
 
 createNavMenu({ current: 'pickems' });
@@ -548,7 +631,7 @@ const idParam = Number(new URL(location.href).searchParams.get('id')) || null;
 
 // Estado de la página (se conserva entre recargas por Realtime)
 const st = { session: null, me: null, players: [], profiles: new Map(), events: [], ev: null, matches: [], picks: [], bets: [],
-             balance: 0, betTeam: new Map(), betBusy: new Set(), drawn: false };
+             balance: 0, betTeam: new Map(), betBusy: new Set(), drawn: false, teams: [], spicks: [], swOpen: null };
 let br = createBracket([]);
 let countdownTarget = null;
 
@@ -584,6 +667,20 @@ async function load() {
   if (!st.events.length) { $('empty').hidden = false; $('main').hidden = true; $('hub').hidden = true; return; }
   st.ev = idParam ? st.events.find(e => e.id === idParam) ?? null : null;
   if (!st.ev) return loadHub();   // sin ?id (o uno que no existe): la portada
+  if (st.ev.kind === 'swiss') {
+    const [{ data: teams }, { data: spicks }] = await Promise.all([
+      supabase.from('pickem_teams').select('*').eq('event_id', st.ev.id).order('sort'),
+      supabase.from('pickem_swiss_picks').select('*').eq('event_id', st.ev.id),
+    ]);
+    st.teams = teams ?? [];
+    // Mientras se guarda una elección, lo que llega del servidor puede ir un paso atrás: se conservan las mías.
+    st.spicks = pending ? [...(spicks ?? []).filter(p => p.player_id !== st.me?.id), ...st.spicks.filter(p => p.player_id === st.me?.id)] : (spicks ?? []);
+    st.matches = []; br = createBracket([]); st.picks = []; st.bets = [];
+    document.title = `${splitName(st.ev.name).stage} · Pickems · SharkTracker`;
+    $('main').hidden = false;
+    draw();
+    return;
+  }
   const { data: matches } = await supabase.from('pickem_matches').select('*').eq('event_id', st.ev.id).order('sort').order('id');
   st.matches = matches ?? [];
   br = createBracket(st.matches);
@@ -603,7 +700,11 @@ async function load() {
 }
 
 function draw() {
-  drawEvents(); drawHero(); drawPrizes(); drawNotice(); drawBracket(); drawBets(); drawBoard(); drawNext();
+  const sw = isSwiss();
+  $('bracket-sec').hidden = sw; $('swiss').hidden = !sw;
+  drawEvents(); drawHero(); drawPrizes(); drawNotice();
+  if (sw) { $('bets-sec').hidden = true; drawSwiss(); } else { drawBracket(); drawBets(); }
+  drawBoard(); drawNext();
   st.drawn = true;
 }
 
@@ -631,15 +732,16 @@ function drawHero() {
   countdownTarget = open ? new Date(ev.locks_at).getTime() : ph === 'soon' ? new Date(ev.opens_at).getTime() : null;
   const c = countParts(Math.max(0, (countdownTarget ?? 0) - Date.now()));
   const kicker = ph === 'done' ? `<span class="kicker done">${icono('trofeo', { size: 14 })} Finalizado</span>`
-    : open ? '<span class="kicker open">● Bracket abierto</span>'
+    : open ? `<span class="kicker open">● ${isSwiss() ? 'Elecciones abiertas' : 'Bracket abierto'}</span>`
     : ph === 'soon' ? `<span class="kicker closed">${icono('reloj_arena', { size: 14 })} Próximamente</span>`
-    : `<span class="kicker closed">${icono('candado', { size: 14 })} Bracket cerrado · se juega</span>`;
+    : `<span class="kicker closed">${icono('candado', { size: 14 })} ${isSwiss() ? 'Elecciones cerradas' : 'Bracket cerrado'} · se juega</span>`;
   morph($('hero'), `<div class="hero">
     ${ev.bg_image ? `<span class="hero-bg" aria-hidden="true" style="background-image:url('${esc(ev.bg_image)}'); background-position:${esc(ev.bg_focus ?? '50% 35%')}"></span>` : ''}
     ${kicker}
     <h2 class="ev-name">${esc(ev.name)}</h2>
     <p class="ev-sub">${ph === 'soon' ? `Se abre el <b>${fechaEs(ev.opens_at)}</b> y cierra el` : open ? 'Cierra el' : 'Cerró el'} <b>${fechaEs(ev.locks_at)}</b> (hora de España)</p>
-    ${st.matches.length ? `<p class="ev-sub">${plural(st.matches.length, 'serie', 'series')} · ${plural(new Set(st.picks.map(p => p.player_id)).size, 'participante', 'participantes')}</p>` : ''}
+    ${isSwiss() ? (st.teams.length ? `<p class="ev-sub">${plural(st.teams.length, 'equipo', 'equipos')} · ${plural(new Set(st.spicks.map(p => p.player_id)).size, 'participante', 'participantes')}</p>` : '')
+      : st.matches.length ? `<p class="ev-sub">${plural(st.matches.length, 'serie', 'series')} · ${plural(new Set(st.picks.map(p => p.player_id)).size, 'participante', 'participantes')}</p>` : ''}
     ${countdownTarget ? `<div class="count" id="count" aria-label="${open ? 'Tiempo para el cierre' : 'Tiempo para la apertura'}">
       <div><b data-u="d">${c.d}</b><small>días</small></div><div><b data-u="h">${c.h}</b><small>horas</small></div>
       <div><b data-u="m">${c.m}</b><small>min</small></div><div><b data-u="s">${c.s}</b><small>seg</small></div></div>` : ''}
@@ -647,6 +749,14 @@ function drawHero() {
 }
 
 function drawPrizes() {
+  if (isSwiss()) {
+    const q = (cls, ic, t, d) => `<div class="prize ${cls}"><span class="ico">${icono(ic, { size: 22 })}</span><div><b>${t}</b><small>${d}</small></div></div>`;
+    morph($('prizes'), !st.teams.length ? '' :
+      q('', 'check', `Clasificado acertado: +${SWISS.adv} ${DT()}`, 'Por cada uno de tus 8 equipos que clasifica.') +
+      q('', 'diana', `Récord exacto: +${SWISS.bonus} ${DT()} extra`, `En los huecos 3-0, 3-1 y 3-2. Máximo: ${swissMax()} ${DT()}.`) +
+      q('skin', 'corona', esc(st.ev.perfect_prize), 'Si clasifican tus 8 equipos y clavas los 3 récords.'));
+    return;
+  }
   const pts = st.matches.map(m => m.points);
   if (!pts.length) { morph($('prizes'), ''); return; }
   const total = pts.reduce((a, b) => a + b, 0);
@@ -667,6 +777,10 @@ function drawNotice() {
     html = `<div class="notice">${icono('candado', { size: 20 })}<span><b>Inicia sesión para armar tu bracket.</b> Sin cuenta puedes ver lo que eligió cada uno.</span><a class="btn" href="login.html"><span class="lbl">Iniciar sesión</span></a></div>`;
   } else if (open && !st.me) {
     html = `<div class="notice">${icono('enlace', { size: 20 })}<span><b>Vincula tu cuenta de LoL</b> para jugar: los dientes van a tu perfil.</span><a class="btn" href="login.html"><span class="lbl">Vincular cuenta</span></a></div>`;
+  } else if (open && st.me && isSwiss()) {
+    const done = mySwiss().size, total = SWISS.slots.length;
+    html = `<div class="notice">${icono('lapiz', { size: 20 })}<span>Elige los 8 equipos que clasifican: 3 con su récord exacto y 5 con cualquier récord. Se guarda solo y puedes cambiarlo hasta el cierre.
+      <span class="progress">${done}/${total}</span><span class="pbar ${done === total ? 'full' : ''}" aria-hidden="true"><i style="--p:${done / total}"></i></span></span></div>`;
   } else if (open && st.me) {
     const done = myPicks().size, total = st.matches.length;
     html = `<div class="notice">${icono('lapiz', { size: 20 })}<span>Toca el equipo que crees que gana: pasa a la siguiente ronda de tu bracket. Se guarda solo y puedes cambiarlo hasta el cierre.
@@ -919,6 +1033,167 @@ function tweenNumbers(root) {
   }
 }
 
+// ============================================================
+// Fase suiza: elegir los 8 equipos que clasifican (3 con récord exacto)
+// ============================================================
+const isSwiss = () => st.ev?.kind === 'swiss';
+const teamRow = (name) => st.teams.find(t => t.team === name);
+const mySwiss = () => new Map(st.spicks.filter(p => p.player_id === st.me?.id).map(p => [p.slot, p.team]));
+const rival = (t) => { const i = st.teams.findIndex(x => x.team === t.team); if (i < 0) return null; const j = i % 2 ? i - 1 : i + 1; return st.teams[j]?.team ?? null; };
+const SWORD = () => icono('espadas', { size: 18 });
+
+function slotHtml(slot, mp, canPick) {
+  const team = mp.get(slot) ?? null, t = team ? teamRow(team) : null;
+  const g = team ? swissGrade(slot, t) : { state: 'pending', pts: 0 };
+  const s = swissStatus(t);
+  const open = st.swOpen === slot;
+  const res = !team || g.state === 'pending'
+    ? (t && (t.wins || t.losses) ? `<span class="rec">${t.wins}-${t.losses}</span>` : '')
+    : g.state === 'bad' ? `<span class="res">✕ ${esc(s.rec)}</span>`
+    : `<span class="res">${g.state === 'half' ? 'Parcial ' : '✓ '}+${g.pts} ${DT(12)}</span>`;
+  const inner = team ? `${logo(team)}<span class="nm">${esc(team)}</span>${res}`
+    : `<span class="nm">${canPick ? 'Elige un equipo…' : '—'}</span>`;
+  const chev = canPick ? '<span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>' : '';
+  const cls = `sw-slot ${team ? g.state : 'empty'}`;
+  const label = isRecordSlot(slot) ? `Récord ${slot}` : 'Clasifica';
+  const btn = canPick
+    ? `<button type="button" class="${cls}" data-key="b${slot}" data-sw-slot="${slot}" aria-haspopup="listbox" aria-expanded="${open}" aria-label="${label}: ${team ? esc(team) : 'sin elegir'}">${inner}${chev}</button>`
+    : `<div class="${cls}" data-key="d${slot}">${inner}</div>`;
+  let pop = '';
+  if (open && canPick) {
+    const used = new Map([...mp.entries()].map(([k, v]) => [v, k]));
+    pop = `<div class="sw-pop" role="listbox" aria-label="Equipos" data-key="pop">${st.teams.map(o => {
+      const at = used.get(o.team), sel = at === slot, rv = rival(o);
+      return `<button type="button" role="option" class="sw-opt ${sel ? 'sel' : ''}" aria-selected="${sel}" data-sw-pick="${esc(o.team)}">${logo(o.team)}<span>${esc(o.team)}</span>
+        ${at && !sel ? `<em>en ${isRecordSlot(at) ? at : 'clasifican'}</em>` : rv ? `<small>vs ${esc(equipo(rv)?.code ?? rv)}</small>` : ''}</button>`; }).join('')}
+      ${team ? '<button type="button" role="option" class="sw-opt clear" data-sw-pick="">Quitar equipo</button>' : ''}</div>`;
+  }
+  return `<div class="sw-wrap ${['3-2', 'a4', 'a5'].includes(slot) ? 'right' : ''}" data-key="w${slot}">${btn}${pop}</div>`;
+}
+
+function drawSwiss() {
+  const mp = mySwiss();
+  const canPick = isOpen() && !!st.me;
+  const decided = st.teams.filter(t => swissStatus(t).done).length;
+  const participants = new Set(st.spicks.map(p => p.player_id));
+  const share = (team) => participants.size ? st.spicks.filter(p => p.team === team).length / participants.size : 0;
+  const started = st.teams.some(t => t.wins || t.losses);
+  const order = started ? [...st.teams].sort((a, b) => b.wins - a.wins || a.losses - b.losses || a.sort - b.sort) : st.teams;
+  const byId = new Map(st.players.map(p => [p.id, p]));
+  const rows = [...participants].map(id => byId.get(id)).filter(Boolean).sort((a, b) => nameOf(a).localeCompare(nameOf(b)));
+  const cell = (pid, slots) => slots.map(sl => { const p = st.spicks.find(x => x.player_id === pid && x.slot === sl);
+    if (!p) return '<span class="none">·</span>'; const gr = swissGrade(sl, teamRow(p.team));
+    return logo(p.team).replace('class="tlogo"', `class="tlogo ${gr.state}" title="${esc(p.team)}"`); }).join('');
+  morph($('swiss'), `<section data-key="s1">
+      <h2 class="section-title"><span class="bar"></span>${canPick ? '¿Quién avanzará?' : 'Clasificados'}<span class="aside">${st.teams.length ? `${decided} de ${st.teams.length} equipos decididos` : ''}</span></h2>
+      <div class="sw-rec">${Object.entries(SWISS.record).map(([slot, name]) => `<div class="sw-card" data-key="c${slot}">
+        <div class="sw-head"><span class="ic">${SWORD()}</span><b>${slot}</b><small>${name}</small></div>${slotHtml(slot, mp, canPick)}</div>`).join('')}</div>
+      <div class="sw-sub" data-key="sub"><b>Clasifican</b> con cualquier récord <span class="sw-pts">+${SWISS.adv} ${DT(12)} cada uno</span>
+        <span class="sw-pts" style="margin-left:auto">Récord exacto: +${SWISS.adv + SWISS.bonus} ${DT(12)}</span></div>
+      <div class="sw-adv">${['a1', 'a2', 'a3', 'a4', 'a5'].map(s => slotHtml(s, mp, canPick)).join('')}</div>
+    </section>
+    <section data-key="s2">
+      <h2 class="section-title"><span class="bar"></span>Equipos<span class="aside">${started ? 'Récord en vivo' : 'Ronda 1 · al mejor de 1'}</span></h2>
+      <div class="sw-teams">${order.map(t => { const s = swissStatus(t), rv = rival(t);
+        const sub = s.done ? (s.adv ? `Clasifica ${s.rec}` : `Eliminado ${s.rec}`) : started ? 'En juego' : rv ? `vs ${esc(rv)}` : '';
+        return `<div class="sw-team ${s.done ? (s.adv ? 'adv' : 'out') : ''}" data-key="t${esc(t.team)}">${logo(t.team)}
+          <span class="nm"><b>${esc(t.team)}</b><small>${sub}${participants.size ? ` · ${Math.round(100 * share(t.team))}% lo elige` : ''}</small></span>
+          ${started ? `<span class="wl">${t.wins}-${t.losses}</span>` : ''}<span class="share" style="--p:${share(t.team).toFixed(3)}" aria-hidden="true"></span></div>`; }).join('')}</div>
+    </section>
+    ${rows.length ? `<section data-key="s3">
+      <h2 class="section-title"><span class="bar"></span>Elecciones del grupo</h2>
+      <div class="card" style="overflow:hidden"><table class="sw-matrix">
+        <thead><tr><th>Participante</th><th>3-0</th><th>3-1</th><th>3-2</th><th class="hide-sm">Clasifican</th></tr></thead>
+        <tbody>${rows.map(pl => `<tr data-key="m${pl.id}"><td><div class="pl"><img loading="lazy" decoding="async" src="${iconOr1(pl.icon_id)}" alt="" onerror="${ICON_ONERROR}">
+          <a href="perfil.html?jugador=${encodeURIComponent(pl.id)}">${esc(nameOf(pl))}</a></div></td>
+          <td>${cell(pl.id, ['3-0'])}</td><td>${cell(pl.id, ['3-1'])}</td><td>${cell(pl.id, ['3-2'])}</td>
+          <td class="hide-sm"><div class="picks">${cell(pl.id, ['a1', 'a2', 'a3', 'a4', 'a5'])}</div></td></tr>`).join('')}</tbody>
+      </table></div></section>` : ''}`);
+  // Al abrir el desplegable, el foco va al equipo elegido (o al primero)
+  if (st.swOpen && !drawSwiss.focused) {
+    drawSwiss.focused = true;
+    ($('swiss').querySelector('.sw-pop .sw-opt.sel') ?? $('swiss').querySelector('.sw-pop .sw-opt'))?.focus({ preventScroll: true });
+  }
+}
+
+function closeSwissPop(refocus) {
+  const slot = st.swOpen; if (!slot) return;
+  st.swOpen = null; drawSwiss.focused = false; drawSwiss();
+  if (refocus) $('swiss').querySelector(`[data-sw-slot="${slot}"]`)?.focus();
+}
+
+let swQueue = Promise.resolve();
+$('swiss').addEventListener('click', (e) => {
+  const opt = e.target.closest('[data-sw-pick]');
+  if (opt && st.swOpen) {
+    const slot = st.swOpen, team = opt.dataset.swPick || null, me = st.me.id;
+    // Al instante en pantalla; el servidor guarda detrás y en orden
+    st.spicks = st.spicks.filter(p => !(p.player_id === me && (p.slot === slot || (team && p.team === team))));
+    if (team) st.spicks.push({ player_id: me, event_id: st.ev.id, slot, team });
+    closeSwissPop(true);
+    drawNotice(); drawBoard(); drawHero();
+    if (team) replay($('swiss').querySelector(`[data-sw-slot="${slot}"]`), 'pop');
+    pending++;
+    swQueue = swQueue.then(async () => {
+      const { error } = await supabase.rpc('save_swiss_pick', { p_event: st.ev.id, p_slot: slot, p_team: team });
+      pending--;
+      if (error) { authMenu.toast(error.message, true); await load(); }
+      else if (team && mySwiss().size === SWISS.slots.length) authMenu.toast('🏆 ¡Tus 8 elecciones están listas! Puedes cambiarlas hasta el cierre');
+    });
+    return;
+  }
+  const b = e.target.closest('[data-sw-slot]');
+  if (b) { const slot = b.dataset.swSlot; if (st.swOpen === slot) return closeSwissPop(true); st.swOpen = slot; drawSwiss.focused = false; drawSwiss(); }
+});
+// Cerrar al hacer clic fuera, con Escape o Tab; flechas para moverse por la lista
+document.addEventListener('click', (e) => { if (st.swOpen && !e.target.closest('.sw-wrap')) closeSwissPop(false); });
+$('swiss').addEventListener('keydown', (e) => {
+  if (!st.swOpen) return;
+  if (e.key === 'Escape') { e.preventDefault(); closeSwissPop(true); return; }
+  if (e.key === 'Tab') { closeSwissPop(false); return; }
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  const opts = [...$('swiss').querySelectorAll('.sw-pop .sw-opt')];
+  const i = opts.indexOf(document.activeElement);
+  e.preventDefault();
+  opts[(i + (e.key === 'ArrowDown' ? 1 : -1) + opts.length) % opts.length]?.focus();
+});
+
+// Clasificación de la fase suiza
+function drawSwissBoard() {
+  const byId = new Map(st.players.map(p => [p.id, p]));
+  const rows = new Map();
+  for (const p of st.spicks) {
+    if (!byId.has(p.player_id)) continue;
+    const r = rows.get(p.player_id) ?? { pl: byId.get(p.player_id), teeth: 0, ok: 0, exact: 0, bad: 0, half: 0, picks: 0 };
+    const g = swissGrade(p.slot, teamRow(p.team));
+    r.picks++; r.teeth += g.pts;
+    if (g.state === 'ok' || g.state === 'half') r.ok++;
+    if (g.state === 'ok' && isRecordSlot(p.slot)) r.exact++;
+    if (g.state === 'bad') r.bad++; if (g.state === 'half') r.half++;
+    rows.set(p.player_id, r);
+  }
+  const decided = st.teams.filter(t => swissStatus(t).done && swissStatus(t).adv).length;
+  const list = [...rows.values()].sort((a, b) => b.teeth - a.teeth || b.ok - a.ok || b.picks - a.picks || nameOf(a.pl).localeCompare(nameOf(b.pl)));
+  const alive = (r) => r.picks === SWISS.slots.length && r.bad === 0 && r.half === 0;
+  const tbody = $('board');
+  const first = new Map([...tbody.querySelectorAll('tr[data-key]')].map(tr => [tr.dataset.key, tr.getBoundingClientRect().top]));
+  morph(tbody, list.map((r, i) => `<tr data-key="p${r.pl.id}" class="${i === 0 && r.teeth > 0 ? 'first' : ''}">
+      <td class="pos">${i + 1}</td>
+      <td><div class="pl"><img loading="lazy" decoding="async" src="${iconOr1(r.pl.icon_id)}" alt="" onerror="${ICON_ONERROR}">
+        <a href="perfil.html?jugador=${encodeURIComponent(r.pl.id)}">${esc(nameOf(r.pl))}</a>${alive(r) ? `<span class="tag">${st.ev.finished_at ? esc(st.ev.perfect_prize) : 'Pleno posible'}</span>` : ''}</div></td>
+      <td class="num"><span class="teeth">${DT()} <span data-morph-skip data-n="${r.teeth}">${r.teeth}</span></span></td>
+      <td class="num">${r.ok}/${decided}</td>
+      <td class="num hide-sm">${r.picks}/${SWISS.slots.length}</td>
+    </tr>`).join('') || '<tr><td colspan="5" class="dim" style="text-align:center;padding:22px;">Nadie ha hecho sus elecciones todavía.</td></tr>');
+  tweenNumbers(tbody);
+  if (reduced) return;
+  for (const tr of tbody.querySelectorAll('tr[data-key]')) {
+    const was = first.get(tr.dataset.key); if (was === undefined) continue;
+    const dy = was - tr.getBoundingClientRect().top; if (Math.abs(dy) < 1) continue;
+    tr.animate([{ transform: `translateY(${dy}px)` }, { transform: 'translateY(0)' }], { duration: 420, easing: EASE_IO });
+  }
+}
+
 // ── Apuestas ──
 function betState(m) {
   const t1 = br.actual(m, 1), t2 = br.actual(m, 2);
@@ -1006,7 +1281,13 @@ $('bets-sec').addEventListener('click', async (e) => {
 
 // ── Clasificación (las filas se deslizan a su puesto nuevo) ──
 function drawBoard() {
+  if (isSwiss()) {
+    $('board-sec').hidden = !st.teams.length;
+    $('board-note').textContent = 'Los dientes se suman a tu cartera en cuanto cada equipo cierra su destino (3 victorias o 3 derrotas). “Pleno posible”: hizo sus 8 elecciones y no ha fallado ninguna de las que ya se decidieron.';
+    return drawSwissBoard();
+  }
   $('board-sec').hidden = !st.matches.length;
+  $('board-note').textContent = 'Los dientes se suman a tu cartera cuando la admin carga el resultado de cada serie. “Pleno posible”: completó el bracket y no ha fallado ninguna serie de las que ya se jugaron.';
   const byId = new Map(st.players.map(p => [p.id, p]));
   const total = st.matches.length;
   const rows = new Map();
@@ -1046,18 +1327,22 @@ function drawBoard() {
 // ============================================================
 // Portada de Pickems (sin ?id)
 // ============================================================
-const hub = { matches: [], picks: [], bets: [], brs: new Map(), drawn: false };
+const hub = { matches: [], picks: [], bets: [], brs: new Map(), drawn: false, teams: [], spicks: [] };
 const SONAR = `<svg class="sonar" viewBox="0 0 300 300" aria-hidden="true"><circle cx="150" cy="150" r="38"/><circle cx="150" cy="150" r="72"/>
   <circle cx="150" cy="150" r="108"/><circle cx="150" cy="150" r="144"/><circle class="ping" cx="150" cy="150" r="144" style="opacity:0"/></svg>`;
 const SHARE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>';
 
 async function loadHub() {
   const ids = st.events.map(e => e.id);
-  const [{ data: matches }, { data: bets }] = await Promise.all([
+  const [{ data: matches }, { data: bets }, { data: teams }, { data: spicks }] = await Promise.all([
     supabase.from('pickem_matches').select('*').in('event_id', ids).order('sort').order('id'),
     supabase.from('pickem_bets').select('match_id, player_id, amount'),
+    supabase.from('pickem_teams').select('*').in('event_id', ids).order('sort'),
+    supabase.from('pickem_swiss_picks').select('*').in('event_id', ids),
   ]);
   hub.matches = matches ?? [];
+  hub.teams = teams ?? [];
+  hub.spicks = spicks ?? [];
   const mids = hub.matches.map(m => m.id);
   const { data: picks } = mids.length ? await supabase.from('pickem_picks').select('*').in('match_id', mids) : { data: [] };
   hub.picks = picks ?? [];
@@ -1080,6 +1365,17 @@ function hubScores() {
     e.picks++; r.events.add(m.event_id);
     if (win && p.team === win) { r.ok++; r.teeth += m.points; e.teeth += m.points; }
     r.byEvent.set(m.event_id, e);
+    byPlayer.set(p.player_id, r);
+  }
+  // Fase suiza
+  for (const p of hub.spicks) {
+    const t = hub.teams.find(x => x.event_id === p.event_id && x.team === p.team);
+    const g = swissGrade(p.slot, t);
+    const r = byPlayer.get(p.player_id) ?? { teeth: 0, ok: 0, events: new Set(), byEvent: new Map() };
+    const e = r.byEvent.get(p.event_id) ?? { teeth: 0, picks: 0 };
+    e.picks++; r.events.add(p.event_id);
+    if (g.pts) { r.ok++; r.teeth += g.pts; e.teeth += g.pts; }
+    r.byEvent.set(p.event_id, e);
     byPlayer.set(p.player_id, r);
   }
   return byPlayer;
@@ -1135,23 +1431,26 @@ function drawHub() {
 }
 
 function stageCard(e, mine, i) {
-  const ph = phaseOf(e), br = hub.brs.get(e.id);
+  const ph = phaseOf(e), br = hub.brs.get(e.id), sw = e.kind === 'swiss';
   const ms = hub.matches.filter(m => m.event_id === e.id);
-  const max = ms.reduce((a, m) => a + m.points, 0);
+  const ts = hub.teams.filter(t => t.event_id === e.id);
+  const total = sw ? (ts.length ? SWISS.slots.length : 0) : ms.length;   // elecciones que hay que hacer
+  const max = sw ? (ts.length ? swissMax() : 0) : ms.reduce((a, m) => a + m.points, 0);
   const my = mine?.byEvent.get(e.id);
-  const myPicks = st.me ? hub.picks.filter(p => p.player_id === st.me.id && ms.some(m => m.id === p.match_id)).length : 0;
-  const played = ms.filter(br.hasResult).length;
+  const myPicks = !st.me ? 0 : sw ? hub.spicks.filter(p => p.player_id === st.me.id && p.event_id === e.id).length
+    : hub.picks.filter(p => p.player_id === st.me.id && ms.some(m => m.id === p.match_id)).length;
+  const played = sw ? ts.filter(t => swissStatus(t).done).length : ms.filter(br.hasResult).length;
   const pill = { soon: `<span class="pill">${icono('reloj_arena', { size: 13 })} Próximamente</span>`, open: '<span class="pill open"><span class="dot"></span>Abierto</span>',
                  closed: `<span class="pill closed">${icono('candado', { size: 13 })} En juego</span>`, done: `<span class="pill done">${icono('trofeo', { size: 13 })} Finalizado</span>` }[ph];
   const sub = ph === 'soon' ? `Apertura de las elecciones: <b>${fechaDia(e.opens_at)} – ${fechaDia(e.locks_at)}</b>`
     : ph === 'open' ? `Cierre de elecciones: <b data-countdown="${new Date(e.locks_at).getTime()}">${hubCount(new Date(e.locks_at).getTime())}</b>`
-    : ph === 'closed' ? `${played} de ${ms.length} series jugadas`
+    : ph === 'closed' ? (sw ? `${played} de ${ts.length} equipos decididos` : `${played} de ${ms.length} series jugadas`)
     : `Finalizado · ${my ? `ganaste <b>${my.teeth} ${DT()}</b>` : 'no participaste'}`;
-  const cta = ph === 'open' ? (st.me ? (myPicks === ms.length && ms.length ? 'Revisar selección' : 'Realizar selección') : 'Ver elecciones')
-    : ph === 'soon' ? (ms.length ? 'Ver series' : '') : 'Ver resultados';
-  const teams = ph !== 'soon' && ms.length ? [...new Set(ms.flatMap(m => [m.team1, m.team2]).filter(Boolean))] : [];
-  const prog = st.me && ms.length && ph !== 'soon'
-    ? `<div class="stage-prog"><small>${myPicks}/${ms.length} elecciones realizadas</small><div class="track"><i class="${myPicks === ms.length ? 'full' : ''}" style="--p:${myPicks / ms.length}"></i></div></div>` : '';
+  const cta = ph === 'open' ? (st.me ? (myPicks === total && total ? 'Revisar selección' : 'Realizar selección') : 'Ver elecciones')
+    : ph === 'soon' ? (total ? (sw ? 'Ver equipos' : 'Ver series') : '') : 'Ver resultados';
+  const teams = sw || ph === 'soon' || !ms.length ? [] : [...new Set(ms.flatMap(m => [m.team1, m.team2]).filter(Boolean))];
+  const prog = st.me && total && ph !== 'soon'
+    ? `<div class="stage-prog"><small>${myPicks}/${total} elecciones realizadas</small><div class="track"><i class="${myPicks === total ? 'full' : ''}" style="--p:${myPicks / total}"></i></div></div>` : '';
   const bg = e.bg_image ? `<span class="stage-bg" aria-hidden="true" style="background-image:url('${esc(e.bg_image)}'); background-position:${esc(e.bg_focus ?? '50% 35%')}"></span>` : '';
   const inner = `${bg}${SONAR}<div class="stage-top">${pill}<span class="stage-pts">${max ? `<b>${my?.teeth ?? 0}</b> / ${max} ${DT()}` : `— ${DT()}`}</span></div>
     <h3>${esc(splitName(e.name).stage)}</h3><p class="sub">${sub}</p>
@@ -1182,13 +1481,15 @@ function drawRewards() {
   morph($('rewards'), `<div class="rw head"><span>Fase</span><span>Por aciertos</span><span>Pleno (aciertas todo)</span><span>Extra</span></div>`
     + evs.map(e => {
       const ms = hub.matches.filter(m => m.event_id === e.id);
-      const max = ms.reduce((a, m) => a + m.points, 0);
+      const sw = e.kind === 'swiss', hasTeams = hub.teams.some(t => t.event_id === e.id);
+      const max = sw ? (hasTeams ? swissMax() : 0) : ms.reduce((a, m) => a + m.points, 0);
       const pts = [...new Set(ms.map(m => m.points))].sort((a, b) => a - b);
       const ph = phaseOf(e);
       const bets = ms.some(m => m.bets_enabled);
+      const howMuch = sw ? `+${SWISS.adv} por clasificado, +${SWISS.bonus} por récord exacto` : `${pts.length > 1 ? `${pts[0]}–${pts[pts.length - 1]}` : pts[0]} por acierto`;
       return `<div class="rw" data-key="rw${e.id}">
         <div class="ph"><b>${esc(splitName(e.name).stage)}</b><small>${ph === 'soon' ? `Se abre el ${fechaDia(e.opens_at)}` : ph === 'open' ? `Cierra el ${fechaDia(e.locks_at)}` : ph === 'closed' ? 'En juego' : 'Finalizado'}</small></div>
-        <div class="val">${max ? `<span class="ic">${icono('diente', { size: 18 })}</span><span>Hasta <b>${max}</b> (${pts.length > 1 ? `${pts[0]}–${pts[pts.length - 1]}` : pts[0]} por acierto)</span>` : '<span class="tbd">Se anuncia al abrir</span>'}</div>
+        <div class="val">${max ? `<span class="ic">${icono('diente', { size: 18 })}</span><span>Hasta <b>${max}</b> (${howMuch})</span>` : '<span class="tbd">Se anuncia al abrir</span>'}</div>
         <div class="val pz"><span class="ic">${icono('corona', { size: 18 })}</span><b>${esc(e.perfect_prize)}</b></div>
         <div class="val ${bets ? '' : 'none'}">${bets ? `<span class="ic">${icono('dado', { size: 18 })}</span><span>Apuesta en la final, hasta <b>${MAX_BET}</b></span>` : '<span class="tbd">—</span>'}</div>
       </div>`; }).join('')
@@ -1224,6 +1525,8 @@ supabase.channel('pickems')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'pickem_matches' }, reload)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'pickem_picks' }, reload)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'pickem_bets' }, reload)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'pickem_teams' }, reload)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'pickem_swiss_picks' }, reload)
   .subscribe();
 
 load();
