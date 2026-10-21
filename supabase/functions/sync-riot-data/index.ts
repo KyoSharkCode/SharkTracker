@@ -67,7 +67,10 @@ async function getChampionDict(): Promise<Map<number, string>> {
       const champJson = await fetch(
         `https://ddragon.leagueoflegends.com/cdn/${latest}/data/es_ES/champion.json`
       ).then((r) => r.json());
-      championsData = champJson.data;
+      // Solo key, id y name: es lo único que se usa y se lee cada minuto
+      // (el JSON completo pesaba >100 KB por lectura).
+      championsData = Object.fromEntries(Object.entries<any>(champJson.data)
+        .map(([k, c]) => [k, { key: c.key, id: c.id, name: c.name }]));
       await supabase.from('ddragon_cache').upsert({
         id: true, version: latest, champions: championsData, updated_at: new Date().toISOString(),
       });
