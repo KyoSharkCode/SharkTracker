@@ -254,7 +254,11 @@ window.sharkTracker.overlayConfig.onChanged(renderApariencia);
 window.sharkTracker.overlayConfig.get().then(renderApariencia);
 
 // --- Ajustes → Apariencia (acento, ventana) y Notificaciones: userData/ajustes.json ---
-const ACENTOS = [['turquesa', 'Turquesa', '#3DFFD2'], ['lila', 'Lila', '#A98BFF'], ['dorado', 'Dorado', '#FFB547'], ['azul', 'Azul', '#5AA9FF'], ['rojo', 'Rojo', '#FF8FA6']];
+// [clave, nombre, tono en oscuro, tono en claro (más oscuro: contraste ≥ 4.5 sobre blanco)]
+const ACENTOS = [['turquesa', 'Turquesa', '#3DFFD2', '#00806A'], ['lila', 'Lila', '#A98BFF', '#6A4FD6'], ['dorado', 'Dorado', '#FFB547', '#9A5800'], ['azul', 'Azul', '#5AA9FF', '#1F6BCB'], ['rojo', 'Rojo', '#FF8FA6', '#C2304D']];
+const temasEl = document.querySelectorAll('.tema[data-tema]');
+if (new URLSearchParams(location.search).get('tema') === 'claro') document.documentElement.dataset.tema = 'claro';
+temasEl.forEach((b) => b.addEventListener('click', async () => renderAjustes(await window.sharkTracker.ajustes.set({ tema: b.dataset.tema }))));
 const acentosEl = $('acentos');
 for (const [clave, nombre, color] of ACENTOS) {
   const b = document.createElement('button');
@@ -277,9 +281,19 @@ function marcar(sw, on) {
 function renderAjustes(aj) {
   if (!aj) return;
   // El acento se aplica a toda la ventana con la variable --acento (style.css).
-  const color = ACENTOS.find(([c]) => c === aj.acento)?.[2] ?? '#3DFFD2';
-  document.documentElement.style.setProperty('--acento', color);
+  // Tema claro: data-tema en <html> (style.css) y el acento oscurecido para que se lea sobre blanco.
+  const claro = aj.tema === 'claro';
+  document.documentElement.dataset.tema = claro ? 'claro' : 'oscuro';
+  const fila = ACENTOS.find(([c]) => c === aj.acento) ?? ACENTOS[0];
+  document.documentElement.style.setProperty('--acento', claro ? fila[3] : fila[2]);
+  temasEl.forEach((b) => {
+    const on = b.dataset.tema === (claro ? 'claro' : 'oscuro');
+    b.classList.toggle('sel', on);
+    b.setAttribute('aria-pressed', String(on));
+  });
   acentosEl.querySelectorAll('.acento').forEach((b) => {
+    const tonos = ACENTOS.find(([c]) => c === b.dataset.acento);
+    b.style.setProperty('--c', claro ? tonos[3] : tonos[2]);
     const on = b.dataset.acento === aj.acento;
     b.classList.toggle('on', on);
     b.setAttribute('aria-checked', String(on));

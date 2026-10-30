@@ -92,7 +92,7 @@ tono oscuro con acento turquesa `#00e5c7`) al construir cada pantalla real.
   - **Fuentes**: Unbounded en títulos (mayúsculas), Albert Sans en la interfaz y Red Hat Mono en las
     cifras (LP, KDA, winrate, tiempos, versión). Los nombres de rango («Oro II») van en Albert Sans 800.
   - **Fases**: 1 brief, 2 dirección, 3 logo + íconos + brandkit y 4 aplicado en el código (hechas).
-    Falta la 5: auditoría y release v0.9.0.
+    5 (auditoría y release) también hecha.
   - **En la app**: los tokens de `:root` de `renderer/style.css` tienen los valores Abisal y al final
     del archivo está el bloque «v0.9 — identidad Abisal». Los acentos de Apariencia conservan sus
     claves (`turquesa`, `lila`…) con los tonos nuevos.
@@ -118,7 +118,7 @@ pantalla de carga (con Ctrl + X), Ajustes → Overlay con editor y Mi Perfil.
 **Fase 2 en curso** (plan acordado): Bloque 0 puesta a punto ✅ · Bloque 1 early access ✅
 (instalador + actualizaciones automáticas) · Bloque 2 Meta (v0.3.0, datos del MCP de OP.GG
 guardados en Supabase; ver sección "Meta") ✅ · Bloque 3 En Vivo ✅ · Bloque 4 Ajustes Apariencia/Notificaciones ✅ (v0.8.0, ver abajo) · Bloque 5 motor
-de clips + timers de campamentos. La app es **solo para el grupo de amigos** (no pública).
+de clips (los timers de campamentos se descartaron). La app es **solo para el grupo de amigos** (no pública).
 
 ## Versión, empaquetado y publicación (Fase 2, bloques 0 y 1)
 
@@ -406,7 +406,7 @@ Mockup: `https://claude.ai/artifact/6gK8Gg31m9YjTo1ptqaLt8`. Un solo PR con app 
 
 Mockup: tableros "Ajustes — Apariencia" y "Ajustes — Notificaciones" del canvas de la app.
 Decidido con Alex: color de acento + overlay + ventana; tema claro y "Versiones temáticas"
-quedan como "Próximamente" (el claro obligaría a rehacer ~400 colores fijos). Avisos = los del
+quedan como "Próximamente" (el tema claro llegó en la v0.9.8, ver "Tema claro"). Avisos = los del
 grupo del mockup (no los de la app).
 - `ajustes-app.js` (main): `userData/ajustes.json` → `acento` (turquesa/lila/dorado/azul/rojo),
   `ventana` (`siempreEncima`, `bandeja`, `alIniciar`, todo apagado de fábrica) y `avisos`
@@ -461,7 +461,7 @@ Decisiones de Alex (oct 2026).
   carpeta) + Ajustes → Clips.
 - **Fases**: C0 prueba (script que mide FPS/CPU/RAM con y sin grabar en la PC de Alex y la de un amigo, y valida
   el audio por aplicación) → C1 búfer + Ctrl+F8 → C2 eventos automáticos → C3 sección Clips + ajustes →
-  C4 extras (resumen de la partida; base para leer el minimapa de los timers de campamentos).
+  C4 extras (resumen de la partida = timeline de la galería, v0.9.7; los timers de campamentos se descartaron).
   Meta: < 3 % de FPS, < 200 MB de RAM (antes 150: abrir el codificador de la GPU ya pesa ~120–150 MB), < 5 % de CPU.
 - **C0 (prueba)**: `app/pruebas/prueba-clips-C0.bat` (un solo archivo: .bat + PowerShell embebido tras `#PS-INICIO`).
   Pide admin (PresentMon lo necesita), baja FFmpeg LGPL (BtbN) y PresentMon a `%LOCALAPPDATA%\SharkTracker-prueba-clips`,
@@ -701,8 +701,7 @@ visual" y "Overlay — estructuras" del canvas)
 4. ✅ Ajustes → Overlay (pestañas Cuenta / Overlay en Ajustes):
    - Interruptores reales: diferencia de oro, Barón/Ancestral, anuncios de objetivos,
      avisos de lo que pasó (toasts), Tu rendimiento y Tu build (Ctrl + X). Se aplican al instante (IPC
-     `overlay:config`), también en partida. "Timers de campamentos" y la
-     tarjeta "Pantalla de carga" se ven como "Próximamente".
+     `overlay:config`), también en partida. ("Timers de campamentos" se quitó: descartado.)
    - "Reposicionar elementos" abre una **ventana aparte** (`editor/`) que emula la
      pantalla del juego: esquema del HUD de LoL (siluetas propias, sin imágenes de Riot)
      o una captura propia de fondo (se copia a userData, solo en este PC). Reutiliza
@@ -787,10 +786,25 @@ Ojo: en league-v4 la división viene en el campo **`rank`** (no `division`).
 
 Decisiones:
 - **"Tu build"** y **Meta**: hechos con el MCP de OP.GG (ver "Meta" y "Build adaptada y build en partida").
-- **Timers de campamentos**: SÍ se quieren, solo de campamentos cuya muerte se vio
-  (como Blitz/Porofessor/Itero). La API local no tiene eventos de campamentos: hay
-  que leer el minimapa por captura de pantalla → se hace después, reutilizando la
-  captura del motor de clips. Revisar la política de Riot antes de publicarlo.
+- **Timers de campamentos: descartados** (Kyo, oct 2026). Habría que leer el minimapa por captura
+  de pantalla (la API local no da campamentos) y costaría rendimiento; no se hacen.
+
+## Tema claro (v0.9.8, pedido de Kyo)
+
+- Ajustes → Apariencia → Tema: Oscuro (de fábrica) / Claro. `ajustes.json` → `tema` (`TEMAS` en
+  ajustes-app.js). app.js pone `data-tema="claro"` en `<html>`; main.js pasa el tema en la dirección
+  (`?tema=claro`, para pintarlo desde el principio) y usa su fondo como `backgroundColor` de la ventana.
+- **Solo variables**: el bloque «Tema claro» al final de `renderer/style.css` redefine la paleta en
+  `:root[data-tema="claro"]`. Para eso los colores sueltos pasaron a variables nuevas en el primer `:root`
+  (`--campo`, `--panel-3`, `--sobre-acento`, `--fondo-main`, `--card-a/b`, `--destacado-a/b`, `--pila-1/2`,
+  `--texto-chip/gris/azul/rojo/oro/oro-suave/discord`) y los bordes/realces usan `rgba(var(--linea-rgb), a)`;
+  los tintes del acento, `color-mix(in srgb, var(--acento) N%, transparent)`. **Al agregar CSS nuevo: nada de
+  hex sueltos ni `rgba(120,220,210,…)`; usar estas variables** para que funcione en los dos temas.
+- **Acento en claro**: cada acento tiene su tono oscurecido (`ACENTOS` en app.js, 4.º valor; contraste ≥ 4.5
+  sobre blanco) y `--acento-claro` se vuelve más oscuro. Texto sobre el acento = blanco (`--sobre-acento`).
+- Lo que va sobre imágenes o el video (cartas de la carga, portadas y controles de la galería, "Siguiente
+  clip") sigue en claro sobre oscuro en los dos temas. Logo del login: `img/logotipo-vertical-claro.svg`.
+- El **overlay en partida y el editor siguen siempre en oscuro**. "Versiones temáticas" sigue en Próximamente.
 
 ## v0.8.1: auditoría visual de la app (accesibilidad y pulido)
 - Paleta en el `:root` de `renderer/style.css` (`--fondo`, `--panel`, `--texto`, `--texto-tenue`, `--texto-apagado`, `--texto-mudo`, `--verde`, `--en-vivo`, `--dorado`, `--rojo-suave`, `--salmon`, `--lila`, `--azul`, `--rojo`, `--discord`, además de `--acento`). En el CSS se usa `var(--…)`; los hex sueltos que quedan son tonos únicos. `editor.css` usa las variables del overlay más `--ed-*`.

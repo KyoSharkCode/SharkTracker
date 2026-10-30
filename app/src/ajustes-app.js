@@ -29,9 +29,13 @@ const LIMITES_GB = [5, 10, 20, 50];
 const FUENTES_AUDIO = ['juego', 'discord', 'musica', 'mic', 'pc'];
 const TECLA_ULTI = /^[A-Z0-9]$/;
 
+// Tema de la ventana (Ajustes → Apariencia). El overlay en partida siempre va en oscuro.
+const TEMAS = ['oscuro', 'claro'];
+
 function fabrica() {
   return {
     acento: 'turquesa',
+    tema: 'oscuro',
     ventana: {
       siempreEncima: false, // la ventana de la app por encima de las demás
       bandeja: false,       // al cerrar, se queda en la bandeja (así siguen llegando los avisos)
@@ -67,6 +71,7 @@ const archivo = () => path.join(app.getPath('userData'), 'ajustes.json');
 function normalizar(datos) {
   const base = fabrica();
   if (typeof datos?.acento === 'string' && ACENTOS[datos.acento]) base.acento = datos.acento;
+  if (TEMAS.includes(datos?.tema)) base.tema = datos.tema;
   for (const k of Object.keys(base.ventana)) {
     if (typeof datos?.ventana?.[k] === 'boolean') base.ventana[k] = datos.ventana[k];
   }
@@ -104,11 +109,12 @@ function leer() {
   return structuredClone(cache);
 }
 
-// Guarda solo lo que cambia: { acento }, { ventana: { bandeja: true } }, { avisos: { retos: false } } o { clips: { activo: true } }.
+// Guarda solo lo que cambia: { acento }, { tema: 'claro' }, { ventana: { bandeja: true } }, { avisos: { retos: false } } o { clips: { activo: true } }.
 function guardar(cambios) {
   const actual = leer();
   cache = normalizar({
     acento: cambios?.acento ?? actual.acento,
+    tema: cambios?.tema ?? actual.tema,
     ventana: { ...actual.ventana, ...(cambios?.ventana ?? {}) },
     avisos: { ...actual.avisos, ...(cambios?.avisos ?? {}) },
     clips: {
@@ -125,4 +131,4 @@ function guardar(cambios) {
   return structuredClone(cache);
 }
 
-module.exports = { leer, guardar, fabrica, normalizar, ACENTOS, AVISOS, CALIDADES, EVENTOS_CLIP, LIMITES_GB, FUENTES_AUDIO };
+module.exports = { leer, guardar, fabrica, normalizar, ACENTOS, TEMAS, AVISOS, CALIDADES, EVENTOS_CLIP, LIMITES_GB, FUENTES_AUDIO };

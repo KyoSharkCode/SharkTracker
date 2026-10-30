@@ -234,6 +234,11 @@ init();
 // Notas del parche de la app. Al publicar una versión nueva, se agrega arriba del todo.
 // Cada versión: { version, titulo, nuevo: [...], arreglos: [...] } (texto plano).
 const NOTAS = [
+  { version: '0.9.8', titulo: 'Tema claro', nuevo: [
+      'Ajustes › Apariencia: ya puedes elegir el tema claro. Toda la app pasa a fondos claros y el color de acento se oscurece un poco para que se lea bien. El overlay en partida sigue en oscuro, sobre el juego.',
+    ], arreglos: [
+      'Ajustes › Overlay: se quitó "Timers de campamentos", que ya no está en los planes.',
+    ] },
   { version: '0.9.7', titulo: 'Timeline de la partida', nuevo: [
       'Clips: al abrir una partida, sus clips se ven uno tras otro en un solo reproductor y, debajo, una línea con los minutos de la partida y el ícono de cada jugada en su minuto (kills, asistencias, muertes, dragones, Barón, torres…). Pulsa un ícono para ir a esa jugada.',
       'Al terminar un clip sale "Siguiente clip en 5" abajo a la izquierda del video: si no lo cancelas, pasa solo al siguiente.',

@@ -211,7 +211,6 @@
               <div class="swrow"><div><div class="swnm">Anuncios de objetivos</div><div class="swsub">Dragón, Vacuolarvas, Heraldo, Barón e inhibidores por reaparecer</div></div><button class="sw" type="button" role="switch" data-pieza="anuncios"></button></div>
               <div class="swrow"><div><div class="swnm">Avisos de lo que pasó</div><div class="swsub">Dragón y alma, Vacuolarvas, Heraldo, torres e inhibidores</div></div><button class="sw" type="button" role="switch" data-pieza="toasts"></button></div>
               <div class="swrow"><div><div class="swnm">Tu rendimiento</div><div class="swsub">Oro/min, CS/min, visión y particip. vs la división de arriba</div></div><button class="sw" type="button" role="switch" data-pieza="rendimiento"></button></div>
-              <div class="swrow pronto"><div><div class="swnm">Timers de campamentos <span class="prox">Próximamente</span></div><div class="swsub">Sobre el minimapa, por visión</div></div><span class="sw off"></span></div>
               <div class="swrow"><div><div class="swnm">Tu build</div><div class="swsub">Build completa en orden, adaptada a los rivales. En partida: <b>Ctrl + X</b> para mostrarla u ocultarla</div></div><button class="sw" type="button" role="switch" data-pieza="build"></button></div>
               <div class="swrow"><div><div class="swnm">Siguiente compra</div><div class="swsub">Junto al minimapa: el próximo objeto de tu build y el oro que te falta</div></div><button class="sw" type="button" role="switch" data-pieza="siguiente"></button></div>
               <div class="swrow"><div><div class="swnm">Sube esta habilidad</div><div class="swsub">Al subir de nivel, una flecha sobre la habilidad que toca según el orden de OP.GG</div></div><button class="sw" type="button" role="switch" data-pieza="habilidad"></button></div>
@@ -245,10 +244,10 @@
           <div class="ovgrid">
             <div class="card">
               <div class="cardhd">Tema</div>
-              <div class="cardsub">Cómo se ve la app</div>
+              <div class="cardsub">Cómo se ve la app. El overlay en partida siempre va en oscuro, sobre el juego.</div>
               <div class="temas">
-                <button class="tema sel" type="button" aria-pressed="true"><span class="tema-muestra oscuro"></span>Oscuro</button>
-                <button class="tema" type="button" disabled title="Próximamente"><span class="tema-muestra claro"></span>Claro <span class="prox">Próximamente</span></button>
+                <button class="tema sel" type="button" data-tema="oscuro" aria-pressed="true"><span class="tema-muestra oscuro"></span>Oscuro</button>
+                <button class="tema" type="button" data-tema="claro" aria-pressed="false"><span class="tema-muestra claro"></span>Claro</button>
               </div>
               <div class="teaser"><span class="prox">Próximamente</span><span><b>Versiones temáticas</b>: skins visuales para la app (como los cosméticos de SharkTracker), que podrás activar o quitar cuando quieras.</span></div>
             </div>
