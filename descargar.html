@@ -234,6 +234,11 @@ init();
 // Notas del parche de la app. Al publicar una versión nueva, se agrega arriba del todo.
 // Cada versión: { version, titulo, nuevo: [...], arreglos: [...] } (texto plano).
 const NOTAS = [
+  { version: '0.9.7', titulo: 'Timeline de la partida', nuevo: [
+      'Clips: al abrir una partida, sus clips se ven uno tras otro en un solo reproductor y, debajo, una línea con los minutos de la partida y el ícono de cada jugada en su minuto (kills, asistencias, muertes, dragones, Barón, torres…). Pulsa un ícono para ir a esa jugada.',
+      'Al terminar un clip sale "Siguiente clip en 5" abajo a la izquierda del video: si no lo cancelas, pasa solo al siguiente.',
+      'Botón "Ver como lista" para volver a la cuadrícula (la app se acuerda de tu elección). Los favoritos y las partidas grabadas antes de esta versión siguen en cuadrícula.',
+    ] },
   { version: '0.9.6', titulo: 'Clips con sonido', arreglos: [
       'Audio de los clips: salían en silencio (a veces con un golpe de ruido). Con la grabación por la tarjeta gráfica, FFmpeg dejaba de leer el sonido mientras esperaba al video y el audio se perdía. Ahora el sonido se lee siempre y se coloca en su sitio contando muestras, así que llega entero y sincronizado con la imagen.',
     ] },

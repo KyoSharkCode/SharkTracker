@@ -975,7 +975,7 @@ html, body { font-variant-numeric: tabular-nums; }
 .visor-video { display: block; width: 100%; aspect-ratio: 16 / 9; max-height: 62vh; background: #000; border-radius: 10px; }
 .visor-acciones { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
 .visor-sep { flex: 1; }
-#visor-fav.on { color: var(--dorado); }
+.visor-acciones .btn-sec.on { color: var(--dorado); }
 
 /* Mi Perfil: más jugados en 30 días (a la derecha de las maestrías) */
 .card-masjugados { display: flex; flex-direction: column; }
@@ -1027,3 +1027,49 @@ html, body { font-variant-numeric: tabular-nums; }
   .gal-carpeta:hover .gal-cuantos, .gal-carpeta:hover .gal-favs { transform: none; }
 }
 .gal-dur { z-index: 2; }
+
+/* Timeline de la partida: los clips uno tras otro en un solo reproductor */
+.gal-cab-carpeta .gal-vista { margin-left: auto; }
+.tl { display: flex; flex-direction: column; gap: 12px; }
+.tl-escena { position: relative; border-radius: 12px; overflow: hidden; background: #000; }
+.tl-video { display: block; width: 100%; aspect-ratio: 16 / 9; max-height: 64vh; background: #000; }
+/* "Siguiente clip en 5": abajo a la izquierda del video, encima de los controles */
+.tl-siguiente { position: absolute; left: 14px; bottom: 64px; display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 14px;
+  border-radius: 10px; background: rgba(3,17,26,0.88); border: 1px solid rgba(120,220,210,0.18); box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  animation: tl-sig-entra 200ms var(--ease-out); }
+.tl-siguiente[hidden] { display: none; }
+@keyframes tl-sig-entra { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.tl-sig-txt { font-size: 13px; font-weight: 600; color: var(--texto); font-variant-numeric: tabular-nums; margin-right: 4px; }
+.tl-sig-btn { font: inherit; font-size: 12px; font-weight: 700; border: 0; border-radius: 7px; padding: 6px 10px; cursor: pointer;
+  background: var(--acento); color: #03111A; }
+.tl-sig-btn.tl-sig-no { background: rgba(120,220,210,0.1); color: var(--texto-suave); font-weight: 600; }
+.tl-sig-btn.tl-sig-no:hover { background: rgba(120,220,210,0.18); color: var(--texto); }
+.tl-cab { display: flex; align-items: flex-start; gap: 12px; }
+.tl-cab .visor-nombre-caja { flex: 1; min-width: 0; }
+.tl-contador { font-family:'Red Hat Mono',ui-monospace,monospace; font-size: 12px; font-weight: 600; color: var(--texto-tenue);
+  background: #051823; border-radius: 7px; padding: 4px 8px; white-space: nowrap; }
+.tl-pista { position: relative; height: 74px; border-radius: 12px; background: #051823; border: 1px solid rgba(120,220,210,0.07); overflow: hidden; }
+.tl-eje { position: absolute; left: 18px; right: 18px; height: 1px; background: rgba(127,175,173,0.45); }
+.tl-marca { position: absolute; width: 1px; height: 4px; background: rgba(127,175,173,0.4); }
+.tl-marca.grande { height: 7px; background: rgba(127,175,173,0.8); }
+.tl-min { position: absolute; transform: translateX(-50%); font-family:'Red Hat Mono',ui-monospace,monospace; font-size: 11px; color: var(--texto-apagado); }
+.tl-tramo { position: absolute; height: 3px; border-radius: 2px; background: rgba(167,211,207,0.35); }
+.tl-tramo.on { background: var(--acento); }
+.tl-cabezal { position: absolute; width: 2px; height: 22px; margin-left: -1px; border-radius: 1px; background: var(--acento); pointer-events: none; }
+/* Una jugada: sus íconos en el minuto en que pasó */
+.tl-jugada { position: absolute; display: flex; gap: 2px; padding: 0; border: 0; background: none; cursor: pointer; --tl-c: var(--texto-tenue); color: var(--tl-c);
+  border-radius: 6px; transition: color 150ms var(--ease-out), transform 150ms var(--ease-out); }
+.tl-jugada:hover, .tl-jugada:focus-visible { --tl-c: var(--texto); transform: translateY(-2px); }
+.tl-jugada.on { --tl-c: var(--acento); }
+.tl-icono { position: relative; width: 22px; height: 22px; display: block; }
+.tl-icono svg { width: 22px; height: 22px; display: block; fill: currentColor; }
+.tl-num { position: absolute; right: -5px; top: -6px; min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px;
+  font-family:'Red Hat Mono',ui-monospace,monospace; font-size: 10px; font-weight: 700; line-height: 14px; text-align: center;
+  background: var(--tl-c); color: #03111A; }
+.tl-robo { position: absolute; right: -6px; top: -6px; width: 12px; height: 12px; color: var(--dorado); }
+.tl-robo svg { width: 12px; height: 12px; }
+.tl-fav { position: absolute; left: -7px; top: -8px; font-size: 10px; color: var(--dorado); line-height: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .tl-siguiente { animation: none; }
+  .tl-jugada:hover, .tl-jugada:focus-visible { transform: none; }
+}

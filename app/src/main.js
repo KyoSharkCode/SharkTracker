@@ -602,6 +602,7 @@ function avisarClip(datos) {
 }
 // Cada segundo, con allgamedata: ¿hubo una jugada tuya que merezca clip?
 function revisarJugadas(datos) {
+  clips.ponerReloj(Number(datos?.gameData?.gameTime));
   const c = ajustesApp.leer().clips;
   if (!c.activo || !detectorJugadas || !clips.grabando()) return;
   clips.ponerCampeon(campeonActual);

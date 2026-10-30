@@ -311,6 +311,11 @@ async function detenerPartida() {
   const a = agenda;
   agenda = null;
   if (a) await a.vaciar(); // Ctrl + F8 o una jugada justo al final: se guardan con lo que haya
+  // Duración de la partida (eje de la timeline), si se llegó a guardar algún clip.
+  if (partida?.duracion && Object.values(leerIndice().archivos).some((x) => x.partida === partida.id)) {
+    leerIndice().partidas = { ...(leerIndice().partidas ?? {}), [partida.id]: { duracion: Math.round(partida.duracion) } };
+    guardarIndice();
+  }
   if (!motor.grabando()) { partida = null; return; }
   await motor.detener();
   partida = null;
@@ -320,13 +325,26 @@ async function detenerPartida() {
 
 function ponerCampeon(campeon) { if (partida && campeon) partida.campeon = campeon; }
 
+// Reloj del juego (gameTime de la Live Client API, cada segundo): con él cada clip nuevo
+// sabe en qué minuto de la partida pasó (timeline de la galería). Los clips de antes no lo tienen.
+function ponerReloj(segundos) {
+  if (!partida || !Number.isFinite(segundos)) return;
+  partida.reloj = { pared: Date.now(), juego: segundos };
+  partida.duracion = Math.max(partida.duracion ?? 0, segundos);
+}
+// Hora del PC (ms) → segundo de la partida, o null si todavía no se sabe.
+function aJuego(ms) {
+  const r = partida?.reloj;
+  return r ? Math.max(0, Math.round((r.juego + (ms - r.pared) / 1000) * 10) / 10) : null;
+}
+
 // Una jugada (automática) o Ctrl + F8 (manual). Devuelve 'nueva', 'unida' o null si no se graba.
 function marcar(jugada, ajustes) {
   if (!agenda || !motor.grabando()) return null;
   return agenda.marcar(jugada, ajustes);
 }
 
-async function guardarJugada({ segundos, fin, etiquetas, manual }, ajustes) {
+async function guardarJugada({ segundos, fin, etiquetas, manual, desde }, ajustes) {
   const titulo = tituloJugada(etiquetas.filter((e) => e !== 'Clip'));
   const campeon = partida?.campeon;
   // Cada partida, su carpeta (se elige con el primer clip, cuando ya se sabe el campeón).
@@ -338,9 +356,14 @@ async function guardarJugada({ segundos, fin, etiquetas, manual }, ajustes) {
   if (r.ok) {
     // Momento de la jugada dentro del clip (después de los segundos de "antes"): miniatura y vista previa.
     const momento = Math.max(0, Math.min(ajustes.antes, r.segundos - 1));
+    // En qué segundo de la partida empieza el clip y pasa la jugada, y todas sus jugadas
+    // (los íconos de la timeline).
+    const inicio = aJuego(fin - r.segundos * 1000);
+    const juego = inicio === null ? null : { inicio, jugada: aJuego(desde ?? fin) };
     leerIndice().archivos[archivo] = {
       partida: partida?.id ?? Date.now(), campeon: campeon ?? null, titulo, manual: !!manual,
       creado: Date.now(), segundos: r.segundos, momento, favorito: false,
+      ...(juego ? { juego, etiquetas: [...new Set(etiquetas)] } : {}),
     };
     guardarIndice();
     motor.miniatura(r.archivo, rutaMini(archivo), momento).catch(() => {});
@@ -372,6 +395,7 @@ function nombresEnDisco() {
 
 function clipsEnDisco() {
   const idx = leerIndice().archivos;
+  const idxPartidas = leerIndice().partidas ?? {};
   return nombresEnDisco().map((archivo) => {
     let st;
     try { st = fs.statSync(rutaClip(archivo)); } catch { return null; }
@@ -384,6 +408,9 @@ function clipsEnDisco() {
       renombrado: !!i.renombrado, // el nombre lo puso la persona: se muestra el del archivo
       campeon: i.campeon ?? null,
       partida: i.partida ?? null,
+      juego: i.juego ?? null,           // { inicio, jugada }: segundo de la partida (solo clips desde la v0.9.7)
+      etiquetas: i.etiquetas ?? null,   // jugadas del clip ("Dragón", "Kill"…)
+      duracionPartida: idxPartidas[i.partida]?.duracion ?? null,
       manual: !!i.manual,
       favorito: !!i.favorito,
       segundos: i.segundos ?? null,
@@ -580,7 +607,7 @@ function abrirCarpeta(carpeta) {
 }
 
 module.exports = {
-  preparar, iniciarPartida, detenerPartida, ponerCampeon, marcar, alGuardado, estado, abrirCarpeta,
+  preparar, iniciarPartida, detenerPartida, ponerCampeon, ponerReloj, marcar, alGuardado, estado, abrirCarpeta,
   dispositivos, planAudio, probarAudio, galeria, completarMiniaturas, favorito, renombrar, borrar, mostrarEnCarpeta, servir, aplicarLimite,
   grabando: () => motor.grabando(), log,
 };

@@ -111,7 +111,7 @@
       <!-- Clips (C3): galería por partida. Ver renderer/clips.js y src/clips.js -->
       <section class="page" id="page-clips">
         <div class="h1">Clips</div>
-        <div class="h1sub">Tus jugadas guardadas, por partida. Los videos están en Videos › SharkTracker.</div>
+        <div class="h1sub">Tus jugadas guardadas, por partida: ábrela y se ven una tras otra. Los videos están en Videos › SharkTracker.</div>
         <div class="clips-barra-sup">
           <div class="clips-espacio">
             <div class="clips-espacio-txt"><span id="gal-uso">—</span><span id="gal-fav" class="swsub"></span></div>
@@ -128,26 +128,11 @@
 
         <dialog id="gal-visor" class="gal-visor" aria-labelledby="visor-titulo">
           <div class="visor-cab">
-            <div class="visor-nombre">
-              <div id="visor-titulo" class="visor-titulo"></div>
-              <form id="visor-renombrar" class="visor-renombrar" hidden>
-                <input id="visor-input" type="text" maxlength="120" aria-label="Nombre del clip" spellcheck="false">
-                <button class="checkbtn" type="submit">Guardar</button>
-                <button class="btn-sec" type="button" id="visor-renombrar-cancelar">Cancelar</button>
-              </form>
-              <div id="visor-sub" class="swsub"></div>
-            </div>
+            <div id="visor-nombre" class="visor-nombre"></div>
             <button type="button" class="visor-cerrar" id="visor-cerrar" aria-label="Cerrar">&times;</button>
           </div>
           <video id="visor-video" class="visor-video" controls preload="metadata"></video>
-          <div class="visor-acciones">
-            <button type="button" class="btn-sec" id="visor-fav" aria-pressed="false"></button>
-            <button type="button" class="btn-sec" id="visor-btn-renombrar">Renombrar</button>
-            <button type="button" class="btn-sec" id="visor-mostrar">Mostrar en la carpeta</button>
-            <span class="visor-sep"></span>
-            <button type="button" class="btn-sec btn-peligro" id="visor-borrar">Borrar</button>
-          </div>
-          <div id="visor-error" class="swsub bad" hidden></div>
+          <div id="visor-pie"></div>
         </dialog>
       </section>
 

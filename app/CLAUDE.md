@@ -623,6 +623,24 @@ Decisiones de Alex (oct 2026).
   el master de BtbN, destello y pitido en cada segundo del reloj, codificador con B-frames: 33 s de audio en
   33 s, 0 s esperando, pitido 20–30 ms antes del destello (≈ 1–2 cuadros) y sin deriva; con pistas separadas
   igual.
+- **Timeline de la partida (v0.9.7, idea de Kyo, como Outplayed)**: dentro de una partida de la galería los clips
+  (archivos sueltos, como siempre) se ven uno tras otro en un reproductor (`crearTimeline` en `renderer/clips.js`) y,
+  debajo, **el eje de minutos de la partida** (marca cada minuto, número cada 5) con **los íconos de cada jugada en su
+  minuto** (hasta 3 por clip, por `PRIORIDAD`; multikill = espadas con su número; robo = garra dorada sobre el objetivo;
+  ★ si es favorito), el tramo que cubre cada clip sobre el eje y una línea que avanza con el video. Si dos clips quedan
+  pegados, el segundo sube de carril (hasta 3). Gris claro; el clip actual en acento. Íconos: los Abisal de la web y el
+  overlay más muerte, asistencia, ulti y robo, diseñados en Figma (`https://www.figma.com/design/I9Q8v5I1sQScAOZ8TEnbpD`)
+  y copiados en `ICONOS` de `renderer/clips.js`.
+  - **Datos**: main.js pasa cada segundo `gameData.gameTime` a `clips.ponerReloj`; al guardar un clip, el índice guarda
+    `juego: { inicio, jugada }` (segundo de la partida en que empieza el clip y en que pasó la primera jugada) y
+    `etiquetas` (todas sus jugadas). Al terminar la partida, `indice.partidas[id].duracion` = largo del eje.
+  - **Solo clips nuevos** (decisión de Kyo): las partidas de antes de la v0.9.7 no tienen `juego` y se ven en cuadrícula,
+    como siempre (sin botón de timeline). No se estima nada para los viejos.
+  - **No salta solo al terminar**: abajo a la izquierda del video sale "Siguiente clip en 5" (5 → 1, con "Ver ahora" y
+    "Cancelar"); darle al play o moverse por el video también la cancela. "Ver como lista" vuelve a la cuadrícula
+    (se recuerda en localStorage `clips.vista`); "★ Favoritos" sigue en cuadrícula (son de partidas distintas).
+  - Renombrar/favorito/mostrar/borrar salen de `crearControles` (los usan el visor y la timeline). Al refrescar la
+    galería (miniaturas nuevas, favorito…) la timeline se actualiza sin cortar el video; al cambiar de sección se pausa.
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)
