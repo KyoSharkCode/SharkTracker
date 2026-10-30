@@ -607,6 +607,15 @@ Decisiones de Alex (oct 2026).
   (AAC casi vacío). Ráfagas de audio (entregar 1 s de golpe) no lo reproducen en Linux.
   **`-thread_queue_size` no se puede usar en la entrada**: en el FFmpeg master ya es opción de salida y la
   grabación con audio no arranca.
+- **Timeline de la partida (v0.9.7, idea de Kyo, como Outplayed)**: dentro de una partida de la galería los clips
+  (archivos sueltos, como siempre) se ven uno tras otro en un reproductor (`crearTimeline` en `renderer/clips.js`), con
+  una pista debajo: un bloque por clip en orden de creación, ancho según `segundos`, color por la jugada principal
+  (`tipoJugada`: kill acento, objetivo dorado, estructura lila, muerte rojo, manual gris) y relleno con el avance.
+  **No salta solo al terminar**: abajo a la izquierda del video sale "Siguiente clip en 5" (5 → 1, con "Ver ahora" y
+  "Cancelar"); darle al play o moverse por el video también la cancela. "Ver como lista" vuelve a la cuadrícula
+  (se recuerda en localStorage `clips.vista`); "★ Favoritos" sigue en cuadrícula (son de partidas distintas).
+  Renombrar/favorito/mostrar/borrar salen de `crearControles` (los usan el visor y la timeline). Al refrescar la
+  galería (miniaturas nuevas, favorito…) la timeline se actualiza sin cortar el video; al cambiar de sección se pausa.
 - **Causa y arreglo (v0.9.6, registro de Kyo del 14/10/2026)**: "a FFmpeg le llegaron 17 s de audio en 96 s" y
   los informes de niveles del ayudante salían cada varios minutos en vez de cada 30 s: el ayudante pasaba casi
   todo el tiempo **bloqueado escribiendo en la tubería**. FFmpeg 7+ (planificador por hilos) deja de leer una

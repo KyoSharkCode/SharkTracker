@@ -1,6 +1,7 @@
 // Sección Clips (C3): la galería de tus clips, agrupados por partida.
 // Miniatura, duración y estrella de favorito en cada uno; al abrirlo, el visor con
 // el video, renombrar, mostrar en la carpeta y borrar (a la papelera de Windows).
+// Dentro de una partida, sus clips se ven uno tras otro en una timeline.
 // Los archivos los sirve el proceso main con sharkclip://video/… y sharkclip://mini/…
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -44,7 +45,9 @@
   let datos = null;
   let filtro = 'todos';
   let abierta = null; // carpeta de partida abierta (clave del grupo) o null = todas las partidas
-  let actual = null; // clip abierto en el visor
+  // Dentro de una partida: 'timeline' (de fábrica) o 'lista' (cuadrícula). Se recuerda.
+  let vista = 'timeline';
+  try { if (localStorage.getItem('clips.vista') === 'lista') vista = 'lista'; } catch { /* sin almacenamiento */ }
 
   // ── Barra superior: espacio usado y filtro ──
   function pintarEspacio() {
@@ -93,6 +96,7 @@
   }
   const grupoAbierto = () => (abierta && datos ? grupos(datos.clips).find((g) => g.clave === abierta) ?? null : null);
   const cuantos = (n) => `${n} ${n === 1 ? 'clip' : 'clips'}`;
+  const subGrupo = (g) => `${dia(g.inicio)}${g.porDia ? '' : `, ${hora(g.inicio)}`} · ${cuantos(g.clips.length)} · ${tamano(g.tamano)}`;
 
   function portada(g) {
     // La del primer favorito, si hay; si no, la del clip más reciente con miniatura.
@@ -219,6 +223,8 @@
 
   function pintarLista() {
     quitarPrevia();
+    // La timeline solo vive dentro de una partida (y con esa vista elegida).
+    if (filtro === 'favoritos' || !grupoAbierto() || vista !== 'timeline') quitarTimeline();
     const lista = $('gal-lista');
     const todos = datos?.clips ?? [];
     // Favoritos: todos juntos, de cualquier partida.
@@ -231,17 +237,44 @@
       return;
     }
     if (!todos.length) { lista.replaceChildren(vacio()); return; }
-    // Dentro de una partida: sus clips.
+    // Dentro de una partida: sus clips en la timeline (de fábrica) o en cuadrícula.
     const g = grupoAbierto();
     if (g) {
+      if (vista === 'timeline' && tl?.clave === g.clave && lista.contains(tl.raiz)) {
+        // Ya está a la vista: se actualiza sin cortar el video.
+        lista.querySelector('.gal-grupo-sub').textContent = subGrupo(g);
+        tl.actualizar(g);
+        return;
+      }
+      quitarTimeline();
       const cab = el('div', 'gal-cab-carpeta');
       const volver = el('button', 'btn-sec gal-volver', '‹ Partidas');
       volver.type = 'button';
       volver.addEventListener('click', () => { abierta = null; pintarLista(); });
       const tit = el('div', 'gal-cab-tit');
-      tit.append(el('h2', 'gal-grupo-tit', g.titulo),
-        el('span', 'gal-grupo-sub', `${dia(g.inicio)}${g.porDia ? '' : `, ${hora(g.inicio)}`} · ${cuantos(g.clips.length)} · ${tamano(g.tamano)}`));
-      cab.append(volver, tit);
+      tit.append(el('h2', 'gal-grupo-tit', g.titulo), el('span', 'gal-grupo-sub', subGrupo(g)));
+      const modos = el('div', 'segmentos gal-vista');
+      modos.setAttribute('role', 'radiogroup');
+      modos.setAttribute('aria-label', 'Cómo ver los clips');
+      for (const [v, texto] of [['timeline', 'Timeline'], ['lista', 'Ver como lista']]) {
+        const b = el('button', `segmento${vista === v ? ' on' : ''}`, texto);
+        b.type = 'button';
+        b.setAttribute('role', 'radio');
+        b.setAttribute('aria-checked', String(vista === v));
+        b.addEventListener('click', () => {
+          if (vista === v) return;
+          vista = v;
+          try { localStorage.setItem('clips.vista', v); } catch { /* sin almacenamiento: vale solo ahora */ }
+          pintarLista();
+        });
+        modos.append(b);
+      }
+      cab.append(volver, tit, modos);
+      if (vista === 'timeline') {
+        tl = crearTimeline(g);
+        lista.replaceChildren(cab, tl.raiz);
+        return;
+      }
       const grid = el('div', 'gal-grid');
       grid.append(...g.clips.map((c) => tarjeta(c)));
       lista.replaceChildren(cab, grid);
@@ -262,108 +295,304 @@
   async function alternarFavorito(c) {
     await window.sharkTracker.clips.favorito(c.archivo, !c.favorito);
     await cargar();
-    if (actual?.archivo === c.archivo) pintarVisor(datos.clips.find((x) => x.archivo === c.archivo) ?? actual);
+    if (visor.open && ctlVisor.clip()?.archivo === c.archivo) ctlVisor.pintar(datos.clips.find((x) => x.archivo === c.archivo) ?? c);
   }
 
-  // ── Visor ──
+  // ── Controles de un clip: nombre, renombrar, favorito, mostrar y borrar ──
+  // Los usan el visor (ventana encima) y la timeline de la partida. `video()` es el
+  // reproductor que tiene el archivo abierto: Windows no deja renombrar ni borrar un
+  // archivo que el video tiene abierto, así que se suelta antes y se vuelve a poner.
+  // `alCambiar(clip)`: después de renombrar (el clip con su nombre nuevo) o de borrar (null).
+  function crearControles({ idTitulo, video, alCambiar }) {
+    let clip = null;
+    let borrarTimer = null;
+    const nombreCaja = el('div', 'visor-nombre-caja');
+    const titulo = el('div', 'visor-titulo');
+    if (idTitulo) titulo.id = idTitulo;
+    const form = el('form', 'visor-renombrar');
+    form.hidden = true;
+    const input = el('input');
+    input.type = 'text';
+    input.maxLength = 120;
+    input.spellcheck = false;
+    input.setAttribute('aria-label', 'Nombre del clip');
+    const guardar = el('button', 'checkbtn', 'Guardar');
+    guardar.type = 'submit';
+    const cancelar = el('button', 'btn-sec', 'Cancelar');
+    cancelar.type = 'button';
+    form.append(input, guardar, cancelar);
+    const sub = el('div', 'swsub');
+    nombreCaja.append(titulo, form, sub);
+
+    const acciones = el('div', 'visor-acciones');
+    const fav = el('button', 'btn-sec');
+    fav.type = 'button';
+    const btnRenombrar = el('button', 'btn-sec', 'Renombrar');
+    btnRenombrar.type = 'button';
+    const mostrar = el('button', 'btn-sec', 'Mostrar en la carpeta');
+    mostrar.type = 'button';
+    const borrar = el('button', 'btn-sec btn-peligro', 'Borrar');
+    borrar.type = 'button';
+    acciones.append(fav, btnRenombrar, mostrar, el('span', 'visor-sep'), borrar);
+    const errorTxt = el('div', 'swsub bad');
+    errorTxt.hidden = true;
+
+    const error = (texto) => { errorTxt.textContent = texto; errorTxt.hidden = !texto; };
+    const soltar = () => {
+      const v = video();
+      v.pause();
+      v.removeAttribute('src');
+      v.load();
+    };
+    function cerrarRenombrar() { form.hidden = true; titulo.hidden = false; }
+    function reiniciarBorrar() {
+      clearTimeout(borrarTimer);
+      borrar.classList.remove('confirmar');
+      borrar.textContent = 'Borrar';
+    }
+    function pintar(c) {
+      clip = c;
+      titulo.textContent = nombre(c);
+      titulo.title = c.archivo;
+      sub.textContent = [`${dia(c.creado)}, ${hora(c.creado)}`, c.campeon, c.segundos ? duracion(c.segundos) : null, tamano(c.tamano)].filter(Boolean).join(' · ');
+      fav.textContent = c.favorito ? '★ Favorito' : '☆ Favorito';
+      fav.classList.toggle('on', c.favorito);
+      fav.setAttribute('aria-pressed', String(c.favorito));
+    }
+    // Clip nuevo en pantalla: sin formularios abiertos ni errores viejos.
+    function mostrarClip(c) {
+      pintar(c);
+      cerrarRenombrar();
+      reiniciarBorrar();
+      error('');
+    }
+
+    fav.addEventListener('click', async () => {
+      if (!clip) return;
+      await window.sharkTracker.clips.favorito(clip.archivo, !clip.favorito);
+      await cargar();
+      const c = datos.clips.find((x) => x.archivo === clip?.archivo);
+      if (c) pintar(c);
+    });
+    mostrar.addEventListener('click', () => clip && window.sharkTracker.clips.mostrar(clip.archivo));
+    btnRenombrar.addEventListener('click', () => {
+      if (!clip) return;
+      titulo.hidden = true;
+      form.hidden = false;
+      input.value = clip.renombrado || clip.manual ? base(clip) : nombre(clip);
+      input.focus();
+      input.select();
+    });
+    cancelar.addEventListener('click', cerrarRenombrar);
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!clip) return;
+      const v = video();
+      const t = v.currentTime;
+      soltar();
+      const r = await window.sharkTracker.clips.renombrar(clip.archivo, input.value);
+      if (!r.ok) {
+        error(r.motivo === 'existe' ? 'Ya hay un clip con ese nombre.' : r.motivo === 'nombre' ? 'Escribe un nombre.' : 'No se pudo renombrar (¿está abierto en otro programa?).');
+      } else {
+        error('');
+        cerrarRenombrar();
+      }
+      await cargar();
+      const c = datos.clips.find((x) => x.archivo === (r.ok ? r.archivo : clip.archivo));
+      if (c) {
+        pintar(c);
+        v.src = url('video', c.archivo);
+        v.currentTime = t;
+        alCambiar(c);
+      }
+    });
+    // Borrar: dos clics (el primero pide confirmar).
+    borrar.addEventListener('click', async () => {
+      if (!clip) return;
+      if (!borrar.classList.contains('confirmar')) {
+        borrar.classList.add('confirmar');
+        borrar.textContent = '¿Borrar? Va a la papelera';
+        borrarTimer = setTimeout(reiniciarBorrar, 4000);
+        return;
+      }
+      const archivo = clip.archivo;
+      soltar();
+      const ok = await window.sharkTracker.clips.borrar(archivo);
+      if (!ok) { error('No se pudo borrar (¿está abierto en otro programa?).'); video().src = url('video', archivo); reiniciarBorrar(); return; }
+      clip = null;
+      reiniciarBorrar();
+      alCambiar(null);
+    });
+
+    return { nombreCaja, acciones, errorTxt, mostrarClip, pintar, reiniciarBorrar, clip: () => clip };
+  }
+
+  // ── Visor (clips sueltos: favoritos y la vista de lista) ──
   const visor = $('gal-visor');
-  const video = $('visor-video');
-  let borrarTimer = null;
-  function soltarVideo() {
-    // Windows no deja renombrar ni borrar un archivo que el video tiene abierto.
-    video.pause();
-    video.removeAttribute('src');
-    video.load();
-  }
-  function pintarVisor(c) {
-    actual = c;
-    $('visor-titulo').textContent = nombre(c);
-    $('visor-titulo').title = c.archivo;
-    $('visor-sub').textContent = [`${dia(c.creado)}, ${hora(c.creado)}`, c.campeon, c.segundos ? duracion(c.segundos) : null, tamano(c.tamano)].filter(Boolean).join(' · ');
-    const fav = $('visor-fav');
-    fav.textContent = c.favorito ? '★ Favorito' : '☆ Favorito';
-    fav.classList.toggle('on', c.favorito);
-    fav.setAttribute('aria-pressed', String(c.favorito));
-  }
+  const videoVisor = $('visor-video');
+  const ctlVisor = crearControles({
+    idTitulo: 'visor-titulo',
+    video: () => videoVisor,
+    alCambiar: async (c) => { if (!c) { visor.close(); await cargar(); } },
+  });
+  $('visor-nombre').append(ctlVisor.nombreCaja);
+  $('visor-pie').append(ctlVisor.acciones, ctlVisor.errorTxt);
   function abrir(c) {
-    pintarVisor(c);
-    cerrarRenombrar();
-    reiniciarBorrar();
-    $('visor-error').hidden = true;
-    video.src = url('video', c.archivo);
+    ctlVisor.mostrarClip(c);
+    videoVisor.src = url('video', c.archivo);
     visor.showModal();
-    video.play().catch(() => {});
+    videoVisor.play().catch(() => {});
   }
-  visor.addEventListener('close', () => { soltarVideo(); actual = null; reiniciarBorrar(); });
+  visor.addEventListener('close', () => {
+    videoVisor.pause();
+    videoVisor.removeAttribute('src');
+    videoVisor.load(); // suelta el archivo
+    ctlVisor.reiniciarBorrar();
+  });
   $('visor-cerrar').addEventListener('click', () => visor.close());
   // Clic en el fondo oscuro: cerrar.
   visor.addEventListener('click', (e) => { if (e.target === visor) visor.close(); });
-  $('visor-fav').addEventListener('click', () => actual && alternarFavorito(actual));
-  $('visor-mostrar').addEventListener('click', () => actual && window.sharkTracker.clips.mostrar(actual.archivo));
 
-  function error(texto) {
-    $('visor-error').textContent = texto;
-    $('visor-error').hidden = !texto;
+  // ── Timeline de la partida ──
+  // Los clips de la partida, del primero al último, en un solo reproductor con una pista
+  // debajo (un bloque por clip, ancho según lo que dura). Al terminar un clip, abajo a la
+  // izquierda del video sale "Siguiente clip en 5…": si no lo cancelas, pasa al siguiente.
+  const CUENTA = 5;
+  // Color del bloque según la jugada principal (la primera del título es la más vistosa).
+  function tipoJugada(c) {
+    if (c.manual || !c.titulo || c.titulo === 'Clip') return 'manual';
+    const t = c.titulo.split(' + ')[0];
+    if (/Muerte/.test(t)) return 'muerte';
+    if (/Barón|Dragón|dragón|Ancestral|Heraldo|Larvas|Atakhan/.test(t)) return 'objetivo';
+    if (/Torre|Inhibidor/.test(t)) return 'estructura';
+    return 'kill';
   }
 
-  // Renombrar
-  function cerrarRenombrar() {
-    $('visor-renombrar').hidden = true;
-    $('visor-titulo').hidden = false;
-  }
-  $('visor-btn-renombrar').addEventListener('click', () => {
-    if (!actual) return;
-    $('visor-titulo').hidden = true;
-    $('visor-renombrar').hidden = false;
-    $('visor-input').value = actual.renombrado || actual.manual ? base(actual) : nombre(actual);
-    $('visor-input').focus();
-    $('visor-input').select();
-  });
-  $('visor-renombrar-cancelar').addEventListener('click', cerrarRenombrar);
-  $('visor-renombrar').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!actual) return;
-    const t = video.currentTime;
-    soltarVideo();
-    const r = await window.sharkTracker.clips.renombrar(actual.archivo, $('visor-input').value);
-    if (!r.ok) {
-      error(r.motivo === 'existe' ? 'Ya hay un clip con ese nombre.' : r.motivo === 'nombre' ? 'Escribe un nombre.' : 'No se pudo renombrar (¿está abierto en otro programa?).');
-    } else {
-      error('');
-      cerrarRenombrar();
+  let tl = null; // timeline a la vista: { clave, raiz, video, clips, i, actualizar(g), soltar() }
+
+  function crearTimeline(g) {
+    const raiz = el('div', 'tl');
+    const escena = el('div', 'tl-escena');
+    const video = el('video', 'tl-video');
+    video.controls = true;
+    video.preload = 'auto';
+    video.playsInline = true;
+    const sig = el('div', 'tl-siguiente');
+    sig.hidden = true;
+    sig.setAttribute('role', 'status');
+    const sigTxt = el('span', 'tl-sig-txt');
+    const sigYa = el('button', 'tl-sig-btn', 'Ver ahora');
+    sigYa.type = 'button';
+    const sigNo = el('button', 'tl-sig-btn tl-sig-no', 'Cancelar');
+    sigNo.type = 'button';
+    sig.append(sigTxt, sigYa, sigNo);
+    escena.append(video, sig);
+
+    const ctl = crearControles({
+      video: () => video,
+      alCambiar: async (c) => {
+        if (c) { t.clips[t.i] = c; pintarPista(); return; }
+        // Borrado: se queda en el mismo lugar de la pista (el siguiente, o el anterior si era el último).
+        await cargar();
+      },
+    });
+    const cab = el('div', 'tl-cab');
+    const contador = el('span', 'tl-contador');
+    cab.append(ctl.nombreCaja, contador);
+    const pista = el('div', 'tl-pista');
+    pista.setAttribute('role', 'list');
+    pista.setAttribute('aria-label', 'Clips de la partida');
+    raiz.append(escena, cab, pista, ctl.acciones, ctl.errorTxt);
+
+    const t = { clave: g.clave, raiz, video, clips: [], i: 0, cuenta: null };
+
+    function pararCuenta() {
+      clearInterval(t.cuenta);
+      t.cuenta = null;
+      sig.hidden = true;
     }
-    await cargar();
-    const c = datos.clips.find((x) => x.archivo === (r.ok ? r.archivo : actual.archivo));
-    if (c) {
-      pintarVisor(c);
+    function ir(i, reproducir = true) {
+      pararCuenta();
+      t.i = Math.max(0, Math.min(t.clips.length - 1, i));
+      const c = t.clips[t.i];
+      ctl.mostrarClip(c);
+      if (c.mini) video.poster = url('mini', c.archivo); else video.removeAttribute('poster');
       video.src = url('video', c.archivo);
-      video.currentTime = t;
+      if (reproducir) video.play().catch(() => {});
+      pintarPista();
     }
-  });
+    function pintarPista() {
+      contador.textContent = `Clip ${t.i + 1} de ${t.clips.length}`;
+      pista.replaceChildren(...t.clips.map((c, i) => {
+        const b = el('button', `tl-bloque tl-${tipoJugada(c)}${i === t.i ? ' on' : ''}`);
+        b.type = 'button';
+        b.setAttribute('role', 'listitem');
+        b.style.flexGrow = String(Math.max(10, c.segundos ?? 40));
+        b.title = `${nombre(c)} · ${hora(c.creado)}${c.segundos ? ` · ${duracion(c.segundos)}` : ''}`;
+        b.setAttribute('aria-label', `${i + 1}. ${b.title}`);
+        if (i === t.i) b.setAttribute('aria-current', 'true');
+        const relleno = el('i', 'tl-relleno');
+        if (i < t.i) relleno.style.width = '100%';
+        b.append(relleno, el('span', 'tl-etq', `${c.favorito ? '★ ' : ''}${nombre(c)}`));
+        b.addEventListener('click', () => ir(i));
+        return b;
+      }));
+    }
+    video.addEventListener('timeupdate', () => {
+      const r = pista.querySelector('.tl-bloque.on .tl-relleno');
+      if (r && video.duration) r.style.width = `${Math.min(100, (video.currentTime / video.duration) * 100)}%`;
+    });
+    video.addEventListener('ended', () => {
+      if (t.i >= t.clips.length - 1) return;
+      let quedan = CUENTA;
+      sigTxt.textContent = `Siguiente clip en ${quedan}`;
+      sig.hidden = false;
+      t.cuenta = setInterval(() => {
+        quedan--;
+        if (quedan <= 0) { ir(t.i + 1); return; }
+        sigTxt.textContent = `Siguiente clip en ${quedan}`;
+      }, 1000);
+    });
+    // Si vuelves a darle al play o te mueves por el video, la cuenta se cancela.
+    video.addEventListener('play', pararCuenta);
+    video.addEventListener('seeking', pararCuenta);
+    sigYa.addEventListener('click', () => ir(t.i + 1));
+    sigNo.addEventListener('click', pararCuenta);
 
-  // Borrar: dos clics (el primero pide confirmar).
-  function reiniciarBorrar() {
-    clearTimeout(borrarTimer);
-    const b = $('visor-borrar');
-    b.classList.remove('confirmar');
-    b.textContent = 'Borrar';
+    // Datos nuevos (miniaturas, favorito, clip renombrado o borrado): la pista se repinta y
+    // el video sigue donde iba si su clip sigue ahí.
+    t.actualizar = (grupo) => {
+      const antes = t.clips[t.i]?.archivo;
+      t.clips = [...grupo.clips].sort((a, b) => a.creado - b.creado);
+      const j = t.clips.findIndex((c) => c.archivo === antes);
+      if (j >= 0) {
+        t.i = j;
+        ctl.pintar(t.clips[j]);
+        pintarPista();
+      } else {
+        ir(Math.min(t.i, t.clips.length - 1), false);
+      }
+    };
+    t.soltar = () => {
+      pararCuenta();
+      video.pause();
+      video.removeAttribute('src');
+      video.load(); // suelta el archivo
+    };
+    t.clips = [...g.clips].sort((a, b) => a.creado - b.creado);
+    ir(0, false);
+    return t;
   }
-  $('visor-borrar').addEventListener('click', async () => {
-    const b = $('visor-borrar');
-    if (!actual) return;
-    if (!b.classList.contains('confirmar')) {
-      b.classList.add('confirmar');
-      b.textContent = '¿Borrar? Va a la papelera';
-      borrarTimer = setTimeout(reiniciarBorrar, 4000);
-      return;
-    }
-    const archivo = actual.archivo;
-    soltarVideo();
-    const ok = await window.sharkTracker.clips.borrar(archivo);
-    if (!ok) { error('No se pudo borrar (¿está abierto en otro programa?).'); video.src = url('video', archivo); reiniciarBorrar(); return; }
-    visor.close();
-    await cargar();
-  });
+
+  function quitarTimeline() {
+    if (!tl) return;
+    tl.soltar();
+    tl = null;
+  }
+  // Al ir a otra sección, el video de la timeline se pausa.
+  document.querySelectorAll('.navitem').forEach((n) => n.addEventListener('click', () => {
+    if (n.dataset.page !== 'clips' && tl) { tl.video.pause(); }
+  }));
 
   // Clip nuevo o miniaturas listas: se refresca si la sección está a la vista.
   const visible = () => $('page-clips').classList.contains('active');

@@ -975,7 +975,7 @@ html, body { font-variant-numeric: tabular-nums; }
 .visor-video { display: block; width: 100%; aspect-ratio: 16 / 9; max-height: 62vh; background: #000; border-radius: 10px; }
 .visor-acciones { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
 .visor-sep { flex: 1; }
-#visor-fav.on { color: var(--dorado); }
+.visor-acciones .btn-sec.on { color: var(--dorado); }
 
 /* Mi Perfil: más jugados en 30 días (a la derecha de las maestrías) */
 .card-masjugados { display: flex; flex-direction: column; }
@@ -1027,3 +1027,41 @@ html, body { font-variant-numeric: tabular-nums; }
   .gal-carpeta:hover .gal-cuantos, .gal-carpeta:hover .gal-favs { transform: none; }
 }
 .gal-dur { z-index: 2; }
+
+/* Timeline de la partida: los clips uno tras otro en un solo reproductor */
+.gal-cab-carpeta .gal-vista { margin-left: auto; }
+.tl { display: flex; flex-direction: column; gap: 12px; }
+.tl-escena { position: relative; border-radius: 12px; overflow: hidden; background: #000; }
+.tl-video { display: block; width: 100%; aspect-ratio: 16 / 9; max-height: 64vh; background: #000; }
+/* "Siguiente clip en 5": abajo a la izquierda del video, encima de los controles */
+.tl-siguiente { position: absolute; left: 14px; bottom: 64px; display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 14px;
+  border-radius: 10px; background: rgba(3,17,26,0.88); border: 1px solid rgba(120,220,210,0.18); box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  animation: tl-sig-entra 200ms var(--ease-out); }
+.tl-siguiente[hidden] { display: none; }
+@keyframes tl-sig-entra { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.tl-sig-txt { font-size: 13px; font-weight: 600; color: var(--texto); font-variant-numeric: tabular-nums; margin-right: 4px; }
+.tl-sig-btn { font: inherit; font-size: 12px; font-weight: 700; border: 0; border-radius: 7px; padding: 6px 10px; cursor: pointer;
+  background: var(--acento); color: #03111A; }
+.tl-sig-btn.tl-sig-no { background: rgba(120,220,210,0.1); color: var(--texto-suave); font-weight: 600; }
+.tl-sig-btn.tl-sig-no:hover { background: rgba(120,220,210,0.18); color: var(--texto); }
+.tl-cab { display: flex; align-items: flex-start; gap: 12px; }
+.tl-cab .visor-nombre-caja { flex: 1; min-width: 0; }
+.tl-contador { font-family:'Red Hat Mono',ui-monospace,monospace; font-size: 12px; font-weight: 600; color: var(--texto-tenue);
+  background: #051823; border-radius: 7px; padding: 4px 8px; white-space: nowrap; }
+.tl-pista { display: flex; gap: 4px; padding: 6px; border-radius: 12px; background: #051823; border: 1px solid rgba(120,220,210,0.07); overflow-x: auto; }
+.tl-bloque { --tl-color: var(--acento); position: relative; flex: 1 1 0; min-width: 44px; height: 44px; padding: 0 8px; border-radius: 8px; cursor: pointer;
+  font: inherit; text-align: left; overflow: hidden; color: var(--texto-tenue);
+  background: color-mix(in srgb, var(--tl-color) 10%, #08202C); border: 1px solid color-mix(in srgb, var(--tl-color) 22%, transparent);
+  border-top: 3px solid var(--tl-color); transition: background 150ms var(--ease-out), color 150ms var(--ease-out); }
+.tl-bloque:hover { background: color-mix(in srgb, var(--tl-color) 18%, #08202C); color: var(--texto); }
+.tl-bloque.on { color: var(--texto); background: color-mix(in srgb, var(--tl-color) 16%, #0A2533); border-color: color-mix(in srgb, var(--tl-color) 55%, transparent); }
+.tl-relleno { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: color-mix(in srgb, var(--tl-color) 16%, transparent); pointer-events: none; }
+.tl-etq { position: relative; display: block; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-kill { --tl-color: var(--acento); }
+.tl-objetivo { --tl-color: var(--dorado); }
+.tl-estructura { --tl-color: var(--lila); }
+.tl-muerte { --tl-color: var(--rojo); }
+.tl-manual { --tl-color: var(--texto-mudo); }
+@media (prefers-reduced-motion: reduce) {
+  .tl-siguiente { animation: none; }
+}
