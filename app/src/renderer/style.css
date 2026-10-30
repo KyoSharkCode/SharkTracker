@@ -1048,20 +1048,28 @@ html, body { font-variant-numeric: tabular-nums; }
 .tl-cab .visor-nombre-caja { flex: 1; min-width: 0; }
 .tl-contador { font-family:'Red Hat Mono',ui-monospace,monospace; font-size: 12px; font-weight: 600; color: var(--texto-tenue);
   background: #051823; border-radius: 7px; padding: 4px 8px; white-space: nowrap; }
-.tl-pista { display: flex; gap: 4px; padding: 6px; border-radius: 12px; background: #051823; border: 1px solid rgba(120,220,210,0.07); overflow-x: auto; }
-.tl-bloque { --tl-color: var(--acento); position: relative; flex: 1 1 0; min-width: 44px; height: 44px; padding: 0 8px; border-radius: 8px; cursor: pointer;
-  font: inherit; text-align: left; overflow: hidden; color: var(--texto-tenue);
-  background: color-mix(in srgb, var(--tl-color) 10%, #08202C); border: 1px solid color-mix(in srgb, var(--tl-color) 22%, transparent);
-  border-top: 3px solid var(--tl-color); transition: background 150ms var(--ease-out), color 150ms var(--ease-out); }
-.tl-bloque:hover { background: color-mix(in srgb, var(--tl-color) 18%, #08202C); color: var(--texto); }
-.tl-bloque.on { color: var(--texto); background: color-mix(in srgb, var(--tl-color) 16%, #0A2533); border-color: color-mix(in srgb, var(--tl-color) 55%, transparent); }
-.tl-relleno { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: color-mix(in srgb, var(--tl-color) 16%, transparent); pointer-events: none; }
-.tl-etq { position: relative; display: block; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tl-kill { --tl-color: var(--acento); }
-.tl-objetivo { --tl-color: var(--dorado); }
-.tl-estructura { --tl-color: var(--lila); }
-.tl-muerte { --tl-color: var(--rojo); }
-.tl-manual { --tl-color: var(--texto-mudo); }
+.tl-pista { position: relative; height: 74px; border-radius: 12px; background: #051823; border: 1px solid rgba(120,220,210,0.07); overflow: hidden; }
+.tl-eje { position: absolute; left: 18px; right: 18px; height: 1px; background: rgba(127,175,173,0.45); }
+.tl-marca { position: absolute; width: 1px; height: 4px; background: rgba(127,175,173,0.4); }
+.tl-marca.grande { height: 7px; background: rgba(127,175,173,0.8); }
+.tl-min { position: absolute; transform: translateX(-50%); font-family:'Red Hat Mono',ui-monospace,monospace; font-size: 11px; color: var(--texto-apagado); }
+.tl-tramo { position: absolute; height: 3px; border-radius: 2px; background: rgba(167,211,207,0.35); }
+.tl-tramo.on { background: var(--acento); }
+.tl-cabezal { position: absolute; width: 2px; height: 22px; margin-left: -1px; border-radius: 1px; background: var(--acento); pointer-events: none; }
+/* Una jugada: sus íconos en el minuto en que pasó */
+.tl-jugada { position: absolute; display: flex; gap: 2px; padding: 0; border: 0; background: none; cursor: pointer; --tl-c: var(--texto-tenue); color: var(--tl-c);
+  border-radius: 6px; transition: color 150ms var(--ease-out), transform 150ms var(--ease-out); }
+.tl-jugada:hover, .tl-jugada:focus-visible { --tl-c: var(--texto); transform: translateY(-2px); }
+.tl-jugada.on { --tl-c: var(--acento); }
+.tl-icono { position: relative; width: 22px; height: 22px; display: block; }
+.tl-icono svg { width: 22px; height: 22px; display: block; fill: currentColor; }
+.tl-num { position: absolute; right: -5px; top: -6px; min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px;
+  font-family:'Red Hat Mono',ui-monospace,monospace; font-size: 10px; font-weight: 700; line-height: 14px; text-align: center;
+  background: var(--tl-c); color: #03111A; }
+.tl-robo { position: absolute; right: -6px; top: -6px; width: 12px; height: 12px; color: var(--dorado); }
+.tl-robo svg { width: 12px; height: 12px; }
+.tl-fav { position: absolute; left: -7px; top: -8px; font-size: 10px; color: var(--dorado); line-height: 1; }
 @media (prefers-reduced-motion: reduce) {
   .tl-siguiente { animation: none; }
+  .tl-jugada:hover, .tl-jugada:focus-visible { transform: none; }
 }
