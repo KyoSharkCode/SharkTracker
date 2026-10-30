@@ -154,7 +154,7 @@ function createWindow() {
     frame: false, // dibujamos nuestra propia barra de título, como en el mockup
     title: 'SharkTracker',
     icon: path.join(__dirname, 'assets', 'icon.png'),
-    backgroundColor: '#03111A',
+    backgroundColor: ajustesApp.leer().tema === 'claro' ? '#EEF4F5' : '#03111A',
     // Abierta por Windows al iniciar sesión y con la bandeja activada: empieza escondida.
     show: !(process.argv.includes(ARG_AL_INICIAR) && ajustesApp.leer().ventana.bandeja),
     webPreferences: {
@@ -164,7 +164,8 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+  // El tema va en la dirección para pintarlo desde el primer instante (sin destello oscuro).
+  mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'), { query: { tema: ajustesApp.leer().tema } });
   // Con la bandeja activada, la × solo esconde la ventana.
   mainWindow.on('close', (e) => {
     if (!saliendo && tray && ajustesApp.leer().ventana.bandeja) {
