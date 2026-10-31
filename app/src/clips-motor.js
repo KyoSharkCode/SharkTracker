@@ -172,6 +172,7 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
         return null;
       }
       // La muestra que sale a la hora T es el sonido de T menos el retraso fijo del ayudante.
+      recibido.primera = primera; // para medir si el reloj del audio se separa del del PC
       const desfase = (primera - RETRASO_AYUDANTE_MS - origen / 1000) / 1000;
       log(`Audio: empieza en el segundo ${desfase.toFixed(3)} del video`);
       p = lanzar(argsAudio(audio.pistas, desfase));
@@ -328,6 +329,12 @@ function crearMotorClips({ dir, ffmpeg, log = () => {}, entrada = entradaPantall
           const seg = (bytes) => bytes / (4 * flujo.canales * AUDIO_HZ);
           llegada = ` · a FFmpeg le llegaron ${seg(flujo.recibido.bytes).toFixed(0)} s de audio en ${((Date.now() - flujo.recibido.desde) / 1000).toFixed(0)} s`
             + ` (${seg(flujo.espera()).toFixed(1)} s esperando a que FFmpeg los tome)`;
+          // Deriva: audio recibido menos lo que debería haber según la hora del PC. Si crece,
+          // el audio de los clips se corre (positivo = el sonido llega antes que la imagen).
+          if (flujo.recibido.primera) {
+            const deriva = seg(flujo.recibido.bytes) - (Date.now() - flujo.recibido.primera) / 1000;
+            llegada += ` · reloj del audio ${deriva >= 0 ? '+' : ''}${deriva.toFixed(2)} s respecto a la hora del PC`;
+          }
         }
         const ultimo = elegidos[elegidos.length - 1];
         log(`Audio del clip: ${await revisarAudio(destino, total)} · último trozo: ${await revisarAudio(ultimo.archivo, ultimo.dur)}${llegada}`);

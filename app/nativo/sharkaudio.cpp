@@ -19,9 +19,12 @@
 //       --niveles N: cada N s (30 de fábrica) avisa qué llegó de cada fuente (nivel en dB,
 //       "silencio" o "no llega nada"); la app lo guarda en registro.txt.
 //
-// El audio sale al ritmo del reloj del PC (QueryPerformanceCounter), con 50 ms de
-// retraso fijo para tener margen: si una fuente no manda nada (silencio, programa
+// El audio sale al ritmo de la HORA del PC (GetSystemTimePreciseAsFileTime), con 50 ms
+// de retraso fijo para tener margen: si una fuente no manda nada (silencio, programa
 // cerrado), esa parte va en silencio; así el audio nunca se corre respecto del video.
+// Es la misma hora con la que FFmpeg marca el video (RTCTIME). Hasta la v1.0 se usaba
+// QueryPerformanceCounter: si Windows corrige la hora poco a poco (sincronización), los
+// dos relojes se separan (en el PC de Kyo, ~0,4 %: 1 s cada 4 min) y el audio se corría.
 // Los avisos van por la salida de errores (la app los guarda en registro.txt).
 //
 // Compilar: ver compilar.cmd (Visual Studio) o, desde Linux, con MinGW:
@@ -30,6 +33,9 @@
 
 #ifndef UNICODE
 #define UNICODE
+#endif
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0A00  // Windows 10: GetSystemTimePreciseAsFileTime y la captura por proceso
 #endif
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
@@ -554,6 +560,13 @@ static void informarNiveles(std::deque<Fuente>& fuentes, Medida& enviada, int se
   aviso(t);
 }
 
+// Hora del PC en unidades de 100 ns (la misma que usa FFmpeg para marcar el video).
+static long long horaPC() {
+  FILETIME ft;
+  GetSystemTimePreciseAsFileTime(&ft);
+  return ((long long)ft.dwHighDateTime << 32) | ft.dwLowDateTime;
+}
+
 static int modoCapturar(std::deque<Fuente>& fuentes, bool separadas, int cadaNiveles) {
   HANDLE salida = GetStdHandle(STD_OUTPUT_HANDLE);
   SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS); // pesa casi nada; que no se corte
@@ -563,9 +576,7 @@ static int modoCapturar(std::deque<Fuente>& fuentes, bool separadas, int cadaNiv
     f.ultimoIntento = GetTickCount64();
   }
   const size_t canales = separadas ? 2 + 2 * fuentes.size() : 2;
-  LARGE_INTEGER frec, t0, ahora;
-  QueryPerformanceFrequency(&frec);
-  QueryPerformanceCounter(&t0);
+  const long long t0 = horaPC();
   long long enviados = 0;
   std::vector<float> buf;
   ULONGLONG ultimoInforme = GetTickCount64();
@@ -586,12 +597,18 @@ static int modoCapturar(std::deque<Fuente>& fuentes, bool separadas, int cadaNiv
       // Demasiado en cola (el reloj de la tarjeta va un poco más rápido): fuera lo viejo.
       if (f.cola.size() > MAX_COLA * 2) f.cola.erase(f.cola.begin(), f.cola.end() - COLA_OBJETIVO * 2);
     }
-    QueryPerformanceCounter(&ahora);
-    long long ms = (ahora.QuadPart - t0.QuadPart) * 1000 / frec.QuadPart - RETRASO_MS;
+    long long ms = (horaPC() - t0) / 10000 - RETRASO_MS;
     if (ms <= 0) continue;
     long long deberia = ms * HZ / 1000;
     long long n = deberia - enviados;
+    // La hora del PC retrocedió (Windows la ajustó de golpe): se espera a que vuelva a
+    // avanzar; el video, marcado con la misma hora, hace lo mismo.
     if (n <= 0) continue;
+    // Saltó hacia delante: el hueco va en silencio, de a 1 s como mucho por vuelta (el
+    // video también salta). Si es enorme (> 10 min, p. ej. cambio de zona horaria), no
+    // se rellena: se sigue desde ahora.
+    if (n > (long long)HZ * 600) { aviso(L"La hora del PC saltó más de 10 min: el audio sigue desde ahora"); enviados = deberia; continue; }
+    if (n > HZ) { n = HZ; deberia = enviados + n; }
     buf.assign((size_t)n * canales, 0.f);
     for (size_t fi = 0; fi < fuentes.size(); fi++) {
       auto& f = fuentes[fi];

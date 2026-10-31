@@ -533,7 +533,7 @@ Decisiones de Alex (oct 2026).
     `programa` (captura por proceso con el árbol incluido, raíces por nombre de .exe; reintenta cada 3 s si
     no está abierto: Discord), `mic` y `pc` (loopback del dispositivo; "defecto" o id). Todo pedido en PCM
     16 bits 48 kHz estéreo (AUTOCONVERTPCM) y sale como float por stdout **al ritmo del reloj del PC**
-    (QPC) con 50 ms de retraso fijo: lo que no llegó va en silencio, lo que sobra (>200 ms) se descarta.
+    (la hora del PC desde la v1.0.1; antes QPC) con 50 ms de retraso fijo: lo que no llegó va en silencio, lo que sobra (>200 ms) se descarta.
     Con `--separadas`: mezcla + un par estéreo por fuente. "Todo el PC" reemplaza a Juego y Discord.
     La app pasa su stdout a la entrada de FFmpeg (la "q" para cerrar ya no sirve: con audio se mata).
     **Sincronía** (el audio cambió en v0.9.6, ver más abajo): video (`setpts` dentro de lavfi, pegado a ddagrab) y audio (`asetpts`, menos lo que
@@ -623,6 +623,16 @@ Decisiones de Alex (oct 2026).
   el master de BtbN, destello y pitido en cada segundo del reloj, codificador con B-frames: 33 s de audio en
   33 s, 0 s esperando, pitido 20–30 ms antes del destello (≈ 1–2 cuadros) y sin deriva; con pistas separadas
   igual.
+- **Audio corrido ~1 s (v1.0.1, registro de Kyo del 31/10/2026)**: en la misma partida "esperando a que FFmpeg
+  los tome" pasó de 0,0 s (min 4) a 1,0 s (min 8) y 1,3 s (min 9,5), y le llegaban más segundos de audio que de
+  reloj ("483 s de audio en 482 s"): el ayudante marcaba el ritmo con **QueryPerformanceCounter** y el video lleva
+  la **hora del PC** (RTCTIME); ese día la hora de Windows se estaba corrigiendo (~0,4 %, 1 s cada 4 min) y el
+  sonido se adelantaba cada vez más a la imagen. El 30/10 no pasó (relojes de acuerdo). Arreglo en
+  `nativo/sharkaudio.cpp`: el ritmo sale de **`GetSystemTimePreciseAsFileTime`** (la misma hora que el video).
+  Si la hora retrocede, el ayudante espera; si salta hacia delante, rellena el hueco con silencio de a 1 s
+  (> 10 min: no rellena y lo avisa). `clips-motor.js` agrega a "Audio del clip" la **deriva**: "reloj del audio
+  +X s respecto a la hora del PC" (audio recibido − hora transcurrida desde la primera muestra); debe quedar
+  cerca de 0. Compila con MinGW (`x86_64-w64-mingw32-g++`, `_WIN32_WINNT` 0x0A00).
 - **Timeline de la partida (v0.9.7, idea de Kyo, como Outplayed)**: dentro de una partida de la galería los clips
   (archivos sueltos, como siempre) se ven uno tras otro en un reproductor (`crearTimeline` en `renderer/clips.js`) y,
   debajo, **el eje de minutos de la partida** (marca cada minuto, número cada 5) con **los íconos de cada jugada en su
