@@ -758,7 +758,8 @@ Ojo: en league-v4 la división viene en el campo **`rank`** (no `division`).
   Medidas de la pantalla de carga real a 1920×1080 (esquema del editor): cartas de x 233
   a 1671 (5 por fila, 254 px + 42), filas en y 68–528 y 591–1051. Movible en el editor
   ("Ver pantalla de carga"). Interruptores en Ajustes → Overlay (rango/winrate de cada
-  equipo y etiquetas; "Counters del rival" próximamente).
+  equipo y etiquetas). "Counters del rival" se quitó en la v0.9.8: ya lo cubre En Vivo ("Le ganan a
+  {rival}" en los picks y la guía "Contra {rival}").
 
 ## Mi Perfil (mockup "La cara de la app" + su estado "sin conexión")
 
