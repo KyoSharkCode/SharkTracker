@@ -482,6 +482,8 @@ async function renderClips(aj) {
   const c = aj?.clips;
   if (!c) return;
   estadoClips = await window.sharkTracker.clips.estado();
+  // Invitación en Mi Perfil: mientras los clips estén apagados y no se haya descartado.
+  $('invitacion-clips').hidden = c.activo || !c.invitacion || !estadoClips?.windows;
   marcar(swClips, c.activo);
   marcar(swClipsOverlay, c.overlayEnClip);
   marcarSegmentos(calidadClipsEl, c.calidad);
@@ -547,6 +549,17 @@ swClips.addEventListener('click', async () => {
   }
   guardarClips({ activo: activar });
 });
+// "Activar" lleva a Ajustes → Clips y enciende el interruptor (ahí se ve la descarga de FFmpeg).
+$('invitacion-activar').addEventListener('click', () => {
+  $('invitacion-clips').hidden = true;
+  document.querySelector('.navitem[data-page="ajustes"]')?.click();
+  document.querySelector('.stab[data-stab="clips"]')?.click();
+  if (!swClips.classList.contains('on')) swClips.click();
+});
+$('invitacion-no').addEventListener('click', () => {
+  $('invitacion-clips').hidden = true;
+  guardarClips({ invitacion: false });
+});
 swClipsOverlay.addEventListener('click', () => guardarClips({ overlayEnClip: !swClipsOverlay.classList.contains('on') }));
 $('btn-clips-carpeta').addEventListener('click', () => window.sharkTracker.clips.abrirCarpeta());
 window.sharkTracker.clips.onGuardado((r) => {
@@ -555,3 +568,9 @@ window.sharkTracker.clips.onGuardado((r) => {
 });
 window.sharkTracker.ajustes.onChanged(renderClips);
 window.sharkTracker.ajustes.get().then(renderClips);
+
+// Ajustes → Cuenta → Diagnóstico: registro de errores (userData/registro-app.txt).
+$('btn-registro').addEventListener('click', async () => {
+  const ok = await window.sharkTracker.app.abrirRegistro();
+  $('registro-txt').textContent = ok ? '' : 'No se pudo abrir el registro.';
+});

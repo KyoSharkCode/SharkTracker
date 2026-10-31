@@ -77,6 +77,15 @@
     <div class="main">
 
       <section class="page active" id="page-perfil">
+        <!-- Invitación a activar los clips (v1.0): solo aquí, nunca en partida ni en la carga. -->
+        <div id="invitacion-clips" class="invitacion" role="region" aria-labelledby="invitacion-tit" hidden>
+          <div class="invitacion-tit" id="invitacion-tit">Graba tus mejores jugadas</div>
+          <div class="invitacion-txt">SharkTracker puede guardar automáticamente tus kills, objetivos y jugadas de cada partida, sin bajar tus FPS. Está apagado hasta que lo actives.</div>
+          <div class="invitacion-btns">
+            <button id="invitacion-activar" class="checkbtn" type="button">Activar</button>
+            <button id="invitacion-no" class="btn-sec" type="button">No volver a mostrar</button>
+          </div>
+        </div>
         <div class="h1">Mi Perfil</div>
         <div id="perfil-sub" class="h1sub">Cargando tu perfil…</div>
         <div id="perfil-cab" class="profhead" hidden></div>
@@ -197,6 +206,11 @@
           <div id="live-status" class="livestatus">Sin comprobar todavía.</div>
           <button id="btn-check" class="checkbtn">Comprobar ahora</button>
           <pre id="live-json" class="livejson" hidden></pre>
+          <div class="registro-fila">
+            <div><div class="swnm">Registro de errores</div><div class="swsub">Si algo falla en la app, queda anotado aquí. Si avisas de un problema, adjunta este archivo.</div></div>
+            <button id="btn-registro" class="btn-sec" type="button">Abrir registro</button>
+          </div>
+          <div id="registro-txt" class="swsub" role="status"></div>
         </div>
         </div>
 

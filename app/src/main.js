@@ -1,5 +1,6 @@
-const { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, protocol } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, protocol, shell } = require('electron');
 const path = require('path');
+const os = require('os');
 const https = require('https');
 const { execFile } = require('child_process');
 const cfg = require('./config');
@@ -12,6 +13,31 @@ const ajustesApp = require('./ajustes-app');
 const notificaciones = require('./notificaciones');
 const clips = require('./clips');
 const { crearDetector } = require('./clips-eventos');
+const { crearRegistro } = require('./registro');
+
+// ── Registro de errores (userData/registro-app.txt; Ajustes → Cuenta → Diagnóstico) ──
+// Lo que falla en el proceso main, en la ventana, en el overlay o en el editor queda anotado.
+const registro = crearRegistro({ dir: () => app.getPath('userData') });
+process.on('uncaughtException', (e) => registro.anotar('main', e));
+process.on('unhandledRejection', (e) => registro.anotar('main', e));
+const consolaError = console.error.bind(console);
+console.error = (...partes) => {
+  consolaError(...partes);
+  registro.anotar('main', partes.map((p) => (p instanceof Error ? p.stack || p.message : typeof p === 'string' ? p : JSON.stringify(p))).join(' '));
+};
+// Errores de las ventanas (la app, el overlay, el editor): llegan como mensajes de consola.
+const origenVentana = (wc) => (/\/overlay\//.test(wc.getURL()) ? 'overlay' : /\/editor\//.test(wc.getURL()) ? 'editor' : 'ventana');
+app.on('web-contents-created', (_e, wc) => {
+  wc.on('console-message', (ev, nivelViejo, mensajeViejo, lineaVieja, origenViejo) => {
+    const nivel = ev?.level ?? nivelViejo;
+    if (nivel !== 'error' && nivel !== 3) return;
+    const linea = ev?.lineNumber ?? lineaVieja;
+    const archivo = String(ev?.sourceId ?? origenViejo ?? '').split('/').pop();
+    registro.anotar(origenVentana(wc), ev?.message ?? mensajeViejo, archivo ? `${archivo}:${linea}` : '');
+  });
+  wc.on('render-process-gone', (_ev, d) => { if (d.reason !== 'clean-exit') registro.anotar(origenVentana(wc), `La ventana se cerró de golpe (${d.reason}, código ${d.exitCode})`); });
+});
+app.on('child-process-gone', (_e, d) => { if (d.reason !== 'clean-exit') registro.anotar('main', `Proceso ${d.type} cerrado de golpe (${d.reason})`, d.name ?? ''); });
 
 // La Live Client Data API de League usa un certificado autofirmado local,
 // así que hay que decirle a Node que no lo rechace (127.0.0.1:2999, nunca sale de tu PC).
@@ -57,6 +83,7 @@ if (!gotLock) {
   });
 
   app.whenReady().then(() => {
+    registro.info(`SharkTracker ${app.getVersion()} abierto · Windows ${os.release()}`);
     protocol.handle('sharkclip', (req) => clips.servir(req));
     createWindow();
     aplicarVentana(ajustesApp.leer());
@@ -196,6 +223,11 @@ function createWindow() {
 // nueva, se descarga sola y se instala al cerrar la app (o al pulsar
 // "Reiniciar y actualizar" en Ajustes → Cuenta). Con `npm start` no se busca nada.
 ipcMain.handle('app:version', () => app.getVersion());
+// Ajustes → Cuenta → Diagnóstico: abre el registro de errores (lo crea si todavía no hay nada).
+ipcMain.handle('registro:abrir', async () => {
+  if (!registro.leer()) registro.info('Registro de errores de SharkTracker: todavía no hubo ningún error.');
+  return (await shell.openPath(registro.ruta())) === '';
+});
 let estadoActualizacion = { estado: app.isPackaged ? 'buscando' : 'desarrollo' };
 function avisarActualizacion(estado) {
   estadoActualizacion = estado;

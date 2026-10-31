@@ -1,0 +1,29 @@
+# Pruebas automáticas de la app de escritorio (app/test, Node puro: sin Electron ni
+# dependencias). Corren solas en cada PR y en cada cambio de main que toque app/,
+# y también antes de publicar una versión ("App: publicar versión").
+# Para correrlas en tu PC: cd app && npm test
+name: "App: pruebas"
+
+on:
+  pull_request:
+    paths: ["app/**", ".github/workflows/app-pruebas.yml"]
+  push:
+    branches: [main]
+    paths: ["app/**", ".github/workflows/app-pruebas.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm test

@@ -53,6 +53,7 @@ function fabrica() {
       teclaUlti: 'R',        // por si cambiaste la tecla de la R en el juego
       avisoAuto: true,       // aviso pequeño en el overlay al guardar un clip automático
       limiteGB: 10,          // espacio para clips normales (se borran los más viejos)
+      invitacion: true,      // aviso en Mi Perfil para activarlos (false = "No volver a mostrar")
       audio: {
         juego: { activo: true, volumen: 100 },                      // solo el sonido de League
         discord: { activo: false, volumen: 100 },                   // voces del grupo (avísales)
@@ -91,6 +92,7 @@ function normalizar(datos) {
   if (typeof c.teclaUlti === 'string' && TECLA_ULTI.test(c.teclaUlti.toUpperCase())) base.clips.teclaUlti = c.teclaUlti.toUpperCase();
   if (typeof c.avisoAuto === 'boolean') base.clips.avisoAuto = c.avisoAuto;
   if (LIMITES_GB.includes(c.limiteGB)) base.clips.limiteGB = c.limiteGB;
+  if (typeof c.invitacion === 'boolean') base.clips.invitacion = c.invitacion;
   for (const f of FUENTES_AUDIO) {
     const o = c.audio?.[f];
     if (typeof o?.activo === 'boolean') base.clips.audio[f].activo = o.activo;

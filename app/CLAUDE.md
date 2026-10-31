@@ -445,8 +445,8 @@ Decisiones de Alex (oct 2026).
   (FFmpeg no la trae). Avisar al grupo que se graban voces de Discord.
 - **Calidad**: Máxima (resolución de la pantalla hasta 1440p, 60 fps) · **Alta de fábrica (1080p60, H.264)** ·
   Ligera (720p30). Sin GPU compatible → Ligera por defecto. HEVC/AV1 como opción si la GPU lo soporta.
-- **Todo opcional**: interruptor general en Ajustes → Clips, **apagado de fábrica**; la primera partida pregunta
-  una vez si se activa. Apagado = no se graba nada.
+- **Todo opcional**: interruptor general en Ajustes → Clips, **apagado de fábrica**. Apagado = no se graba nada.
+  La invitación a activarlos sale en **Mi Perfil** (v1.0, decisión de Kyo: nunca en partida ni en la carga), ver "v1.0".
 - **Eventos (de fábrica, cada uno con interruptor)**, solo si participaste (autor, asistencia o víctima, según
   la Live Client Data API): kill, multikill, muerte, objetivos (dragón, Barón, Heraldo, larvas) y estructuras
   (torres, inhibidores). **Ulti**: la API no la avisa; se detecta la tecla de la R (uiohook, configurable si la
@@ -789,6 +789,27 @@ Decisiones:
 - **"Tu build"** y **Meta**: hechos con el MCP de OP.GG (ver "Meta" y "Build adaptada y build en partida").
 - **Timers de campamentos: descartados** (Kyo, oct 2026). Habría que leer el minimapa por captura
   de pantalla (la API local no da campamentos) y costaría rendimiento; no se hacen.
+
+## v1.0 (oct 2026): invitación a los clips, registro de errores y pruebas automáticas
+
+- **Invitación a los clips** (`#invitacion-clips` en Mi Perfil, arriba a la derecha): sale mientras los clips
+  estén apagados y `clips.invitacion` (ajustes.json) siga en `true`. **Activar** lleva a Ajustes → Clips y
+  enciende el interruptor (ahí se ve la descarga de FFmpeg); **No volver a mostrar** guarda `invitacion: false`.
+  Regla de Kyo: **nada de ventanas emergentes en partida ni en la pantalla de carga**; lo que pida una decisión
+  va dentro de la app.
+- **Registro de errores** (`src/registro.js`, se prueba en Node): `userData/registro-app.txt`. main.js anota
+  `uncaughtException`, `unhandledRejection`, todo `console.error` del proceso main, los errores de consola de
+  cada ventana (app = `ventana`, `overlay`, `editor`; evento `console-message`), ventanas o procesos que se
+  cierran de golpe, y una línea al abrir (versión y Windows). El mismo error seguido (mismo origen y primera
+  línea, < 1 min) se cuenta en vez de repetirse; el archivo se recorta solo (máx. 512 KB). Ajustes → Cuenta →
+  Diagnóstico → **"Abrir registro"** (IPC `registro:abrir`). Los clips siguen con su `clips/registro.txt`.
+- **Pruebas automáticas** (`app/test/*.test.js`, `node:test`, sin dependencias): `npm test` en `app/`. Cubren
+  habilidades, rendimiento, siguiente compra, avisos, Mi Perfil, registro, ajustes, jugadas y agenda de los
+  clips, argumentos de audio de FFmpeg y el cerebro del overlay. `test/electron-falso.js` reemplaza a
+  `electron` para los módulos que lo importan. Corren en cada PR que toque `app/` (workflow **"App: pruebas"**)
+  y antes de armar el instalador en "App: publicar versión" (si fallan, no se publica). **Al cambiar un
+  módulo que "se prueba en Node", actualizar o agregar su prueba.**
+- `app/GUIA.md` (guía de los amigos) actualizada con la timeline, el tema claro, la invitación y el registro.
 
 ## Tema claro (v0.9.8, pedido de Kyo)
 

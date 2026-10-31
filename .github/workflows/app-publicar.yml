@@ -29,6 +29,9 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: app/package-lock.json
+      # Si alguna prueba falla no se publica nada (no hacen falta dependencias: Node puro).
+      - name: Pruebas automáticas
+        run: npm test
       - name: Preparar el Release en borrador
         shell: bash
         run: |

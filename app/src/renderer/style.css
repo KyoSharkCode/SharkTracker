@@ -1094,6 +1094,22 @@ html, body { font-variant-numeric: tabular-nums; }
   .tl-jugada:hover, .tl-jugada:focus-visible { transform: none; }
 }
 
+/* Diagnóstico: registro de errores */
+.registro-fila { display: flex; align-items: center; gap: 12px; justify-content: space-between; margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(var(--linea-rgb),0.08); }
+
+/* Invitación a activar los clips (Mi Perfil, arriba a la derecha). */
+#page-perfil { position: relative; }
+.invitacion { position: absolute; top: 0; right: 0; z-index: 5; width: min(340px, 100%); padding: 16px 16px 14px; border-radius: 14px;
+  background: var(--panel); border: 1px solid color-mix(in srgb, var(--acento) 40%, transparent); box-shadow: 0 14px 34px rgba(0,0,0,0.32);
+  animation: invitacion-entra 250ms var(--ease-out); }
+.invitacion[hidden] { display: none; }
+@keyframes invitacion-entra { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.invitacion-tit { font-size: 15px; font-weight: 700; color: var(--texto); }
+.invitacion-txt { font-size: 13px; line-height: 1.45; color: var(--texto-tenue); margin-top: 6px; }
+.invitacion-btns { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+@media (prefers-reduced-motion: reduce) { .invitacion { animation: none; } }
+:root[data-tema="claro"] .invitacion { box-shadow: 0 12px 28px rgba(10,40,50,0.16); }
+
 /* ============================================================
    Tema claro (v0.9.8, Ajustes → Apariencia → Tema). app.js pone
    data-tema="claro" en <html>. Solo cambian las variables: el layout es el mismo.

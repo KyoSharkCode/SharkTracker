@@ -1,4 +1,4 @@
-# SharkTracker para escritorio — guía rápida (early access)
+# SharkTracker para escritorio: guía rápida (v1.0)
 
 App de SharkTracker para League of Legends: overlay en partida, pantalla de carga con
 los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
@@ -16,6 +16,9 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
    esa misma cuenta de Discord.
 3. En League of Legends: Configuración → Vídeo → Modo de ventana: **"Sin bordes"**.
    En pantalla completa el overlay no se puede dibujar encima del juego.
+4. En **Mi Perfil**, arriba a la derecha, la app te ofrece activar los **clips** una sola vez:
+   "Activar" o "No volver a mostrar". Nunca te pregunta nada durante la partida. Puedes
+   activarlos más tarde en Ajustes → Clips.
 
 ## En selección de campeones
 - **En Vivo** se abre sola: picks y bans recomendados; al fijar, runas, hechizos y build con
@@ -41,7 +44,7 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
   antes y 15 s después). Jugadas seguidas van en un solo clip. Arriba a la derecha sale "Clip creado".
 
 ## Ajustes a tu gusto
-- **Ajustes → Apariencia**: color de acento de la app, tamaño y opacidad del overlay en partida
+- **Ajustes → Apariencia**: tema **oscuro o claro** (el overlay en partida siempre va en oscuro), color de acento de la app, tamaño y opacidad del overlay en partida
   (80 % de fábrica), y la ventana: siempre encima, **cerrar a la bandeja** (la × la esconde junto
   al reloj; para salir, clic derecho en el ícono → Salir) y abrir al iniciar Windows.
 - **Ajustes → Notificaciones**: avisos de Windows con tus dientes, misiones, retos del grupo y el
@@ -54,11 +57,18 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
   Discord, micrófono o todo el PC, cada uno con su volumen; si grabas Discord, avisa al grupo) y el
   espacio máximo (10 GB de fábrica; los favoritos ★ no cuentan).
 - **Clips** (menú lateral): una carpeta por partida ("Briar 2026-10-08", también en **Videos ›
-  SharkTracker**). Dentro, al pasar el mouse por un clip ves unos segundos de la jugada; clic para
-  verlo, ★ para guardarlo para siempre, renombrar, mostrar en la carpeta o borrar (va a la papelera).
+  SharkTracker**). Al abrir una partida, sus clips se ven **uno tras otro**, con una línea de los
+  minutos de la partida y el ícono de cada jugada en su minuto: pulsa un ícono para ir a esa jugada.
+  Al terminar un clip sale "Siguiente clip en 5" (puedes cancelarlo). **"Ver como lista"** muestra
+  la cuadrícula de siempre. ★ guarda un clip para siempre; también puedes renombrar, mostrar en la
+  carpeta o borrar (va a la papelera).
 - **Audio de los clips**: en Ajustes → Clips → Audio, "Probar audio" dice qué fuente se oye. Si usas
   Wave Link o Voicemeeter, usa "Juego", "Discord" y "Música" (Spotify; graban el programa, sin
   importar por dónde sale) en lugar de "Todo el PC".
+
+## Si algo falla
+En **Ajustes → Cuenta → Diagnóstico**, "Abrir registro" abre el archivo donde la app anota sus
+errores. Si avisas de un problema, mándalo junto con lo que estabas haciendo.
 
 ## Actualizaciones
 Son **automáticas**: la app busca versiones nuevas al abrirse (y cada 4 h), las descarga sola y las
