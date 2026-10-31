@@ -19,6 +19,7 @@ contextBridge.exposeInMainWorld('sharkTracker', {
     onActualizacion: (callback) => ipcRenderer.on('update:estado', (_e, estado) => callback(estado)),
     instalarActualizacion: () => ipcRenderer.send('update:instalar'),
     buscarActualizacion: () => ipcRenderer.invoke('update:buscar'),
+    abrirRegistro: () => ipcRenderer.invoke('registro:abrir'), // userData/registro-app.txt
   },
 
   // Mi Perfil

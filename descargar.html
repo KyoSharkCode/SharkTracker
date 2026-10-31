@@ -234,6 +234,14 @@ init();
 // Notas del parche de la app. Al publicar una versión nueva, se agrega arriba del todo.
 // Cada versión: { version, titulo, nuevo: [...], arreglos: [...] } (texto plano).
 const NOTAS = [
+  { version: '1.0.0', titulo: 'SharkTracker 1.0', nuevo: [
+      'Tema claro: en Ajustes › Apariencia ya puedes elegir el tema claro. Toda la app pasa a fondos claros y el color de acento se oscurece un poco para que se lea bien. El overlay en partida sigue en oscuro, sobre el juego.',
+      'Clips: en Mi Perfil, arriba a la derecha, la app te ofrece activarlos una sola vez ("Activar" o "No volver a mostrar"). Nunca pregunta nada durante la partida ni en la pantalla de carga.',
+      'Registro de errores: si algo falla, la app lo anota. En Ajustes › Cuenta › Diagnóstico, "Abrir registro" lo abre para mandarlo si avisas de un problema.',
+    ], arreglos: [
+      'Ajustes › Overlay: se quitaron "Timers de campamentos" (ya no está en los planes) y "Counters del rival" (ya lo cubre En Vivo: "Le ganan a…" en los picks y la guía "Contra…").',
+      'Por dentro: pruebas automáticas que se revisan antes de publicar cada versión, para que no se rompa lo que ya funciona.',
+    ] },
   { version: '0.9.7', titulo: 'Timeline de la partida', nuevo: [
       'Clips: al abrir una partida, sus clips se ven uno tras otro en un solo reproductor y, debajo, una línea con los minutos de la partida y el ícono de cada jugada en su minuto (kills, asistencias, muertes, dragones, Barón, torres…). Pulsa un ícono para ir a esa jugada.',
       'Al terminar un clip sale "Siguiente clip en 5" abajo a la izquierda del video: si no lo cancelas, pasa solo al siguiente.',
