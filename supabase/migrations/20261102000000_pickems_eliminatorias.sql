@@ -16,7 +16,7 @@
 -- ============================================================
 do $$
 declare
-  v_lock timestamptz := timestamp '2026-11-02 22:00' at time zone 'Europe/Madrid';   -- ⚠️ cierre
+  v_lock timestamptz := timestamp '2026-11-03 22:00' at time zone 'Europe/Madrid';   -- ⚠️ cierre
   v_ev bigint; q1 bigint; q2 bigint; q3 bigint; q4 bigint; s1 bigint; s2 bigint;
 begin
   select id into v_ev from pickem_events where name = 'Worlds 2026 · Eliminatorias';
