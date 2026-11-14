@@ -155,6 +155,9 @@ Deno.serve(async (req) => {
   // Cada línea se escribe también en Supabase → Edge Functions → sync-matches → Logs.
   const lineas: string[] = [];
   const log = { push: (texto: string) => { lineas.push(texto); console.log(`[sync-matches] ${texto}`); } };
+  // Avisos que se repiten en cada corrida mientras no cambie nada: solo van en
+  // la respuesta (net._http_response), no a los logs de Supabase, que tienen cupo.
+  const nota = (texto: string) => { lineas.push(texto); };
   // Inserta un evento y lo anota en el log (o anota el error si falló).
   const evento = async (row: Record<string, unknown>, texto: string) => {
     const { error } = await supabase.from('events').insert(row);
@@ -191,7 +194,7 @@ Deno.serve(async (req) => {
       // (p. ej. ARAM: Caos) a ninguna key; se cuentan y se anota una sola línea.
       if (res.status === 403) { bloqueadas++; continue; }
       if (!res.ok) {
-        if (res.status !== 404) log.push(`Partida vista en vivo ${matchId}: Riot respondió ${res.status}`);
+        if (res.status !== 404) nota(`Partida vista en vivo ${matchId}: Riot respondió ${res.status}`);
         continue;
       }
       const detalle = await res.json();
@@ -201,7 +204,7 @@ Deno.serve(async (req) => {
         if (pid) extraPorJugador.set(pid, [...(extraPorJugador.get(pid) ?? []), matchId]);
       }
     }
-    if (bloqueadas) log.push(`${bloqueadas} partida(s) vistas en vivo que Riot no publica (403, modo sin datos en la API)`);
+    if (bloqueadas) nota(`${bloqueadas} partida(s) vistas en vivo que Riot no publica (403, modo sin datos en la API)`);
   } catch (e) {
     if (e instanceof LimiteRiot) cortado = true;
     log.push(`ERROR partidas vistas en vivo: ${e instanceof Error ? e.message : String(e)}`);
@@ -217,7 +220,7 @@ Deno.serve(async (req) => {
         `https://${REGION_API}.api.riotgames.com/lol/match/v5/matches/by-puuid/${player.puuid}/ids?startTime=${desde}&start=0&count=${MATCH_HISTORY_COUNT}`
       );
       const extra = (extraPorJugador.get(player.id) ?? []).filter((id) => !deRiot.includes(id));
-      if (extra.length) log.push(`${player.riot_game_name}: ${extra.length} partida(s) vistas en vivo que Riot no lista en su historial`);
+      if (extra.length) nota(`${player.riot_game_name}: ${extra.length} partida(s) vistas en vivo que Riot no lista en su historial`);
       const ids = [...deRiot, ...extra];
 
       // Qué partidas ya están guardadas, y en cuáles ya está ESTE jugador. Una partida
@@ -235,8 +238,8 @@ Deno.serve(async (req) => {
       const yaGuardadas = new Set((existentes ?? []).map((m: any) => m.match_id));
       const conEl = new Set((mias ?? []).map((m: any) => m.match_id));
       const pendientes = ids.filter((id) => !conEl.has(id)).length;
-      if (!ids.length) log.push(`${player.riot_game_name}: Riot no devuelve partidas suyas en los últimos ${HISTORY_DAYS} días`);
-      else if (pendientes) log.push(`${player.riot_game_name}: ${ids.length} partidas recientes en Riot, ${pendientes} por guardar`);
+      if (!ids.length) nota(`${player.riot_game_name}: Riot no devuelve partidas suyas en los últimos ${HISTORY_DAYS} días`);
+      else if (pendientes) nota(`${player.riot_game_name}: ${ids.length} partidas recientes en Riot, ${pendientes} por guardar`);
 
       for (const matchId of ids) {
         if (conEl.has(matchId)) continue;

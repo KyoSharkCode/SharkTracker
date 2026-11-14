@@ -75,7 +75,9 @@ Deno.serve(async (req) => {
     .from('players').select('id, puuid, riot_game_name').not('puuid', 'is', null);
   if (error) return new Response(error.message, { status: 500 });
 
-  const champDict = await getChampionDict();
+  // El diccionario de campeones solo hace falta si alguien está en partida
+  // (así, cuando nadie juega, no se lee de la base cada minuto).
+  let champDict: Map<number, string> | null = null;
   const log: string[] = [];
   const seenGames = new Set<number>();
 
@@ -119,6 +121,7 @@ Deno.serve(async (req) => {
       const gameId = body.gameId as number;
       const queueName = QUEUE_NAMES[body.gameQueueConfigId] ?? 'Modo Destacado';
       const equipo = participante.teamId === 100 ? 'blue' : 'red';
+      champDict ??= await getChampionDict();
       const campeon = champDict.get(participante.championId) ?? 'Desconocido';
 
       // Rivalidad en vivo — otro del grupo en la MISMA partida pero
@@ -169,7 +172,7 @@ Deno.serve(async (req) => {
         if (!lgSinCambios) {
           const participantes = (body.participants ?? []).map((p: any) => ({
             nombre: nombreRiot(p),
-            campeon: champDict.get(p.championId) ?? 'Desconocido',
+            campeon: champDict!.get(p.championId) ?? 'Desconocido',
             equipo: p.teamId === 100 ? 'blue' : 'red',
             icono_invocador: p.profileIconId,
             hechizos: [p.spell1Id, p.spell2Id],
@@ -178,7 +181,7 @@ Deno.serve(async (req) => {
           const baneos = (body.bannedChampions ?? [])
             .sort((a: any, b: any) => (a.pickTurn ?? 0) - (b.pickTurn ?? 0))
             .map((b: any) => ({
-              campeon: (b.championId ?? -1) > -1 ? (champDict.get(b.championId) ?? 'Desconocido') : null,
+              campeon: (b.championId ?? -1) > -1 ? (champDict!.get(b.championId) ?? 'Desconocido') : null,
               equipo: b.teamId === 100 ? 'blue' : 'red',
             }));
 
