@@ -42,6 +42,7 @@ Riot / Twitch ──► Edge Functions (cada 1–3 min) ──► Base de datos 
   - **Realtime**: avisa a las páginas abiertas cuando cambia algo, sin recargar.
 - **Historial de 30 días**: la limpieza diaria borra partidas, eventos y rangos más antiguos (siempre se conserva el último rango de cada jugador y las "mejores partidas").
 - **Datos solo cuando cambian**: los procesos automáticos no reescriben nada si no hay novedades, para no generar tráfico ni recargas innecesarias.
+- **Una sola tarea programada**: en vez de un cron job por cada cosa, `pg_cron` tiene una única tarea, `tareas-programadas`, que corre cada minuto y reparte el trabajo: llama a las Edge Functions automáticas y calcula insignias, misiones, recompensas, cierre de retos y avisos de Discord, cada cosa con su frecuencia. Si no hay nadie en partida ni actividad en los últimos 30 minutos, el rango y el historial de partidas se consultan cada 15 minutos en vez de cada 1–3. Aparte quedan solo las tareas de limpieza y la del meta (`supabase/migrations/20261117000000_cron_tareas_programadas.sql`).
 
 ### Claves y seguridad
 
