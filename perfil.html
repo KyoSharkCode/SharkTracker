@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <!-- Seguridad (CSP): la página solo puede cargar código y datos de los servicios que usa SharkTracker
-     (Supabase, jsDelivr, Riot/DDragon, CommunityDragon, Meraki, Google Fonts y Twitch). Si se agrega un
+     (Supabase, jsDelivr, Riot/DDragon, CommunityDragon, Meraki y Google Fonts). Si se agrega un
      servicio nuevo, hay que sumarlo aquí (y en las demás páginas). -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://mvupiohecvoiwuxwjdrt.supabase.co wss://mvupiohecvoiwuxwjdrt.supabase.co https://ddragon.leagueoflegends.com https://raw.communitydragon.org https://cdn.merakianalytics.com https://cdn.jsdelivr.net; frame-src 'self' https://player.twitch.tv; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://mvupiohecvoiwuxwjdrt.supabase.co wss://mvupiohecvoiwuxwjdrt.supabase.co https://ddragon.leagueoflegends.com https://raw.communitydragon.org https://cdn.merakianalytics.com https://cdn.jsdelivr.net; frame-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="logo/favicon.svg">
@@ -80,19 +80,7 @@
   .hero-avatar-wrap{position:relative; flex-shrink:0;}
   .hero-avatar.framed{border-radius:50%;}
   .hero-avatar{width:72px; height:72px; border-radius:14px; border:2px solid var(--accent); object-fit:cover; display:block; box-shadow:none; background:var(--placeholder);}
-  /* Twitch: esquina inferior derecha de la tarjeta del nombre (a la
-     altura de la bio), fuera del avatar para no chocar con los marcos.
-     La tarjeta reserva ese hueco a la derecha solo si hay Twitch. */
   .hero-identity{position:relative;}
-  /* Solo se reserva hueco en las líneas de abajo (rol y bio), no en toda
-     la tarjeta: así no se ensancha y la tarjeta del elo sigue cabiendo
-     a la derecha del banner. */
-  .hero-identity.has-twitch .p-role, .hero-identity.has-twitch .p-bio, .hero-identity.has-twitch .tags-list{padding-right:26px;}
-  .hero-twitch{position:absolute; bottom:10px; right:12px; width:22px; height:22px; filter:drop-shadow(0 1px 2px rgba(0,0,0,.6)); transition:transform .15s;}
-  .hero-twitch:hover{transform:scale(1.12);}
-  .hero-twitch img{width:100%; height:100%; display:block;}
-  .hero-twitch.live{border-radius:50%; box-shadow:0 0 0 1px var(--danger);}
-  .hero-twitch.live img{filter:brightness(0) saturate(100%) invert(46%) sepia(89%) saturate(1657%) hue-rotate(325deg) brightness(103%) contrast(101%);}
   .hero-name-block{min-width:0;}
   .p-name{margin:0; font-family:'Unbounded',sans-serif; font-weight:700; font-size:clamp(15px,2.2vw,21px); line-height:1.1; letter-spacing:0; color:var(--text); display:flex; align-items:center; gap:8px; flex-wrap:wrap; text-transform:uppercase;}
   .p-tag{font-family:'Albert Sans',system-ui,sans-serif; font-size:14px; color:var(--text-faint); font-weight:600; text-transform:none; letter-spacing:0;}
@@ -223,25 +211,6 @@
   .tag-pill.ice{color:#7FD4FF; background:rgba(127,212,255,.1); border-color:rgba(127,212,255,.3);} .tag-pill.ice .ico-svg{color:#7FD4FF;}
   .tag-pill small{font-size:12px; font-weight:500; color:var(--text-dim); max-width:220px; overflow:hidden; text-overflow:ellipsis;}
   .tag-champ-icon{width:15px; height:15px; border-radius:4px; object-fit:cover; flex-shrink:0;}
-
-  /* ── CUADRO DE STREAM — solo existe si está en vivo (misma lógica que index.html) ── */
-  .twitch-wrap{display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows .5s ease, opacity .4s ease;}
-  .twitch-wrap.visible{grid-template-rows:1fr; opacity:1;}
-  /* El espacio de abajo va dentro de lo que se despliega: así se anima junto con la tarjeta sin animar márgenes. */
-  .twitch-inner > .twitch-card{margin-bottom:22px;}
-  .twitch-inner{min-height:0; overflow:hidden;}
-  .twitch-card{display:flex; height:220px; background:var(--panel); border:1px solid var(--danger-glow); box-shadow:none; border-radius:var(--radius); overflow:hidden;}
-  .twitch-preview{flex:0 0 57%; position:relative; background:repeating-linear-gradient(45deg,var(--placeholder),var(--placeholder) 10px,#0A2533 10px,#0A2533 20px); border-right:1px solid var(--border);}
-  .twitch-preview iframe{width:100%; height:100%; border:0;}
-  .twitch-live-chip{position:absolute; top:12px; left:12px; display:flex; align-items:center; gap:6px; background:rgba(3,17,26,.75); padding:4px 10px; border-radius:6px;}
-  .twitch-live-chip .dot{width:6px; height:6px; border-radius:50%; background:var(--danger); box-shadow:none; animation:pulse-red 2s infinite;}
-  @keyframes pulse-red{0%{box-shadow:0 0 0 0 rgba(255,111,142,.6);} 70%{box-shadow:0 0 0 8px rgba(255,111,142,0);} 100%{box-shadow:0 0 0 0 rgba(255,111,142,0);}}
-  .twitch-info{flex-grow:1; padding:22px 24px; display:flex; flex-direction:column; justify-content:center; gap:8px; min-width:0;}
-  .twitch-label{font-size:12px; font-weight:700; color:var(--text-faint);}
-  .twitch-title{font-size:18px; font-weight:800; line-height:1.25; overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical;}
-  .twitch-game{font-size:13px; color:var(--accent); font-weight:700;}
-  .twitch-viewers{font-size:13px; color:var(--danger); font-weight:700;}
-  @media (max-width:700px){ .twitch-card{flex-direction:column; height:auto;} .twitch-preview{flex:none; aspect-ratio:16/9; border-right:none; border-bottom:1px solid var(--border);} }
 
   /* ── ESTADO DE PARTIDA — siempre visible ── */
   .live-status-box{position:relative; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px 24px; min-height:76px; display:flex; align-items:center; justify-content:center; margin-bottom:22px;}
@@ -388,8 +357,6 @@
   .p-nick{font-size:14px; font-weight:500; color:var(--text-dim); margin-bottom:6px;}
   .p-role{font-size:14px; color:var(--text-soft); font-weight:500; margin-top:6px;}
   .p-bio{color:var(--text-soft); font-size:14px; max-width:520px;}
-  .hero-twitch{position:static; display:inline-flex; width:30px; height:30px; padding:5px; border-radius:50%; background:rgba(120,220,210,.08); align-self:center;}
-  .hero-identity.has-twitch .p-role, .hero-identity.has-twitch .p-bio, .hero-identity.has-twitch .tags-list{padding-right:0;}
   .tag-pill{border-radius:6px; font-weight:700; border:0;}
   .hero-rank{background:none; border:0; padding:0; backdrop-filter:none; gap:2px;}
   .hero-tier-row span{font-family:'Albert Sans',system-ui,sans-serif; font-size:26px; font-weight:800; color:var(--gold-soft); line-height:1;}
@@ -519,7 +486,6 @@
               <div class="ed-count ed-only" id="ed-bio-count">0/100</div>
               <div class="tags-list view-only" id="tags-list" aria-label="Tags destacados"></div>
             </div>
-            <a class="hero-twitch view-only" id="p-twitch" style="display:none;" target="_blank" rel="noopener"><img alt="Twitch"></a>
           </div>
           <div class="hero-rank">
             <div class="hero-tier-row">
@@ -549,13 +515,6 @@
       <div class="picker-label" id="skin-label">Skins</div>
       <div class="skin-grid" id="skin-grid"></div>
     </section>
-
-    <!-- Cuadro de Stream: solo aparece si está en vivo en Twitch -->
-    <div class="twitch-wrap" id="twitch-wrap">
-      <div class="twitch-inner">
-        <div class="twitch-card" id="twitch-card"></div>
-      </div>
-    </div>
 
     <!-- ¿Cuánto me falta? + estado de partida, lado a lado -->
     <div class="fila-objetivo">
@@ -792,7 +751,6 @@ function showError(msg) {
 // Estado del historial — se guarda para poder cambiar de pestaña sin volver a pedir datos.
 let historyState = { byTab: new Map(), companionsByMatch: new Map(), nameById: new Map(), playerId: null };
 let currentTab = 'soloq';
-let lastStreamChannel = null;
 let aiState = { playerId: null, latestMatchId: null, loading: false };
 let viewState = { player: null, profile: {}, live: { in_game: false }, isMine: false };
 let profileCos = { playerId: null, data: null, sig: '' };   // cosméticos de la tienda del jugador que se está viendo
@@ -841,7 +799,7 @@ async function init() {
   // (antes una partida de cualquiera recargaba el perfil entero).
   const pid = viewState.player?.id;
   const soloEste = pid ? { filter: `player_id=eq.${pid}` } : {};
-  ['player_profiles', 'player_cosmetics', 'live_status', 'stream_status', 'match_participants', 'player_masteries']
+  ['player_profiles', 'player_cosmetics', 'live_status', 'match_participants', 'player_masteries']
     .forEach(table => channel.on('postgres_changes', { event: '*', schema: 'public', table, ...soloEste }, scheduleRefresh));
   channel.subscribe();
 }
@@ -858,13 +816,12 @@ async function refreshAll() {
 
 async function loadAll() {
   const [{ data: players }, { data: profiles }, { data: rankSnaps }, { data: liveStatus },
-         { data: streamStatus }, { data: weeklyBadges }, { data: firstWin }] = await Promise.all([
+         { data: weeklyBadges }, { data: firstWin }] = await Promise.all([
     supabase.from('players').select('*'),
     supabase.from('player_profiles').select('*'),
     // Vista rank_latest: solo el último rango de cada jugador (no 30 días de historial).
     supabase.from('rank_latest').select('*').eq('queue_type', 'RANKED_SOLO_5x5'),
     supabase.from('live_status').select('*'),
-    supabase.from('stream_status').select('*'),
     supabase.from('weekly_badges').select('*'),
     supabase.from('daily_first_win_state').select('*').maybeSingle(),
   ]);
@@ -905,7 +862,6 @@ async function loadAll() {
   for (const row of rankSnaps ?? []) { if (!latestRankByPlayer.has(row.player_id)) latestRankByPlayer.set(row.player_id, row); }
   const rank = latestRankByPlayer.get(player.id) ?? null;
   const live = (liveStatus ?? []).find(l => l.player_id === player.id) ?? { in_game: false };
-  const stream = (streamStatus ?? []).find(s => s.player_id === player.id) ?? { is_live: false };
 
   // Posición en el ranking (mismo orden que index.html: elo_score desc).
   // Solo cuenta si el jugador tiene rango de SoloQ.
@@ -952,9 +908,8 @@ async function loadAll() {
   aiState.playerId = player.id;
   aiState.latestMatchId = soloq.find(m => !esRemake(m))?.match_id ?? null;
 
-  renderHero(player, profile, rank, live, stream, position, soloq);
+  renderHero(player, profile, rank, live, position, soloq);
   renderTags(player, rank, position, soloq, weeklyBadges ?? [], firstWin, nameById);
-  renderStream(profile, stream);
   await renderLiveBox(live, liveStatus ?? [], nameById);
   renderMastery(masteries ?? []);
   renderTopChamps(soloq);
@@ -1149,25 +1104,12 @@ async function refreshProfileCosmetics(player, redraw) {
   if (changed && (data?.nombre || data?.emoji || !data)) redraw();
 }
 
-function renderHero(player, profile, rank, live, stream, position, soloq) {
+function renderHero(player, profile, rank, live, position, soloq) {
   document.getElementById('p-position').textContent = position ? `#${position} en el Ranking` : '';
 
   const pAvatar = document.getElementById('p-avatar');
   pAvatar.src = profileIconUrl(player.icon_id) ?? profileIconUrl(1);
   pAvatar.onerror = () => { pAvatar.onerror = null; pAvatar.src = profileIconUrl(1); };
-
-  const twitchLive = !!stream?.is_live;
-  const twitchEl = document.getElementById('p-twitch');
-  document.querySelector('.hero-identity').classList.toggle('has-twitch', !!profile.twitch_username);
-  if (profile.twitch_username) {
-    twitchEl.style.display = 'block';
-    twitchEl.className = `hero-twitch view-only ${twitchLive ? 'live' : ''}`;
-    twitchEl.href = `https://twitch.tv/${encodeURIComponent(profile.twitch_username)}`;
-    twitchEl.title = `Twitch${twitchLive ? ' — en vivo' : ''}`;
-    twitchEl.querySelector('img').src = `assets/${twitchLive ? 'Online_Twitch' : 'Offline_Twitch'}.svg`;
-  } else {
-    twitchEl.style.display = 'none';
-  }
 
   const trend = getTrend(soloq);
   const streak = getStreak(soloq);
@@ -1178,7 +1120,7 @@ function renderHero(player, profile, rank, live, stream, position, soloq) {
   const tag = player.riot_tag_line ? `<span class="p-tag">#${esc(player.riot_tag_line)}</span>` : '';
   const cosNow = profileCos.playerId === player.id ? profileCos.data : null;
   document.getElementById('p-name').innerHTML = `${nameHtml(player.riot_game_name, cosNow)}${tag}${trendHtml}${streakHtml}`;
-  refreshProfileCosmetics(player, () => renderHero(player, profile, rank, live, stream, position, soloq));
+  refreshProfileCosmetics(player, () => renderHero(player, profile, rank, live, position, soloq));
   document.getElementById('p-role').textContent = player.primary_role ? `Rol principal: ${roleLabel(player.primary_role)}` : 'Sin rol registrado';
 
   // Apodo: solo si lo eligió y es distinto a su nombre de invocador
@@ -1287,38 +1229,6 @@ function renderTags(player, rank, position, soloq, weeklyBadges, firstWin, nameB
     btn.textContent = abierto ? 'Ver menos' : `+${ocultos} más`;
     btn.setAttribute('aria-expanded', abierto);
   });
-}
-
-// ── CUADRO DE STREAM — solo si está en vivo. El iframe no se recrea en cada
-// actualización de Realtime (si no, el video se reiniciaría cada vez).
-function renderStream(profile, stream) {
-  const wrap = document.getElementById('twitch-wrap');
-  const card = document.getElementById('twitch-card');
-  if (!stream?.is_live || !profile.twitch_username) {
-    wrap.classList.remove('visible');
-    lastStreamChannel = null;
-    return;
-  }
-  const channel = profile.twitch_username;
-  if (lastStreamChannel !== channel) {
-    const parentDomain = window.location.hostname || 'localhost';
-    card.innerHTML = `
-      <div class="twitch-preview">
-        <div class="twitch-live-chip"><span class="dot"></span><span style="font-size:11px;font-weight:800;color:var(--text);text-transform:uppercase;">En vivo</span></div>
-        <iframe src="https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parentDomain}&muted=true" allowfullscreen></iframe>
-      </div>
-      <div class="twitch-info">
-        <div class="twitch-label">${esc(channel)}</div>
-        <div class="twitch-title" id="twitch-title"></div>
-        <div class="twitch-game" id="twitch-game"></div>
-        <div class="twitch-viewers" id="twitch-viewers"></div>
-      </div>`;
-    lastStreamChannel = channel;
-  }
-  document.getElementById('twitch-title').textContent = stream.title ?? '';
-  document.getElementById('twitch-game').textContent = stream.game_name ?? '';
-  document.getElementById('twitch-viewers').textContent = `${stream.viewer_count ?? 0} espectadores`;
-  requestAnimationFrame(() => wrap.classList.add('visible'));
 }
 
 // ── ESTADO DE PARTIDA ──

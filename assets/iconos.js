@@ -54,7 +54,6 @@ const ICONOS = {
   destello: { d: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>' },
   pelicula: { d: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/>' },
   imagen: { d: '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>' },
-  twitch: { d: '<path d="M4 3h16v11l-4 4h-4l-3 3H7v-3H4z"/><path d="M11 7v4M15 7v4"/>' },
   intercambio: { d: '<path d="M7 7h13l-3-3M17 17H4l3 3"/>' },
   dormir: { d: '<path d="M4 6h5l-5 6h5M13 3h4l-4 5h4M20 13a8 8 0 1 1-8-8"/>' },
   arriba: { d: '<path d="M12 19V5M5 12l7-7 7 7"/>' },

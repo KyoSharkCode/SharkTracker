@@ -1,7 +1,7 @@
 // ============================================================
 // Menú ☰ de navegación (arriba a la izquierda) — compartido por todas
 // las páginas. Solo NAVEGACIÓN del sitio, igual para todos.
-// Lo que es de TU cuenta (perfil, editar, Twitch, admin, cerrar sesión)
+// Lo que es de TU cuenta (perfil, editar, admin, cerrar sesión)
 // vive en el menú del ícono de perfil (auth-menu.js), no acá.
 //
 // Uso:  import { createNavMenu } from './assets/nav-menu.js';

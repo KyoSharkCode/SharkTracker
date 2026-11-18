@@ -55,7 +55,6 @@
   --f-ui:'Albert Sans',system-ui,sans-serif;
   --f-cifra:'Red Hat Mono',ui-monospace,monospace;
   /* Marcas externas */
-  --twitch:#9146ff;
   --discord:#5865F2;
   /* Otros */
   --radius:16px;
@@ -149,17 +148,14 @@ html{scrollbar-color:#154152 var(--bg);}
    - Botones, pestañas, chips, selects y buscadores: crecen a 44 px.
    - Enlaces de texto (nombres del ranking, "volver"…): el área tocable
      crece por dentro (padding + margen negativo), el diseño no se mueve.
-   - Íconos chicos (Twitch): un área invisible alrededor.
    ============================================================ */
 @media (pointer:coarse){
   html .nav-btn{width:44px; height:44px;}
   html .nav-close{min-width:44px; min-height:44px;}
   .chipbtn, button.chip, button.tab, button.btn, select, .elo-filter,
   input:is([type=text],[type=search],:not([type])){min-height:44px;}
-  .login-btn, .twitch-btn{display:inline-flex; align-items:center; justify-content:center; min-height:44px; box-sizing:border-box;}
+  .login-btn{display:inline-flex; align-items:center; justify-content:center; min-height:44px; box-sizing:border-box;}
   a.profile-link, a.status-chip, .volver, .back, .lbl a, .msg a, .sub a{padding-block:14px; margin-block:-14px;}
-  .twitch-badge{position:relative;}
-  .twitch-badge::after{content:''; position:absolute; inset:-14px -6px;}
 }
 
 /* Imagen que todavía no tiene src (la rellena el JS): invisible hasta entonces,
@@ -172,8 +168,8 @@ img:not([src]){visibility:hidden;}
    :where() = sin especificidad: si una página define su propia transición,
    la suya manda (el botón igual se hunde, solo que sin suavizado).
    ============================================================ */
-:where(button, .btn, .login-btn, .twitch-btn, .chipbtn, .chip, .tab){transition:scale 160ms cubic-bezier(.23,1,.32,1);}
-:where(button, .btn, .login-btn, .twitch-btn, .chipbtn, button.chip, .tab):active:not(:disabled){scale:.97;}
+:where(button, .btn, .login-btn, .chipbtn, .chip, .tab){transition:scale 160ms cubic-bezier(.23,1,.32,1);}
+:where(button, .btn, .login-btn, .chipbtn, button.chip, .tab):active:not(:disabled){scale:.97;}
 
 /* ============================================================
    Esqueletos de carga (shimmer). Uso:

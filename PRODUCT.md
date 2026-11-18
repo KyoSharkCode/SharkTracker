@@ -49,7 +49,7 @@ Tan útil y completo como OP.GG, Porofessor o League of Graphs, pero con dos dif
   - se consulta en PC y en celular y se muestra en el stream;
   - se actualiza sola por Realtime.
 - **Datos:**
-  - fuentes: Riot API, Data Dragon, Twitch, OP.GG (meta) y Gemini (consejos de IA);
+  - fuentes: Riot API, Data Dragon, OP.GG (meta) y Gemini (consejos de IA);
   - historial de 30 días.
 
 ## Capabilities and Constraints

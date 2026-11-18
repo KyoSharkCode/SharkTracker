@@ -29,15 +29,15 @@ Proyecto personal, sin fines comerciales. No está respaldado por Riot Games.
 ## Cómo funciona
 
 ```
-Riot / Twitch ──► Edge Functions (cada 1–3 min) ──► Base de datos ──► Realtime ──► Páginas abiertas
+Riot ──────────► Edge Functions (cada 1–3 min) ──► Base de datos ──► Realtime ──► Páginas abiertas
                    sync-riot-data, sync-matches,       (Supabase)        (aviso al instante,
-                   sync-live-status, sync-twitch-status                  redibuja solo lo que cambió)
+                   sync-live-status                                      redibuja solo lo que cambió)
 ```
 
 - **Web estática** (HTML + JavaScript, sin build). Cada página lee los datos directamente de Supabase.
 - **Supabase** hace de backend:
   - **Base de datos PostgreSQL** con reglas de seguridad (RLS): la web solo puede *leer* datos públicos. Todo lo que modifica datos pasa por funciones que comprueban quién llama.
-  - **Edge Functions** (`supabase/functions/`): hablan con Riot, Twitch y el servicio de IA. Las automáticas las dispara `pg_cron` y están protegidas para que solo el cron pueda llamarlas.
+  - **Edge Functions** (`supabase/functions/`): hablan con Riot y el servicio de IA. Las automáticas las dispara `pg_cron` y están protegidas para que solo el cron pueda llamarlas.
   - **Cron jobs** en la base: insignias, misiones, recompensas, cierre de retos, avisos de Discord y limpieza diaria.
   - **Realtime**: avisa a las páginas abiertas cuando cambia algo, sin recargar.
 - **Historial de 30 días**: la limpieza diaria borra partidas, eventos y rangos más antiguos (siempre se conserva el último rango de cada jugador y las "mejores partidas").
@@ -45,7 +45,7 @@ Riot / Twitch ──► Edge Functions (cada 1–3 min) ──► Base de datos 
 
 ### Claves y seguridad
 
-Las claves privadas de los servicios externos (Riot, Twitch, IA, Discord) y el secreto de los cron jobs **no están en este repositorio**: viven en los *Secrets* de las Edge Functions y en *Vault* de Supabase. Lo único que aparece en el código es la URL del proyecto y su *anon key* (`assets/supabase.js`), que son públicas por diseño: lo que protege los datos son las reglas RLS y los permisos de la base.
+Las claves privadas de los servicios externos (Riot, IA, Discord) y el secreto de los cron jobs **no están en este repositorio**: viven en los *Secrets* de las Edge Functions y en *Vault* de Supabase. Lo único que aparece en el código es la URL del proyecto y su *anon key* (`assets/supabase.js`), que son públicas por diseño: lo que protege los datos son las reglas RLS y los permisos de la base.
 
 Nunca subas archivos `.env` ni claves al repositorio (ya están excluidos en `.gitignore`).
 
