@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <!-- Seguridad (CSP): la página solo puede cargar código y datos de los servicios que usa SharkTracker
-     (Supabase, jsDelivr, Riot/DDragon, CommunityDragon, Meraki, Google Fonts y Twitch). Si se agrega un
+     (Supabase, jsDelivr, Riot/DDragon, CommunityDragon, Meraki y Google Fonts). Si se agrega un
      servicio nuevo, hay que sumarlo aquí (y en las demás páginas). -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://mvupiohecvoiwuxwjdrt.supabase.co wss://mvupiohecvoiwuxwjdrt.supabase.co https://ddragon.leagueoflegends.com https://raw.communitydragon.org https://cdn.merakianalytics.com https://cdn.jsdelivr.net; frame-src 'self' https://player.twitch.tv; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://mvupiohecvoiwuxwjdrt.supabase.co wss://mvupiohecvoiwuxwjdrt.supabase.co https://ddragon.leagueoflegends.com https://raw.communitydragon.org https://cdn.merakianalytics.com https://cdn.jsdelivr.net; frame-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="logo/favicon.svg">
@@ -103,14 +103,11 @@
   .pl small{color:var(--text-faint); font-weight:600;}
   .dc{color:var(--text-dim);}
   .none{color:var(--text-faint); font-style:italic;}
-  .tw{display:inline-flex; align-items:center; gap:6px; color:#C9B8FF; font-weight:700;}
   .badge{font-size:12px; font-weight:800; padding:2px 8px; border-radius:99px; white-space:nowrap;}
   .badge.ok{background:rgba(145,70,255,.22); color:#C9B8FF;}
   .badge.warn{background:rgba(255,181,71,.14); color:var(--gold);}
   .actions{display:flex; gap:6px; justify-content:flex-end;}
   td:last-child{width:1%; white-space:nowrap;}
-  .tw-edit{display:flex; gap:6px; align-items:center;}
-  .tw-edit input{width:150px; background:var(--field); border:1px solid var(--twitch); border-radius:8px; padding:7px 10px; color:var(--text); font:600 13px 'Albert Sans',system-ui,sans-serif; outline:none;}
   .confirm{background:rgba(255,111,142,.07); border:1px solid rgba(255,111,142,.35); border-radius:10px; padding:10px 12px; font-size:12.5px; line-height:1.5; color:var(--text-dim); margin-top:8px;}
   .confirm b{color:var(--text);}
   .confirm .actions{justify-content:flex-start; margin-top:8px;}
@@ -358,7 +355,7 @@
           <small>Se busca en Riot (LAN) antes de agregarla.</small>
         </form>
         <table>
-          <thead><tr><th>Cuenta de LoL</th><th>Discord</th><th>Twitch</th><th></th></tr></thead>
+          <thead><tr><th>Cuenta de LoL</th><th>Discord</th><th></th></tr></thead>
           <tbody id="pl-list"></tbody>
         </table>
       </div>
@@ -388,9 +385,9 @@ const fecha = (iso) => new Date(iso).toLocaleString('es-ES', { day: 'numeric', m
 
 const authMenu = createAuthMenu({ supabase, profileIconUrl });
 
-// Qué fila de jugador está en modo "editar Twitch" o "confirmar desvincular"
+// Qué fila de jugador está en modo "confirmar desvincular" o "confirmar quitar"
 // (se conserva al redibujar por Realtime).
-const ui = { editTw: null, confirmUnlink: null, confirmRemove: null, chConfirm: null, msConfirm: null };
+const ui = { confirmUnlink: null, confirmRemove: null, chConfirm: null, msConfirm: null };
 let playersCache = [];
 
 // ── Pestañas ──
@@ -504,26 +501,17 @@ async function loadPlayers() {
 }
 
 function drawPlayers() {
-  if (!playersCache.length) { $('pl-list').innerHTML = `<tr><td colspan="4" class="empty">El roster está vacío.</td></tr>`; return; }
+  if (!playersCache.length) { $('pl-list').innerHTML = `<tr><td colspan="3" class="empty">El roster está vacío.</td></tr>`; return; }
   $('pl-list').innerHTML = playersCache.map(p => {
     const linked = !!p.user_id;
-    const editing = ui.editTw === p.player_id;
     const confirming = ui.confirmUnlink === p.player_id;
     const removing = ui.confirmRemove === p.player_id;
-    const twCell = editing
-      ? `<div class="tw-edit"><input id="tw-input" maxlength="25" placeholder="usuario de twitch" value="${esc(p.twitch_username ?? '')}">
-           <button class="btn ok" data-act="tw-save" data-id="${p.player_id}" type="button">Guardar</button>
-           <button class="btn ghost" data-act="tw-cancel" type="button">✕</button></div>`
-      : p.twitch_username
-        ? `<span class="tw">📺 ${esc(p.twitch_username)}</span> <span class="badge ${p.twitch_verified ? 'ok' : 'warn'}">${p.twitch_verified ? 'Verificado' : 'A mano'}</span>`
-        : `<span class="none">—</span>`;
     const actions = `
-        ${linked && !editing ? `<button class="btn ghost" data-act="tw-edit" data-id="${p.player_id}" type="button">Twitch</button>` : ''}
         ${linked && !confirming ? `<button class="btn no" data-act="unlink" data-id="${p.player_id}" type="button">Desvincular</button>` : ''}
         ${removing ? '' : `<button class="btn no" data-act="remove" data-id="${p.player_id}" type="button" title="Quitar del roster">✕</button>`}`;
     const confirmBox = confirming ? `
       <div class="confirm">¿Desvincular <b>${esc(p.riot_game_name)}</b> de <b>${esc(p.discord_name ?? 'ese Discord')}</b>?
-        Se borran su apodo, bio, campeón/skin elegidos y su Twitch. La cuenta queda libre para una nueva solicitud.
+        Se borran su apodo, bio y campeón/skin elegidos. La cuenta queda libre para una nueva solicitud.
         <div class="actions"><button class="btn danger" data-act="unlink-yes" data-id="${p.player_id}" type="button">Sí, desvincular</button>
         <button class="btn ghost" data-act="unlink-no" type="button">Cancelar</button></div></div>` : removing ? `
       <div class="confirm">¿Quitar <b>${esc(p.riot_game_name)}#${esc(p.riot_tag_line)}</b> del roster?
@@ -535,11 +523,9 @@ function drawPlayers() {
       <td data-label="Cuenta de LoL"><div class="pl"><img loading="lazy" decoding="async" src="${profileIconUrl(p.icon_id) ?? profileIconUrl(1)}" alt="" onerror="${ICON_ONERROR}">
         <div><a href="perfil.html?jugador=${encodeURIComponent(p.player_id)}">${esc(p.riot_game_name)}</a> <small>#${esc(p.riot_tag_line)}</small></div></div>${confirmBox}</td>
       <td data-label="Discord" class="dc">${linked ? esc(p.discord_name ?? 'Vinculado') : '<span class="none">Sin vincular</span>'}</td>
-      <td data-label="Twitch">${twCell}</td>
       <td><div class="actions">${actions}</div></td>
     </tr>`;
   }).join('');
-  if (ui.editTw) { const inp = $('tw-input'); inp?.focus(); inp?.setSelectionRange(inp.value.length, inp.value.length); }
 }
 
 $('pl-list').addEventListener('click', async (e) => {
@@ -547,10 +533,8 @@ $('pl-list').addEventListener('click', async (e) => {
   if (!btn) return;
   const { act, id } = btn.dataset;
   $('pl-err').textContent = '';
-  if (act === 'tw-edit') { ui.editTw = id; ui.confirmUnlink = null; drawPlayers(); return; }
-  if (act === 'tw-cancel') { ui.editTw = null; drawPlayers(); return; }
-  if (act === 'unlink') { ui.confirmUnlink = id; ui.confirmRemove = null; ui.editTw = null; drawPlayers(); return; }
-  if (act === 'remove') { ui.confirmRemove = id; ui.confirmUnlink = null; ui.editTw = null; drawPlayers(); return; }
+  if (act === 'unlink') { ui.confirmUnlink = id; ui.confirmRemove = null; drawPlayers(); return; }
+  if (act === 'remove') { ui.confirmRemove = id; ui.confirmUnlink = null; drawPlayers(); return; }
   if (act === 'remove-no') { ui.confirmRemove = null; drawPlayers(); return; }
   if (act === 'remove-yes') {
     btn.disabled = true;
@@ -562,15 +546,6 @@ $('pl-list').addEventListener('click', async (e) => {
     return;
   }
   if (act === 'unlink-no') { ui.confirmUnlink = null; drawPlayers(); return; }
-  if (act === 'tw-save') {
-    btn.disabled = true;
-    const { error } = await supabase.rpc('admin_set_twitch', { p_player_id: id, p_username: $('tw-input').value });
-    if (error) { $('pl-err').textContent = error.message; btn.disabled = false; return; }
-    ui.editTw = null;
-    authMenu.toast('Twitch actualizado');
-    await loadPlayers();
-    return;
-  }
   if (act === 'unlink-yes') {
     btn.disabled = true;
     const { error } = await supabase.rpc('admin_unlink_player', { p_player_id: id });
@@ -580,12 +555,6 @@ $('pl-list').addEventListener('click', async (e) => {
     await loadPlayers();
   }
 });
-$('pl-list').addEventListener('keydown', (e) => {
-  if (e.target.id !== 'tw-input') return;
-  if (e.key === 'Enter') $('pl-list').querySelector('[data-act="tw-save"]')?.click();
-  if (e.key === 'Escape') { ui.editTw = null; drawPlayers(); }
-});
-
 // ── Agregar cuenta al roster (Edge Function: la busca en Riot) ──
 $('btn-add-pl').addEventListener('click', () => { $('add-form').hidden = false; $('add-riotid').focus(); });
 $('add-cancel').addEventListener('click', () => { $('add-form').hidden = true; $('add-riotid').value = ''; });
