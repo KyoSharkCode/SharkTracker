@@ -66,6 +66,12 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
   Wave Link o Voicemeeter, usa "Juego", "Discord" y "Música" (Spotify; graban el programa, sin
   importar por dónde sale) en lugar de "Todo el PC".
 
+- **Coach de macro (experimental)**: en Ajustes → Coach. Con el interruptor encendido, una voz te da
+  consejos de macro durante la partida (preparar objetivos, visión, compras, qué hacer al reaparecer).
+  Por ahora solo en **jungla y soporte**, en la Grieta. Usa la voz de Windows ("Probar voz" para
+  elegirla) y con **Ctrl + F9** lo silencias en partida. Tiene un límite de gasto por día y por mes:
+  al llegar, se calla solo.
+
 ## Si algo falla
 En **Ajustes → Cuenta → Diagnóstico**, "Abrir registro" abre el archivo donde la app anota sus
 errores. Si avisas de un problema, mándalo junto con lo que estabas haciendo.

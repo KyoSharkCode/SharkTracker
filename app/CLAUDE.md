@@ -186,6 +186,9 @@ app/
                            y la captura de fondo opcional del editor
     preload-editor.js    → contextBridge (window.editor) de la ventana "Reposicionar elementos"
     lcu.js               → API local del cliente de LoL (En Vivo): fase, selección, runas, build, hechizos
+    coach-cerebro.js     → coach de macro: resumen de tu partida y cuándo pedir un consejo (sin Electron)
+    coach.js             → coach en la app: Edge Function `coach`, costes e historial
+    voz.js               → voz de Windows (speechSynthesis) para el overlay y Ajustes → Coach
     meta.js              → Meta: catálogos de DDragon y llamadas a la Edge Function `meta`
     build-adaptada.js    → build contra el equipo rival y "siguiente compra" (sin Electron, se prueba en Node)
     editor/              → ventana "Reposicionar elementos" (pantalla emulada del juego)
@@ -651,6 +654,54 @@ Decisiones de Alex (oct 2026).
     (se recuerda en localStorage `clips.vista`); "★ Favoritos" sigue en cuadrícula (son de partidas distintas).
   - Renombrar/favorito/mostrar/borrar salen de `crearControles` (los usan el visor y la timeline). Al refrescar la
     galería (miniaturas nuevas, favorito…) la timeline se actualiza sin cortar el video; al cambiar de sección se pausa.
+
+## Coach de macro por voz (experimental, nov 2026) — etapa 1
+
+Decisiones de Kyo (nov 2026). **Apagado de fábrica**; por ahora solo para **jungla y soporte**, en la Grieta.
+- **Qué es**: consejos de macro hablados durante la partida (no reflejos): preparar objetivos, visión, compras y
+  backs, qué hacer al reaparecer, cómo jugar según el marcador. Fórmula de cada consejo: **ventana de tiempo +
+  acción según tu rol + por qué**, una o dos frases (máx. ~30 palabras). **Nunca un dato a secas** que el overlay
+  ya muestra ("Dragón en 1 min"): por eso los de objetivos salen ~2 min antes, con tiempo para backear.
+- **Sin postpartida** (ya existe el analizador de la web) y **sin captura de pantalla** en esta etapa.
+- **Fuentes**: solo la Live Client Data API (lo que ya lee el overlay cada 1 s; no hay peticiones nuevas al juego)
+  y la "siguiente compra" que la app ya calcula. **Del rival, solo el marcador**: kills, torres, dragones y
+  **cuántos** están muertos (Kyo: se ve en pantalla). Nunca quién, dónde, objetos, niveles ni hechizos: esos
+  campos no entran en el resumen (`coach-cerebro.js` `resumir`, con prueba) y la Edge Function vuelve a filtrar
+  campo por campo, así que el modelo no puede usarlos.
+- **Política de Riot** (revisada el 20/11/2026: developer.riotgames.com/policies/general, /docs/lol y la página
+  "Third Party Applications" de soporte): el texto dice que no se aprueban "apps that dictate player decisions" ni
+  apps que "draw conclusions for you during gameplay"; en la práctica hay coaches de voz públicos (Backseat AI,
+  STATUP.GG, OP.GG AI). Zona gris asumida por Kyo. **Pendiente: declarar la función en el producto del Developer
+  Portal** (Riot pide auditar cada función nueva). Si Riot endurece el criterio, se apaga con el interruptor.
+- **Modelos** (API de Claude, en la Edge Function `coach`): filtro **Haiku 5.5** (`claude-haiku-5-5`, responde
+  `{hablar, motivo}` en JSON, sin razonamiento) y coach **Sonnet 5.5** (`claude-sonnet-5-5`, `thinking:
+  between_tools` = sin razonamiento previo, `effort: low`, `max_tokens` 160, system prompt en caché). La guía de
+  macro por rol (`SISTEMA_COACH` en `supabase/functions/coach/index.ts`) la corrige Kyo: ahí está la calidad.
+- **App**:
+  - `src/coach-cerebro.js` (sin Electron, se prueba en Node): `resumir` (estado compacto) y `crearCoach`
+    (una partida): situaciones **directas** (van directo a Sonnet): `objetivo` (faltan 125–25 s, una vez por
+    objetivo), `muerte` (acabas de morir, ≥ 10 s de espera) y `ritmo` (Barón, Ancestral, 3.er/4.º dragón,
+    inhibidor); y **por si acaso** (pasan por Haiku): `compra` (te alcanza la siguiente compra), `vision` (sin
+    ward de control y con oro) y `revision` (repaso cada 90 s). Reglas: mínimo entre consejos (`intervalo`, 75 s;
+    25 s para los directos), tope por partida (10), máx. 45 consultas, callado si hubo una kill en los últimos
+    8 s (salvo que estés muerta), y lo anterior a abrir la app no cuenta. Tiempos en `T`.
+  - `src/coach.js`: sesión de la partida (llama a la Edge Function con tu sesión, descarta respuestas de más de
+    14 s, suma tokens y coste, se detiene con `sin_sesion`/`sin_cuenta`/`sin_key`/`limite_dia`/`limite_mes` o 3
+    errores seguidos) e historial en `userData/coach.json` (últimas 20 partidas con consejos y coste).
+  - `src/voz.js`: voz de Windows vía `speechSynthesis` (gratis). Habla **el overlay** (`overlay:coach`); la
+    ventana lo usa para "Probar voz". **Sin probar en Windows todavía** (en Linux no hay voces).
+  - main.js: `sesionCoach.tick` en la lectura de cada segundo; **Ctrl + F9** silencia/reactiva (silenciado no
+    consulta: no gasta). `game-state.js` devuelve además `objetivos` (todos, sin el filtro de 1:30) y `alma`.
+  - Ajustes → Coach (`ajustes.json` → `coach`: activo, silenciado, voz, volumen, velocidad, intervalo, tope):
+    interruptores, voz, y "Uso y coste" (esta partida, últimas partidas y gasto del mes).
+- **Backend**: Edge Function `coach` ("Verify JWT" ENCENDIDO, solo cuentas vinculadas; SDK oficial
+  `npm:@anthropic-ai/sdk`). Secret **`ANTHROPIC_API_KEY`** (workspace propio de la Console con límite mensual:
+  la barrera dura). Límites propios en la tabla `coach_uso` (migración `20261120000000_coach.sql`, contadores
+  por persona y día, sin datos de partidas): `COACH_LIMITE_MES_USD` (15, todo el grupo) y `COACH_LIMITE_DIA_USD`
+  (0.75 por persona). Coste estimado con los precios de `PRECIOS` (ajustar si cambian).
+- **Etapa 2 (pendiente, por decidir)**: imagen solo en momentos concretos (estado de la oleada antes de backear,
+  campamentos de jungla en el minimapa), captura directa desde Electron, no desde los clips. Antes de
+  construirla: probar con 10–15 capturas reales si Sonnet lo lee bien.
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)

@@ -574,3 +574,95 @@ $('btn-registro').addEventListener('click', async () => {
   const ok = await window.sharkTracker.app.abrirRegistro();
   $('registro-txt').textContent = ok ? '' : 'No se pudo abrir el registro.';
 });
+
+// ── Ajustes → Coach (experimental): interruptores, voz de Windows, y uso y coste ──
+// El coach vive en el proceso main (coach.js); aquí solo se configura y se ve lo que dijo.
+const guardarCoach = async (cambios) => renderCoach(await window.sharkTracker.ajustes.set({ coach: cambios }));
+const RANGOS_COACH = { intervalo: ' s', tope: '', volumen: ' %', velocidad: ' %' };
+const TEXTO_BLOQUEO = {
+  sin_sesion: 'Inicia sesión con Discord para usar el coach.',
+  sin_cuenta: 'Tu Discord no tiene una cuenta de LoL vinculada en SharkTracker.',
+  sin_key: 'Falta configurar la key de Claude en Supabase (ANTHROPIC_API_KEY).',
+  limite_dia: 'Llegaste al límite de gasto de hoy: vuelve mañana.',
+  limite_mes: 'El grupo llegó al límite de gasto del mes.',
+  error: 'El coach no responde: se detuvo por esta partida.',
+};
+const usd = (n) => `US$ ${(Number(n) || 0).toFixed(Number(n) >= 1 ? 2 : 3)}`;
+let coachAjustes = null;
+
+function renderCoach(aj) {
+  const c = aj?.coach;
+  if (!c) return;
+  coachAjustes = c;
+  marcar($('sw-coach'), c.activo);
+  marcar($('sw-coach-silencio'), c.silenciado);
+  $('sw-coach-silencio').disabled = !c.activo;
+  for (const [k, unidad] of Object.entries(RANGOS_COACH)) {
+    $(`coach-${k}`).value = c[k];
+    $(`coach-${k}-v`).textContent = `${c[k]}${unidad}`;
+  }
+  $('coach-voz').value = c.voz;
+  if (!c.activo) $('coach-estado').textContent = 'Apagado: no se envía nada.';
+  else if (c.silenciado) $('coach-estado').textContent = 'Silenciado: no habla ni consulta.';
+  else $('coach-estado').textContent = 'Activado: hablará en tu próxima partida de jungla o soporte.';
+}
+$('sw-coach').addEventListener('click', () => guardarCoach({ activo: !$('sw-coach').classList.contains('on') }));
+$('sw-coach-silencio').addEventListener('click', () => guardarCoach({ silenciado: !$('sw-coach-silencio').classList.contains('on') }));
+for (const [k, unidad] of Object.entries(RANGOS_COACH)) {
+  const r = $(`coach-${k}`);
+  r.addEventListener('input', () => { $(`coach-${k}-v`).textContent = `${r.value}${unidad}`; });
+  r.addEventListener('change', () => guardarCoach({ [k]: Number(r.value) }));
+}
+
+// Voces de Windows (voz.js). La lista llega un momento después de abrir la ventana.
+function pintarVoces() {
+  const lista = window.vozCoach?.voces() ?? [];
+  const sel = $('coach-voz');
+  sel.replaceChildren(new Option('La primera en español', ''), ...lista.map((v) => new Option(`${v.nombre} (${v.idioma})`, v.nombre)));
+  sel.value = coachAjustes?.voz ?? '';
+  if (sel.selectedIndex < 0) sel.value = '';
+  $('coach-voz-txt').textContent = !lista.length ? 'Windows no reporta voces instaladas'
+    : lista.some((v) => /^es/i.test(v.idioma)) ? 'Voces instaladas en tu Windows'
+    : 'No hay voces en español instaladas: sonará con acento';
+}
+window.vozCoach?.alCambiarVoces(pintarVoces);
+$('coach-voz').addEventListener('change', () => guardarCoach({ voz: $('coach-voz').value }));
+$('btn-coach-voz').addEventListener('click', () => {
+  const ok = window.vozCoach?.decir('Dragón en dos minutos: backea, trae ward de control y prepara la zona para tu jungla.', {
+    voz: $('coach-voz').value, volumen: Number($('coach-volumen').value), velocidad: Number($('coach-velocidad').value),
+  });
+  $('coach-voz-prueba').textContent = ok ? '' : 'Esta ventana no puede usar la voz de Windows.';
+});
+
+// Uso: lo que lleva esta partida, las últimas partidas y el gasto del mes (lo suma la Edge Function).
+function filaCoach(titulo, detalle, consejos = []) {
+  const caja = document.createElement('details');
+  const resumen = document.createElement('summary');
+  resumen.textContent = `${titulo} · ${detalle}`;
+  caja.append(resumen, ...consejos.map((x) => {
+    const p = document.createElement('p');
+    p.textContent = `${x.minuto} · ${x.texto}`;
+    return p;
+  }));
+  if (!consejos.length) caja.append(Object.assign(document.createElement('p'), { textContent: 'Sin consejos hablados.' }));
+  return caja;
+}
+const detalleCoach = (p) => `${p.consejos.length} consejo${p.consejos.length === 1 ? '' : 's'} · ${p.llamadas} consultas · ${(p.tokens.entrada + p.tokens.salida).toLocaleString('es')} tokens · ${usd(p.usd)}`;
+function pintarEstadoCoach(e) {
+  if (!e) return;
+  const p = e.partida;
+  $('coach-partida').replaceChildren(...(p && (p.llamadas || p.bloqueo) ? [filaCoach(`Esta partida${p.campeon ? ` (${p.campeon})` : ''}`, p.bloqueo ? TEXTO_BLOQUEO[p.bloqueo] ?? p.bloqueo : detalleCoach(p), p.consejos)] : []));
+  $('coach-historial').replaceChildren(...(e.historial ?? []).slice(0, 8).map((h) =>
+    filaCoach(`${new Date(h.fecha).toLocaleDateString('es', { day: 'numeric', month: 'short' })} · ${h.campeon || 'Partida'}`, detalleCoach(h), h.consejos)));
+}
+async function pintarUsoCoach() {
+  pintarEstadoCoach(await window.sharkTracker.coach.estado());
+  const u = await window.sharkTracker.coach.uso();
+  $('coach-uso').textContent = u?.estado === 'ok'
+    ? `Este mes: tú ${usd(u.mes_mio)} · todo el grupo ${usd(u.mes_total)} de ${usd(u.limite_mes)}. Hoy: ${usd(u.dia_mio)} de ${usd(u.limite_dia)}.`
+    : TEXTO_BLOQUEO[u?.estado] ?? 'No se pudo leer el gasto del mes.';
+}
+window.sharkTracker.coach.onEstado(pintarEstadoCoach);
+document.querySelector('.stab[data-stab="coach"]')?.addEventListener('click', () => { pintarVoces(); pintarUsoCoach(); });
+window.sharkTracker.ajustes.onChanged(renderCoach);
+window.sharkTracker.ajustes.get().then((aj) => { renderCoach(aj); pintarVoces(); });

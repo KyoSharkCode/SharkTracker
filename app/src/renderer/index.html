@@ -147,13 +147,14 @@
 
       <section class="page" id="page-ajustes">
         <div class="h1">Ajustes</div>
-        <div class="h1sub">Cuenta, overlay, apariencia, notificaciones y clips de la app</div>
+        <div class="h1sub">Cuenta, overlay, apariencia, notificaciones, coach y clips de la app</div>
 
         <div class="stabs">
           <button class="stab active" type="button" data-stab="cuenta">Cuenta</button>
           <button class="stab" type="button" data-stab="overlay">Overlay</button>
           <button class="stab" type="button" data-stab="apariencia">Apariencia</button>
           <button class="stab" type="button" data-stab="avisos">Notificaciones</button>
+          <button class="stab" type="button" data-stab="coach">Coach</button>
           <button class="stab" type="button" data-stab="clips">Clips</button>
         </div>
 
@@ -310,6 +311,50 @@
           </div>
         </div>
 
+        <!-- Coach de macro por voz (experimental). Ver src/coach.js y src/coach-cerebro.js -->
+        <div class="subpage" id="stab-coach">
+          <div class="ovgrid">
+            <div class="card">
+              <div class="cardhd">Coach de macro <span class="coach-etiqueta">Experimental</span></div>
+              <div class="cardsub">Consejos de macro por voz durante la partida: preparar objetivos, visión, compras y qué hacer al reaparecer. Solo usa los datos de tu partida que el juego ya da; del rival, solo el marcador. Por ahora está afinado para <b>jungla y soporte</b>, en la Grieta del Invocador.</div>
+              <div class="swrow"><div><div class="swnm">Activar el coach</div><div class="swsub" id="coach-estado">Apagado: no se envía nada.</div></div><button class="sw" type="button" role="switch" id="sw-coach" aria-label="Activar el coach"></button></div>
+              <div class="swrow"><div><div class="swnm">Silenciado</div><div class="swsub">En partida: <b>Ctrl + F9</b>. Silenciado no habla ni consulta, así que no gasta.</div></div><button class="sw" type="button" role="switch" id="sw-coach-silencio" aria-label="Silenciar el coach"></button></div>
+              <div class="ajrow">
+                <div><div class="swnm">Entre consejos</div><div class="swsub">Segundos mínimos, salvo eventos importantes</div></div>
+                <div class="rango"><input type="range" id="coach-intervalo" min="60" max="180" step="5" aria-label="Segundos entre consejos"><output id="coach-intervalo-v"></output></div>
+              </div>
+              <div class="ajrow">
+                <div><div class="swnm">Consejos por partida</div><div class="swsub">Tope de consejos hablados</div></div>
+                <div class="rango"><input type="range" id="coach-tope" min="3" max="12" step="1" aria-label="Consejos por partida"><output id="coach-tope-v"></output></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="cardhd">Voz</div>
+              <div class="cardsub">La voz de Windows, gratis y sin conexión. Para más voces: Configuración de Windows → Hora e idioma → Voz.</div>
+              <div class="ajrow">
+                <div><div class="swnm">Voz</div><div class="swsub" id="coach-voz-txt">Voces instaladas en tu Windows</div></div>
+                <select id="coach-voz" class="selector" aria-label="Voz del coach"></select>
+              </div>
+              <div class="ajrow">
+                <div><div class="swnm">Volumen</div></div>
+                <div class="rango"><input type="range" id="coach-volumen" min="0" max="100" step="5" aria-label="Volumen de la voz"><output id="coach-volumen-v"></output></div>
+              </div>
+              <div class="ajrow">
+                <div><div class="swnm">Velocidad</div></div>
+                <div class="rango"><input type="range" id="coach-velocidad" min="70" max="150" step="5" aria-label="Velocidad de la voz"><output id="coach-velocidad-v"></output></div>
+              </div>
+              <div class="avisos-pie"><button id="btn-coach-voz" class="checkbtn" type="button">Probar voz</button><span id="coach-voz-prueba" class="swsub"></span></div>
+            </div>
+            <div class="card">
+              <div class="cardhd">Uso y coste</div>
+              <div class="cardsub">Coste estimado según los tokens que devuelve la API de Claude. El coach se detiene solo al llegar al límite del día o del mes.</div>
+              <div class="coach-uso" id="coach-uso">Abre esta pestaña con sesión iniciada para ver el gasto.</div>
+              <div class="coach-lista" id="coach-partida"></div>
+              <div class="coach-lista" id="coach-historial"></div>
+            </div>
+          </div>
+        </div>
+
         <!-- Clips: búfer durante la partida, jugadas automáticas, Ctrl + F8 y audio. Ver src/clips.js -->
         <div class="subpage" id="stab-clips">
           <div class="ovgrid">
@@ -402,6 +447,7 @@
     </div>
   </div>
 
+  <script src="../voz.js"></script>
   <script src="perfil.js"></script>
   <script src="meta.js"></script>
   <script src="envivo.js"></script>

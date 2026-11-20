@@ -513,6 +513,8 @@ function pintarClip(d) {
   clipTimer = setTimeout(() => mostrar(nodo, false), 3000);
 }
 window.overlay.onClip?.(pintarClip);
+// Coach: el consejo llega ya redactado; aquí solo se dice con la voz de Windows (voz.js).
+window.overlay.onCoach?.((d) => window.vozCoach?.decir(d?.texto, d));
 
 window.overlay.onState(pintarEstado);
 window.overlay.onConfig?.(aplicarConfig);

@@ -1174,3 +1174,11 @@ html, body { font-variant-numeric: tabular-nums; }
 :root[data-tema="claro"] :is(.gal-clip:hover, .gal-carpeta:hover .gal-portada) { box-shadow: 0 10px 22px rgba(10,40,50,0.16); }
 /* Logo de la pantalla de inicio de sesión: letras oscuras. */
 :root[data-tema="claro"] .mainlogo { content: url("img/logotipo-vertical-claro.svg"); }
+
+/* ── Ajustes → Coach (experimental) ── */
+.coach-etiqueta { margin-left: 8px; padding: 2px 8px; border-radius: 999px; font: 700 11px 'Albert Sans', system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--acento); background: color-mix(in srgb, var(--acento) 14%, transparent); vertical-align: middle; }
+.coach-uso { font-size: 13px; color: var(--texto-tenue); padding: 4px 2px 10px; font-variant-numeric: tabular-nums; }
+.coach-lista details { border-top: 1px solid rgba(var(--linea-rgb), 0.06); padding: 9px 2px; }
+.coach-lista summary { cursor: pointer; font-size: 13px; color: var(--texto); font-variant-numeric: tabular-nums; }
+.coach-lista p { margin: 8px 0 0 16px; font-size: 13px; line-height: 1.45; color: var(--texto-tenue); }
+#sw-coach-silencio:disabled { opacity: .45; cursor: default; }
