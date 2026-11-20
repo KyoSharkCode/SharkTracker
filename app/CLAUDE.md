@@ -144,6 +144,10 @@ de clips (los timers de campamentos se descartaron). La app es **solo para el gr
   no deja crear un Release ya publicado sin etiqueta). Probar local: `npm run dist`.
   **Notas del parche**: al publicar, agregar la versión arriba del todo en `NOTAS` de
   `descargar.html` (sección "Notas del parche", visible para todos).
+- **Build de prueba** (sin publicar): Actions → **"App: build de prueba"** → Run workflow → elegir la rama
+  (`.github/workflows/app-build-prueba.yml`; en ramas `claude/…` también con un commit que diga `[build]`).
+  Deja el instalador como *Artifact* de esa ejecución (.zip con `SharkTracker-Setup.exe`, 14 días). No crea
+  Release: los demás no se actualizan. Lleva la versión de package.json, así que la reemplaza la próxima publicada.
 - **Descarga desde la web**: `descargar.html` (menú ☰ → "App de escritorio"). El botón usa
   el enlace de descarga de la última publicación y muestra versión/fecha/tamaño leyendo la API pública de GitHub
   (`api.github.com` está en su CSP). Sin versión publicada, el botón dice "Muy pronto".
