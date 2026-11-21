@@ -316,15 +316,15 @@
           <div class="ovgrid">
             <div class="card">
               <div class="cardhd">Coach de macro <span class="coach-etiqueta">Experimental</span></div>
-              <div class="cardsub">Consejos de macro por voz durante la partida: preparar objetivos, visión, compras y qué hacer al reaparecer. Solo usa los datos de tu partida que el juego ya da; del rival, solo el marcador. Por ahora está afinado para <b>jungla y soporte</b>, en la Grieta del Invocador.</div>
+              <div class="cardsub">Un coach de macro que sigue tu partida y te habla sobre todo en las pausas: al morir, al comprar y cuando algo cambia. Con <b>Ctrl + F10</b> le pides su lectura cuando quieras. Solo usa los datos de tu partida que el juego ya da; del rival, solo el marcador. Por ahora está afinado para <b>jungla y soporte</b>, en la Grieta del Invocador.</div>
               <div class="swrow"><div><div class="swnm">Activar el coach</div><div class="swsub" id="coach-estado">Apagado: no se envía nada.</div></div><button class="sw" type="button" role="switch" id="sw-coach" aria-label="Activar el coach"></button></div>
               <div class="swrow"><div><div class="swnm">Silenciado</div><div class="swsub">En partida: <b>Ctrl + F9</b>. Silenciado no habla ni consulta, así que no gasta.</div></div><button class="sw" type="button" role="switch" id="sw-coach-silencio" aria-label="Silenciar el coach"></button></div>
               <div class="ajrow">
-                <div><div class="swnm">Entre consejos</div><div class="swsub">Segundos mínimos, salvo eventos importantes</div></div>
+                <div><div class="swnm">Entre consejos</div><div class="swsub">Segundos mínimos, salvo al morir, al comprar o si se lo pides</div></div>
                 <div class="rango"><input type="range" id="coach-intervalo" min="60" max="180" step="5" aria-label="Segundos entre consejos"><output id="coach-intervalo-v"></output></div>
               </div>
               <div class="ajrow">
-                <div><div class="swnm">Consejos por partida</div><div class="swsub">Tope de consejos hablados</div></div>
+                <div><div class="swnm">Consejos por partida</div><div class="swsub">Tope de consejos (los que pides tú no cuentan)</div></div>
                 <div class="rango"><input type="range" id="coach-tope" min="3" max="12" step="1" aria-label="Consejos por partida"><output id="coach-tope-v"></output></div>
               </div>
             </div>

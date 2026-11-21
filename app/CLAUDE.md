@@ -661,6 +661,29 @@ Decisiones de Alex (oct 2026).
 
 ## Coach de macro por voz (experimental, nov 2026) — etapa 1
 
+**v2 (21/11/2026), tras la primera prueba de Kyo** (Shyvana jungla, 12 consejos, US$ 0.039): "los consejos son
+decentes pero suena a notificaciones por voz activadas". 9 de 12 decían "backea ya", 7 cerraban con "Castigo listo",
+mandó a backear con ~250 de oro porque venía un objetivo, y leyó "2 min 53 s" como "53 segundos". Cambios:
+- **Memoria**: `crearCoach` lleva una **bitácora** de la partida (muertes con su contexto, compras, objetivos de cada
+  equipo, un control cada 5 min y lo que el coach ya dijo, máx. 30 entradas) que viaja en cada consulta. Sirve para
+  ver patrones y dar seguimiento ("sigues sin…", "bien, compraste…").
+- **Qué estás haciendo** (`actividad`): el oro que baja de golpe = compraste = estás en base (`enBaseHace`); CS del
+  último minuto; vida de hace 10 s. La API no dice dónde estás, las oleadas, los campamentos ni si estás
+  canalizando el back: eso sigue sin saberse (es lo que daría la imagen de la etapa 2).
+- **Cuándo habla** (reemplaza la lista de situaciones de más abajo): en las pausas, `muerte` y `base` (acabas de
+  comprar; máx. una cada 2:30); `ritmo` (Barón, Ancestral, 3.er/4.º dragón, inhibidor); `objetivo` **solo si
+  detecta un problema** entre 110 y 40 s antes (vida < 50 %, maná < 30 %, oro para la siguiente compra, soporte sin
+  ward de control, tu jungla muerta) y nunca si compraste hace < 60 s; `compra` (llevas 45 s pudiendo comprar y
+  sigues fuera; pasa por Haiku); y `pedido`. **Fuera**: avisos de objetivo por reloj, `vision` y el repaso cada 90 s.
+- **Ctrl + F10**: "dame tu lectura ahora" (`pedido`): sale en la siguiente lectura, sin esperas, y no cuenta para el tope.
+- **Sonnet razona antes de hablar**: `thinking: adaptive` + `effort: low`, `max_tokens` 1000 (el razonamiento cuenta);
+  si se corta (`max_tokens`) no se dice nada. Largo: hasta 3 frases en las pausas, 1–2 en el resto. La app espera
+  hasta 13 s. Los plazos van en una sola unidad ("unos 3 minutos (173 segundos)"). El guion (`SISTEMA_COACH`) pasó
+  de pasos por rol a "cómo piensa un coach" + criterios: analizar uniendo hechos, no narrar; no mandar a hacer lo
+  que probablemente ya hace; no backear con < 400 de oro salvo poca vida; sin muletillas; `NADA` si no hay nada.
+- Sin probar con la API real todavía (sí con Claude y Supabase simulados). Coste esperado: algo mayor por consejo.
+
+
 Decisiones de Kyo (nov 2026). **Apagado de fábrica**; por ahora solo para **jungla y soporte**, en la Grieta.
 - **Qué es**: consejos de macro hablados durante la partida (no reflejos): preparar objetivos, visión, compras y
   backs, qué hacer al reaparecer, cómo jugar según el marcador. Fórmula de cada consejo: **ventana de tiempo +

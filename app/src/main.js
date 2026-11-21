@@ -498,7 +498,7 @@ function cargarPrecios() {
   }).on('error', () => { /* se usa el precio de la API del juego */ });
 }
 
-// ── Teclado: Tab (diferencia de oro), Ctrl + X (panel de carga / build), Ctrl + F8 (clip) y Ctrl + F9 (coach) ──
+// ── Teclado: Tab (diferencia de oro), Ctrl + X (panel de carga / build), Ctrl + F8 (clip), Ctrl + F9 y Ctrl + F10 (coach) ──
 // uiohook-napi "escucha" el teclado sin quitarle las teclas al juego (como el
 // pulsar-para-hablar de Discord). Solo se enciende durante la pantalla de carga
 // y la partida, y solo mira esas dos combinaciones: el resto de teclas se ignoran
@@ -509,6 +509,7 @@ let tabPulsado = false;
 let xPulsada = false;
 let f8Pulsada = false;
 let f9Pulsada = false;
+let f10Pulsada = false;
 let ultiPulsada = false;
 let teclaUlti = ajustesApp.leer().clips.teclaUlti; // se actualiza al cambiar los ajustes
 function iniciarTeclado() {
@@ -539,6 +540,11 @@ function iniciarTeclado() {
           f9Pulsada = true;
           if (overlayTimer) alternarSilencioCoach();
         }
+        // Ctrl + F10: pedirle al coach su lectura de la partida ahora.
+        if (e.keycode === UiohookKey.F10 && e.ctrlKey && !f10Pulsada) {
+          f10Pulsada = true;
+          if (overlayTimer) pedirLecturaCoach();
+        }
         // Tecla de la R (clips automáticos de ulti). Sin Ctrl ni Alt: así no cuenta un atajo.
         if (e.keycode === UiohookKey[teclaUlti] && !e.ctrlKey && !e.altKey && !ultiPulsada) {
           ultiPulsada = true;
@@ -550,6 +556,7 @@ function iniciarTeclado() {
         if (e.keycode === UiohookKey.X) xPulsada = false;
         if (e.keycode === UiohookKey.F8) f8Pulsada = false;
         if (e.keycode === UiohookKey.F9) f9Pulsada = false;
+        if (e.keycode === UiohookKey.F10) f10Pulsada = false;
         if (e.keycode === UiohookKey[teclaUlti]) ultiPulsada = false;
       });
       hook = uIOhook;
@@ -567,6 +574,7 @@ function detenerTeclado() {
   xPulsada = false;
   f8Pulsada = false;
   f9Pulsada = false;
+  f10Pulsada = false;
   ultiPulsada = false;
 }
 // Guarda la decisión (visible u oculto) para las próximas partidas.
@@ -656,6 +664,12 @@ function alternarSilencioCoach() {
   const ajustes = ajustesApp.guardar({ coach: { silenciado: !c.silenciado } });
   mainWindow?.webContents.send('ajustes:changed', ajustes);
   decirCoach(ajustes.coach.silenciado ? 'Coach silenciado' : 'Coach activado');
+}
+// Ctrl + F10: su lectura cuando tú la pidas (no cuenta para el tope de consejos).
+function pedirLecturaCoach() {
+  const c = ajustesApp.leer().coach;
+  if (!c.activo) return;
+  if (!sesionCoach.pedirLectura()) decirCoach(c.silenciado ? 'El coach está silenciado' : 'El coach no está disponible en esta partida');
 }
 ipcMain.handle('coach:estado', () => sesionCoach.estado());
 ipcMain.handle('coach:uso', () => sesionCoach.uso());

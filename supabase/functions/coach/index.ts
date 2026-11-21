@@ -3,11 +3,13 @@
 // La llama la app (con tu sesión de Discord) durante la partida, cuando su "cerebro"
 // (app/src/coach-cerebro.js) detecta una situación que puede merecer un consejo:
 //
-// POST { accion: 'consejo', partida, situacion: { tipo, directo, motivo }, estado, dichos }
-//   1. Filtro (Claude Haiku 5.5): ¿vale la pena decir algo? Responde sí/no y un motivo
-//      breve. Los eventos claros (objetivo cerca, acabas de morir, cambio grande de la
-//      partida) llegan con directo = true y se saltan el filtro.
-//   2. Coach (Claude Sonnet 5.5): redacta el consejo, una o dos frases para leer en voz.
+// POST { accion: 'consejo', partida, situacion: { tipo, directo, motivo }, estado, bitacora }
+//   estado   = resumen de SU partida ahora mismo + qué viene haciendo (actividad).
+//   bitacora = la historia de la partida: muertes, compras, objetivos, controles cada
+//              5 min y lo que el coach ya le dijo. Es la memoria del coach.
+//   1. Filtro (Claude Haiku 5.5), solo para lo que no es un momento claro (oro
+//      acumulado): ¿vale la pena decir algo? Responde sí/no y un motivo breve.
+//   2. Coach (Claude Sonnet 5.5): lee la bitácora y redacta el consejo para leer en voz.
 //   Devuelve { estado: 'ok', hablar, texto, uso: { entrada, salida, usd } }.
 //
 // POST { accion: 'uso' }
@@ -52,7 +54,7 @@ const PRECIOS: Record<string, { entrada: number; salida: number; cacheLectura: n
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 // Sin reintentos y con poco margen: un consejo que llega tarde ya no sirve.
-const claude = ANTHROPIC_API_KEY ? new Anthropic({ apiKey: ANTHROPIC_API_KEY, timeout: 8000, maxRetries: 0 }) : null;
+const claude = ANTHROPIC_API_KEY ? new Anthropic({ apiKey: ANTHROPIC_API_KEY, timeout: 11500, maxRetries: 0 }) : null;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -60,54 +62,56 @@ const json = (body: unknown, status = 200) =>
 // ── Prompts (fijos, sin fechas ni datos de la partida: así el del coach se guarda en la caché de la API) ──
 const JERGA = 'Usa la jerga de League of Legends como se habla en Latinoamérica: "jungla" (nunca "selva"), "línea" (no "carril"), "backear", "farmear", "rotar", "wards", "ward de control", y los objetivos por su nombre: Dragón, Vacuolarvas (o "Vacuos"), Heraldo, Barón, Dragón Ancestral.';
 
-const SISTEMA_COACH = `Eres el coach de macro de League of Legends de SharkTracker. Le hablas por voz a una jugadora MIENTRAS juega su partida, así que cada consejo tiene que entenderse de una sola escucha.
+const SISTEMA_COACH = `Eres coach de macro de League of Legends dentro de SharkTracker. Acompañas por voz a una jugadora durante SU partida, como alguien que la está viendo jugar y la conoce: no eres un sistema de avisos.
 
-Recibes un resumen de SU partida (su rol, su estado, su equipo, el marcador y los objetivos con su reloj) y la situación que disparó la consulta. Respondes con UN consejo.
+QUÉ RECIBES
+- "Ahora": su estado en este momento (rol, vida, oro, objetos, visión), su equipo, el marcador y los objetivos con su reloj.
+- "Lo último": lo que se puede deducir de los últimos segundos (si acaba de comprar, cuánto farmeó, si su vida viene cayendo).
+- "Bitácora": la historia de la partida en orden: sus muertes con su contexto, sus compras, los objetivos de cada equipo, un control cada 5 minutos y, marcado como COACH, lo que tú ya le dijiste.
+- "Momento": por qué se te consulta ahora.
+
+CÓMO PIENSA UN COACH
+- Analiza, no narres. Un dato suelto (un reloj, su oro, su farmeo) ella ya lo ve en pantalla. Lo tuyo es unir dos o más hechos en una conclusión y de ahí sacar qué hacer: "tus tres muertes fueron con más rivales vivos que aliados: espera a tu equipo antes de entrar al río".
+- Usa la bitácora. Busca patrones (muertes seguidas, muertes con oro sin gastar, objetivos que se escapan después de que ella muere) y dile lo que ves en SU partida, no teoría general.
+- Dale seguimiento a lo que dijiste. Si una compra o un cambio posterior muestra que te hizo caso, puedes reconocerlo en pocas palabras. Si el mismo problema sigue, no repitas la frase: di que sigue y qué le está costando.
+- No le digas que haga lo que probablemente ya está haciendo. Si compró hace unos segundos, está en base: no le digas que backee ni que compre. Si su CS subió en el último minuto, ya está farmeando.
+- Lo que NO sabes: dónde está nadie en el mapa, cómo están las oleadas, qué campamentos están vivos, dónde hay visión, ni si está volviendo a base ahora mismo. No afirmes nada de eso. Si tu consejo depende de algo así, dilo en condicional o elige otro consejo.
+- Backear: no lo recomiendes con menos de unos 400 de oro, salvo que tenga poca vida o maná. Llegar tarde y sana a un objetivo suele ser mejor que puntual y a media vida.
+- Sin muletillas. No cierres siempre igual ni metas el ward de control o el Castigo en cada consejo: solo cuando ese sea de verdad el punto.
+- Si no hay algo concreto que valga la pena decir AHORA, responde exactamente: NADA. Callar es mejor que hacer ruido.
+
+SEGÚN EL MOMENTO
+- Acaba de morir (puede escuchar con calma): una lectura breve de por qué le está pasando, si la bitácora lo deja ver, y qué hacer al reaparecer. Hasta 3 frases, 50 palabras.
+- Acaba de comprar (está saliendo de base): hacia dónde conviene que vayan sus próximos 2 minutos según lo que viene y cómo va la partida. Hasta 2 frases, 40 palabras.
+- Pidió tu lectura: lo más importante de su partida ahora mismo y por qué; puede incluir algo que está haciendo bien. Hasta 3 frases, 50 palabras.
+- Objetivo con un problema detectado: resuelve ESE problema. Una o dos frases, 28 palabras.
+- Cambio grande de la partida (Barón, alma, inhibidor): cómo cambia lo que le conviene hacer. Una o dos frases, 28 palabras.
+- Oro acumulado: solo si de verdad le conviene volver ahora. Una frase.
 
 FORMATO
-- Una o dos frases, 30 palabras como máximo. Español latino, de tú.
-- Estructura: la ventana de tiempo, qué hacer ella según su rol, y por qué importa.
+- Español latino, de tú, tono cercano y directo, sin regaños. Es una sugerencia: la decisión es de ella.
 - Se va a leer con un lector de voz: solo texto corrido. Sin saludos, sin su nombre, sin listas, sin comillas, sin paréntesis, sin emojis ni símbolos. Escribe "2 minutos" y "400 de oro", no "2:00" ni "400g".
 - ${JERGA}
-
-REGLAS
-- Solo macro: preparar objetivos, visión, cuándo backear y qué comprar, rotaciones, qué hacer al reaparecer, cómo jugar con ventaja o desventaja. Nunca mecánicas ni reflejos.
-- Nunca digas un dato a secas. Ella ya ve en pantalla los relojes de objetivos y sus números; tu trabajo es cruzarlos con su rol y su estado para darle una acción concreta.
-- Usa solo los datos que recibes. NO sabes dónde está nadie en el mapa, cómo están las oleadas, qué campamentos de jungla están vivos ni dónde hay visión: no afirmes nada sobre eso. Si el consejo depende de algo que no ves, dilo en condicional ("si tu línea está empujada…").
+- Solo macro, nunca mecánicas ni reflejos.
 - Del rival solo conoces el marcador y cuántos están muertos. Nunca menciones campeones rivales, sus objetos, niveles, hechizos, ultis ni dónde podrían estar.
-- No repitas ni reformules lo que aparece en "Ya dijiste en esta partida".
-- Es una sugerencia: la decisión es de ella. Tono directo y cercano, sin regaños.
-- Si con estos datos no hay un consejo concreto y útil que dar AHORA, responde exactamente: NADA
 
-GUÍA DE SOPORTE
-- Unos 2 minutos antes de un objetivo: si tiene oro para gastar, poca vida o poco maná, conviene backear ya para volver a tiempo con un ward de control. Si no, ir yendo a la zona.
-- Llegar alrededor de 1 minuto antes: visión en el río y las entradas de jungla del lado del objetivo, y limpiar la visión rival con la Lente del oráculo. El Dragón está en el río de abajo; Vacuolarvas, Heraldo y Barón, en el de arriba.
-- A Vacuolarvas o Heraldo puede rotar si su línea de abajo está empujada o su ADC backeó; no dejar solo al ADC bajo presión.
-- Llevar siempre un ward de control (75 de oro). Cuando el objeto de soporte ya da wards, la Lente del oráculo suele rendir más que el ward amarillo.
-- Si su jungla está muerta cuando sale el objetivo: no forzarlo. Visión defensiva y ceder, o esperar a que reaparezca.
-- Al reaparecer: comprar (ward de control si falta) e ir con el equipo hacia lo siguiente; no caminar sola por zonas sin visión.
-
-GUÍA DE JUNGLA
-- Unos 2 minutos antes de un objetivo: planear el reset. Si tiene oro para gastar o poca vida, backear ahora y no justo antes; después limpiar los campamentos del lado del objetivo de camino y llegar con vida alta y Castigo listo.
-- Si su vida o maná están bajos a menos de 1 minuto del objetivo, es mejor llegar tarde y sana que puntual y a media vida.
-- Dragones: el tercero deja a un equipo a uno del alma. Si el rival lleva 3, el siguiente se disputa con todo el equipo o se cambia por otro objetivo (Heraldo, torres, Barón) en vez de regalarlo sin nada a cambio.
-- Farmeo por debajo de su referencia: priorizar limpiar campamentos entre jugadas antes que buscar peleas largas.
-- Oro acumulado: backear entre limpiezas y antes del objetivo, no después.
-- Al reaparecer: farmear de camino al siguiente objetivo; no ir sola a contestar uno que ya se perdió.
-
-PARA LOS DOS ROLES
-- Más rivales muertos que aliados: es la ventana para el objetivo disponible o, si no hay, para torres. Más aliados muertos: no pelear, visión y esperar.
+CRITERIOS DE MACRO (referencia, no un guion)
+- El Dragón está en el río de abajo; Vacuolarvas, Heraldo y Barón, en el de arriba.
+- El tercer dragón deja a un equipo a uno del alma: ese siguiente dragón se disputa con todo el equipo o se cambia por otro objetivo, no se regala sin nada a cambio.
+- Más rivales muertos que aliados: ventana para el objetivo disponible o para torres. Más aliados muertos: no pelear, visión y esperar.
 - Con Barón o Ancestral de su equipo: agruparse y empujar con las oleadas mientras dure. Si lo tiene el rival: limpiar oleadas bajo torre y no pelear en campo abierto.
-- Con ventaja en el marcador: jugar por objetivos y negar visión. Con desventaja: ceder lo que no se pueda disputar, farmear y defender en grupo.`;
+- Con ventaja: jugar por objetivos y negar visión. Con desventaja: ceder lo que no se pueda disputar, farmear y defender en grupo.
+- Soporte: la visión se pone antes de que salga el objetivo, no cuando ya empezó; si su jungla está muerta, no se fuerza el objetivo; a Vacuolarvas o Heraldo puede rotar si su ADC no queda vendido.
+- Jungla: el reset se planea antes del objetivo, no encima; con el farmeo por debajo de su referencia, los campamentos entre jugadas pesan más que las peleas largas; no ir sola a contestar un objetivo que ya se perdió.`;
 
-const SISTEMA_FILTRO = `Eres el filtro de un coach de macro de League of Legends que habla por voz durante la partida. Recibes un resumen de la partida de una jugadora (su rol, su estado, su equipo, el marcador, los objetivos con su reloj) y un motivo de consulta. Decides si AHORA vale la pena interrumpirla con un consejo hablado.
+const SISTEMA_FILTRO = `Eres el filtro de un coach de macro de League of Legends que habla por voz durante la partida. Recibes el estado de la partida de una jugadora, lo que viene haciendo, la bitácora de su partida (incluye lo que el coach ya le dijo, marcado como COACH) y el momento por el que se consulta. Decides si AHORA vale la pena interrumpirla.
 
 Responde hablar = true solo si se cumplen las tres cosas:
-1. Hay una acción de macro concreta que ella puede hacer en el próximo minuto o dos (backear y comprar algo que le alcanza, comprar un ward de control, preparar un objetivo que viene, aprovechar que hay más rivales muertos que aliados, cambiar cómo juega por el marcador).
-2. Esa acción se deduce de los datos del resumen, sin suponer posiciones en el mapa, estado de las oleadas ni campamentos de jungla, que no se conocen.
-3. No se le dijo ya algo parecido (mira "Ya dijiste en esta partida").
+1. Hay una acción de macro concreta que le conviene hacer en el próximo minuto y que probablemente no está haciendo ya.
+2. Esa acción se deduce de los datos, sin suponer posiciones en el mapa, oleadas ni campamentos, que no se conocen.
+3. El coach no le dijo ya algo parecido hace poco.
 
-Responde hablar = false si solo habría un dato a secas que ella ya ve en pantalla (un reloj, su oro, su farmeo), si el consejo sería genérico, o si está en una situación en la que no puede actuar. Ante la duda, false: es mejor callar que hacer ruido. En un "Repaso general" lo normal es false.
+Responde hablar = false si solo habría un dato que ella ya ve en pantalla, si el consejo sería genérico, si acaba de comprar, o si tiene poco oro para que volver a base valga la pena. Ante la duda, false: es mejor callar que hacer ruido.
 
 Devuelve hablar y un motivo de 12 palabras como máximo.`;
 
@@ -119,7 +123,10 @@ const ESQUEMA_FILTRO = {
 };
 
 // ── Lo que manda la app, campo por campo (lo demás se descarta) ──
-const TIPOS = ['objetivo', 'muerte', 'ritmo', 'compra', 'vision', 'revision'];
+const TIPOS = ['objetivo', 'muerte', 'base', 'pedido', 'ritmo', 'compra'];
+// Momentos en los que puede escuchar con calma: el consejo puede ser un poco más largo.
+const PAUSAS = ['muerte', 'base', 'pedido'];
+const ENTRADAS = ['muerte', 'compra', 'jugada', 'objetivo', 'control', 'coach'];
 const ROLES = ['jungla', 'soporte'];
 const txt = (v: unknown, max: number) =>
   typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f<>{}`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max) : '';
@@ -127,7 +134,14 @@ const num = (v: unknown, min: number, max: number): number | null => {
   const n = Number(v);
   return v === null || v === undefined || !Number.isFinite(n) ? null : Math.min(max, Math.max(min, Math.round(n)));
 };
-const reloj = (s: number) => (s >= 60 ? `${Math.floor(s / 60)} min ${s % 60} s` : `${s} s`);
+// Un plazo en palabras y en segundos, sin mezclar unidades (con "2 min 53 s" el modelo
+// llegó a leer "53 segundos").
+function plazo(s: number): string {
+  if (s < 90) return `${s} segundos`;
+  const medios = Math.round(s / 30);
+  const min = Math.floor(medios / 2);
+  return `unos ${min} minutos${medios % 2 ? ' y medio' : ''} (${s} segundos)`;
+}
 const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
 
 function comparada(m: any, unidad: string): string {
@@ -137,11 +151,11 @@ function comparada(m: any, unidad: string): string {
 }
 
 // Resumen de la partida en texto para el modelo. Devuelve null si falta lo básico.
-function redactarEstado(e: any, situacion: any, dichos: any): string | null {
+function redactarEstado(e: any, situacion: any, bitacora: any): string | null {
   const rol = ROLES.includes(e?.rol) ? e.rol : null;
   const t = num(e?.t, 0, 7200);
   if (!rol || t === null) return null;
-  const lineas: string[] = [];
+  const lineas: string[] = ['AHORA'];
   lineas.push(`Minuto ${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')} · Rol: ${rol} · Campeón: ${txt(e.campeon, 30) || 'desconocido'} (nivel ${num(e.nivel, 1, 18) ?? '?'})`);
 
   const vida = num(e.vida, 0, 100);
@@ -179,7 +193,7 @@ function redactarEstado(e: any, situacion: any, dichos: any): string | null {
   const objetivos = (Array.isArray(e.objetivos) ? e.objetivos : []).slice(0, 5).map((o: any) => {
     const nombre = txt(o?.nombre, 24);
     const en = num(o?.en, -3600, 3600);
-    return nombre && en !== null ? (en > 0 ? `${nombre} aparece en ${reloj(en)}` : `${nombre} ya está disponible`) : '';
+    return nombre && en !== null ? (en > 0 ? `${nombre}: aparece en ${plazo(en)}` : `${nombre}: disponible ya`) : '';
   }).filter(Boolean);
   if (objetivos.length) lineas.push(`Objetivos: ${objetivos.join('; ')}`);
   const buffs = (Array.isArray(e.buffs) ? e.buffs : []).slice(0, 2).map((b: any) => {
@@ -188,22 +202,35 @@ function redactarEstado(e: any, situacion: any, dichos: any): string | null {
   }).filter(Boolean);
   if (buffs.length) lineas.push(`Buffs activos: ${buffs.join('; ')}`);
 
-  const ya = (Array.isArray(dichos) ? dichos : []).slice(-5).map((d: any) => {
-    const texto = txt(d?.texto, 260);
-    return texto ? `- [${txt(d?.minuto, 6)}] ${texto}` : '';
+  // Lo que se deduce de los últimos segundos.
+  const act = e.actividad ?? {};
+  const ultimo: string[] = [];
+  const enBase = num(act.enBaseHace, 0, 600);
+  if (enBase !== null) ultimo.push(enBase <= 20 ? `compró hace ${enBase} segundos: está en base o saliendo de ella` : `compró hace ${enBase} segundos: ya volvió de base`);
+  const csMin = num(act.csUltimoMin, 0, 60);
+  if (csMin !== null) ultimo.push(rol === 'jungla' ? `en el último minuto sumó ${csMin} de CS (un campamento da 4)` : `en el último minuto sumó ${csMin} de CS`);
+  const vidaAntes = num(act.vidaHace10, 0, 100);
+  if (vidaAntes !== null && vida !== null && !muerta && vidaAntes - vida >= 20) ultimo.push(`su vida bajó de ${vidaAntes} % a ${vida} % en 10 segundos`);
+  lineas.push('', 'LO ÚLTIMO', ultimo.length ? ultimo.join('; ') : 'sin cambios que destacar');
+
+  // La historia de la partida, incluido lo que el coach ya dijo.
+  const historia = (Array.isArray(bitacora) ? bitacora : []).slice(-30).map((b: any) => {
+    const detalle = txt(b?.detalle, b?.tipo === 'coach' ? 400 : 160);
+    if (!detalle || !ENTRADAS.includes(b?.tipo)) return '';
+    return `- [${txt(b?.minuto, 6)}] ${b.tipo === 'coach' ? 'COACH: ' : ''}${detalle}`;
   }).filter(Boolean);
-  lineas.push(ya.length ? `Ya dijiste en esta partida:\n${ya.join('\n')}` : 'Ya dijiste en esta partida: nada todavía');
-  lineas.push(`Motivo de la consulta: ${txt(situacion?.motivo, 160) || 'repaso general'}`);
+  lineas.push('', 'BITÁCORA', historia.length ? historia.join('\n') : 'todavía no pasó nada que anotar');
+  lineas.push('', `MOMENTO: ${txt(situacion?.motivo, 200) || 'sin detalle'}`);
   return lineas.join('\n');
 }
 
-// Lo que se va a leer en voz: una o dos frases limpias, o nada.
-function pulir(texto: string): string {
+// Lo que se va a leer en voz: frases limpias, o nada. En las pausas cabe algo más largo.
+function pulir(texto: string, largo: number): string {
   let t = texto.replace(/\s+/g, ' ').replace(/^["'«“]+|["'»”]+$/g, '').trim();
   if (!t || /^nada\b/i.test(t)) return '';
   t = t.replace(/[*_#`]/g, '').replace(/\bselv[aá]tic[oa]s?\b/gi, 'de la jungla').replace(/\bselva\b/gi, 'jungla');
-  if (t.length > 260) {
-    const corte = t.slice(0, 260);
+  if (t.length > largo) {
+    const corte = t.slice(0, largo);
     const fin = Math.max(corte.lastIndexOf('. '), corte.lastIndexOf(': '));
     t = fin > 80 ? corte.slice(0, fin + 1) : corte;
   }
@@ -263,7 +290,10 @@ Deno.serve(async (req) => {
 
     const situacion = cuerpo.situacion ?? {};
     if (!TIPOS.includes(situacion.tipo)) return json({ error: 'Situación desconocida' }, 400);
-    const resumen = redactarEstado(cuerpo.estado, situacion, cuerpo.dichos);
+    // La app de la primera versión mandaba "dichos" en lugar de la bitácora.
+    const historia = Array.isArray(cuerpo.bitacora) ? cuerpo.bitacora
+      : (Array.isArray(cuerpo.dichos) ? cuerpo.dichos.map((d: any) => ({ minuto: d?.minuto, tipo: 'coach', detalle: d?.texto })) : []);
+    const resumen = redactarEstado(cuerpo.estado, situacion, historia);
     if (!resumen) return json({ estado: 'ok', hablar: false, motivo: 'rol sin coach', uso: { entrada: 0, salida: 0, usd: 0 } });
 
     const uso: Uso = { entrada: 0, salida: 0, usd: 0 };
@@ -290,20 +320,23 @@ Deno.serve(async (req) => {
           motivo = txt(d?.motivo, 120);
         } catch { hablar = false; }
       }
-      // 2) Coach: Sonnet redacta la frase. "between_tools" = sin razonamiento antes de
-      //    responder (en Sonnet 5.5 "disabled" no existe); el system prompt va a la caché.
+      // 2) Coach: Sonnet lee la bitácora y redacta. Razona un poco antes de hablar
+      //    (adaptive + effort low): sin razonar, recitaba la guía y leía mal los plazos.
+      //    El razonamiento cuenta contra max_tokens, por eso el margen. El system prompt
+      //    va a la caché.
       if (hablar) {
         const c = await claude.messages.create({
           model: MODELO_COACH,
-          max_tokens: 160,
-          thinking: { type: 'between_tools' },
+          max_tokens: 1000,
+          thinking: { type: 'adaptive' },
           output_config: { effort: 'low' },
           system: [{ type: 'text', text: SISTEMA_COACH, cache_control: { type: 'ephemeral' } }],
           messages: [{ role: 'user', content: resumen }],
         });
         sumarUso(uso, MODELO_COACH, c.usage);
         // Si el modelo se niega a responder (stop_reason "refusal"), simplemente no se habla.
-        texto = c.stop_reason === 'refusal' ? '' : pulir(textoDe(c));
+        // Si se queda sin margen a media frase ("max_tokens"), tampoco: mejor callar que decir algo cortado.
+        texto = c.stop_reason === 'end_turn' ? pulir(textoDe(c), PAUSAS.includes(situacion.tipo) ? 380 : 230) : '';
         hablar = !!texto;
       }
     } catch (e) {

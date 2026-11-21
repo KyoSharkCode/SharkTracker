@@ -13,8 +13,8 @@ const fs = require('fs');
 const path = require('path');
 const { resumir, crearCoach, ROLES_COACH } = require('./coach-cerebro');
 
-const ESPERA_MS = 9000;     // una respuesta más lenta que esto ya no sirve
-const CADUCA_MS = 14000;    // desde que pasó algo hasta que se dice, como mucho
+const ESPERA_MS = 13000;    // una respuesta más lenta que esto ya no sirve (el coach ahora razona antes de hablar)
+const CADUCA_MS = 16000;    // desde que pasó algo hasta que se dice, como mucho
 const HISTORIAL = 20;       // partidas guardadas
 const ERRORES_SEGUIDOS = 3; // con 3 fallos seguidos se deja de intentar en esta partida
 // Respuestas de la Edge Function que apagan el coach hasta la próxima partida.
@@ -83,15 +83,27 @@ function crearSesion({ pedir, hablar, ajustes, avisar = () => {}, ahora = Date.n
 
   // Cada segundo, con lo que leyó el overlay. extras: { rol, siguiente }.
   function tick(datos, estado, extras = {}) {
-    if (!partida || partida.ocupado) return;
+    if (!partida) return;
     const c = ajustes().coach;
     // Solo en la Grieta del Invocador (los consejos de objetivos y roles no valen en ARAM, Arena o URF).
     const esGrieta = (datos?.gameData?.mapNumber ?? 11) === 11 && (datos?.gameData?.gameMode ?? 'CLASSIC') === 'CLASSIC';
     const r = esGrieta ? resumir(datos, estado, extras) : null;
     if (r) { partida.campeon = r.campeon; partida.rol = r.rol; }
     const activo = !!r && c.activo && !c.silenciado && !partida.bloqueo && ROLES_COACH.includes(r.rol);
-    const situacion = partida.coach.siguiente(r, datos, ahora(), activo);
-    if (situacion) consultar(situacion, r);
+    // Observar, siempre (también mientras se espera una respuesta): bitácora y qué estás haciendo.
+    partida.coach.observar(r, datos, activo);
+    if (!activo || partida.ocupado) return;
+    const situacion = partida.coach.siguiente(r, datos, ahora());
+    if (situacion) consultar(situacion, { ...r, actividad: partida.coach.actividad(r) });
+  }
+
+  // Atajo "dame tu lectura ahora": sale en la siguiente lectura de la partida.
+  // Devuelve false si no hay partida o el coach no puede responder.
+  function pedirLectura() {
+    const c = ajustes().coach;
+    if (!partida || !c.activo || c.silenciado || partida.bloqueo) return false;
+    partida.coach.pedir();
+    return true;
   }
 
   async function consultar(situacion, r) {
@@ -101,7 +113,7 @@ function crearSesion({ pedir, hablar, ajustes, avisar = () => {}, ahora = Date.n
     const t0 = ahora();
     try {
       const res = await conLimite(pedir({
-        accion: 'consejo', partida: p.id, situacion, estado: r, dichos: p.coach.dichos().slice(-5),
+        accion: 'consejo', partida: p.id, situacion, estado: r, bitacora: p.coach.bitacora(),
       }), ESPERA_MS);
       if (partida !== p) return; // la partida terminó mientras tanto
       if (res?.uso) {
@@ -136,7 +148,7 @@ function crearSesion({ pedir, hablar, ajustes, avisar = () => {}, ahora = Date.n
     try { return await conLimite(pedir({ accion: 'uso' }), ESPERA_MS); } catch { return { estado: 'error' }; }
   }
 
-  return { iniciarPartida, terminarPartida, tick, estado: publico, uso };
+  return { iniciarPartida, terminarPartida, tick, pedirLectura, estado: publico, uso };
 }
 
 module.exports = { crearSesion, crearPedir, BLOQUEOS };
