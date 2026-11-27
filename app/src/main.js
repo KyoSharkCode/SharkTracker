@@ -14,6 +14,7 @@ const notificaciones = require('./notificaciones');
 const clips = require('./clips');
 const { crearDetector } = require('./clips-eventos');
 const { crearRegistro } = require('./registro');
+const { crearConsejos } = require('./consejos');
 
 // ── Registro de errores (userData/registro-app.txt; Ajustes → Cuenta → Diagnóstico) ──
 // Lo que falla en el proceso main, en la ventana, en el overlay o en el editor queda anotado.
@@ -472,15 +473,30 @@ function createOverlayWindow() {
 let ddVersion = null;
 let preciosItems = null; // itemID → coste total (DDragon), para el oro
 function cargarVersionDD() {
-  if (ddVersion) { if (!preciosItems) cargarPrecios(); return; }
+  if (ddVersion) { if (!preciosItems) cargarPrecios(); cargarConsejosCampeones(); return; }
   https.get('https://ddragon.leagueoflegends.com/api/versions.json', { timeout: 5000 }, (res) => {
     let body = '';
     res.on('data', (c) => (body += c));
     res.on('end', () => {
       try { ddVersion = JSON.parse(body)[0] ?? null; } catch { /* sin retratos: se usan iniciales */ }
-      if (ddVersion) cargarPrecios();
+      if (ddVersion) { cargarPrecios(); cargarConsejosCampeones(); }
     });
   }).on('error', () => { /* sin retratos: se usan iniciales */ });
+}
+// Consejos oficiales de Riot "cómo jugar contra" cada campeón (enemytips), en español.
+// Para la tarjeta de consejos al morir. Una vez por sesión; si falla, la tarjeta sale sin ellos.
+function cargarConsejosCampeones() {
+  if (consejosCampeones || !ddVersion) return;
+  https.get(`https://ddragon.leagueoflegends.com/cdn/${ddVersion}/data/es_MX/championFull.json`, { timeout: 15000 }, (res) => {
+    let body = '';
+    res.on('data', (c) => (body += c));
+    res.on('end', () => {
+      try {
+        const data = JSON.parse(body).data ?? {};
+        consejosCampeones = Object.fromEntries(Object.entries(data).map(([id, c]) => [id, (c.enemytips ?? []).filter((x) => typeof x === 'string' && x.length <= 260)]));
+      } catch { /* sin consejos oficiales */ }
+    });
+  }).on('error', () => { /* sin consejos oficiales */ });
 }
 // Coste total de cada objeto: la API del juego solo da el último paso de la receta.
 function cargarPrecios() {
@@ -573,6 +589,7 @@ function startOverlay() {
   detectorJugadas = crearDetector();
   datosPartida = null;
   reiniciarBuild();
+  motorConsejos = crearConsejos();
   // "Tu rendimiento": promedios de la división de arriba (una vez por partida).
   const partida = estadoPartida;
   auth.getReferencia()
@@ -598,7 +615,11 @@ function startOverlay() {
       ? siguienteCompra(buildOrden, misObjetos, res.data?.activePlayer?.currentGold, objetosBuild) : null;
     // Punto de habilidad sin gastar → cuál subir según el orden de OP.GG (flecha en el overlay).
     const habilidad = ordenHabilidades ? siguienteHabilidad(res.data?.activePlayer, ordenHabilidades) : null;
-    overlayWindow.webContents.send('overlay:state', { ...estadoPartida.actualizar(res.data), ddVersion, misObjetos, siguiente, habilidad });
+    const estado = estadoPartida.actualizar(res.data);
+    overlayWindow.webContents.send('overlay:state', { ...estado, ddVersion, misObjetos, siguiente, habilidad });
+    // Consejos en pantalla (reglas, sin IA): la tarjeta de la izquierda.
+    const consejo = motorConsejos?.procesar(res.data, estado, { tips: consejosCampeones ?? {}, siguiente });
+    if (consejo) overlayWindow.webContents.send('overlay:consejo', consejo);
     avisarPartidaApp({ misObjetos, siguiente });
   }, 1000);
 }
@@ -613,6 +634,8 @@ function stopOverlay() {
   datosPartida = null;
   if (!cargaActiva) detenerTeclado();
   reiniciarBuild();
+  motorConsejos = null;
+  overlayWindow?.webContents.send('overlay:consejo', null);
   reiniciarPartidaApp(); // terminó la partida: la app deja de mostrarla
   clearInterval(overlayTimer);
   overlayTimer = null;
@@ -621,6 +644,10 @@ function stopOverlay() {
   if (!cargaActiva) overlayWindow?.hide();
 }
 ipcMain.handle('game:getStatus', () => ({ inGame: !!lastInGame }));
+
+// ── Consejos en pantalla (ver consejos.js): la tarjeta de la izquierda ──
+let motorConsejos = null;     // uno por partida
+let consejosCampeones = null; // campeón → consejos oficiales "contra" (Data Dragon)
 
 // ── Clips: búfer durante la partida, jugadas automáticas y Ctrl + F8 (ver clips.js) ──
 let campeonActual = null;
@@ -706,6 +733,7 @@ const meta = require('./meta');
 ipcMain.handle('meta:tier', () => meta.cargarTier());
 ipcMain.handle('meta:campeon', (_e, championId, posicion) => meta.cargarCampeon(championId, posicion));
 ipcMain.handle('meta:matchup', (_e, championId, posicion, rivalId) => meta.cargarMatchup(championId, posicion, rivalId).catch(() => ({ estado: 'error' })));
+ipcMain.handle('meta:plan', (_e, datos) => meta.pedirPlan(datos).catch(() => ({ estado: 'error' })));
 ipcMain.handle('meta:adaptar', (_e, ficha, miCampeon, rivales) => meta.adaptarBuild(ficha, miCampeon, rivales).catch(() => null));
 
 // ── En Vivo (selección de campeones, vía la API local del cliente de LoL) ──

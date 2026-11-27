@@ -514,6 +514,27 @@ function pintarClip(d) {
 }
 window.overlay.onClip?.(pintarClip);
 
+// ── Consejos: tarjeta a la izquierda que reacciona a la partida ──
+// d: { titulo, texto, pie, campeon: { nombre, clave }, segundos }. Entra desde la
+// izquierda, se queda `segundos` y se va. `fijo` (editor): no se va sola.
+let consejoTimer = null;
+function pintarConsejo(d) {
+  const nodo = $('consejo');
+  clearTimeout(consejoTimer);
+  if (!d?.texto || !ver('consejos')) { mostrar(nodo, false); return; }
+  const cara = versionDD && d.campeon?.clave ? el('img', 'consejo-cara') : null;
+  if (cara) {
+    cara.alt = d.campeon.nombre ?? '';
+    cara.addEventListener('error', () => { cara.remove(); nodo.classList.add('sin-cara'); });
+    cara.src = `https://ddragon.leagueoflegends.com/cdn/${versionDD}/img/champion/${d.campeon.clave}.png`;
+  }
+  nodo.classList.toggle('sin-cara', !cara);
+  nodo.replaceChildren(...[cara, el('div', 'consejo-titulo', d.titulo ?? 'Consejo'), el('div', 'consejo-texto', d.texto), d.pie ? el('div', 'consejo-pie', d.pie) : null].filter(Boolean));
+  mostrar(nodo, true, true);
+  if (!d.fijo) consejoTimer = setTimeout(() => mostrar(nodo, false), Math.min(20, Math.max(4, Number(d.segundos) || 11)) * 1000);
+}
+window.overlay.onConsejo?.(pintarConsejo);
+
 window.overlay.onState(pintarEstado);
 window.overlay.onConfig?.(aplicarConfig);
 window.overlay.getConfig?.().then(aplicarConfig);

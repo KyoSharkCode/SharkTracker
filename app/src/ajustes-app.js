@@ -42,6 +42,8 @@ function fabrica() {
       alIniciar: false,     // abrir SharkTracker al iniciar Windows
     },
     avisos: Object.fromEntries(AVISOS.map((a) => [a, true])),
+    // Plan de partida con IA (En Vivo): generarlo solo al fijar campeón, sin pulsar el botón.
+    plan: { auto: false },
     clips: {
       activo: false,         // grabar el búfer durante la partida (Ctrl + F8 guarda)
       calidad: 'alta',       // alta = 60 fps · ligera = 30 fps y menos peso
@@ -79,6 +81,7 @@ function normalizar(datos) {
   for (const a of AVISOS) {
     if (typeof datos?.avisos?.[a] === 'boolean') base.avisos[a] = datos.avisos[a];
   }
+  if (typeof datos?.plan?.auto === 'boolean') base.plan.auto = datos.plan.auto;
   const c = datos?.clips ?? {};
   if (typeof c.activo === 'boolean') base.clips.activo = c.activo;
   if (CALIDADES.includes(c.calidad)) base.clips.calidad = c.calidad;
@@ -119,6 +122,7 @@ function guardar(cambios) {
     tema: cambios?.tema ?? actual.tema,
     ventana: { ...actual.ventana, ...(cambios?.ventana ?? {}) },
     avisos: { ...actual.avisos, ...(cambios?.avisos ?? {}) },
+    plan: { ...actual.plan, ...(cambios?.plan ?? {}) },
     clips: {
       ...actual.clips,
       ...(cambios?.clips ?? {}),

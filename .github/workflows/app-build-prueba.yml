@@ -1,0 +1,56 @@
+# Build de prueba de la app de escritorio: arma el instalador de UNA rama sin publicar
+# nada. No crea ningún Release, así que las apps instaladas de los demás no se enteran.
+#
+# Cómo se usa:
+#  - Pestaña "Actions" del repo → "App: build de prueba" → "Run workflow" → elegir la rama.
+#  - O, en una rama claude/…, un commit cuyo mensaje incluya [build].
+# Al terminar (unos 5–10 min), en la página de esa ejecución, abajo, en "Artifacts",
+# está "SharkTracker-prueba-…": un .zip con SharkTracker-Setup.exe. Se instala encima de
+# la app que ya tengas (misma sesión y ajustes) y dura 14 días en GitHub.
+#
+# La build lleva la misma versión que app/package.json: no se actualiza sola hasta que
+# se publique una versión más nueva con "App: publicar versión", que la reemplaza.
+name: "App: build de prueba"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["claude/**"]
+    paths: ["app/**", ".github/workflows/app-build-prueba.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[build]')
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Pruebas automáticas
+        run: npm test
+      - run: npm ci
+      # Ayudante de audio de los clips (app/nativo), igual que en "App: publicar versión".
+      - name: Compilar el ayudante de audio (sharkaudio.exe)
+        shell: cmd
+        run: nativo\compilar.cmd
+      - name: Armar el instalador (sin publicar)
+        run: npx electron-builder --win --publish never
+      - name: Nombre de la build
+        id: nombre
+        shell: bash
+        run: echo "nombre=SharkTracker-prueba-$(node -p "require('./package.json').version")-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.nombre.outputs.nombre }}
+          path: app/dist/SharkTracker-Setup.exe
+          if-no-files-found: error
+          retention-days: 14

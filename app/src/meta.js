@@ -9,6 +9,7 @@
 const https = require('https');
 const auth = require('./auth');
 const { adaptar } = require('./build-adaptada');
+const { armarPedido, validarPlan } = require('./plan');
 
 const DD = 'https://ddragon.leagueoflegends.com/cdn';
 // players.primary_role (web) → posición de OP.GG.
@@ -149,6 +150,24 @@ async function cargarMatchup(championId, posicion, rivalId) {
   return data;
 }
 
+// Plan de partida con IA (En Vivo). datos: { campeon, rol, rivales, aliados, rivalLinea, ficha,
+// matchup, adaptada }. Aquí se arman las opciones reales (plan.js), la Edge Function
+// `plan-partida` les suma tu estilo y llama a Claude, y la respuesta se valida contra esas
+// opciones. Devuelve { estado, plan, paginas (para importar las runas elegidas), uso, … }.
+async function pedirPlan(datos) {
+  const cliente = auth.client();
+  const { data: { session } } = await cliente.auth.getSession();
+  if (!session) return { estado: 'sin_sesion' };
+  const armado = armarPedido(datos, await cargarCatalogos());
+  if (!armado) return { estado: 'sin_datos' };
+  const { data, error } = await cliente.functions.invoke('plan-partida', { body: { accion: 'plan', pedido: armado.pedido } });
+  if (error) return { estado: 'error' };
+  if (data?.estado !== 'ok') return { estado: data?.estado ?? 'error', gasto: data?.gasto ?? null };
+  const plan = validarPlan(data.plan, armado.pedido);
+  if (!plan) return { estado: 'sin_plan' };
+  return { estado: 'ok', plan, paginas: armado.paginas, uso: data.uso ?? null, estilo: data.estilo ?? null, gasto: data.gasto ?? null };
+}
+
 // Amigos de SharkTracker (para En Vivo): Riot ID + rango de SoloQ, de la base (0 peticiones a Riot).
 async function cargarAmigos() {
   const cliente = auth.client();
@@ -176,4 +195,4 @@ async function rolDeCampeon(championId) {
   return data?.posicion ?? null;
 }
 
-module.exports = { cargarTier, cargarCampeon, cargarMatchup, cargarAmigos, cargarCatalogos, adaptarBuild, rolDeCampeon };
+module.exports = { cargarTier, cargarCampeon, cargarMatchup, cargarAmigos, cargarCatalogos, adaptarBuild, rolDeCampeon, pedirPlan };

@@ -26,6 +26,11 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
 - **Contra tu rival de línea**: quién gana la línea, un consejo de OP.GG y hasta 3 páginas de
   runas para elegir.
 
+- **Plan de partida (IA)**: al fijar tu campeón, la tarjeta "Plan de partida" tiene el botón "Generar plan":
+  una IA cruza las dos composiciones con tus números de los últimos 30 días y te dice cómo jugar la línea,
+  cómo gana tu equipo y qué evitar, y elige runas, botas y objetos entre los de OP.GG, con su motivo. Tú decides
+  si importas algo. Tiene un límite de gasto por día.
+
 ## Durante la partida
 - **Pantalla de carga**: rango, winrate y etiquetas de los 10. **Ctrl + X** lo oculta o lo muestra.
 - **Ctrl + X en partida**: tu build completa en orden, arriba a la izquierda (lo que ya
@@ -65,6 +70,15 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
 - **Audio de los clips**: en Ajustes → Clips → Audio, "Probar audio" dice qué fuente se oye. Si usas
   Wave Link o Voicemeeter, usa "Juego", "Discord" y "Música" (Spotify; graban el programa, sin
   importar por dónde sale) en lugar de "Todo el PC".
+
+- **Consejos**: una tarjeta a la izquierda que reacciona a tu partida. Al morir te dice qué pasó (te llevaban
+  niveles, peleaste con menos gente, tenías oro sin gastar) y cómo jugar contra quien te mató; también avisa si
+  cae la torre de tu línea, si llevas oro encima o si hay ventana para un objetivo. Se apaga en Ajustes → Overlay
+  y se mueve con "Reposicionar elementos".
+
+- **Clips, el reproductor**: debajo del video tienes clip anterior y siguiente, el botón **Favorito**, el volumen
+  y la velocidad (0,5× y 0,25× para ver una jugada despacio). La marca dorada de la barra es el momento de la
+  jugada. Con el teclado: Espacio, ← →, Mayús + ← → para cambiar de clip, F favorito y M silenciar.
 
 ## Si algo falla
 En **Ajustes → Cuenta → Diagnóstico**, "Abrir registro" abre el archivo donde la app anota sus

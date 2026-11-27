@@ -234,6 +234,14 @@ init();
 // Notas del parche de la app. Al publicar una versión nueva, se agrega arriba del todo.
 // Cada versión: { version, titulo, nuevo: [...], arreglos: [...] } (texto plano).
 const NOTAS = [
+  { version: '1.0.2', titulo: 'Consejos, plan de partida y reproductor nuevo', nuevo: [
+      'Consejos en partida: una tarjeta a la izquierda que reacciona a lo que pasa. Al morir te dice qué pasó (te llevaban niveles, peleaste con menos gente, tenías oro sin gastar) y cómo jugar contra quien te mató; también avisa si cae la torre de tu línea, si llevas oro encima o si hay ventana para un objetivo. Se apaga en Ajustes › Overlay y se mueve con "Reposicionar elementos".',
+      'Plan de partida con IA: al fijar tu campeón, En Vivo tiene la tarjeta "Plan de partida". Con "Generar plan", una IA cruza las dos composiciones con tus números de los últimos 30 días y te dice cómo jugar la línea, cómo gana tu equipo y qué evitar, y elige runas, botas y objetos entre los de OP.GG, con su motivo. Tú decides si importas algo.',
+      'Clips: reproductor propio. Botones de clip anterior y siguiente, el favorito a la vista en la barra del video, cámara lenta (0,5× y 0,25×) para ver una jugada despacio, y una marca dorada en el momento exacto de la jugada.',
+      'Clips con el teclado: Espacio para reproducir o pausar, ← → para moverte 5 segundos, Mayús + ← → para cambiar de clip, F para favorito y M para silenciar.',
+    ], arreglos: [
+      'Clips: el filtro de arriba ahora se llama "Solo favoritos", para no confundirlo con marcar un clip como favorito.',
+    ] },
   { version: '1.0.1', titulo: 'Audio de los clips en su sitio', arreglos: [
       'Audio de los clips: en algunos PC el sonido se iba adelantando a la imagen durante la partida (hasta un segundo en los clips del final). El audio ahora sigue la misma hora que el video, así que queda sincronizado de principio a fin.',
     ] },

@@ -12,6 +12,7 @@ const PIEZAS = [
   'build', // build completa en partida (se muestra u oculta con Ctrl + X)
   'siguiente', // siguiente compra de la build, junto al minimapa
   'habilidad', // flecha "sube esta" sobre las habilidades al subir de nivel
+  'consejos', // tarjeta de consejos que reacciona a la partida (entra por la izquierda)
   // Pantalla de carga
   'carga', // el panel entero (se alterna con Ctrl + X durante la carga)
   'cargaRangoAliados', 'cargaWinrateAliados', 'cargaRangoRivales', 'cargaWinrateRivales', 'cargaEtiquetas',
@@ -26,6 +27,7 @@ const POSICIONES_FABRICA = {
   carga:       { x: 1484, y: 60 },   // panel de la pantalla de carga (420 px de ancho)
   build:       { x: 16,   y: 16 },   // build en partida, arriba a la izquierda (452 px de ancho)
   siguiente:   { x: 1385, y: 996 },  // siguiente compra, a la izquierda del minimapa (250 px de ancho)
+  consejo:     { x: 16,   y: 560 },  // tarjeta de consejos, a la izquierda (400 px de ancho)
   habilidad:   { x: 744,  y: 902 },  // "sube esta": encima de las flechitas de subir nivel (Q W E R)
 };
 

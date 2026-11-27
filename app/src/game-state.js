@@ -37,6 +37,7 @@ const INHIB_REAPARECE = { 11: 5 * 60, 12: 4 * 60 };
 const MAPA = { grieta: 11, aram: 12, arena: 30 };
 const TOAST_DURACION = 5;    // segundos
 const LARVAS_TANDA = 15;     // s sin otra Vacuolarva del rival = terminaron el grupo
+const EPICOS = new Set(['dragon', 'ancestral', 'larvas', 'heraldo', 'baron']);
 
 const DRAGON_ES = {
   Fire: 'Infernal', Water: 'Océano', Earth: 'Montaña', Air: 'Nube',
@@ -253,9 +254,13 @@ function crearEstadoPartida() {
     const ultimo = (nombre, filtro = () => true) =>
       [...eventos].reverse().find((e) => e.EventName === nombre && filtro(e));
     const proximos = [];
+    // Todos los objetivos épicos con su reloj, sin el filtro de 1:30 (para los consejos):
+    // falta > 0 = segundos para que aparezca; falta <= 0 = ya está disponible.
+    const objetivos = [];
     const agregar = (clave, nombre, aparece, extra = {}, antes = AVISO_ANTES) => {
       if (aparece == null) return;
       const falta = aparece - t;
+      if (EPICOS.has(clave)) objetivos.push({ clave, nombre, falta: Math.ceil(falta) });
       if (falta > 0 && falta <= antes) proximos.push({ clave, nombre, falta: Math.ceil(falta), ...extra });
     };
     // Objetivos épicos: solo en la Grieta.
@@ -269,8 +274,9 @@ function crearEstadoPartida() {
       } else {
         agregar('dragon', 'Dragón', ultDragon ? ultDragon.EventTime + TIEMPOS.dragon.reaparece : TIEMPOS.dragon.primera);
       }
-      if (!larvas.length) agregar('larvas', 'Vacuolarvas', TIEMPOS.larvas.primera);
-      if (!ultimo('HeraldKill')) agregar('heraldo', 'Heraldo', TIEMPOS.heraldo.primera);
+      // Las Vacuolarvas se van cuando llega el Heraldo, y el Heraldo cuando llega el Barón.
+      if (!larvas.length && t < TIEMPOS.heraldo.primera) agregar('larvas', 'Vacuolarvas', TIEMPOS.larvas.primera);
+      if (!ultimo('HeraldKill') && t < TIEMPOS.baron.primera) agregar('heraldo', 'Heraldo', TIEMPOS.heraldo.primera);
       const ultBaron = ultimo('BaronKill');
       agregar('baron', 'Barón', ultBaron ? ultBaron.EventTime + TIEMPOS.baron.reaparece : TIEMPOS.baron.primera);
     }
@@ -287,6 +293,7 @@ function crearEstadoPartida() {
         { esMio, detalle: est.carril ? `${est.carril[0].toUpperCase()}${est.carril.slice(1)} · reaparece` : 'Reaparece' }, AVISO_INHIB);
     }
     proximos.sort((a, b) => a.falta - b.falta);
+    objetivos.sort((a, b) => a.falta - b.falta);
 
     // ── Diferencia de oro por fila del Tab ──
     // Fila i: el i-ésimo de tu equipo contra el i-ésimo del rival (mismo orden
@@ -309,7 +316,7 @@ function crearEstadoPartida() {
       modo: datos?.gameData?.gameMode,
     });
 
-    return { tiempo: t, mapa, miLado, baron, ancestral, toast, proximos, dragones: cuenta, oro, rendimiento, aliadoIzquierda: miLado !== 'red' };
+    return { tiempo: t, mapa, miLado, baron, ancestral, toast, proximos, objetivos, dragones: cuenta, oro, rendimiento, aliadoIzquierda: miLado !== 'red' };
   }
 
   return { actualizar, setReferencia, setPrecios };

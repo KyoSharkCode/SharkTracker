@@ -6,4 +6,5 @@ window.overlay = {
   onConfig: (cb) => { window.__aplicarConfig = cb; },
   onCarga: (cb) => { window.__carga = cb; },
   onBuild: (cb) => { window.__build = cb; },
+  onConsejo: (cb) => { window.__consejo = cb; },
 };

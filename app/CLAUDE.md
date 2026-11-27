@@ -144,6 +144,10 @@ de clips (los timers de campamentos se descartaron). La app es **solo para el gr
   no deja crear un Release ya publicado sin etiqueta). Probar local: `npm run dist`.
   **Notas del parche**: al publicar, agregar la versión arriba del todo en `NOTAS` de
   `descargar.html` (sección "Notas del parche", visible para todos).
+- **Build de prueba** (sin publicar): Actions → **"App: build de prueba"** → Run workflow → elegir la rama
+  (`.github/workflows/app-build-prueba.yml`; en ramas `claude/…` también con un commit que diga `[build]`).
+  Deja el instalador como *Artifact* de esa ejecución (.zip con `SharkTracker-Setup.exe`, 14 días). No crea
+  Release: los demás no se actualizan. Lleva la versión de package.json, así que la reemplaza la próxima publicada.
 - **Descarga desde la web**: `descargar.html` (menú ☰ → "App de escritorio"). El botón usa
   el enlace de descarga de la última publicación y muestra versión/fecha/tamaño leyendo la API pública de GitHub
   (`api.github.com` está en su CSP). Sin versión publicada, el botón dice "Muy pronto".
@@ -186,6 +190,8 @@ app/
                            y la captura de fondo opcional del editor
     preload-editor.js    → contextBridge (window.editor) de la ventana "Reposicionar elementos"
     lcu.js               → API local del cliente de LoL (En Vivo): fase, selección, runas, build, hechizos
+    plan.js              → plan de partida con IA: opciones reales y validación de la respuesta (sin Electron)
+    consejos.js          → tarjeta de consejos: reglas que reaccionan a la partida (sin IA, sin Electron)
     meta.js              → Meta: catálogos de DDragon y llamadas a la Edge Function `meta`
     build-adaptada.js    → build contra el equipo rival y "siguiente compra" (sin Electron, se prueba en Node)
     editor/              → ventana "Reposicionar elementos" (pantalla emulada del juego)
@@ -651,6 +657,93 @@ Decisiones de Alex (oct 2026).
     (se recuerda en localStorage `clips.vista`); "★ Favoritos" sigue en cuadrícula (son de partidas distintas).
   - Renombrar/favorito/mostrar/borrar salen de `crearControles` (los usan el visor y la timeline). Al refrescar la
     galería (miniaturas nuevas, favorito…) la timeline se actualiza sin cortar el video; al cambiar de sección se pausa.
+
+## v1.0.2 (nov 2026): reproductor propio de clips + consejos + plan de partida
+
+- **Reproductor de clips propio** (`renderer/reproductor.js`, `window.crearReproductor`; pedido de Kyo: el del
+  navegador "se ve raro", no dejaba pasar al clip siguiente y el favorito estaba escondido). Lo usan la timeline
+  y el visor (`clips.js`). Barra sobre el video: clip anterior · reproducir/pausa · siguiente · tiempo ·
+  **Favorito** (botón con nombre; dorado relleno = guardado) · volumen (se recuerda, `localStorage`
+  `clips.volumen` / `clips.mudo`) · velocidad 1× / 0,5× / 0,25× (vuelve a 1× en cada clip) · pantalla completa
+  (del reproductor entero). La barra de avance lleva una **marca dorada en el momento de la jugada** (`momento`).
+  La barra se esconde a los 2,4 s reproduciendo sin mover el ratón. Clic en el video = pausa; doble clic = completa.
+  - **Teclado** (sección Clips a la vista, sin estar escribiendo; sin animaciones): Espacio/K, ← → (5 s),
+    Mayús + ← → (clip anterior/siguiente), F (favorito), M (silenciar).
+  - El favorito salió de la fila de acciones (quedan Renombrar, Mostrar en la carpeta, Borrar): ahora vive solo
+    en el reproductor y en la estrella de cada tarjeta. La estrella cambia al instante y luego se confirma.
+  - El visor de clips sueltos también tiene anterior/siguiente (recorre la lista desde la que se abrió).
+  - El filtro de arriba pasó de "★ Favoritos" a **"Solo favoritos"** (Kyo lo pulsaba creyendo que marcaba el clip).
+  - Estilos `.rep*` al final de `style.css` (claro sobre oscuro en los dos temas, como todo lo que va sobre video).
+  - Probado en Chromium con un video de ejemplo (reproducir, saltar, teclado, favorito, velocidad, visor).
+    **Sin probar en Windows con clips reales** (H.264 por `sharkclip://`).
+- Además entran en la 1.0.2 la **tarjeta de consejos** y el **plan de partida con IA** (secciones de abajo).
+
+## Consejos en pantalla (nov 2026): la tarjeta que reacciona a la partida
+
+Decisión de Kyo (27/11/2026) tras probar el coach por voz: "con audio no hace la diferencia; mejor un sistema de
+notificaciones acorde a la partida, como los consejos de Overwatch al morir". **Reemplaza al coach de IA, que se quitó (ver más abajo).**
+- **Qué es**: una tarjeta (`#consejo`, zona izquierda, x 16 y 560, 400 px; entra y sale por la izquierda) con
+  "CONSEJO", el texto y, al morir, el retrato de quien te mató y debajo el consejo oficial contra ese campeón.
+  Interruptor "Consejos" en Ajustes → Overlay (pieza `consejos`, encendida de fábrica) y movible en el editor.
+- **Sin IA, sin coste, al instante**: `src/consejos.js` (`crearConsejos`, sin Electron, con prueba) son reglas sobre
+  `allgamedata` + `game-state.js`. Todos los roles, solo en la Grieta. main.js lo llama cada segundo
+  (`motorConsejos.procesar`) y manda `overlay:consejo`.
+  - **Al morir** (sale siempre; dura lo que tardas en reaparecer, 9–16 s). Entre las reglas que aplican, la menos
+    usada en la partida: `nivel` (quien te mató te lleva 2+ niveles), `numeros` (quedaban 2+ rivales vivos más
+    que aliados), `repetido` (el mismo campeón por 3.ª vez), `objetivo` (moriste a < 75 s de un objetivo), `oro`
+    (≥ 1200 sin gastar) y `torre`. Si no aplica ninguna: el consejo oficial contra ese campeón (uno distinto cada vez).
+  - **En partida** (mínimo 45 s entre consejos, no en plena pelea, tope 16): torre de TU línea perdida o tirada
+    (una vez cada una), inhibidor, 3.er dragón de cada equipo, Barón, ventaja numérica (3+ rivales muertos de
+    más), oro acumulado (60 s pudiendo comprar), salir de base sin ward de control (soporte/jungla) y farmeo por
+    debajo de tu referencia en los minutos 10 y 15. Tiempos y umbrales en `T`; los textos están en el mismo archivo.
+- **Consejos oficiales**: `enemytips` de Data Dragon (`championFull.json` es_MX, una vez por sesión, main.js
+  `cargarConsejosCampeones`). 147 de 173 campeones los traen (los más nuevos no: Yone, Viego, Ambessa…).
+- **Excepción aprobada por Kyo a "nunca campeones rivales"**: la tarjeta nombra a quien te mató y usa su nivel
+  (lo enseña el marcador). No rastrea a nadie. 
+
+## Plan de partida con IA (En Vivo, nov 2026) — paso 1
+
+Decisión de Kyo (27/11/2026): la IA va donde hay tiempo para leer y datos que cruzar, antes de la partida.
+- **Regla: la IA elige, no inventa.** `src/plan.js` (`armarPedido`, sin Electron, con prueba) arma las OPCIONES
+  reales: runas (la de la ficha + las del enfrentamiento, sin repetir), botas (ficha, enfrentamiento y build
+  adaptada) y situacionales (4.º–6.º de OP.GG con winrate + lo que sugiere `build-adaptada.js`). `validarPlan`
+  descarta cualquier objeto o página que no esté en esas opciones (la Edge Function ya lo filtra antes).
+- **Edge Function `plan-partida`** ("Verify JWT" ENCENDIDO, solo cuentas vinculadas): le suma **tu estilo**,
+  calculado en el servidor con `matches` + `match_participants` de 30 días (normales y ranked de la Grieta, sin
+  remakes): en el rol y con el campeón → partidas, WR, KDA, CS/min, visión/min, KP, parte del daño y wards de
+  control (`extra_stats`), con la referencia de la división de arriba (`elo_referencias_promedio`). Modelo
+  **Claude Sonnet 5.5** (`claude-sonnet-5-5`, `thinking: adaptive`, `effort: medium`, salida JSON con esquema,
+  system prompt en caché). Devuelve línea / equipo / evita, runas, botas, hasta 3 situacionales en orden y una alternativa.
+- **Gasto**: reutiliza la tabla `coach_uso` y `coach_registrar_uso`. Límites `IA_LIMITE_MES_USD` (50, todo el
+  grupo) y `IA_LIMITE_DIA_USD` (3 por persona), subidos por Kyo el 27/11/2026 (antes 15 y 0.75). Coste estimado con `PRECIO` (≈ US$ 0.02 por plan, sin medir en real).
+- **Solo con sesión de Discord y cuenta de LoL vinculada**: la función lo exige y `cardPlan` no dibuja la
+  tarjeta sin eso (`iaDisponible`); En Vivo queda como siempre, con las tarjetas de OP.GG.
+- **App**: `meta.pedirPlan` (IPC `meta:plan`) → tarjeta **"Plan de partida · IA"** en En Vivo (`cardPlan` en
+  `renderer/envivo.js`), la primera al fijar campeón. Se genera **con el botón**; el interruptor de la tarjeta
+  ("Generarlo solo al fijar campeón", `ajustes.json` → `plan.auto`, apagado de fábrica) lo pide solo y una vez
+  más cuando ya eligieron los 5 rivales. Botones "Importar runas del plan" y "Importar build del plan" (bloque
+  "Plan de partida" arriba del set): **nada se importa solo**. El pie muestra con cuántas partidas se calculó
+  tu estilo, el coste de ese plan y el gasto del mes.
+- **Sin probar con la API real** (sí con Claude y Supabase simulados, y la tarjeta en Chromium).
+- **Siguientes pasos acordados**: (2) en la carga, una línea por rival ("cómo juega tu campeón contra ese") para
+  la tarjeta de consejos, que cubre los 26 campeones sin consejo oficial; (3) mejorar el estilo con la línea de
+  tiempo de Riot (dónde y cuándo mueres, diferencias de oro/CS al 10 y 15) y un resumen por campeón que no se
+  borre a los 30 días.
+
+## Coach de IA por voz: probado y descartado (nov 2026)
+
+Se construyó y se probó en partida un coach de macro con la API de Claude (filtro Haiku 5.5 + Sonnet 5.5, voz de
+Windows, Edge Function `coach`, bitácora de la partida, Ctrl + F9 / F10). **Kyo lo descartó el 27/11/2026**: con
+audio "no hace la diferencia" y a la larga molesta; los consejos sonaban a notificaciones porque la API local no
+dice dónde estás, las oleadas ni los campamentos. Lo reemplaza la tarjeta de consejos de arriba (reglas, sin IA).
+- Se quitó de la app y del repo: `coach.js`, `coach-cerebro.js`, `voz.js`, la pestaña Ajustes → Coach, los atajos
+  y `supabase/functions/coach` (también borrada en Supabase). El código queda en el historial de git (rama
+  `claude/festive-thompson-fxlnal`, commits "Coach de macro por voz" y "Coach v2").
+- Queda en la base la tabla `coach_uso` con su función `coach_registrar_uso` (migración `20261120000000_coach.sql`,
+  contadores de gasto por persona y día): ahora la usa `plan-partida` como tope de gasto. El secreto `ANTHROPIC_API_KEY` sigue en los Secrets de Edge Functions.
+- Aprendido, por si se retoma: política de Riot revisada el 20/11/2026 (no aprueban "apps that dictate player
+  decisions" ni que "draw conclusions for you during gameplay"; analizar después de jugar sí); coste real medido
+  ≈ US$ 0.04 por partida; sin razonamiento Sonnet recitaba la guía y leyó "2 min 53 s" como "53 segundos".
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)

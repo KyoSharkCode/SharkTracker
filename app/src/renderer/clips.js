@@ -306,7 +306,8 @@
   // reproductor que tiene el archivo abierto: Windows no deja renombrar ni borrar un
   // archivo que el video tiene abierto, así que se suelta antes y se vuelve a poner.
   // `alCambiar(clip)`: después de renombrar (el clip con su nombre nuevo) o de borrar (null).
-  function crearControles({ idTitulo, video, alCambiar }) {
+  // `rep()`: el reproductor de ese video; ahí vive el botón de favorito (a la vista, en la barra).
+  function crearControles({ idTitulo, video, alCambiar, rep = () => null }) {
     let clip = null;
     let borrarTimer = null;
     const nombreCaja = el('div', 'visor-nombre-caja');
@@ -328,15 +329,13 @@
     nombreCaja.append(titulo, form, sub);
 
     const acciones = el('div', 'visor-acciones');
-    const fav = el('button', 'btn-sec');
-    fav.type = 'button';
     const btnRenombrar = el('button', 'btn-sec', 'Renombrar');
     btnRenombrar.type = 'button';
     const mostrar = el('button', 'btn-sec', 'Mostrar en la carpeta');
     mostrar.type = 'button';
     const borrar = el('button', 'btn-sec btn-peligro', 'Borrar');
     borrar.type = 'button';
-    acciones.append(fav, btnRenombrar, mostrar, el('span', 'visor-sep'), borrar);
+    acciones.append(btnRenombrar, mostrar, el('span', 'visor-sep'), borrar);
     const errorTxt = el('div', 'swsub bad');
     errorTxt.hidden = true;
 
@@ -358,9 +357,7 @@
       titulo.textContent = nombre(c);
       titulo.title = c.archivo;
       sub.textContent = [`${dia(c.creado)}, ${hora(c.creado)}`, c.campeon, c.segundos ? duracion(c.segundos) : null, tamano(c.tamano)].filter(Boolean).join(' · ');
-      fav.textContent = c.favorito ? '★ Favorito' : '☆ Favorito';
-      fav.classList.toggle('on', c.favorito);
-      fav.setAttribute('aria-pressed', String(c.favorito));
+      rep()?.fijar({ favorito: c.favorito });
     }
     // Clip nuevo en pantalla: sin formularios abiertos ni errores viejos.
     function mostrarClip(c) {
@@ -370,13 +367,16 @@
       error('');
     }
 
-    fav.addEventListener('click', async () => {
+    // Favorito: la estrella cambia al instante y después se confirma con lo guardado.
+    async function alternarFavorito() {
       if (!clip) return;
-      await window.sharkTracker.clips.favorito(clip.archivo, !clip.favorito);
+      const archivo = clip.archivo;
+      rep()?.fijar({ favorito: !clip.favorito });
+      await window.sharkTracker.clips.favorito(archivo, !clip.favorito);
       await cargar();
-      const c = datos.clips.find((x) => x.archivo === clip?.archivo);
-      if (c) pintar(c);
-    });
+      const c = datos.clips.find((x) => x.archivo === archivo);
+      if (c && clip?.archivo === archivo) pintar(c);
+    }
     mostrar.addEventListener('click', () => clip && window.sharkTracker.clips.mostrar(clip.archivo));
     btnRenombrar.addEventListener('click', () => {
       if (!clip) return;
@@ -427,23 +427,38 @@
       alCambiar(null);
     });
 
-    return { nombreCaja, acciones, errorTxt, mostrarClip, pintar, reiniciarBorrar, clip: () => clip };
+    return { nombreCaja, acciones, errorTxt, mostrarClip, pintar, reiniciarBorrar, alternarFavorito, clip: () => clip };
   }
 
   // ── Visor (clips sueltos: favoritos y la vista de lista) ──
   const visor = $('gal-visor');
-  const videoVisor = $('visor-video');
+  // Anterior / siguiente recorren la lista desde la que se abrió (los favoritos o los clips de la partida).
+  let listaVisor = [];
+  const moverVisor = (paso) => {
+    const i = listaVisor.findIndex((x) => x.archivo === ctlVisor.clip()?.archivo);
+    const c = listaVisor[i + paso];
+    if (i >= 0 && c) abrir(datos?.clips.find((x) => x.archivo === c.archivo) ?? c, listaVisor);
+  };
+  const repVisor = window.crearReproductor({
+    alAnterior: () => moverVisor(-1), alSiguiente: () => moverVisor(1), alFavorito: () => ctlVisor.alternarFavorito(),
+  });
+  const videoVisor = repVisor.video;
+  $('visor-escena').append(repVisor.raiz);
   const ctlVisor = crearControles({
     idTitulo: 'visor-titulo',
     video: () => videoVisor,
+    rep: () => repVisor,
     alCambiar: async (c) => { if (!c) { visor.close(); await cargar(); } },
   });
   $('visor-nombre').append(ctlVisor.nombreCaja);
   $('visor-pie').append(ctlVisor.acciones, ctlVisor.errorTxt);
-  function abrir(c) {
+  function abrir(c, lista = null) {
+    listaVisor = lista ?? (filtro === 'favoritos' ? (datos?.clips ?? []).filter((x) => x.favorito) : (grupoAbierto()?.clips ?? [c]));
     ctlVisor.mostrarClip(c);
+    const i = listaVisor.findIndex((x) => x.archivo === c.archivo);
+    repVisor.fijar({ hayAnterior: i > 0, haySiguiente: i >= 0 && i < listaVisor.length - 1, momento: c.momento ?? null });
     videoVisor.src = url('video', c.archivo);
-    visor.showModal();
+    if (!visor.open) visor.showModal();
     videoVisor.play().catch(() => {});
   }
   visor.addEventListener('close', () => {
@@ -517,10 +532,13 @@
   function crearTimeline(g) {
     const raiz = el('div', 'tl');
     const escena = el('div', 'tl-escena');
-    const video = el('video', 'tl-video');
-    video.controls = true;
-    video.preload = 'auto';
-    video.playsInline = true;
+    // Reproductor propio: anterior / siguiente recorren los clips de la partida.
+    const rep = window.crearReproductor({
+      alAnterior: () => { if (t.i > 0) ir(t.i - 1); },
+      alSiguiente: () => { if (t.i < t.clips.length - 1) ir(t.i + 1); },
+      alFavorito: () => ctl.alternarFavorito(),
+    });
+    const video = rep.video;
     const sig = el('div', 'tl-siguiente');
     sig.hidden = true;
     sig.setAttribute('role', 'status');
@@ -530,10 +548,11 @@
     const sigNo = el('button', 'tl-sig-btn tl-sig-no', 'Cancelar');
     sigNo.type = 'button';
     sig.append(sigTxt, sigYa, sigNo);
-    escena.append(video, sig);
+    escena.append(rep.raiz, sig);
 
     const ctl = crearControles({
       video: () => video,
+      rep: () => rep,
       alCambiar: async (c) => {
         if (c) { t.clips[t.i] = c; pintarPista(); return; }
         // Borrado: se queda en el mismo lugar de la pista (el siguiente, o el anterior si era el último).
@@ -560,6 +579,7 @@
       t.i = Math.max(0, Math.min(t.clips.length - 1, i));
       const c = t.clips[t.i];
       ctl.mostrarClip(c);
+      rep.fijar({ hayAnterior: t.i > 0, haySiguiente: t.i < t.clips.length - 1, momento: c.momento ?? (c.juego ? c.juego.jugada - c.juego.inicio : null) });
       if (c.mini) video.poster = url('mini', c.archivo); else video.removeAttribute('poster');
       video.src = url('video', c.archivo);
       if (reproducir) video.play().catch(() => {});
@@ -675,6 +695,7 @@
       if (j >= 0) {
         t.i = j;
         ctl.pintar(t.clips[j]);
+        rep.fijar({ hayAnterior: j > 0, haySiguiente: j < t.clips.length - 1 });
         pintarPista();
       } else {
         ir(Math.min(t.i, t.clips.length - 1), false);
@@ -682,6 +703,7 @@
     };
     t.soltar = () => {
       observador.disconnect();
+      rep.soltar();
       pararCuenta();
       video.pause();
       video.removeAttribute('src');
