@@ -575,7 +575,8 @@
     const cambios = a ? [...a.sugerencias.map((s) => ({ item: s.item, titulo: s.titulo, motivo: s.motivo, deOpgg: s.deOpgg })),
       ...(a.botas ? [{ item: a.botas.item, titulo: 'Botas', motivo: a.botas.motivo, deOpgg: false }] : [])] : [];
     c.append(el('div', 'mt-subt', 'Contra este equipo'));
-    if (!rivalesFijados) c.append(el('div', 'mt-pasod', 'Aparece cuando los rivales fijen su campeón.'));
+    // En ARAM los rivales no se ven en la selección: la build se adapta ya en partida (Ctrl + X).
+    if (!rivalesFijados) c.append(el('div', 'mt-pasod', rol === 'aram' ? 'En ARAM los rivales se ven al empezar la partida: ahí tu build (Ctrl + X) se adapta a ellos.' : 'Aparece cuando los rivales fijen su campeón.'));
     else if (!a) c.append(el('div', 'mt-pasod', 'Analizando a los rivales…'));
     else {
       if (a.resumen) c.append(el('div', 'ev-adapt-res', `${a.resumen}${rivalesFijados < 5 ? ` (${rivalesFijados} de 5 rivales)` : ''}`));
@@ -674,7 +675,7 @@
     if (faltan > 0) {
       const p = el('div', 'ev-pend');
       for (let i = 0; i < faltan; i++) p.append(el('span', 'ev-pendic', '?'));
-      p.append(el('span', 'mt-pasod', 'Aparecen al fijar su campeón.'));
+      p.append(el('span', 'mt-pasod', esAram() ? 'En ARAM se ven al empezar la partida.' : 'Aparecen al fijar su campeón.'));
       c.append(p);
     }
     return c;
