@@ -733,6 +733,7 @@ const meta = require('./meta');
 ipcMain.handle('meta:tier', () => meta.cargarTier());
 ipcMain.handle('meta:campeon', (_e, championId, posicion) => meta.cargarCampeon(championId, posicion));
 ipcMain.handle('meta:matchup', (_e, championId, posicion, rivalId) => meta.cargarMatchup(championId, posicion, rivalId).catch(() => ({ estado: 'error' })));
+ipcMain.handle('meta:plan', (_e, datos) => meta.pedirPlan(datos).catch(() => ({ estado: 'error' })));
 ipcMain.handle('meta:adaptar', (_e, ficha, miCampeon, rivales) => meta.adaptarBuild(ficha, miCampeon, rivales).catch(() => null));
 
 // ── En Vivo (selección de campeones, vía la API local del cliente de LoL) ──

@@ -246,7 +246,144 @@
     hechizos: '✓ Hechizos puestos (tu Destello se queda en su tecla).',
     build: '✓ Set de objetos creado: lo verás en la tienda del juego.',
     buildAdaptada: '✓ Set adaptado creado: arriba del todo verás "Contra este equipo".',
+    planRunas: '✓ Página de runas del plan creada y seleccionada en el cliente.',
+    planBuild: '✓ Set del plan creado: arriba del todo verás "Plan de partida".',
   };
+
+  // ── Plan de partida con IA ──
+  // La IA elige entre las opciones reales (build y runas de OP.GG, enfrentamiento y build
+  // adaptada) cruzándolas con las dos composiciones y con tu estilo de los últimos 30 días.
+  // Se pide con el botón o, si lo activas, solo al fijar campeón; se puede actualizar una
+  // vez cuando terminan de elegir los rivales. Nada se importa sin pulsar su botón.
+  const planes = new Map(); // `${id}:${rol}` → { estado, plan, paginas, uso, estilo, gasto, rivales: 'ids' }
+  let planAuto = false;
+  const TEXTO_PLAN = {
+    sin_sesion: 'Inicia sesión para generar el plan.',
+    sin_cuenta: 'Tu Discord no tiene una cuenta de LoL vinculada en SharkTracker.',
+    sin_key: 'Falta configurar la key de Claude en Supabase.',
+    limite_dia: 'Llegaste al límite de gasto de hoy: mañana vuelve a estar disponible.',
+    limite_mes: 'El grupo llegó al límite de gasto del mes.',
+    sin_plan: 'La IA no devolvió un plan completo. Prueba otra vez.',
+    sin_datos: 'Faltan los datos de Meta de tu campeón.',
+    ocupado: 'La IA está ocupada. Prueba en unos segundos.',
+  };
+  const rivalesFijados = () => (estado.rivales ?? []).map((r) => r.campeon).filter(Boolean).sort((a, b) => a - b);
+  function pedirPlan(id, rol, f) {
+    const k = `${id}:${rol}`;
+    const rivales = rivalesFijados();
+    const linea = rivalDeLinea();
+    const m = linea ? matchups.get(`${id}:${rol}:${linea}`) : null;
+    const a = adaptadas.get(`${id}:${rol}:${[...rivales].sort().join(',')}`);
+    planes.set(k, { ...(planes.get(k) ?? {}), estado: 'cargando', rivales: rivales.join(',') });
+    pintar(true);
+    window.sharkTracker.meta.plan({
+      campeon: id, rol, rivales, aliados: (estado.aliados ?? []).map((x) => x.campeon).filter(Boolean), rivalLinea: linea,
+      ficha: f, matchup: typeof m === 'object' ? m : null, adaptada: typeof a === 'object' ? a : null,
+    }).then((r) => {
+      const previo = planes.get(k) ?? {};
+      // Si falla una actualización, se conserva el plan que ya había.
+      planes.set(k, r?.estado === 'ok' ? { ...r, rivales: rivales.join(',') } : { ...previo, estado: previo.plan ? 'ok' : (r?.estado ?? 'error'), fallo: r?.estado ?? 'error' });
+      pintar(true);
+    });
+  }
+  function cardPlan(id, rol, f) {
+    const c = tarjeta('Plan de partida · IA', 'dot-carga');
+    const k = `${id}:${rol}`;
+    const p = planes.get(k);
+    const rivales = rivalesFijados();
+    // ¿Ya están los datos que la IA necesita? (la guía del rival de línea y la build adaptada, si aplican)
+    const linea = rivalDeLinea();
+    const m = linea ? matchup(id, rol, linea) : null;
+    const listo = !!f && !(linea && (m === null || m === 'cargando')) && !(rivales.length && !adaptada(id, rol, f));
+    const completo = rivales.length >= 5;
+    const hayNuevos = p?.plan && p.rivales !== rivales.join(',');
+    // Solo: al fijar campeón y, una vez más, cuando ya eligieron los cinco rivales.
+    if (planAuto && listo && p?.estado !== 'cargando' && (!p || (hayNuevos && completo && !p.completo))) {
+      setTimeout(() => { if (!planes.get(k) || planes.get(k).estado !== 'cargando') { pedirPlan(id, rol, f); const x = planes.get(k); if (x) x.completo = completo; } }, 0);
+    }
+    const generar = (texto) => {
+      const b = el('button', 'ev-btn', texto);
+      b.type = 'button';
+      b.disabled = !listo;
+      b.addEventListener('click', () => pedirPlan(id, rol, f));
+      return b;
+    };
+    if (!p?.plan) {
+      if (p?.estado === 'cargando') { c.append(el('div', 'mt-vacio', 'Preparando tu plan: cruzando las dos composiciones con tu estilo…')); return c; }
+      c.append(el('div', 'mt-vacio', p ? (TEXTO_PLAN[p.estado] ?? 'No se pudo generar el plan. Prueba otra vez.')
+        : 'La IA cruza tu campeón, las dos composiciones y tu estilo de los últimos 30 días, y elige entre las builds y runas de OP.GG. No inventa objetos: solo escoge y te explica por qué.'));
+      const acc = el('div', 'ev-acciones');
+      acc.append(generar(listo ? 'Generar plan' : 'Cargando datos…'));
+      c.append(acc, filaAuto());
+      return c;
+    }
+    const plan = p.plan;
+    const linea3 = (etq, texto) => { const fl = el('div', 'pl-fila'); fl.append(el('div', 'pl-etq', etq), el('div', 'pl-txt', texto)); return fl; };
+    c.append(linea3('Línea', plan.linea), linea3('Equipo', plan.composicion), linea3('Evita', plan.evita));
+    const eleccion = (nodoIcono, titulo, motivo) => {
+      const fl = el('div', 'ev-adapt');
+      const t = el('div');
+      t.append(el('div', 'ev-adapt-t', titulo), el('div', 'mt-pasod', motivo));
+      fl.append(nodoIcono, t);
+      return fl;
+    };
+    const pagina = plan.runas ? p.paginas?.[plan.runas.opcion - 1] : null;
+    if (pagina) c.append(eleccion(icono(cat().runas[pagina.runas_principales[0]]?.img, 'mt-item', '?', plan.runas.clave), `Runas: ${plan.runas.clave}`, plan.runas.motivo));
+    if (plan.botas) c.append(eleccion(iconoObjeto(plan.botas.id), `Botas: ${plan.botas.nombre}`, plan.botas.motivo));
+    plan.objetos.forEach((o, i) => c.append(eleccion(iconoObjeto(o.id), `${i + 1}.º situacional: ${o.nombre}`, o.motivo)));
+    if (plan.alternativa) c.append(el('div', 'pl-alt', `Si cambia la partida: ${plan.alternativa}`));
+
+    const acc = el('div', 'ev-acciones');
+    if (pagina) {
+      acc.append(boton('Importar runas del plan', 'planRunas', () => api().importarRunas({
+        nombre: campeon(id).nombre, principal: pagina.principal, secundaria: pagina.secundaria,
+        runas: [...pagina.runas_principales, ...(pagina.runas_secundarias ?? []), ...(pagina.fragmentos ?? [])],
+      })));
+    }
+    const elegidos = [plan.botas?.id, ...plan.objetos.map((o) => o.id)].filter(Boolean);
+    if (elegidos.length) {
+      acc.append(boton('Importar build del plan', 'planBuild', () => api().importarBuild({
+        championId: id,
+        titulo: `${campeon(id).nombre} ${ROL_ES[rol] ?? ''} (plan)`.replace('  ', ' '),
+        bloques: [
+          { titulo: 'Plan de partida', items: elegidos },
+          { titulo: 'Inicio', items: f?.inicio?.ids ?? [] }, { titulo: 'Core', items: f?.core?.ids ?? [] }, { titulo: 'Botas', items: f?.botas?.ids ?? [] },
+          { titulo: '4.º objeto (elige uno)', items: (f?.cuarto ?? []).map((g) => g.ids[0]) },
+          { titulo: '5.º objeto (elige uno)', items: (f?.quinto ?? []).map((g) => g.ids[0]) },
+          { titulo: '6.º objeto (elige uno)', items: (f?.sexto ?? []).map((g) => g.ids[0]) },
+        ],
+      })));
+    }
+    if (p.estado === 'cargando') acc.append(el('span', 'mt-pasod', 'Actualizando…'));
+    else if (hayNuevos) acc.append(generar('Actualizar con los rivales nuevos'));
+    c.append(acc);
+    for (const t of ['planRunas', 'planBuild']) { const av = aviso(t); if (av) c.append(av); }
+    const pie = [
+      p.estilo ? `Con tus ${p.estilo.rol} partidas en el rol y ${p.estilo.campeon} con ${campeon(id).nombre} (30 días)` : '',
+      p.uso ? `US$ ${Number(p.uso.usd).toFixed(3)}` : '',
+      p.gasto ? `mes del grupo: US$ ${Number(p.gasto.mes_total).toFixed(2)} de ${p.gasto.limite_mes}` : '',
+      p.fallo ? 'la última actualización falló' : '',
+    ].filter(Boolean).join(' · ');
+    if (pie) c.append(el('div', 'pl-pie', pie));
+    c.append(filaAuto());
+    return c;
+  }
+  // Interruptor: generar el plan solo, sin pulsar el botón (gasta en cada selección).
+  function filaAuto() {
+    const fl = el('div', 'pl-auto');
+    const sw = el('button', `sw${planAuto ? ' on' : ''}`);
+    sw.type = 'button';
+    sw.setAttribute('role', 'switch');
+    sw.setAttribute('aria-checked', String(planAuto));
+    sw.setAttribute('aria-label', 'Generar el plan solo al fijar campeón');
+    sw.addEventListener('click', async () => {
+      const aj = await window.sharkTracker.ajustes.set({ plan: { auto: !planAuto } });
+      planAuto = !!aj?.plan?.auto;
+      pintar(true);
+    });
+    fl.append(el('span', 'mt-pasod', 'Generarlo solo al fijar campeón'), sw);
+    return fl;
+  }
 
   // ── Contra tu rival de línea (guía de enfrentamiento de OP.GG, todos los elos) ──
   // Quién gana la línea, el consejo de OP.GG, lo que más funciona contra él y hasta 3
@@ -670,7 +807,7 @@
       arriba.append(t);
     } else if (estado.yo?.bloqueado && estado.yo.campeon) {
       miF = ficha(estado.yo.campeon, rol);
-      arriba.append(cardRunas(estado.yo.campeon, rol, miF), cardBuild(estado.yo.campeon, rol, miF));
+      arriba.append(cardPlan(estado.yo.campeon, rol, miF), cardRunas(estado.yo.campeon, rol, miF), cardBuild(estado.yo.campeon, rol, miF));
       const vs = cardMatchup(estado.yo.campeon, rol);
       if (vs) arriba.append(vs);
     } else {
@@ -730,6 +867,8 @@
       pintar(true);
     });
     api().partida().then((d) => { if (d) { partida = d; pintar(true); } });
+    window.sharkTracker.ajustes.get().then((aj) => { planAuto = !!aj?.plan?.auto; });
+    window.sharkTracker.ajustes.onChanged((aj) => { planAuto = !!aj?.plan?.auto; });
     api().amigos().then((lista) => { amigos = new Map((lista ?? []).map((a) => [a.riotId, a.rango])); pintar(true); });
     await cargarMeta();
     recibir(await api().estado());

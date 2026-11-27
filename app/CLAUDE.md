@@ -190,6 +190,7 @@ app/
                            y la captura de fondo opcional del editor
     preload-editor.js    → contextBridge (window.editor) de la ventana "Reposicionar elementos"
     lcu.js               → API local del cliente de LoL (En Vivo): fase, selección, runas, build, hechizos
+    plan.js              → plan de partida con IA: opciones reales y validación de la respuesta (sin Electron)
     consejos.js          → tarjeta de consejos: reglas que reaccionan a la partida (sin IA, sin Electron)
     meta.js              → Meta: catálogos de DDragon y llamadas a la Edge Function `meta`
     build-adaptada.js    → build contra el equipo rival y "siguiente compra" (sin Electron, se prueba en Node)
@@ -680,6 +681,33 @@ notificaciones acorde a la partida, como los consejos de Overwatch al morir". **
 - **Excepción aprobada por Kyo a "nunca campeones rivales"**: la tarjeta nombra a quien te mató y usa su nivel
   (lo enseña el marcador). No rastrea a nadie. 
 
+## Plan de partida con IA (En Vivo, nov 2026) — paso 1
+
+Decisión de Kyo (27/11/2026): la IA va donde hay tiempo para leer y datos que cruzar, antes de la partida.
+- **Regla: la IA elige, no inventa.** `src/plan.js` (`armarPedido`, sin Electron, con prueba) arma las OPCIONES
+  reales: runas (la de la ficha + las del enfrentamiento, sin repetir), botas (ficha, enfrentamiento y build
+  adaptada) y situacionales (4.º–6.º de OP.GG con winrate + lo que sugiere `build-adaptada.js`). `validarPlan`
+  descarta cualquier objeto o página que no esté en esas opciones (la Edge Function ya lo filtra antes).
+- **Edge Function `plan-partida`** ("Verify JWT" ENCENDIDO, solo cuentas vinculadas): le suma **tu estilo**,
+  calculado en el servidor con `matches` + `match_participants` de 30 días (normales y ranked de la Grieta, sin
+  remakes): en el rol y con el campeón → partidas, WR, KDA, CS/min, visión/min, KP, parte del daño y wards de
+  control (`extra_stats`), con la referencia de la división de arriba (`elo_referencias_promedio`). Modelo
+  **Claude Sonnet 5.5** (`claude-sonnet-5-5`, `thinking: adaptive`, `effort: medium`, salida JSON con esquema,
+  system prompt en caché). Devuelve línea / equipo / evita, runas, botas, hasta 3 situacionales en orden y una alternativa.
+- **Gasto**: reutiliza la tabla `coach_uso` y `coach_registrar_uso`. Límites `IA_LIMITE_MES_USD` (15, todo el
+  grupo) y `IA_LIMITE_DIA_USD` (0.75 por persona). Coste estimado con `PRECIO` (≈ US$ 0.02 por plan, sin medir en real).
+- **App**: `meta.pedirPlan` (IPC `meta:plan`) → tarjeta **"Plan de partida · IA"** en En Vivo (`cardPlan` en
+  `renderer/envivo.js`), la primera al fijar campeón. Se genera **con el botón**; el interruptor de la tarjeta
+  ("Generarlo solo al fijar campeón", `ajustes.json` → `plan.auto`, apagado de fábrica) lo pide solo y una vez
+  más cuando ya eligieron los 5 rivales. Botones "Importar runas del plan" y "Importar build del plan" (bloque
+  "Plan de partida" arriba del set): **nada se importa solo**. El pie muestra con cuántas partidas se calculó
+  tu estilo, el coste de ese plan y el gasto del mes.
+- **Sin probar con la API real** (sí con Claude y Supabase simulados, y la tarjeta en Chromium).
+- **Siguientes pasos acordados**: (2) en la carga, una línea por rival ("cómo juega tu campeón contra ese") para
+  la tarjeta de consejos, que cubre los 26 campeones sin consejo oficial; (3) mejorar el estilo con la línea de
+  tiempo de Riot (dónde y cuándo mueres, diferencias de oro/CS al 10 y 15) y un resumen por campeón que no se
+  borre a los 30 días.
+
 ## Coach de IA por voz: probado y descartado (nov 2026)
 
 Se construyó y se probó en partida un coach de macro con la API de Claude (filtro Haiku 5.5 + Sonnet 5.5, voz de
@@ -690,8 +718,7 @@ dice dónde estás, las oleadas ni los campamentos. Lo reemplaza la tarjeta de c
   y `supabase/functions/coach` (también borrada en Supabase). El código queda en el historial de git (rama
   `claude/festive-thompson-fxlnal`, commits "Coach de macro por voz" y "Coach v2").
 - Queda en la base la tabla `coach_uso` con su función `coach_registrar_uso` (migración `20261120000000_coach.sql`,
-  contadores de gasto por persona y día): no se usa, pero sirve tal cual de tope de gasto si otra función con IA
-  la necesita. El secreto `ANTHROPIC_API_KEY` sigue en los Secrets de Edge Functions.
+  contadores de gasto por persona y día): ahora la usa `plan-partida` como tope de gasto. El secreto `ANTHROPIC_API_KEY` sigue en los Secrets de Edge Functions.
 - Aprendido, por si se retoma: política de Riot revisada el 20/11/2026 (no aprueban "apps that dictate player
   decisions" ni que "draw conclusions for you during gameplay"; analizar después de jugar sí); coste real medido
   ≈ US$ 0.04 por partida; sin razonamiento Sonnet recitaba la guía y leyó "2 min 53 s" como "53 segundos".

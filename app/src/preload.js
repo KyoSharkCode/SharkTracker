@@ -32,6 +32,7 @@ contextBridge.exposeInMainWorld('sharkTracker', {
   meta: {
     tier: () => ipcRenderer.invoke('meta:tier'),
     campeon: (championId, posicion) => ipcRenderer.invoke('meta:campeon', championId, posicion),
+    plan: (datos) => ipcRenderer.invoke('meta:plan', datos), // plan de partida con IA (En Vivo)
     adaptar: (ficha, miCampeon, rivales) => ipcRenderer.invoke('meta:adaptar', ficha, miCampeon, rivales),
     matchup: (championId, posicion, rivalId) => ipcRenderer.invoke('meta:matchup', championId, posicion, rivalId),
   },

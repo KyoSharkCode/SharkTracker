@@ -1174,3 +1174,11 @@ html, body { font-variant-numeric: tabular-nums; }
 :root[data-tema="claro"] :is(.gal-clip:hover, .gal-carpeta:hover .gal-portada) { box-shadow: 0 10px 22px rgba(10,40,50,0.16); }
 /* Logo de la pantalla de inicio de sesión: letras oscuras. */
 :root[data-tema="claro"] .mainlogo { content: url("img/logotipo-vertical-claro.svg"); }
+
+/* ── En Vivo: plan de partida con IA ── */
+.pl-fila { display: grid; grid-template-columns: 62px 1fr; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(var(--linea-rgb), 0.06); }
+.pl-etq { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--acento); padding-top: 2px; }
+.pl-txt { font-size: 13px; line-height: 1.45; color: var(--texto); }
+.pl-alt { font-size: 12px; line-height: 1.45; color: var(--texto-tenue); margin-top: 8px; }
+.pl-pie { font-size: 11px; color: var(--texto-apagado); margin-top: 10px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.pl-auto { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(var(--linea-rgb), 0.06); }
