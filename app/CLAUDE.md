@@ -694,8 +694,10 @@ Decisión de Kyo (27/11/2026): la IA va donde hay tiempo para leer y datos que c
   control (`extra_stats`), con la referencia de la división de arriba (`elo_referencias_promedio`). Modelo
   **Claude Sonnet 5.5** (`claude-sonnet-5-5`, `thinking: adaptive`, `effort: medium`, salida JSON con esquema,
   system prompt en caché). Devuelve línea / equipo / evita, runas, botas, hasta 3 situacionales en orden y una alternativa.
-- **Gasto**: reutiliza la tabla `coach_uso` y `coach_registrar_uso`. Límites `IA_LIMITE_MES_USD` (15, todo el
-  grupo) y `IA_LIMITE_DIA_USD` (0.75 por persona). Coste estimado con `PRECIO` (≈ US$ 0.02 por plan, sin medir en real).
+- **Gasto**: reutiliza la tabla `coach_uso` y `coach_registrar_uso`. Límites `IA_LIMITE_MES_USD` (50, todo el
+  grupo) y `IA_LIMITE_DIA_USD` (3 por persona), subidos por Kyo el 27/11/2026 (antes 15 y 0.75). Coste estimado con `PRECIO` (≈ US$ 0.02 por plan, sin medir en real).
+- **Solo con sesión de Discord y cuenta de LoL vinculada**: la función lo exige y `cardPlan` no dibuja la
+  tarjeta sin eso (`iaDisponible`); En Vivo queda como siempre, con las tarjetas de OP.GG.
 - **App**: `meta.pedirPlan` (IPC `meta:plan`) → tarjeta **"Plan de partida · IA"** en En Vivo (`cardPlan` en
   `renderer/envivo.js`), la primera al fijar campeón. Se genera **con el botón**; el interruptor de la tarjeta
   ("Generarlo solo al fijar campeón", `ajustes.json` → `plan.auto`, apagado de fábrica) lo pide solo y una vez

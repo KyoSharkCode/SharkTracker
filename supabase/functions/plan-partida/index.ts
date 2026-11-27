@@ -17,8 +17,8 @@
 // La key de Claude vive en los Secrets (ANTHROPIC_API_KEY), en un workspace propio de la
 // Console con límite mensual. Además se lleva la cuenta en la tabla coach_uso (contadores
 // por persona y día) y se corta al llegar a:
-//   IA_LIMITE_MES_USD (15 de fábrica)   → todo el grupo, por mes
-//   IA_LIMITE_DIA_USD (0.75 de fábrica) → cada persona, por día (UTC)
+//   IA_LIMITE_MES_USD (50 de fábrica) → todo el grupo, por mes
+//   IA_LIMITE_DIA_USD (3 de fábrica)  → cada persona, por día (UTC)
 //
 // Política de Riot: solo datos previos a la partida (lo que se ve en la selección de
 // campeones y estadísticas del propio jugador), y la decisión sigue siendo del jugador:
@@ -34,8 +34,8 @@ const limite = (nombre: string, fabrica: number) => {
   const n = Number(Deno.env.get(nombre));
   return Number.isFinite(n) && n > 0 ? n : fabrica;
 };
-const LIMITE_MES_USD = limite('IA_LIMITE_MES_USD', 15);
-const LIMITE_DIA_USD = limite('IA_LIMITE_DIA_USD', 0.75);
+const LIMITE_MES_USD = limite('IA_LIMITE_MES_USD', 50);
+const LIMITE_DIA_USD = limite('IA_LIMITE_DIA_USD', 3);
 
 const MODELO = 'claude-sonnet-5-5';
 // US$ por millón de tokens, para el coste ESTIMADO (lo que manda es la factura de la Console).

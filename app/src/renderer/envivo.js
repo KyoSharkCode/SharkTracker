@@ -255,6 +255,10 @@
   // adaptada) cruzándolas con las dos composiciones y con tu estilo de los últimos 30 días.
   // Se pide con el botón o, si lo activas, solo al fijar campeón; se puede actualizar una
   // vez cuando terminan de elegir los rivales. Nada se importa sin pulsar su botón.
+  // Solo para cuentas con sesión de Discord y cuenta de LoL vinculada (la Edge Function lo
+  // exige igual). Sin eso la tarjeta no aparece y En Vivo queda como siempre, con OP.GG.
+  let iaDisponible = false;
+  const revisarIA = (s) => { iaDisponible = !!s?.loggedIn && !!s.player; };
   const planes = new Map(); // `${id}:${rol}` → { estado, plan, paginas, uso, estilo, gasto, rivales: 'ids' }
   let planAuto = false;
   const TEXTO_PLAN = {
@@ -287,9 +291,10 @@
     });
   }
   function cardPlan(id, rol, f) {
-    const c = tarjeta('Plan de partida · IA', 'dot-carga');
     const k = `${id}:${rol}`;
     const p = planes.get(k);
+    if (!iaDisponible || ['sin_sesion', 'sin_cuenta'].includes(p?.estado)) return null;
+    const c = tarjeta('Plan de partida · IA', 'dot-carga');
     const rivales = rivalesFijados();
     // ¿Ya están los datos que la IA necesita? (la guía del rival de línea y la build adaptada, si aplican)
     const linea = rivalDeLinea();
@@ -807,7 +812,9 @@
       arriba.append(t);
     } else if (estado.yo?.bloqueado && estado.yo.campeon) {
       miF = ficha(estado.yo.campeon, rol);
-      arriba.append(cardPlan(estado.yo.campeon, rol, miF), cardRunas(estado.yo.campeon, rol, miF), cardBuild(estado.yo.campeon, rol, miF));
+      const plan = cardPlan(estado.yo.campeon, rol, miF);
+      if (plan) arriba.append(plan);
+      arriba.append(cardRunas(estado.yo.campeon, rol, miF), cardBuild(estado.yo.campeon, rol, miF));
       const vs = cardMatchup(estado.yo.campeon, rol);
       if (vs) arriba.append(vs);
     } else {
@@ -867,6 +874,8 @@
       pintar(true);
     });
     api().partida().then((d) => { if (d) { partida = d; pintar(true); } });
+    window.sharkTracker.auth.getState().then((s) => { revisarIA(s); pintar(true); });
+    window.sharkTracker.auth.onChanged((s) => { revisarIA(s); pintar(true); });
     window.sharkTracker.ajustes.get().then((aj) => { planAuto = !!aj?.plan?.auto; });
     window.sharkTracker.ajustes.onChanged((aj) => { planAuto = !!aj?.plan?.auto; });
     api().amigos().then((lista) => { amigos = new Map((lista ?? []).map((a) => [a.riotId, a.rango])); pintar(true); });
