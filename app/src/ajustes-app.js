@@ -1,4 +1,4 @@
-// Ajustes de la app (Ajustes → Apariencia, Notificaciones, Coach y Clips).
+// Ajustes de la app (Ajustes → Apariencia, Notificaciones y Clips).
 // Se guardan en la carpeta de datos de la app (userData/ajustes.json), solo en
 // este PC. Lo del overlay (piezas, posiciones, tamaño y transparencia) vive
 // aparte, en overlay-config.js.
@@ -29,9 +29,6 @@ const LIMITES_GB = [5, 10, 20, 50];
 const FUENTES_AUDIO = ['juego', 'discord', 'musica', 'mic', 'pc'];
 const TECLA_ULTI = /^[A-Z0-9]$/;
 
-// Coach de macro por voz (Ajustes → Coach, experimental). Apagado de fábrica.
-const COACH_RANGOS = { volumen: [0, 100], velocidad: [70, 150], intervalo: [60, 180], tope: [3, 12] };
-
 // Tema de la ventana (Ajustes → Apariencia). El overlay en partida siempre va en oscuro.
 const TEMAS = ['oscuro', 'claro'];
 
@@ -45,16 +42,6 @@ function fabrica() {
       alIniciar: false,     // abrir SharkTracker al iniciar Windows
     },
     avisos: Object.fromEntries(AVISOS.map((a) => [a, true])),
-    coach: {
-      activo: false,      // sin activarlo no se manda nada a ningún lado
-      silenciado: false,  // Ctrl + F9 en partida: callado y sin consultas
-      hablar: false,      // además de la tarjeta, leerlo con la voz de Windows
-      voz: '',            // nombre de la voz de Windows ('' = la primera en español)
-      volumen: 80,        // 0–100
-      velocidad: 100,     // 70–150 (100 = normal)
-      intervalo: 75,      // segundos mínimos entre consejos (salvo eventos importantes)
-      tope: 10,           // consejos por partida, como mucho
-    },
     clips: {
       activo: false,         // grabar el búfer durante la partida (Ctrl + F8 guarda)
       calidad: 'alta',       // alta = 60 fps · ligera = 30 fps y menos peso
@@ -92,12 +79,6 @@ function normalizar(datos) {
   for (const a of AVISOS) {
     if (typeof datos?.avisos?.[a] === 'boolean') base.avisos[a] = datos.avisos[a];
   }
-  const co = datos?.coach ?? {};
-  for (const k of ['activo', 'silenciado', 'hablar']) if (typeof co[k] === 'boolean') base.coach[k] = co[k];
-  if (typeof co.voz === 'string' && co.voz.length < 200) base.coach.voz = co.voz;
-  for (const [k, [min, max]] of Object.entries(COACH_RANGOS)) {
-    if (Number.isFinite(co[k])) base.coach[k] = Math.min(max, Math.max(min, Math.round(co[k])));
-  }
   const c = datos?.clips ?? {};
   if (typeof c.activo === 'boolean') base.clips.activo = c.activo;
   if (CALIDADES.includes(c.calidad)) base.clips.calidad = c.calidad;
@@ -130,8 +111,7 @@ function leer() {
   return structuredClone(cache);
 }
 
-// Guarda solo lo que cambia: { acento }, { tema: 'claro' }, { ventana: { bandeja: true } }, { avisos: { retos: false } },
-// { coach: { activo: true } } o { clips: { activo: true } }.
+// Guarda solo lo que cambia: { acento }, { tema: 'claro' }, { ventana: { bandeja: true } }, { avisos: { retos: false } } o { clips: { activo: true } }.
 function guardar(cambios) {
   const actual = leer();
   cache = normalizar({
@@ -139,7 +119,6 @@ function guardar(cambios) {
     tema: cambios?.tema ?? actual.tema,
     ventana: { ...actual.ventana, ...(cambios?.ventana ?? {}) },
     avisos: { ...actual.avisos, ...(cambios?.avisos ?? {}) },
-    coach: { ...actual.coach, ...(cambios?.coach ?? {}) },
     clips: {
       ...actual.clips,
       ...(cambios?.clips ?? {}),
@@ -154,4 +133,4 @@ function guardar(cambios) {
   return structuredClone(cache);
 }
 
-module.exports = { leer, guardar, fabrica, normalizar, ACENTOS, TEMAS, AVISOS, CALIDADES, EVENTOS_CLIP, LIMITES_GB, FUENTES_AUDIO, COACH_RANGOS };
+module.exports = { leer, guardar, fabrica, normalizar, ACENTOS, TEMAS, AVISOS, CALIDADES, EVENTOS_CLIP, LIMITES_GB, FUENTES_AUDIO };

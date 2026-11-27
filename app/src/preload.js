@@ -65,13 +65,6 @@ contextBridge.exposeInMainWorld('sharkTracker', {
     probarAviso: () => ipcRenderer.invoke('ajustes:probarAviso'),
   },
 
-  // Coach de macro por voz (Ajustes → Coach): consejos de la partida, costes y gasto del mes.
-  coach: {
-    estado: () => ipcRenderer.invoke('coach:estado'),
-    uso: () => ipcRenderer.invoke('coach:uso'),
-    onEstado: (callback) => ipcRenderer.on('coach:estado', (_e, estado) => callback(estado)),
-  },
-
   // Clips (sección Clips y Ajustes → Clips): FFmpeg, codificador, audio, galería y carpeta.
   // Ctrl + F8 y las jugadas automáticas viven en el proceso main. Los videos y
   // miniaturas se ven con sharkclip://video/<archivo> y sharkclip://mini/<archivo>.

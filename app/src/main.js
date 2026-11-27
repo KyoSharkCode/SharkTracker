@@ -14,8 +14,6 @@ const notificaciones = require('./notificaciones');
 const clips = require('./clips');
 const { crearDetector } = require('./clips-eventos');
 const { crearRegistro } = require('./registro');
-const coach = require('./coach');
-const { rolCoach } = require('./coach-cerebro');
 const { crearConsejos } = require('./consejos');
 
 // ── Registro de errores (userData/registro-app.txt; Ajustes → Cuenta → Diagnóstico) ──
@@ -514,7 +512,7 @@ function cargarPrecios() {
   }).on('error', () => { /* se usa el precio de la API del juego */ });
 }
 
-// ── Teclado: Tab (diferencia de oro), Ctrl + X (panel de carga / build), Ctrl + F8 (clip), Ctrl + F9 y Ctrl + F10 (coach) ──
+// ── Teclado: Tab (diferencia de oro) y Ctrl + X (panel de carga / build en partida) ──
 // uiohook-napi "escucha" el teclado sin quitarle las teclas al juego (como el
 // pulsar-para-hablar de Discord). Solo se enciende durante la pantalla de carga
 // y la partida, y solo mira esas dos combinaciones: el resto de teclas se ignoran
@@ -524,8 +522,6 @@ let hookEncendido = false;
 let tabPulsado = false;
 let xPulsada = false;
 let f8Pulsada = false;
-let f9Pulsada = false;
-let f10Pulsada = false;
 let ultiPulsada = false;
 let teclaUlti = ajustesApp.leer().clips.teclaUlti; // se actualiza al cambiar los ajustes
 function iniciarTeclado() {
@@ -551,16 +547,6 @@ function iniciarTeclado() {
           f8Pulsada = true;
           if (overlayTimer) guardarClip();
         }
-        // Ctrl + F9: silenciar o reactivar el coach (solo en partida).
-        if (e.keycode === UiohookKey.F9 && e.ctrlKey && !f9Pulsada) {
-          f9Pulsada = true;
-          if (overlayTimer) alternarSilencioCoach();
-        }
-        // Ctrl + F10: pedirle al coach su lectura de la partida ahora.
-        if (e.keycode === UiohookKey.F10 && e.ctrlKey && !f10Pulsada) {
-          f10Pulsada = true;
-          if (overlayTimer) pedirLecturaCoach();
-        }
         // Tecla de la R (clips automáticos de ulti). Sin Ctrl ni Alt: así no cuenta un atajo.
         if (e.keycode === UiohookKey[teclaUlti] && !e.ctrlKey && !e.altKey && !ultiPulsada) {
           ultiPulsada = true;
@@ -571,8 +557,6 @@ function iniciarTeclado() {
         if (e.keycode === UiohookKey.Tab) avisarTab(false);
         if (e.keycode === UiohookKey.X) xPulsada = false;
         if (e.keycode === UiohookKey.F8) f8Pulsada = false;
-        if (e.keycode === UiohookKey.F9) f9Pulsada = false;
-        if (e.keycode === UiohookKey.F10) f10Pulsada = false;
         if (e.keycode === UiohookKey[teclaUlti]) ultiPulsada = false;
       });
       hook = uIOhook;
@@ -589,8 +573,6 @@ function detenerTeclado() {
   tabPulsado = false;
   xPulsada = false;
   f8Pulsada = false;
-  f9Pulsada = false;
-  f10Pulsada = false;
   ultiPulsada = false;
 }
 // Guarda la decisión (visible u oculto) para las próximas partidas.
@@ -607,7 +589,6 @@ function startOverlay() {
   detectorJugadas = crearDetector();
   datosPartida = null;
   reiniciarBuild();
-  sesionCoach.iniciarPartida();
   motorConsejos = crearConsejos();
   // "Tu rendimiento": promedios de la división de arriba (una vez por partida).
   const partida = estadoPartida;
@@ -636,8 +617,6 @@ function startOverlay() {
     const habilidad = ordenHabilidades ? siguienteHabilidad(res.data?.activePlayer, ordenHabilidades) : null;
     const estado = estadoPartida.actualizar(res.data);
     overlayWindow.webContents.send('overlay:state', { ...estado, ddVersion, misObjetos, siguiente, habilidad });
-    // Coach de macro (si está activado): mira el mismo estado y decide si hay algo que decir.
-    sesionCoach.tick(res.data, estado, { rol: rolCoach(yo?.position, buildPartida?.rol), siguiente });
     // Consejos en pantalla (reglas, sin IA): la tarjeta de la izquierda.
     const consejo = motorConsejos?.procesar(res.data, estado, { tips: consejosCampeones ?? {}, siguiente });
     if (consejo) overlayWindow.webContents.send('overlay:consejo', consejo);
@@ -655,7 +634,6 @@ function stopOverlay() {
   datosPartida = null;
   if (!cargaActiva) detenerTeclado();
   reiniciarBuild();
-  sesionCoach.terminarPartida();
   motorConsejos = null;
   overlayWindow?.webContents.send('overlay:consejo', null);
   reiniciarPartidaApp(); // terminó la partida: la app deja de mostrarla
@@ -667,38 +645,9 @@ function stopOverlay() {
 }
 ipcMain.handle('game:getStatus', () => ({ inGame: !!lastInGame }));
 
-// ── Coach de macro por voz (experimental; ver coach.js y coach-cerebro.js) ──
-// Lo que dice el coach de IA sale en la misma tarjeta de consejos (título "Coach") y,
-// solo si se pide en Ajustes → Coach, también con la voz de Windows.
-let motorConsejos = null;     // consejos.js, uno por partida
+// ── Consejos en pantalla (ver consejos.js): la tarjeta de la izquierda ──
+let motorConsejos = null;     // uno por partida
 let consejosCampeones = null; // campeón → consejos oficiales "contra" (Data Dragon)
-function decirCoach(texto, segundos = 14) {
-  const c = ajustesApp.leer().coach;
-  overlayWindow?.webContents.send('overlay:consejo', { titulo: 'Coach', texto, pie: null, campeon: null, segundos });
-  if (c.hablar) overlayWindow?.webContents.send('overlay:coach', { texto, voz: c.voz, volumen: c.volumen, velocidad: c.velocidad });
-}
-const sesionCoach = coach.crearSesion({
-  pedir: coach.crearPedir(auth),
-  hablar: decirCoach,
-  ajustes: () => ajustesApp.leer(),
-  avisar: (estado) => mainWindow?.webContents.send('coach:estado', estado),
-});
-// Ctrl + F9: silenciado no habla ni consulta (no gasta). El aviso lo dice la voz de Windows, sin IA.
-function alternarSilencioCoach() {
-  const c = ajustesApp.leer().coach;
-  if (!c.activo) return;
-  const ajustes = ajustesApp.guardar({ coach: { silenciado: !c.silenciado } });
-  mainWindow?.webContents.send('ajustes:changed', ajustes);
-  decirCoach(ajustes.coach.silenciado ? 'Coach silenciado' : 'Coach activado', 4);
-}
-// Ctrl + F10: su lectura cuando tú la pidas (no cuenta para el tope de consejos).
-function pedirLecturaCoach() {
-  const c = ajustesApp.leer().coach;
-  if (!c.activo) return;
-  if (!sesionCoach.pedirLectura()) decirCoach(c.silenciado ? 'El coach está silenciado' : 'El coach no está disponible en esta partida', 4);
-}
-ipcMain.handle('coach:estado', () => sesionCoach.estado());
-ipcMain.handle('coach:uso', () => sesionCoach.uso());
 
 // ── Clips: búfer durante la partida, jugadas automáticas y Ctrl + F8 (ver clips.js) ──
 let campeonActual = null;

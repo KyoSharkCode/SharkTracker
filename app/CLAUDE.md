@@ -191,9 +191,6 @@ app/
     preload-editor.js    → contextBridge (window.editor) de la ventana "Reposicionar elementos"
     lcu.js               → API local del cliente de LoL (En Vivo): fase, selección, runas, build, hechizos
     consejos.js          → tarjeta de consejos: reglas que reaccionan a la partida (sin IA, sin Electron)
-    coach-cerebro.js     → coach de macro: resumen de tu partida y cuándo pedir un consejo (sin Electron)
-    coach.js             → coach en la app: Edge Function `coach`, costes e historial
-    voz.js               → voz de Windows (speechSynthesis) para el overlay y Ajustes → Coach
     meta.js              → Meta: catálogos de DDragon y llamadas a la Edge Function `meta`
     build-adaptada.js    → build contra el equipo rival y "siguiente compra" (sin Electron, se prueba en Node)
     editor/              → ventana "Reposicionar elementos" (pantalla emulada del juego)
@@ -663,8 +660,7 @@ Decisiones de Alex (oct 2026).
 ## Consejos en pantalla (nov 2026): la tarjeta que reacciona a la partida
 
 Decisión de Kyo (27/11/2026) tras probar el coach por voz: "con audio no hace la diferencia; mejor un sistema de
-notificaciones acorde a la partida, como los consejos de Overwatch al morir". **Esto es ahora lo principal; el
-coach de IA de abajo queda como complemento opcional y la voz, apagada de fábrica.**
+notificaciones acorde a la partida, como los consejos de Overwatch al morir". **Reemplaza al coach de IA, que se quitó (ver más abajo).**
 - **Qué es**: una tarjeta (`#consejo`, zona izquierda, x 16 y 560, 400 px; entra y sale por la izquierda) con
   "CONSEJO", el texto y, al morir, el retrato de quien te mató y debajo el consejo oficial contra ese campeón.
   Interruptor "Consejos" en Ajustes → Overlay (pieza `consejos`, encendida de fábrica) y movible en el editor.
@@ -682,80 +678,23 @@ coach de IA de abajo queda como complemento opcional y la voz, apagada de fábri
 - **Consejos oficiales**: `enemytips` de Data Dragon (`championFull.json` es_MX, una vez por sesión, main.js
   `cargarConsejosCampeones`). 147 de 173 campeones los traen (los más nuevos no: Yone, Viego, Ambessa…).
 - **Excepción aprobada por Kyo a "nunca campeones rivales"**: la tarjeta nombra a quien te mató y usa su nivel
-  (lo enseña el marcador). No rastrea a nadie. La IA sigue sin recibir nada de rivales concretos.
-- **Coach de IA**: su texto sale en esta misma tarjeta con el título "Coach" (`decirCoach` en main.js) y solo
-  se lee en voz si `coach.hablar` está encendido (Ajustes → Coach → "Leer en voz alta", apagado de fábrica).
+  (lo enseña el marcador). No rastrea a nadie. 
 
-## Coach de macro por voz (experimental, nov 2026) — etapa 1
+## Coach de IA por voz: probado y descartado (nov 2026)
 
-**v2 (21/11/2026), tras la primera prueba de Kyo** (Shyvana jungla, 12 consejos, US$ 0.039): "los consejos son
-decentes pero suena a notificaciones por voz activadas". 9 de 12 decían "backea ya", 7 cerraban con "Castigo listo",
-mandó a backear con ~250 de oro porque venía un objetivo, y leyó "2 min 53 s" como "53 segundos". Cambios:
-- **Memoria**: `crearCoach` lleva una **bitácora** de la partida (muertes con su contexto, compras, objetivos de cada
-  equipo, un control cada 5 min y lo que el coach ya dijo, máx. 30 entradas) que viaja en cada consulta. Sirve para
-  ver patrones y dar seguimiento ("sigues sin…", "bien, compraste…").
-- **Qué estás haciendo** (`actividad`): el oro que baja de golpe = compraste = estás en base (`enBaseHace`); CS del
-  último minuto; vida de hace 10 s. La API no dice dónde estás, las oleadas, los campamentos ni si estás
-  canalizando el back: eso sigue sin saberse (es lo que daría la imagen de la etapa 2).
-- **Cuándo habla** (reemplaza la lista de situaciones de más abajo): en las pausas, `muerte` y `base` (acabas de
-  comprar; máx. una cada 2:30); `ritmo` (Barón, Ancestral, 3.er/4.º dragón, inhibidor); `objetivo` **solo si
-  detecta un problema** entre 110 y 40 s antes (vida < 50 %, maná < 30 %, oro para la siguiente compra, soporte sin
-  ward de control, tu jungla muerta) y nunca si compraste hace < 60 s; `compra` (llevas 45 s pudiendo comprar y
-  sigues fuera; pasa por Haiku); y `pedido`. **Fuera**: avisos de objetivo por reloj, `vision` y el repaso cada 90 s.
-- **Ctrl + F10**: "dame tu lectura ahora" (`pedido`): sale en la siguiente lectura, sin esperas, y no cuenta para el tope.
-- **Sonnet razona antes de hablar**: `thinking: adaptive` + `effort: low`, `max_tokens` 1000 (el razonamiento cuenta);
-  si se corta (`max_tokens`) no se dice nada. Largo: hasta 3 frases en las pausas, 1–2 en el resto. La app espera
-  hasta 13 s. Los plazos van en una sola unidad ("unos 3 minutos (173 segundos)"). El guion (`SISTEMA_COACH`) pasó
-  de pasos por rol a "cómo piensa un coach" + criterios: analizar uniendo hechos, no narrar; no mandar a hacer lo
-  que probablemente ya hace; no backear con < 400 de oro salvo poca vida; sin muletillas; `NADA` si no hay nada.
-- Sin probar con la API real todavía (sí con Claude y Supabase simulados). Coste esperado: algo mayor por consejo.
-
-
-Decisiones de Kyo (nov 2026). **Apagado de fábrica**; por ahora solo para **jungla y soporte**, en la Grieta.
-- **Qué es**: consejos de macro hablados durante la partida (no reflejos): preparar objetivos, visión, compras y
-  backs, qué hacer al reaparecer, cómo jugar según el marcador. Fórmula de cada consejo: **ventana de tiempo +
-  acción según tu rol + por qué**, una o dos frases (máx. ~30 palabras). **Nunca un dato a secas** que el overlay
-  ya muestra ("Dragón en 1 min"): por eso los de objetivos salen ~2 min antes, con tiempo para backear.
-- **Sin postpartida** (ya existe el analizador de la web) y **sin captura de pantalla** en esta etapa.
-- **Fuentes**: solo la Live Client Data API (lo que ya lee el overlay cada 1 s; no hay peticiones nuevas al juego)
-  y la "siguiente compra" que la app ya calcula. **Del rival, solo el marcador**: kills, torres, dragones y
-  **cuántos** están muertos (Kyo: se ve en pantalla). Nunca quién, dónde, objetos, niveles ni hechizos: esos
-  campos no entran en el resumen (`coach-cerebro.js` `resumir`, con prueba) y la Edge Function vuelve a filtrar
-  campo por campo, así que el modelo no puede usarlos.
-- **Política de Riot** (revisada el 20/11/2026: developer.riotgames.com/policies/general, /docs/lol y la página
-  "Third Party Applications" de soporte): el texto dice que no se aprueban "apps that dictate player decisions" ni
-  apps que "draw conclusions for you during gameplay"; en la práctica hay coaches de voz públicos (Backseat AI,
-  STATUP.GG, OP.GG AI). Zona gris asumida por Kyo. **Pendiente: declarar la función en el producto del Developer
-  Portal** (Riot pide auditar cada función nueva). Si Riot endurece el criterio, se apaga con el interruptor.
-- **Modelos** (API de Claude, en la Edge Function `coach`): filtro **Haiku 5.5** (`claude-haiku-5-5`, responde
-  `{hablar, motivo}` en JSON, sin razonamiento) y coach **Sonnet 5.5** (`claude-sonnet-5-5`, `thinking:
-  between_tools` = sin razonamiento previo, `effort: low`, `max_tokens` 160, system prompt en caché). La guía de
-  macro por rol (`SISTEMA_COACH` en `supabase/functions/coach/index.ts`) la corrige Kyo: ahí está la calidad.
-- **App**:
-  - `src/coach-cerebro.js` (sin Electron, se prueba en Node): `resumir` (estado compacto) y `crearCoach`
-    (una partida): situaciones **directas** (van directo a Sonnet): `objetivo` (faltan 125–25 s, una vez por
-    objetivo), `muerte` (acabas de morir, ≥ 10 s de espera) y `ritmo` (Barón, Ancestral, 3.er/4.º dragón,
-    inhibidor); y **por si acaso** (pasan por Haiku): `compra` (te alcanza la siguiente compra), `vision` (sin
-    ward de control y con oro) y `revision` (repaso cada 90 s). Reglas: mínimo entre consejos (`intervalo`, 75 s;
-    25 s para los directos), tope por partida (10), máx. 45 consultas, callado si hubo una kill en los últimos
-    8 s (salvo que estés muerta), y lo anterior a abrir la app no cuenta. Tiempos en `T`.
-  - `src/coach.js`: sesión de la partida (llama a la Edge Function con tu sesión, descarta respuestas de más de
-    14 s, suma tokens y coste, se detiene con `sin_sesion`/`sin_cuenta`/`sin_key`/`limite_dia`/`limite_mes` o 3
-    errores seguidos) e historial en `userData/coach.json` (últimas 20 partidas con consejos y coste).
-  - `src/voz.js`: voz de Windows vía `speechSynthesis` (gratis). Habla **el overlay** (`overlay:coach`); la
-    ventana lo usa para "Probar voz". **Sin probar en Windows todavía** (en Linux no hay voces).
-  - main.js: `sesionCoach.tick` en la lectura de cada segundo; **Ctrl + F9** silencia/reactiva (silenciado no
-    consulta: no gasta). `game-state.js` devuelve además `objetivos` (todos, sin el filtro de 1:30) y `alma`.
-  - Ajustes → Coach (`ajustes.json` → `coach`: activo, silenciado, voz, volumen, velocidad, intervalo, tope):
-    interruptores, voz, y "Uso y coste" (esta partida, últimas partidas y gasto del mes).
-- **Backend**: Edge Function `coach` ("Verify JWT" ENCENDIDO, solo cuentas vinculadas; SDK oficial
-  `npm:@anthropic-ai/sdk`). Secret **`ANTHROPIC_API_KEY`** (workspace propio de la Console con límite mensual:
-  la barrera dura). Límites propios en la tabla `coach_uso` (migración `20261120000000_coach.sql`, contadores
-  por persona y día, sin datos de partidas): `COACH_LIMITE_MES_USD` (15, todo el grupo) y `COACH_LIMITE_DIA_USD`
-  (0.75 por persona). Coste estimado con los precios de `PRECIOS` (ajustar si cambian).
-- **Etapa 2 (pendiente, por decidir)**: imagen solo en momentos concretos (estado de la oleada antes de backear,
-  campamentos de jungla en el minimapa), captura directa desde Electron, no desde los clips. Antes de
-  construirla: probar con 10–15 capturas reales si Sonnet lo lee bien.
+Se construyó y se probó en partida un coach de macro con la API de Claude (filtro Haiku 5.5 + Sonnet 5.5, voz de
+Windows, Edge Function `coach`, bitácora de la partida, Ctrl + F9 / F10). **Kyo lo descartó el 27/11/2026**: con
+audio "no hace la diferencia" y a la larga molesta; los consejos sonaban a notificaciones porque la API local no
+dice dónde estás, las oleadas ni los campamentos. Lo reemplaza la tarjeta de consejos de arriba (reglas, sin IA).
+- Se quitó de la app y del repo: `coach.js`, `coach-cerebro.js`, `voz.js`, la pestaña Ajustes → Coach, los atajos
+  y `supabase/functions/coach` (también borrada en Supabase). El código queda en el historial de git (rama
+  `claude/festive-thompson-fxlnal`, commits "Coach de macro por voz" y "Coach v2").
+- Queda en la base la tabla `coach_uso` con su función `coach_registrar_uso` (migración `20261120000000_coach.sql`,
+  contadores de gasto por persona y día): no se usa, pero sirve tal cual de tope de gasto si otra función con IA
+  la necesita. El secreto `ANTHROPIC_API_KEY` sigue en los Secrets de Edge Functions.
+- Aprendido, por si se retoma: política de Riot revisada el 20/11/2026 (no aprueban "apps that dictate player
+  decisions" ni que "draw conclusions for you during gameplay"; analizar después de jugar sí); coste real medido
+  ≈ US$ 0.04 por partida; sin razonamiento Sonnet recitaba la guía y leyó "2 min 53 s" como "53 segundos".
 
 ## Estilo visual del overlay (acordado con Alex — tableros "Overlay — estilo
 visual" y "Overlay — estructuras" del canvas)

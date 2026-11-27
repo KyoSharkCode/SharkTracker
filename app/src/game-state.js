@@ -254,7 +254,7 @@ function crearEstadoPartida() {
     const ultimo = (nombre, filtro = () => true) =>
       [...eventos].reverse().find((e) => e.EventName === nombre && filtro(e));
     const proximos = [];
-    // Todos los objetivos épicos con su reloj, sin el filtro de 1:30 (para el coach):
+    // Todos los objetivos épicos con su reloj, sin el filtro de 1:30 (para los consejos):
     // falta > 0 = segundos para que aparezca; falta <= 0 = ya está disponible.
     const objetivos = [];
     const agregar = (clave, nombre, aparece, extra = {}, antes = AVISO_ANTES) => {
@@ -316,7 +316,7 @@ function crearEstadoPartida() {
       modo: datos?.gameData?.gameMode,
     });
 
-    return { tiempo: t, mapa, miLado, baron, ancestral, toast, proximos, objetivos, dragones: cuenta, alma: alma ? { equipo: alma.equipo, tipo: alma.tipo } : null, oro, rendimiento, aliadoIzquierda: miLado !== 'red' };
+    return { tiempo: t, mapa, miLado, baron, ancestral, toast, proximos, objetivos, dragones: cuenta, oro, rendimiento, aliadoIzquierda: miLado !== 'red' };
   }
 
   return { actualizar, setReferencia, setPrecios };

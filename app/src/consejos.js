@@ -11,7 +11,6 @@
 //
 // Cada consejo: { tipo: 'muerte' | 'partida', titulo, texto, pie, campeon, segundos }.
 
-const { jugadorPropio } = require('./coach-cerebro');
 
 // Tu línea según tu rol, como la nombra el juego en las torres (L arriba, C medio, R abajo).
 const CARRIL_ROL = { TOP: 'L', MIDDLE: 'C', BOTTOM: 'R', UTILITY: 'R' };
@@ -34,6 +33,10 @@ const T = {
 };
 
 const nombresDe = (p) => [p?.riotId, p?.summonerName, p?.riotIdGameName, p?.riotId?.split('#')[0]].filter(Boolean);
+function jugadorPropio(datos) {
+  const mios = new Set(nombresDe(datos?.activePlayer));
+  return (datos?.allPlayers ?? []).find((p) => nombresDe(p).some((n) => mios.has(n))) ?? null;
+}
 const clave = (p) => (p?.rawChampionName ?? '').replace(/^game_character_displayname_/, '') || (p?.championName ?? '').replace(/[^A-Za-z]/g, '');
 const estructura = (nombre = '') => { const m = /_T([12])_([LCR])/.exec(nombre); return m ? { team: m[1] === '1' ? 'ORDER' : 'CHAOS', carril: m[2] } : null; };
 const veces = (n) => (n === 2 ? 'dos' : n === 3 ? 'tres' : n === 4 ? 'cuatro' : String(n));

@@ -534,8 +534,6 @@ function pintarConsejo(d) {
   if (!d.fijo) consejoTimer = setTimeout(() => mostrar(nodo, false), Math.min(20, Math.max(4, Number(d.segundos) || 11)) * 1000);
 }
 window.overlay.onConsejo?.(pintarConsejo);
-// Coach: el consejo llega ya redactado; aquí solo se dice con la voz de Windows (voz.js).
-window.overlay.onCoach?.((d) => window.vozCoach?.decir(d?.texto, d));
 
 window.overlay.onState(pintarEstado);
 window.overlay.onConfig?.(aplicarConfig);
