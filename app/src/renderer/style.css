@@ -1232,3 +1232,11 @@ html, body { font-variant-numeric: tabular-nums; }
 .rep :focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
 .tl-siguiente { bottom: 98px; }
 @media (prefers-reduced-motion: reduce) { .rep-centro, .rep-barra { transition: none; } .rep-centro { transform: none; } }
+
+/* ── Clips: "Borrar no favoritos" y su confirmación ── */
+.gal-confirmar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; padding: 12px 14px;
+  border-radius: 10px; background: color-mix(in srgb, var(--rojo-suave) 9%, transparent); border: 1px solid color-mix(in srgb, var(--rojo-suave) 30%, transparent); }
+.gal-confirmar[hidden], .gal-limpiado[hidden] { display: none; }
+.gal-confirmar-txt { flex: 1; min-width: 260px; font-size: 13px; line-height: 1.5; color: var(--texto); }
+.gal-confirmar-btns { display: flex; gap: 8px; }
+.gal-limpiado { margin-bottom: 14px; font-size: 13px; color: var(--texto-tenue); }

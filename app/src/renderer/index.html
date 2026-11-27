@@ -131,7 +131,17 @@
             <button type="button" class="segmento" role="radio" aria-checked="false" data-filtro="favoritos" title="Ver solo los clips que marcaste como favoritos">Solo favoritos</button>
           </div>
           <button id="gal-carpeta" class="btn-sec" type="button">Abrir carpeta</button>
+          <button id="gal-limpiar" class="btn-sec btn-peligro" type="button">Borrar no favoritos</button>
         </div>
+        <!-- Confirmación de "Borrar no favoritos": dice cuántos clips se van y cuántos favoritos se quedan -->
+        <div id="gal-confirmar" class="gal-confirmar" role="alertdialog" aria-labelledby="gal-confirmar-txt" hidden>
+          <div id="gal-confirmar-txt" class="gal-confirmar-txt"></div>
+          <div class="gal-confirmar-btns">
+            <button id="gal-confirmar-no" class="btn-sec" type="button">Cancelar</button>
+            <button id="gal-confirmar-si" class="btn-sec btn-peligro confirmar" type="button">Sí, borrar</button>
+          </div>
+        </div>
+        <div id="gal-limpiado" class="gal-limpiado" role="status" hidden></div>
         <div id="gal-aviso" class="gal-aviso" hidden></div>
         <div id="gal-lista" class="gal-lista"></div>
 

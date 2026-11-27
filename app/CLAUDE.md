@@ -672,6 +672,13 @@ usan la build de ARAM; **ARAM Caos no lleva runas** (se juega con aumentos).
   y la build avisa de que es la de ARAM normal. Los sets importados van al mapa 12 (`lcu.importarBuild` → `mapa`).
 - **En partida** (`main.js` `prepararBuild`): mapa 12 → rol `aram`: "Tu build" (Ctrl + X), "Siguiente compra" y
   "Sube esta" también en ARAM. La tarjeta de consejos sigue solo en la Grieta (Kyo: en ARAM no valen).
+- **Clips → "Borrar no favoritos"** (pedido de Kyo antes de publicar): botón en la barra de arriba de Clips. Borra
+  todos los clips sin ★: de todas las partidas o, con una partida abierta, solo de esa ("… de esta partida"). Pide
+  confirmación con las cifras (cuántos se van y su peso, cuántos favoritos se quedan) y el foco cae en "Cancelar".
+  Van a la **papelera de Windows** (`shell.trashItem`, como al borrar un clip). `clips.borrarNoFavoritos(archivos)`
+  vuelve a mirar el índice: **un favorito nunca se borra aunque la ventana lo pida** (prueba `clips-borrar.test.js`,
+  con archivos reales en una carpeta temporal; `electron-falso.js` ahora trae `shell` y `ST_PRUEBA_DIR`).
+  Desactivado en "Solo favoritos" y cuando no hay nada que borrar. Antes de borrar se sueltan la timeline y el visor.
 - **Diagnóstico**: botón "Guardar datos de la partida" (IPC `lcdata:guardar`): `allgamedata` completo a
   `userData/datos-partida.json` y abre la carpeta. Sirve para ver qué trae la API local en cada modo.
 - **Aumentos de ARAM Caos (pendiente, en estudio)**: OP.GG tiene `lol_list_aram_augments` por campeón (nombre y

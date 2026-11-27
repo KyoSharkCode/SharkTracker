@@ -735,6 +735,7 @@ ipcMain.handle('clips:galeria', () => {
 ipcMain.handle('clips:favorito', (_e, archivo, valor) => clips.favorito(archivo, valor));
 ipcMain.handle('clips:renombrar', (_e, archivo, nombre) => clips.renombrar(archivo, nombre));
 ipcMain.handle('clips:borrar', (_e, archivo) => clips.borrar(archivo));
+ipcMain.handle('clips:borrarNoFavoritos', (_e, archivos) => clips.borrarNoFavoritos(archivos));
 ipcMain.handle('clips:mostrar', (_e, archivo) => clips.mostrarEnCarpeta(archivo));
 
 // ── Mi Perfil (datos de SharkTracker + copia local para "sin conexión") ──
