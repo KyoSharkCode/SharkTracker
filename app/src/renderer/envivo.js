@@ -19,11 +19,16 @@
   const pct = (x, dec = 1) => (x == null ? '—' : `${(x * 100).toFixed(dec).replace('.', ',')}%`);
   const api = () => window.sharkTracker.envivo;
 
-  const ROL_ES = { top: 'Top', jungle: 'Jungla', mid: 'Mid', adc: 'ADC', support: 'Support' };
+  const ROL_ES = { top: 'Top', jungle: 'Jungla', mid: 'Mid', adc: 'ADC', support: 'Support', aram: 'ARAM' };
+  // ARAM y ARAM Caos son colas distintas: las dos usan la build de ARAM de OP.GG (no las separa),
+  // pero en ARAM Caos no hay runas (se juega con aumentos).
+  const COLA_ARAM = 450;
+  const COLA_ARAM_CAOS = 2400;
+  const esAram = () => estado.cola === COLA_ARAM || estado.cola === COLA_ARAM_CAOS;
   const TIERS = { 1: ['S+', 't1'], 2: ['S', 't2'], 3: ['A', 't3'], 4: ['B', 't4'], 5: ['C', 't5'] };
   const COLAS = {
     420: 'SoloQ', 440: 'Flex', 400: 'Normal (reclutamiento)', 430: 'Normal', 490: 'Partida Rápida',
-    450: 'ARAM', 2400: 'ARAM', 700: 'Clash', 1700: 'Arena', 1710: 'Arena', 1720: 'Arena', 1750: 'Arena', 900: 'URF', 1900: 'URF', 0: 'Personalizada',
+    450: 'ARAM', 2400: 'ARAM Caos', 700: 'Clash', 1700: 'Arena', 1710: 'Arena', 1720: 'Arena', 1750: 'Arena', 900: 'URF', 1900: 'URF', 0: 'Personalizada',
   };
   const TIER_ES = {
     IRON: 'Hierro', BRONZE: 'Bronce', SILVER: 'Plata', GOLD: 'Oro', PLATINUM: 'Platino', EMERALD: 'Esmeralda',
@@ -471,9 +476,11 @@
   }
 
   function cardRunas(id, rol, f) {
-    const c = tarjeta('Runas y hechizos', 'dot-carga');
-    if (!f) { c.append(el('div', 'mt-vacio', 'Cargando runas…')); return c; }
-    const ru = f.runas;
+    // ARAM Caos no lleva runas: la tarjeta queda solo con hechizos y habilidades.
+    const sinRunas = rol === 'aram' && estado.cola === COLA_ARAM_CAOS;
+    const c = tarjeta(sinRunas ? 'Hechizos y habilidades' : 'Runas y hechizos', 'dot-carga');
+    if (!f) { c.append(el('div', 'mt-vacio', sinRunas ? 'Cargando…' : 'Cargando runas…')); return c; }
+    const ru = sinRunas ? null : f.runas;
     if (ru) {
       const fila1 = el('div', 'mt-runas');
       const rama = (estilo, ids, principal) => {
@@ -489,7 +496,7 @@
       fila1.append(rama(ru.principal, ru.runas_principales, true), rama(ru.secundaria, ru.runas_secundarias, false));
       const frag = el('div', 'mt-frag');
       for (const x of ru.fragmentos ?? []) frag.append(el('span', 'mt-chip', FRAGMENTOS[x] ?? `#${x}`));
-      c.append(fila1, frag, el('div', 'mt-pasod', `${pct(ru.winrate)} WR · Esmeralda+`));
+      c.append(fila1, frag, el('div', 'mt-pasod', `${pct(ru.winrate)} WR · ${rol === 'aram' ? 'ARAM, todos los elos' : 'Esmeralda+'}`));
       const acc = el('div', 'ev-acciones');
       acc.append(boton('Importar runas', 'runas', () => api().importarRunas({
         nombre: campeon(id).nombre, principal: ru.principal, secundaria: ru.secundaria,
@@ -527,8 +534,13 @@
   }
 
   function cardBuild(id, rol, f) {
-    const c = tarjeta('Build recomendada', 'dot-pos');
+    const c = tarjeta(rol === 'aram' ? 'Build de ARAM' : 'Build recomendada', 'dot-pos');
     if (!f) { c.append(el('div', 'mt-vacio', 'Cargando build…')); return c; }
+    if (rol === 'aram') {
+      c.append(el('div', 'mt-pasod', estado.cola === COLA_ARAM_CAOS
+        ? 'Build de ARAM normal: OP.GG no tiene datos aparte de ARAM Caos, y tus aumentos pueden pedir otros objetos.'
+        : 'Lo más usado en ARAM, todos los elos.'));
+    }
     const orden = el('div', 'mt-build');
     const paso = (titulo, g) => {
       if (!g) return;
@@ -588,11 +600,13 @@
     ];
     const titulo = `${campeon(id).nombre} ${ROL_ES[rol] ?? ''}`.trim();
     const acc = el('div', 'ev-acciones');
-    acc.append(boton('Importar build', 'build', () => api().importarBuild({ championId: id, titulo, bloques: bloquesBase })));
+    const mapa = rol === 'aram' ? 12 : 11; // el set aparece en la tienda de ese mapa
+    acc.append(boton('Importar build', 'build', () => api().importarBuild({ championId: id, titulo, bloques: bloquesBase, mapa })));
     if (cambios.length) {
       acc.append(boton('Importar build adaptada', 'buildAdaptada', () => api().importarBuild({
         championId: id,
         titulo: `${titulo} (adaptada)`,
+        mapa,
         bloques: [{ titulo: 'Contra este equipo', items: cambios.map((x) => x.item) }, ...bloquesBase],
       })));
     }
@@ -806,7 +820,11 @@
 
     const arriba = el('div', 'ev-grid');
     let miF = null;
-    if (!rol) {
+    if (!rol && esAram() && estado.yo?.campeon) {
+      // ARAM y ARAM Caos: la build del campeón que tienes ahora (cambia si lo cambias en el banquillo).
+      miF = ficha(estado.yo.campeon, 'aram');
+      arriba.append(cardBuild(estado.yo.campeon, 'aram', miF), cardRunas(estado.yo.campeon, 'aram', miF));
+    } else if (!rol) {
       const t = tarjeta('Recomendaciones');
       t.append(el('div', 'mt-vacio', `En ${COLAS[estado.cola] ?? 'este modo'} no hay roles: las recomendaciones de Meta son de la Grieta (ranked).`));
       arriba.append(t);

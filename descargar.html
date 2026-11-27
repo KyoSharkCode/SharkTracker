@@ -234,6 +234,13 @@ init();
 // Notas del parche de la app. Al publicar una versión nueva, se agrega arriba del todo.
 // Cada versión: { version, titulo, nuevo: [...], arreglos: [...] } (texto plano).
 const NOTAS = [
+  { version: '1.0.3', titulo: 'Build de ARAM y ARAM Caos', nuevo: [
+      'ARAM: En Vivo ya muestra la build, las runas, los hechizos y el orden de habilidades de ARAM del campeón que te tocó, con los botones de importar. Si lo cambias en el banquillo, se actualiza.',
+      'ARAM Caos: la misma build de ARAM, sin runas (se juega con aumentos). OP.GG no tiene datos aparte de ARAM Caos, así que tus aumentos pueden pedir otros objetos.',
+      'En partida de ARAM también funcionan "Tu build" (Ctrl + X), "Siguiente compra" y la flecha de la habilidad que toca subir.',
+    ], arreglos: [
+      'Ajustes › Cuenta › Diagnóstico: botón "Guardar datos de la partida", que deja en un archivo todo lo que el juego le da a la app en ese momento.',
+    ] },
   { version: '1.0.2', titulo: 'Consejos, plan de partida y reproductor nuevo', nuevo: [
       'Consejos en partida: una tarjeta a la izquierda que reacciona a lo que pasa. Al morir te dice qué pasó (te llevaban niveles, peleaste con menos gente, tenías oro sin gastar) y cómo jugar contra quien te mató; también avisa si cae la torre de tu línea, si llevas oro encima o si hay ventana para un objetivo. Se apaga en Ajustes › Overlay y se mueve con "Reposicionar elementos".',
       'Plan de partida con IA: al fijar tu campeón, En Vivo tiene la tarjeta "Plan de partida". Con "Generar plan", una IA cruza las dos composiciones con tus números de los últimos 30 días y te dice cómo jugar la línea, cómo gana tu equipo y qué evitar, y elige runas, botas y objetos entre los de OP.GG, con su motivo. Tú decides si importas algo.',

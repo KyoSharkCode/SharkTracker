@@ -291,7 +291,7 @@ const AVISO_BUILD = {
   sin_sesion: 'Inicia sesión en la app de SharkTracker para ver tu build.',
   error: 'No se pudo cargar tu build: reintentando…',
 };
-const ROL_BUILD = { top: 'Top', jungle: 'Jungla', mid: 'Mid', adc: 'ADC', support: 'Support' };
+const ROL_BUILD = { top: 'Top', jungle: 'Jungla', mid: 'Mid', adc: 'ADC', support: 'Support', aram: 'ARAM' };
 let build = { datos: null, visible: false };
 let misObjetos = new Set();
 let pistaHasta = 0;

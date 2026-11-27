@@ -26,6 +26,8 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
 - **Contra tu rival de línea**: quién gana la línea, un consejo de OP.GG y hasta 3 páginas de
   runas para elegir.
 
+- **ARAM y ARAM Caos**: En Vivo te muestra la build de ARAM del campeón que te tocó (y las runas, salvo en ARAM
+  Caos, que no lleva). En partida también tienes tu build con Ctrl + X y la siguiente compra.
 - **Plan de partida (IA)**: al fijar tu campeón, la tarjeta "Plan de partida" tiene el botón "Generar plan":
   una IA cruza las dos composiciones con tus números de los últimos 30 días y te dice cómo jugar la línea,
   cómo gana tu equipo y qué evitar, y elige runas, botas y objetos entre los de OP.GG, con su motivo. Tú decides

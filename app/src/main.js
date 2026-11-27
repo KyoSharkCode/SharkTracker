@@ -321,6 +321,20 @@ function liveClientGet(route, timeout = 1500) {
 
 // ¿Hay una partida en curso ahora mismo? (botón "Comprobar ahora")
 ipcMain.handle('lcdata:check', () => liveClientGet('allgamedata'));
+// Diagnóstico: guarda TODO lo que da el juego en este momento en un archivo y lo muestra
+// en la carpeta, para poder mandarlo (sirve para ver qué datos trae cada modo de juego).
+ipcMain.handle('lcdata:guardar', async () => {
+  const r = await liveClientGet('allgamedata', 3000);
+  if (!r.inGame) return { ok: false };
+  try {
+    const archivo = path.join(app.getPath('userData'), 'datos-partida.json');
+    require('fs').writeFileSync(archivo, JSON.stringify(r.data, null, 2));
+    shell.showItemInFolder(archivo);
+    return { ok: true, archivo };
+  } catch (e) {
+    return { ok: false, error: e.message ?? String(e) };
+  }
+});
 
 // Detección automática: cada 5 s se mira si hay partida y se avisa a la
 // interfaz SOLO cuando cambia (entra o sale de partida).
@@ -800,14 +814,16 @@ async function prepararBuild(datos, yo) {
   buildIntento = Date.now();
   const fijar = (d) => { buildPartida = d; enviarBuild(); };
   try {
-    if ((datos?.gameData?.mapNumber ?? 11) !== 11) return fijar({ estado: 'sin_modo' });
+    // Grieta (mapa 11) o Abismo de los Lamentos (12: ARAM y ARAM Caos, con la build de ARAM).
+    const mapa = datos?.gameData?.mapNumber ?? 11;
+    if (mapa !== 11 && mapa !== 12) return fijar({ estado: 'sin_modo' });
     const cat = await meta.cargarCatalogos();
     const porClave = Object.fromEntries(Object.entries(cat.campeones).map(([key, c]) => [c.id.toLowerCase(), Number(key)]));
     const idDe = (p) => porClave[(p.rawChampionName ?? '').replace(/^game_character_displayname_/, '').toLowerCase()];
     const miCampeon = idDe(yo);
     if (!miCampeon) return fijar({ estado: 'error' });
     const rolSeleccion = ultimaSeleccion?.yo?.campeon === miCampeon ? ultimaSeleccion.yo.rol : null;
-    const rol = POS_PARTIDA[yo.position] ?? rolSeleccion ?? (await meta.rolDeCampeon(miCampeon));
+    const rol = mapa === 12 ? 'aram' : (POS_PARTIDA[yo.position] ?? rolSeleccion ?? (await meta.rolDeCampeon(miCampeon)));
     if (!rol) return fijar({ estado: 'error' });
     const rivales = (datos.allPlayers ?? []).filter((p) => p.team !== yo.team).map(idDe).filter(Boolean);
     const ficha = await meta.cargarCampeon(miCampeon, rol);

@@ -574,3 +574,10 @@ $('btn-registro').addEventListener('click', async () => {
   const ok = await window.sharkTracker.app.abrirRegistro();
   $('registro-txt').textContent = ok ? '' : 'No se pudo abrir el registro.';
 });
+
+// Diagnóstico: guardar en un archivo todo lo que da el juego ahora mismo (para mandarlo).
+$('btn-guardar-datos').addEventListener('click', async () => {
+  const r = await window.sharkTracker.guardarDatosPartida();
+  $('guardar-datos-txt').textContent = r?.ok ? 'Guardado: se abrió la carpeta con el archivo datos-partida.json.'
+    : 'No hay una partida en curso (o no se pudo guardar el archivo).';
+});

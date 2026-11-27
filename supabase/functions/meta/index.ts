@@ -284,10 +284,13 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const championId = Number(body?.champion_id);
     const posicion = String(body?.posicion ?? '');
-    if (!Number.isInteger(championId) || !POSICIONES.includes(posicion)) return json({ error: 'Faltan champion_id o posicion' }, 400);
-    const rivalId = body?.rival_id == null ? null : Number(body.rival_id);
+    // posicion 'aram' = la ficha de ARAM del campeón (build, runas, hechizos, habilidades): OP.GG la da con
+    // game_mode 'aram', sin roles y con todos los elos juntos (con filtro de elo quedan muy pocas partidas).
+    const esAram = posicion === 'aram';
+    if (!Number.isInteger(championId) || !(esAram || POSICIONES.includes(posicion))) return json({ error: 'Faltan champion_id o posicion' }, 400);
+    const rivalId = body?.rival_id == null || esAram ? null : Number(body.rival_id);
     if (rivalId !== null && !Number.isInteger(rivalId)) return json({ error: 'rival_id inválido' }, 400);
-    const elo = rivalId === null ? ELO : `vs_${rivalId}`;
+    const elo = esAram ? 'todos' : rivalId === null ? ELO : `vs_${rivalId}`;
 
     // ── 2) Caché: vale 24 h y mientras no cambie el parche ──
     const [{ data: estado }, { data: guardada }] = await Promise.all([
@@ -330,17 +333,19 @@ Deno.serve(async (req) => {
       }
       for (const nombre of await nombresOpgg(championId)) {
         try {
-          respuesta = await llamarOpgg('lol_get_champion_analysis', {
-            game_mode: 'ranked', champion: nombre, position: posicion, tier: ELO, desired_output_fields: CAMPOS,
-          });
+          // En ARAM, OP.GG exige una posición pero no la usa (devuelve lo mismo con cualquiera).
+          respuesta = await llamarOpgg('lol_get_champion_analysis', esAram
+            ? { game_mode: 'aram', champion: nombre, position: 'mid', desired_output_fields: CAMPOS }
+            : { game_mode: 'ranked', champion: nombre, position: posicion, tier: ELO, desired_output_fields: CAMPOS });
           break;
         } catch (e) { ultimoError = e; }
       }
       if (!respuesta) throw ultimoError ?? new Error(`Campeón ${championId} no está en DDragon`);
 
-      const datos = armarFicha(respuesta, parche);
+      const datos: any = armarFicha(respuesta, parche);
+      if (esAram) { datos.elo = 'todos'; datos.modo = 'aram'; }
       const actualizado = new Date().toISOString();
-      await supabase.from('meta_campeon').upsert({ champion_id: championId, posicion, elo: ELO, parche, datos, actualizado });
+      await supabase.from('meta_campeon').upsert({ champion_id: championId, posicion, elo, parche, datos, actualizado });
       return json({ estado: 'ok', datos, actualizado });
     } catch (e) {
       console.error('[meta] OP.GG:', e instanceof Error ? e.message : e);
