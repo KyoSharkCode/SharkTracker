@@ -658,6 +658,30 @@ Decisiones de Alex (oct 2026).
   - Renombrar/favorito/mostrar/borrar salen de `crearControles` (los usan el visor y la timeline). Al refrescar la
     galería (miniaturas nuevas, favorito…) la timeline se actualiza sin cortar el video; al cambiar de sección se pausa.
 
+## v1.0.3 (nov 2026): build de ARAM y ARAM Caos
+
+Pedido de Kyo tras lanzar la 1.0.2. **ARAM (cola 450) y ARAM Caos (cola 2400) son dos colas distintas**: las dos
+usan la build de ARAM; **ARAM Caos no lleva runas** (se juega con aumentos).
+- **Datos** (comprobado contra OP.GG el 27/11/2026): `lol_get_champion_analysis` con `game_mode: 'aram'` da build,
+  runas, hechizos y habilidades (Ahri: 67.943 partidas). Exige `position` pero no la usa; **sin filtro de elo**
+  (con `emerald_plus` quedan muy pocas partidas). No hay `game_mode` de ARAM Caos: usa la de ARAM normal.
+- **Edge Function `meta`**: `posicion: 'aram'` → esa ficha, guardada en `meta_campeon` con posicion `aram` y elo
+  `todos` (`datos.modo = 'aram'`). El resto de la función no cambia.
+- **En Vivo** (`renderer/envivo.js`): en esas dos colas, "Build de ARAM" + "Runas y hechizos" del campeón que
+  tienes (cambia si lo cambias en el banquillo). En ARAM Caos la tarjeta es "Hechizos y habilidades", sin runas,
+  y la build avisa de que es la de ARAM normal. Los sets importados van al mapa 12 (`lcu.importarBuild` → `mapa`).
+- **En partida** (`main.js` `prepararBuild`): mapa 12 → rol `aram`: "Tu build" (Ctrl + X), "Siguiente compra" y
+  "Sube esta" también en ARAM. La tarjeta de consejos sigue solo en la Grieta (Kyo: en ARAM no valen).
+- **Diagnóstico**: botón "Guardar datos de la partida" (IPC `lcdata:guardar`): `allgamedata` completo a
+  `userData/datos-partida.json` y abre la carpeta. Sirve para ver qué trae la API local en cada modo.
+- **Aumentos de ARAM Caos (pendiente, en estudio)**: OP.GG tiene `lol_list_aram_augments` por campeón (nombre y
+  descripción en español, `popular`, `performance`, `tier`). **Riot prohíbe mostrar winrates de aumentos** ("Products
+  cannot display win rates for Augments or Arena Mode items"): se podría ordenar por popularidad y que la IA
+  explique por qué encajan, nunca por rendimiento. La documentación de la Live Client Data API **no menciona
+  aumentos**; falta ver un `datos-partida.json` de una partida real de ARAM Caos para saber si los trae.
+- Sin probar en una partida real de ARAM (sí En Vivo en Chromium para las colas 450, 2400 y 1700, y la función
+  contra OP.GG real).
+
 ## v1.0.2 (nov 2026): reproductor propio de clips + consejos + plan de partida
 
 - **Reproductor de clips propio** (`renderer/reproductor.js`, `window.crearReproductor`; pedido de Kyo: el del

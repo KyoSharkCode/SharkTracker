@@ -200,7 +200,7 @@ async function importarRunas({ nombre, principal, secundaria, runas }) {
 }
 
 // Set de objetos "SharkTracker · Campeón" (se ve en la tienda del juego). Reemplaza el anterior de SharkTracker.
-async function importarBuild({ championId, titulo, bloques }) {
+async function importarBuild({ championId, titulo, bloques, mapa = 11 }) {
   if (!conexion) return { ok: false, error: 'El cliente de LoL no está abierto.' };
   const inv = await pedir('GET', '/lol-summoner/v1/current-summoner');
   const summonerId = inv.data?.summonerId;
@@ -210,7 +210,7 @@ async function importarBuild({ championId, titulo, bloques }) {
   const sets = (datos.itemSets ?? []).filter((s) => !String(s.title ?? '').startsWith(PREFIJO));
   sets.unshift({
     title: `${PREFIJO} · ${titulo}`, type: 'custom', map: 'any', mode: 'any', sortrank: 0, startedFrom: 'blank',
-    associatedChampions: [championId], associatedMaps: [11], preferredItemSlots: [],
+    associatedChampions: [championId], associatedMaps: [mapa === 12 ? 12 : 11], preferredItemSlots: [],
     uid: `sharktracker-${championId}-${Date.now()}`,
     blocks: bloques.filter((b) => b.items.length).map((b) => ({
       type: b.titulo, hideIfSummonerSpell: '', showIfSummonerSpell: '',

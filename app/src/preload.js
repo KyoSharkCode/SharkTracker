@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('sharkTracker', {
   maximize: () => ipcRenderer.send('window:maximize'),
   close: () => ipcRenderer.send('window:close'),
   checkLiveGame: () => ipcRenderer.invoke('lcdata:check'),
+  guardarDatosPartida: () => ipcRenderer.invoke('lcdata:guardar'), // todo lo que da el juego, a un archivo
 
   // Detección automática de partida
   getGameStatus: () => ipcRenderer.invoke('game:getStatus'),
