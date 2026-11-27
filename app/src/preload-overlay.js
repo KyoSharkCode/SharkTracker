@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('overlay', {
   onCarga: (callback) => ipcRenderer.on('overlay:carga', (_e, datos) => callback(datos)),
   onBuild: (callback) => ipcRenderer.on('overlay:build', (_e, datos) => callback(datos)),
   onClip: (callback) => ipcRenderer.on('overlay:clip', (_e, datos) => callback(datos)),
+  onConsejo: (callback) => ipcRenderer.on('overlay:consejo', (_e, datos) => callback(datos)), // tarjeta de consejos
   onCoach: (callback) => ipcRenderer.on('overlay:coach', (_e, datos) => callback(datos)), // consejo que hay que decir en voz alta
   getConfig: () => ipcRenderer.invoke('overlay-config:get'),
 });

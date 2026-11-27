@@ -3,7 +3,7 @@
 // Arrastras cada pieza; al guardar, el overlay se actualiza al instante.
 (() => {
   const byId = (id) => document.getElementById(id);
-  const PIEZAS = { baron: 'Barón', ancestral: 'Ancestral', rendimiento: 'Tu rendimiento', avisos: 'Avisos', carga: 'Pantalla de carga', build: 'Build (Ctrl + X)', siguiente: 'Siguiente compra', habilidad: 'Sube esta (habilidades)' };
+  const PIEZAS = { baron: 'Barón', ancestral: 'Ancestral', rendimiento: 'Tu rendimiento', avisos: 'Avisos', carga: 'Pantalla de carga', build: 'Build (Ctrl + X)', siguiente: 'Siguiente compra', consejo: 'Consejos', habilidad: 'Sube esta (habilidades)' };
   const escenario = byId('escenario');
   const marco = byId('marco');
   const caja = byId('caja');
@@ -88,6 +88,7 @@
     aplicarPosiciones(config.posiciones);
     window.__pintarEstado(EJEMPLO);
     window.__build(EJEMPLO_BUILD);
+    window.__consejo({ fijo: true, titulo: 'Consejo', texto: 'Peleaste con 2 niveles menos que Zed. Antes de volver a buscar esa pelea, céntrate en igualar el nivel con farmeo.', pie: 'Contra Zed: La Armadura es particularmente efectiva contra él.', campeon: { nombre: 'Zed', clave: 'Zed' } });
   });
 
   // ── Arrastrar ──

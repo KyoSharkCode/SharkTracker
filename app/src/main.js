@@ -16,6 +16,7 @@ const { crearDetector } = require('./clips-eventos');
 const { crearRegistro } = require('./registro');
 const coach = require('./coach');
 const { rolCoach } = require('./coach-cerebro');
+const { crearConsejos } = require('./consejos');
 
 // ── Registro de errores (userData/registro-app.txt; Ajustes → Cuenta → Diagnóstico) ──
 // Lo que falla en el proceso main, en la ventana, en el overlay o en el editor queda anotado.
@@ -474,15 +475,30 @@ function createOverlayWindow() {
 let ddVersion = null;
 let preciosItems = null; // itemID → coste total (DDragon), para el oro
 function cargarVersionDD() {
-  if (ddVersion) { if (!preciosItems) cargarPrecios(); return; }
+  if (ddVersion) { if (!preciosItems) cargarPrecios(); cargarConsejosCampeones(); return; }
   https.get('https://ddragon.leagueoflegends.com/api/versions.json', { timeout: 5000 }, (res) => {
     let body = '';
     res.on('data', (c) => (body += c));
     res.on('end', () => {
       try { ddVersion = JSON.parse(body)[0] ?? null; } catch { /* sin retratos: se usan iniciales */ }
-      if (ddVersion) cargarPrecios();
+      if (ddVersion) { cargarPrecios(); cargarConsejosCampeones(); }
     });
   }).on('error', () => { /* sin retratos: se usan iniciales */ });
+}
+// Consejos oficiales de Riot "cómo jugar contra" cada campeón (enemytips), en español.
+// Para la tarjeta de consejos al morir. Una vez por sesión; si falla, la tarjeta sale sin ellos.
+function cargarConsejosCampeones() {
+  if (consejosCampeones || !ddVersion) return;
+  https.get(`https://ddragon.leagueoflegends.com/cdn/${ddVersion}/data/es_MX/championFull.json`, { timeout: 15000 }, (res) => {
+    let body = '';
+    res.on('data', (c) => (body += c));
+    res.on('end', () => {
+      try {
+        const data = JSON.parse(body).data ?? {};
+        consejosCampeones = Object.fromEntries(Object.entries(data).map(([id, c]) => [id, (c.enemytips ?? []).filter((x) => typeof x === 'string' && x.length <= 260)]));
+      } catch { /* sin consejos oficiales */ }
+    });
+  }).on('error', () => { /* sin consejos oficiales */ });
 }
 // Coste total de cada objeto: la API del juego solo da el último paso de la receta.
 function cargarPrecios() {
@@ -592,6 +608,7 @@ function startOverlay() {
   datosPartida = null;
   reiniciarBuild();
   sesionCoach.iniciarPartida();
+  motorConsejos = crearConsejos();
   // "Tu rendimiento": promedios de la división de arriba (una vez por partida).
   const partida = estadoPartida;
   auth.getReferencia()
@@ -621,6 +638,9 @@ function startOverlay() {
     overlayWindow.webContents.send('overlay:state', { ...estado, ddVersion, misObjetos, siguiente, habilidad });
     // Coach de macro (si está activado): mira el mismo estado y decide si hay algo que decir.
     sesionCoach.tick(res.data, estado, { rol: rolCoach(yo?.position, buildPartida?.rol), siguiente });
+    // Consejos en pantalla (reglas, sin IA): la tarjeta de la izquierda.
+    const consejo = motorConsejos?.procesar(res.data, estado, { tips: consejosCampeones ?? {}, siguiente });
+    if (consejo) overlayWindow.webContents.send('overlay:consejo', consejo);
     avisarPartidaApp({ misObjetos, siguiente });
   }, 1000);
 }
@@ -636,6 +656,8 @@ function stopOverlay() {
   if (!cargaActiva) detenerTeclado();
   reiniciarBuild();
   sesionCoach.terminarPartida();
+  motorConsejos = null;
+  overlayWindow?.webContents.send('overlay:consejo', null);
   reiniciarPartidaApp(); // terminó la partida: la app deja de mostrarla
   clearInterval(overlayTimer);
   overlayTimer = null;
@@ -646,10 +668,14 @@ function stopOverlay() {
 ipcMain.handle('game:getStatus', () => ({ inGame: !!lastInGame }));
 
 // ── Coach de macro por voz (experimental; ver coach.js y coach-cerebro.js) ──
-// Habla el overlay (la voz de Windows): es la ventana que seguro está abierta en partida.
-function decirCoach(texto) {
+// Lo que dice el coach de IA sale en la misma tarjeta de consejos (título "Coach") y,
+// solo si se pide en Ajustes → Coach, también con la voz de Windows.
+let motorConsejos = null;     // consejos.js, uno por partida
+let consejosCampeones = null; // campeón → consejos oficiales "contra" (Data Dragon)
+function decirCoach(texto, segundos = 14) {
   const c = ajustesApp.leer().coach;
-  overlayWindow?.webContents.send('overlay:coach', { texto, voz: c.voz, volumen: c.volumen, velocidad: c.velocidad });
+  overlayWindow?.webContents.send('overlay:consejo', { titulo: 'Coach', texto, pie: null, campeon: null, segundos });
+  if (c.hablar) overlayWindow?.webContents.send('overlay:coach', { texto, voz: c.voz, volumen: c.volumen, velocidad: c.velocidad });
 }
 const sesionCoach = coach.crearSesion({
   pedir: coach.crearPedir(auth),
@@ -663,13 +689,13 @@ function alternarSilencioCoach() {
   if (!c.activo) return;
   const ajustes = ajustesApp.guardar({ coach: { silenciado: !c.silenciado } });
   mainWindow?.webContents.send('ajustes:changed', ajustes);
-  decirCoach(ajustes.coach.silenciado ? 'Coach silenciado' : 'Coach activado');
+  decirCoach(ajustes.coach.silenciado ? 'Coach silenciado' : 'Coach activado', 4);
 }
 // Ctrl + F10: su lectura cuando tú la pidas (no cuenta para el tope de consejos).
 function pedirLecturaCoach() {
   const c = ajustesApp.leer().coach;
   if (!c.activo) return;
-  if (!sesionCoach.pedirLectura()) decirCoach(c.silenciado ? 'El coach está silenciado' : 'El coach no está disponible en esta partida');
+  if (!sesionCoach.pedirLectura()) decirCoach(c.silenciado ? 'El coach está silenciado' : 'El coach no está disponible en esta partida', 4);
 }
 ipcMain.handle('coach:estado', () => sesionCoach.estado());
 ipcMain.handle('coach:uso', () => sesionCoach.uso());

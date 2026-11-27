@@ -190,6 +190,7 @@ app/
                            y la captura de fondo opcional del editor
     preload-editor.js    → contextBridge (window.editor) de la ventana "Reposicionar elementos"
     lcu.js               → API local del cliente de LoL (En Vivo): fase, selección, runas, build, hechizos
+    consejos.js          → tarjeta de consejos: reglas que reaccionan a la partida (sin IA, sin Electron)
     coach-cerebro.js     → coach de macro: resumen de tu partida y cuándo pedir un consejo (sin Electron)
     coach.js             → coach en la app: Edge Function `coach`, costes e historial
     voz.js               → voz de Windows (speechSynthesis) para el overlay y Ajustes → Coach
@@ -658,6 +659,32 @@ Decisiones de Alex (oct 2026).
     (se recuerda en localStorage `clips.vista`); "★ Favoritos" sigue en cuadrícula (son de partidas distintas).
   - Renombrar/favorito/mostrar/borrar salen de `crearControles` (los usan el visor y la timeline). Al refrescar la
     galería (miniaturas nuevas, favorito…) la timeline se actualiza sin cortar el video; al cambiar de sección se pausa.
+
+## Consejos en pantalla (nov 2026): la tarjeta que reacciona a la partida
+
+Decisión de Kyo (27/11/2026) tras probar el coach por voz: "con audio no hace la diferencia; mejor un sistema de
+notificaciones acorde a la partida, como los consejos de Overwatch al morir". **Esto es ahora lo principal; el
+coach de IA de abajo queda como complemento opcional y la voz, apagada de fábrica.**
+- **Qué es**: una tarjeta (`#consejo`, zona izquierda, x 16 y 560, 400 px; entra y sale por la izquierda) con
+  "CONSEJO", el texto y, al morir, el retrato de quien te mató y debajo el consejo oficial contra ese campeón.
+  Interruptor "Consejos" en Ajustes → Overlay (pieza `consejos`, encendida de fábrica) y movible en el editor.
+- **Sin IA, sin coste, al instante**: `src/consejos.js` (`crearConsejos`, sin Electron, con prueba) son reglas sobre
+  `allgamedata` + `game-state.js`. Todos los roles, solo en la Grieta. main.js lo llama cada segundo
+  (`motorConsejos.procesar`) y manda `overlay:consejo`.
+  - **Al morir** (sale siempre; dura lo que tardas en reaparecer, 9–16 s). Entre las reglas que aplican, la menos
+    usada en la partida: `nivel` (quien te mató te lleva 2+ niveles), `numeros` (quedaban 2+ rivales vivos más
+    que aliados), `repetido` (el mismo campeón por 3.ª vez), `objetivo` (moriste a < 75 s de un objetivo), `oro`
+    (≥ 1200 sin gastar) y `torre`. Si no aplica ninguna: el consejo oficial contra ese campeón (uno distinto cada vez).
+  - **En partida** (mínimo 45 s entre consejos, no en plena pelea, tope 16): torre de TU línea perdida o tirada
+    (una vez cada una), inhibidor, 3.er dragón de cada equipo, Barón, ventaja numérica (3+ rivales muertos de
+    más), oro acumulado (60 s pudiendo comprar), salir de base sin ward de control (soporte/jungla) y farmeo por
+    debajo de tu referencia en los minutos 10 y 15. Tiempos y umbrales en `T`; los textos están en el mismo archivo.
+- **Consejos oficiales**: `enemytips` de Data Dragon (`championFull.json` es_MX, una vez por sesión, main.js
+  `cargarConsejosCampeones`). 147 de 173 campeones los traen (los más nuevos no: Yone, Viego, Ambessa…).
+- **Excepción aprobada por Kyo a "nunca campeones rivales"**: la tarjeta nombra a quien te mató y usa su nivel
+  (lo enseña el marcador). No rastrea a nadie. La IA sigue sin recibir nada de rivales concretos.
+- **Coach de IA**: su texto sale en esta misma tarjeta con el título "Coach" (`decirCoach` en main.js) y solo
+  se lee en voz si `coach.hablar` está encendido (Ajustes → Coach → "Leer en voz alta", apagado de fábrica).
 
 ## Coach de macro por voz (experimental, nov 2026) — etapa 1
 

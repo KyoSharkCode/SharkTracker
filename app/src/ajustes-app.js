@@ -48,6 +48,7 @@ function fabrica() {
     coach: {
       activo: false,      // sin activarlo no se manda nada a ningún lado
       silenciado: false,  // Ctrl + F9 en partida: callado y sin consultas
+      hablar: false,      // además de la tarjeta, leerlo con la voz de Windows
       voz: '',            // nombre de la voz de Windows ('' = la primera en español)
       volumen: 80,        // 0–100
       velocidad: 100,     // 70–150 (100 = normal)
@@ -92,7 +93,7 @@ function normalizar(datos) {
     if (typeof datos?.avisos?.[a] === 'boolean') base.avisos[a] = datos.avisos[a];
   }
   const co = datos?.coach ?? {};
-  for (const k of ['activo', 'silenciado']) if (typeof co[k] === 'boolean') base.coach[k] = co[k];
+  for (const k of ['activo', 'silenciado', 'hablar']) if (typeof co[k] === 'boolean') base.coach[k] = co[k];
   if (typeof co.voz === 'string' && co.voz.length < 200) base.coach.voz = co.voz;
   for (const [k, [min, max]] of Object.entries(COACH_RANGOS)) {
     if (Number.isFinite(co[k])) base.coach[k] = Math.min(max, Math.max(min, Math.round(co[k])));

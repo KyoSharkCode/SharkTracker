@@ -596,6 +596,7 @@ function renderCoach(aj) {
   coachAjustes = c;
   marcar($('sw-coach'), c.activo);
   marcar($('sw-coach-silencio'), c.silenciado);
+  marcar($('sw-coach-hablar'), c.hablar);
   $('sw-coach-silencio').disabled = !c.activo;
   for (const [k, unidad] of Object.entries(RANGOS_COACH)) {
     $(`coach-${k}`).value = c[k];
@@ -603,10 +604,11 @@ function renderCoach(aj) {
   }
   $('coach-voz').value = c.voz;
   if (!c.activo) $('coach-estado').textContent = 'Apagado: no se envía nada.';
-  else if (c.silenciado) $('coach-estado').textContent = 'Silenciado: no habla ni consulta.';
-  else $('coach-estado').textContent = 'Activado: hablará en tu próxima partida de jungla o soporte.';
+  else if (c.silenciado) $('coach-estado').textContent = 'Silenciado: no consulta.';
+  else $('coach-estado').textContent = 'Activado: escribirá en tu próxima partida de jungla o soporte.';
 }
 $('sw-coach').addEventListener('click', () => guardarCoach({ activo: !$('sw-coach').classList.contains('on') }));
+$('sw-coach-hablar').addEventListener('click', () => guardarCoach({ hablar: !$('sw-coach-hablar').classList.contains('on') }));
 $('sw-coach-silencio').addEventListener('click', () => guardarCoach({ silenciado: !$('sw-coach-silencio').classList.contains('on') }));
 for (const [k, unidad] of Object.entries(RANGOS_COACH)) {
   const r = $(`coach-${k}`);

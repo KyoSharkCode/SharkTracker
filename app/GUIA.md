@@ -66,6 +66,10 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
   Wave Link o Voicemeeter, usa "Juego", "Discord" y "Música" (Spotify; graban el programa, sin
   importar por dónde sale) en lugar de "Todo el PC".
 
+- **Consejos**: una tarjeta a la izquierda que reacciona a tu partida. Al morir te dice qué pasó (te llevaban
+  niveles, peleaste con menos gente, tenías oro sin gastar) y cómo jugar contra quien te mató; también avisa si
+  cae la torre de tu línea, si llevas oro encima o si hay ventana para un objetivo. Se apaga en Ajustes → Overlay
+  y se mueve con "Reposicionar elementos".
 - **Coach de macro (experimental)**: en Ajustes → Coach. Con el interruptor encendido, un coach
   sigue tu partida y te habla sobre todo en las pausas: al morir, al comprar y cuando algo cambia.
   Por ahora solo en **jungla y soporte**, en la Grieta. Usa la voz de Windows ("Probar voz" para
