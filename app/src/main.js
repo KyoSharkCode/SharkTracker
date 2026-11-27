@@ -323,14 +323,18 @@ function liveClientGet(route, timeout = 1500) {
 ipcMain.handle('lcdata:check', () => liveClientGet('allgamedata'));
 // Diagnóstico: guarda TODO lo que da el juego en este momento en un archivo y lo muestra
 // en la carpeta, para poder mandarlo (sirve para ver qué datos trae cada modo de juego).
+// Con la partida ya terminada el juego no responde: se guarda la última lectura que hizo
+// la app de esa partida (se conserva en memoria hasta cerrar la app o jugar otra).
+let ultimaLectura = null; // { datos, cuando }
 ipcMain.handle('lcdata:guardar', async () => {
   const r = await liveClientGet('allgamedata', 3000);
-  if (!r.inGame) return { ok: false };
+  const datos = r.inGame ? r.data : ultimaLectura?.datos;
+  if (!datos) return { ok: false };
   try {
     const archivo = path.join(app.getPath('userData'), 'datos-partida.json');
-    require('fs').writeFileSync(archivo, JSON.stringify(r.data, null, 2));
+    require('fs').writeFileSync(archivo, JSON.stringify(datos, null, 2));
     shell.showItemInFolder(archivo);
-    return { ok: true, archivo };
+    return { ok: true, archivo, anterior: !r.inGame, cuando: r.inGame ? Date.now() : ultimaLectura.cuando };
   } catch (e) {
     return { ok: false, error: e.message ?? String(e) };
   }
@@ -619,6 +623,7 @@ function startOverlay() {
     const yo = jugadorPropio(res.data);
     campeonActual = yo?.championName ?? campeonActual;
     datosPartida = res.data;
+    ultimaLectura = { datos: res.data, cuando: Date.now() }; // para "Guardar datos de la partida" al terminar
     revisarJugadas(res.data);
     if (yo && !buildPreparando && (!buildPartida || buildPartida.estado === 'error') && Date.now() - buildIntento > 30000) {
       prepararBuild(res.data, yo);

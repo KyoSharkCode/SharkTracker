@@ -578,6 +578,7 @@ $('btn-registro').addEventListener('click', async () => {
 // Diagnóstico: guardar en un archivo todo lo que da el juego ahora mismo (para mandarlo).
 $('btn-guardar-datos').addEventListener('click', async () => {
   const r = await window.sharkTracker.guardarDatosPartida();
-  $('guardar-datos-txt').textContent = r?.ok ? 'Guardado: se abrió la carpeta con el archivo datos-partida.json.'
-    : 'No hay una partida en curso (o no se pudo guardar el archivo).';
+  $('guardar-datos-txt').textContent = !r?.ok ? 'No hay datos que guardar: la app no ha leído ninguna partida desde que la abriste.'
+    : r.anterior ? `Guardado lo último que leyó la app de tu partida anterior (a las ${new Date(r.cuando).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}): se abrió la carpeta con datos-partida.json.`
+    : 'Guardado: se abrió la carpeta con el archivo datos-partida.json.';
 });
