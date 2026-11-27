@@ -120,7 +120,7 @@
       <!-- Clips (C3): galería por partida. Ver renderer/clips.js y src/clips.js -->
       <section class="page" id="page-clips">
         <div class="h1">Clips</div>
-        <div class="h1sub">Tus jugadas guardadas, por partida: ábrela y se ven una tras otra. Los videos están en Videos › SharkTracker.</div>
+        <div class="h1sub">Tus jugadas guardadas, por partida: ábrela y se ven una tras otra. Marca con ★ en el reproductor las que quieras conservar.</div>
         <div class="clips-barra-sup">
           <div class="clips-espacio">
             <div class="clips-espacio-txt"><span id="gal-uso">—</span><span id="gal-fav" class="swsub"></span></div>
@@ -128,7 +128,7 @@
           </div>
           <div class="segmentos" id="gal-filtro" role="radiogroup" aria-label="Qué clips mostrar">
             <button type="button" class="segmento on" role="radio" aria-checked="true" data-filtro="todos">Todos</button>
-            <button type="button" class="segmento" role="radio" aria-checked="false" data-filtro="favoritos">★ Favoritos</button>
+            <button type="button" class="segmento" role="radio" aria-checked="false" data-filtro="favoritos" title="Ver solo los clips que marcaste como favoritos">Solo favoritos</button>
           </div>
           <button id="gal-carpeta" class="btn-sec" type="button">Abrir carpeta</button>
         </div>
@@ -140,7 +140,7 @@
             <div id="visor-nombre" class="visor-nombre"></div>
             <button type="button" class="visor-cerrar" id="visor-cerrar" aria-label="Cerrar">&times;</button>
           </div>
-          <video id="visor-video" class="visor-video" controls preload="metadata"></video>
+          <div id="visor-escena" class="visor-escena"></div>
           <div id="visor-pie"></div>
         </dialog>
       </section>
@@ -406,6 +406,7 @@
   <script src="perfil.js"></script>
   <script src="meta.js"></script>
   <script src="envivo.js"></script>
+  <script src="reproductor.js"></script>
   <script src="clips.js"></script>
   <script src="app.js"></script>
 </body>

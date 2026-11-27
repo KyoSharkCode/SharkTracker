@@ -658,6 +658,26 @@ Decisiones de Alex (oct 2026).
   - Renombrar/favorito/mostrar/borrar salen de `crearControles` (los usan el visor y la timeline). Al refrescar la
     galería (miniaturas nuevas, favorito…) la timeline se actualiza sin cortar el video; al cambiar de sección se pausa.
 
+## v1.0.2 (nov 2026): reproductor propio de clips + consejos + plan de partida
+
+- **Reproductor de clips propio** (`renderer/reproductor.js`, `window.crearReproductor`; pedido de Kyo: el del
+  navegador "se ve raro", no dejaba pasar al clip siguiente y el favorito estaba escondido). Lo usan la timeline
+  y el visor (`clips.js`). Barra sobre el video: clip anterior · reproducir/pausa · siguiente · tiempo ·
+  **Favorito** (botón con nombre; dorado relleno = guardado) · volumen (se recuerda, `localStorage`
+  `clips.volumen` / `clips.mudo`) · velocidad 1× / 0,5× / 0,25× (vuelve a 1× en cada clip) · pantalla completa
+  (del reproductor entero). La barra de avance lleva una **marca dorada en el momento de la jugada** (`momento`).
+  La barra se esconde a los 2,4 s reproduciendo sin mover el ratón. Clic en el video = pausa; doble clic = completa.
+  - **Teclado** (sección Clips a la vista, sin estar escribiendo; sin animaciones): Espacio/K, ← → (5 s),
+    Mayús + ← → (clip anterior/siguiente), F (favorito), M (silenciar).
+  - El favorito salió de la fila de acciones (quedan Renombrar, Mostrar en la carpeta, Borrar): ahora vive solo
+    en el reproductor y en la estrella de cada tarjeta. La estrella cambia al instante y luego se confirma.
+  - El visor de clips sueltos también tiene anterior/siguiente (recorre la lista desde la que se abrió).
+  - El filtro de arriba pasó de "★ Favoritos" a **"Solo favoritos"** (Kyo lo pulsaba creyendo que marcaba el clip).
+  - Estilos `.rep*` al final de `style.css` (claro sobre oscuro en los dos temas, como todo lo que va sobre video).
+  - Probado en Chromium con un video de ejemplo (reproducir, saltar, teclado, favorito, velocidad, visor).
+    **Sin probar en Windows con clips reales** (H.264 por `sharkclip://`).
+- Además entran en la 1.0.2 la **tarjeta de consejos** y el **plan de partida con IA** (secciones de abajo).
+
 ## Consejos en pantalla (nov 2026): la tarjeta que reacciona a la partida
 
 Decisión de Kyo (27/11/2026) tras probar el coach por voz: "con audio no hace la diferencia; mejor un sistema de

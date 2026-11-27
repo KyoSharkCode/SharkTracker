@@ -76,6 +76,10 @@ los rangos de todos y tu perfil. Solo para el grupo de SharkTracker.
   cae la torre de tu línea, si llevas oro encima o si hay ventana para un objetivo. Se apaga en Ajustes → Overlay
   y se mueve con "Reposicionar elementos".
 
+- **Clips, el reproductor**: debajo del video tienes clip anterior y siguiente, el botón **Favorito**, el volumen
+  y la velocidad (0,5× y 0,25× para ver una jugada despacio). La marca dorada de la barra es el momento de la
+  jugada. Con el teclado: Espacio, ← →, Mayús + ← → para cambiar de clip, F favorito y M silenciar.
+
 ## Si algo falla
 En **Ajustes → Cuenta → Diagnóstico**, "Abrir registro" abre el archivo donde la app anota sus
 errores. Si avisas de un problema, mándalo junto con lo que estabas haciendo.

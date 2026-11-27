@@ -1182,3 +1182,53 @@ html, body { font-variant-numeric: tabular-nums; }
 .pl-alt { font-size: 12px; line-height: 1.45; color: var(--texto-tenue); margin-top: 8px; }
 .pl-pie { font-size: 11px; color: var(--texto-apagado); margin-top: 10px; line-height: 1.5; font-variant-numeric: tabular-nums; }
 .pl-auto { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(var(--linea-rgb), 0.06); }
+
+/* ── Reproductor de clips propio (v1.0.2; ver reproductor.js) ──
+   Va sobre el video, así que es claro sobre oscuro en los dos temas (como "Siguiente clip"). */
+.rep { position: relative; overflow: hidden; background: #000; --rep-texto: #EEF9F8; --rep-fondo: rgba(3,17,26,0.78); --rep-sobre-dorado: #221500; }
+.rep-video { display: block; width: 100%; aspect-ratio: 16 / 9; max-height: 64vh; background: #000; cursor: pointer; }
+.rep:fullscreen { display: grid; place-items: center; }
+.rep:fullscreen .rep-video { max-height: none; height: 100vh; aspect-ratio: auto; }
+.visor-escena { border-radius: 10px; overflow: hidden; }
+.visor-escena .rep-video { max-height: 62vh; }
+.rep.quieto { cursor: none; }
+/* Botón grande del centro: solo en pausa */
+.rep-centro { position: absolute; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; display: grid; place-items: center;
+  border: 0; border-radius: 50%; background: var(--rep-fondo); color: var(--rep-texto); cursor: pointer;
+  opacity: 0; pointer-events: none; transform: scale(0.94); transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out); }
+.rep.pausado .rep-centro { opacity: 1; pointer-events: auto; transform: none; }
+.rep-centro svg { width: 34px; height: 34px; fill: currentColor; }
+/* Barra de controles */
+.rep-barra { position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 12px 9px; background: linear-gradient(to top, rgba(0,0,0,0.84), rgba(0,0,0,0));
+  transition: opacity 180ms var(--ease-out); }
+.rep.quieto .rep-barra { opacity: 0; pointer-events: none; }
+.rep-linea { position: relative; display: flex; align-items: center; height: 18px; --p: 0%; }
+.rep-avance, .rep-volumen { -webkit-appearance: none; appearance: none; margin: 0; height: 18px; background: transparent; cursor: pointer; }
+.rep-avance { width: 100%; }
+.rep-avance::-webkit-slider-runnable-track { height: 5px; border-radius: 3px; background: linear-gradient(to right, var(--acento) var(--p), rgba(255,255,255,0.28) var(--p)); }
+.rep-avance::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; margin-top: -4px; border-radius: 50%; background: var(--rep-texto); box-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+.rep-marca { position: absolute; top: 2px; width: 3px; height: 14px; margin-left: -1px; border-radius: 2px; background: var(--dorado); box-shadow: 0 0 0 1px rgba(0,0,0,0.45); pointer-events: none; }
+.rep-marca[hidden] { display: none; }
+.rep-fila { display: flex; align-items: center; gap: 4px; margin-top: 3px; }
+.rep-btn { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 8px; background: transparent; color: var(--rep-texto); cursor: pointer; }
+.rep-btn svg { width: 22px; height: 22px; fill: currentColor; }
+.rep-play svg { width: 27px; height: 27px; }
+.rep-btn:hover:not(:disabled) { background: rgba(255,255,255,0.15); }
+.rep-btn:disabled { opacity: 0.32; cursor: default; }
+.rep-tiempo { margin-left: 8px; font-family: 'Red Hat Mono', ui-monospace, monospace; font-size: 12px; font-weight: 600; color: var(--rep-texto); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rep-hueco { flex: 1; }
+/* Favorito: a la vista, con su nombre. Dorado relleno = guardado. */
+.rep-fav { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px 0 10px; margin-right: 6px; border-radius: 9px;
+  border: 1px solid rgba(255,255,255,0.36); background: rgba(3,17,26,0.5); color: var(--rep-texto); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.rep-fav svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; }
+.rep-fav:hover { border-color: var(--dorado); color: var(--dorado); }
+.rep-fav.on { background: var(--dorado); border-color: var(--dorado); color: var(--rep-sobre-dorado); }
+.rep-fav.on svg { fill: currentColor; }
+.rep-volumen { width: 72px; --p: 100%; }
+.rep-volumen::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--rep-texto) var(--p), rgba(255,255,255,0.28) var(--p)); }
+.rep-volumen::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; margin-top: -3.5px; border-radius: 50%; background: var(--rep-texto); }
+.rep-vel { width: auto; min-width: 46px; padding: 0 8px; margin-left: 4px; font-family: 'Red Hat Mono', ui-monospace, monospace; font-size: 12px; font-weight: 600; }
+.rep-vel.lento { color: var(--dorado); }
+.rep :focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.tl-siguiente { bottom: 98px; }
+@media (prefers-reduced-motion: reduce) { .rep-centro, .rep-barra { transition: none; } .rep-centro { transform: none; } }
