@@ -156,8 +156,9 @@ function agrupar(filas: any[]) {
     s.min += f.minutos; s.w += f.win ? 1 : 0; s.k += f.kills ?? 0; s.d += f.deaths ?? 0; s.a += f.assists ?? 0;
     s.cs += f.cs ?? 0; s.vision += f.vision_score ?? 0;
     const x = f.extra_stats ?? {};
-    if (typeof x.kp === 'number') { s.kp += x.kp > 1 ? x.kp / 100 : x.kp; s.nKp++; }
-    if (typeof x.dmg_share === 'number') { s.dano += x.dmg_share > 1 ? x.dmg_share / 100 : x.dmg_share; s.nDano++; }
+    // En la base, kp va de 0 a 1 y dmg_share en porcentaje (comprobado el 27/11/2026).
+    if (typeof x.kp === 'number') { s.kp += x.kp; s.nKp++; }
+    if (typeof x.dmg_share === 'number') { s.dano += x.dmg_share / 100; s.nDano++; }
     if (typeof x.wards_control === 'number') { s.control += x.wards_control; s.nControl++; }
   }
   const n = filas.length;
