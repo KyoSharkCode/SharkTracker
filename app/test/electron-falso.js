@@ -3,6 +3,16 @@
 const Module = require('module');
 const cargar = Module._load;
 Module._load = function (pedido, ...resto) {
-  if (pedido === 'electron') return { app: { getPath: () => require('os').tmpdir() } };
+  if (pedido === 'electron') {
+    // ST_PRUEBA_DIR: carpeta propia de la prueba (userData, videos…) para las que tocan archivos.
+    const fs = require('fs');
+    const path = require('path');
+    const base = process.env.ST_PRUEBA_DIR;
+    return {
+      app: { getPath: (nombre) => (base ? path.join(base, nombre) : require('os').tmpdir()) },
+      // La "papelera" de las pruebas: el archivo desaparece.
+      shell: { trashItem: async (ruta) => fs.rmSync(ruta), showItemInFolder: () => {}, openPath: async () => '' },
+    };
+  }
   return cargar.call(this, pedido, ...resto);
 };

@@ -80,6 +80,8 @@ contextBridge.exposeInMainWorld('sharkTracker', {
     favorito: (archivo, valor) => ipcRenderer.invoke('clips:favorito', archivo, valor),
     renombrar: (archivo, nombre) => ipcRenderer.invoke('clips:renombrar', archivo, nombre),
     borrar: (archivo) => ipcRenderer.invoke('clips:borrar', archivo),
+    borrarNoFavoritos: (archivos) => ipcRenderer.invoke('clips:borrarNoFavoritos', archivos), // sin lista: todos
+
     mostrar: (archivo) => ipcRenderer.invoke('clips:mostrar', archivo),
     onProgreso: (callback) => ipcRenderer.on('clips:progreso', (_e, p) => callback(p)),
     onGuardado: (callback) => ipcRenderer.on('clips:guardado', (_e, r) => callback(r)),

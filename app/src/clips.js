@@ -550,6 +550,20 @@ async function borrar(archivo) {
   } catch { return false; }
 }
 
+// "Borrar no favoritos": manda a la papelera todos los clips que NO son favoritos.
+// archivos: solo esos (los de una partida); sin lista, todos. Qué es favorito se vuelve a
+// mirar aquí, en el índice: aunque la ventana pida borrar uno, un favorito nunca se borra.
+async function borrarNoFavoritos(archivos = null) {
+  const pedidos = Array.isArray(archivos) ? new Set(archivos.map(nombreSeguro).filter(Boolean)) : null;
+  const lista = clipsEnDisco().filter((c) => !c.favorito && (!pedidos || pedidos.has(c.archivo)));
+  const r = { borrados: 0, fallidos: 0, liberado: 0 };
+  for (const c of lista) {
+    if (await borrar(c.archivo)) { r.borrados++; r.liberado += c.tamano; } else r.fallidos++;
+  }
+  if (r.borrados) log(`Borrar no favoritos: ${r.borrados} clips a la papelera${r.fallidos ? `, ${r.fallidos} no se pudieron borrar` : ''}`);
+  return r;
+}
+
 function mostrarEnCarpeta(archivo) {
   const n = nombreSeguro(archivo);
   if (n) shell.showItemInFolder(rutaClip(n));
@@ -608,6 +622,6 @@ function abrirCarpeta(carpeta) {
 
 module.exports = {
   preparar, iniciarPartida, detenerPartida, ponerCampeon, ponerReloj, marcar, alGuardado, estado, abrirCarpeta,
-  dispositivos, planAudio, probarAudio, galeria, completarMiniaturas, favorito, renombrar, borrar, mostrarEnCarpeta, servir, aplicarLimite,
+  dispositivos, planAudio, probarAudio, galeria, completarMiniaturas, favorito, renombrar, borrar, borrarNoFavoritos, mostrarEnCarpeta, servir, aplicarLimite,
   grabando: () => motor.grabando(), log,
 };

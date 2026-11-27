@@ -73,6 +73,58 @@
   // Con una partida abierta, "Abrir carpeta" abre la suya.
   $('gal-carpeta').addEventListener('click', () => window.sharkTracker.clips.abrirCarpeta(grupoAbierto()?.carpeta ?? undefined));
 
+  // ── "Borrar no favoritos": todo lo que no tenga ★, de la partida abierta o de todas ──
+  // Pide confirmación con las cifras (cuántos se van, cuántos favoritos se quedan). Van a la
+  // papelera de Windows, igual que al borrar un clip suelto.
+  const alcanceLimpiar = () => {
+    const g = grupoAbierto();
+    const clips = (g ? g.clips : datos?.clips ?? []);
+    const fuera = clips.filter((c) => !c.favorito);
+    return { g, fuera, quedan: clips.length - fuera.length, peso: fuera.reduce((s, c) => s + c.tamano, 0) };
+  };
+  let limpiarClave = null; // para qué partida (o 'todas') se abrió la confirmación
+  function cerrarLimpiar() { $('gal-confirmar').hidden = true; limpiarClave = null; }
+  function pintarLimpiar() {
+    const a = alcanceLimpiar();
+    const btn = $('gal-limpiar');
+    btn.textContent = a.g ? 'Borrar no favoritos de esta partida' : 'Borrar no favoritos';
+    btn.disabled = !a.fuera.length || filtro === 'favoritos';
+    btn.title = filtro === 'favoritos' ? 'Aquí solo hay favoritos' : !a.fuera.length ? 'No hay clips sin ★ que borrar' : 'Borra todos los clips que no marcaste con ★';
+    // Si cambiaste de partida o ya no hay nada que borrar, la confirmación abierta ya no vale.
+    if (limpiarClave !== null && (limpiarClave !== (a.g?.clave ?? 'todas') || btn.disabled)) cerrarLimpiar();
+  }
+  $('gal-limpiar').addEventListener('click', () => {
+    const a = alcanceLimpiar();
+    if (!a.fuera.length) return;
+    limpiarClave = a.g?.clave ?? 'todas';
+    $('gal-limpiado').hidden = true;
+    $('gal-confirmar-txt').textContent = `Vas a borrar ${cuantos(a.fuera.length)} (${tamano(a.peso)}) ${a.g ? `de esta partida (${a.g.titulo})` : 'de todas tus partidas'}. `
+      + (a.quedan ? `${a.quedan === 1 ? 'Tu favorito se queda' : `Tus ${a.quedan} favoritos se quedan`}. ` : 'No tienes favoritos aquí: no quedará ninguno. ')
+      + 'Van a la papelera de Windows; el espacio se libera al vaciarla.';
+    $('gal-confirmar-si').textContent = `Sí, borrar ${cuantos(a.fuera.length)}`;
+    $('gal-confirmar').hidden = false;
+    $('gal-confirmar-no').focus(); // lo seguro, a mano
+  });
+  $('gal-confirmar-no').addEventListener('click', cerrarLimpiar);
+  $('gal-confirmar-si').addEventListener('click', async () => {
+    const a = alcanceLimpiar();
+    const si = $('gal-confirmar-si');
+    if (!a.fuera.length || si.disabled) return;
+    si.disabled = true;
+    si.textContent = 'Borrando…';
+    // Windows no deja borrar un archivo que un video tiene abierto: se sueltan antes.
+    quitarTimeline();
+    if ($('gal-visor').open) $('gal-visor').close();
+    const r = await window.sharkTracker.clips.borrarNoFavoritos(a.g ? a.fuera.map((c) => c.archivo) : null);
+    si.disabled = false;
+    cerrarLimpiar();
+    const hecho = $('gal-limpiado');
+    hecho.textContent = `${r.borrados === 1 ? 'Se borró 1 clip' : `Se borraron ${r.borrados} clips`} (${tamano(r.liberado)}).`
+      + (r.fallidos ? ` ${r.fallidos === 1 ? '1 no se pudo borrar' : `${r.fallidos} no se pudieron borrar`}: ¿abierto en otro programa?` : '');
+    hecho.hidden = false;
+    await cargar();
+  });
+
   // ── Partidas (carpetas) ──
   // Cada partida es una carpeta en Videos › SharkTracker ("Briar 2026-10-08"). Los clips
   // sueltos de antes se agrupan por partida (si se sabe) o por día.
@@ -223,6 +275,7 @@
 
   function pintarLista() {
     quitarPrevia();
+    pintarLimpiar();
     // La timeline solo vive dentro de una partida (y con esa vista elegida).
     const ga = grupoAbierto();
     if (filtro === 'favoritos' || !ga || vista !== 'timeline' || !conTimeline(ga)) quitarTimeline();
